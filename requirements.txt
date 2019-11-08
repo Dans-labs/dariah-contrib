@@ -1,0 +1,10 @@
+black
+flake8
+flask
+lxml
+markdown
+mkdocs
+pygments
+pymdown-extensions
+pymongo
+pyyaml

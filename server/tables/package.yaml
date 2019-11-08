@@ -1,0 +1,25 @@
+title:
+  type: text
+  perm:
+    edit: office
+startDate:
+  label: Start date
+  type: datetime
+  perm:
+    edit: office
+endDate:
+  label: End date
+  type: datetime
+  perm:
+    edit: office
+typeContribution:
+  label: Type
+  type: typeContribution
+  multiple: true
+  perm:
+    edit: office
+remarks:
+  type: markdown
+  multiple: true
+  perm:
+    edit: office

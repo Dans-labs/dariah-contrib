@@ -1,0 +1,7 @@
+rep:
+  label: Representation
+  perm:
+    edit: nobody
+description:
+  perm:
+    edit: office

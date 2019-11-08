@@ -1,0 +1,20 @@
+level:
+  perm:
+    edit: office
+score:
+  type: int
+  perm:
+    edit: office
+description:
+  perm:
+    edit: office
+criteria:
+  label: Criterion
+  type: criteria
+  perm:
+    edit: office
+remarks:
+  type: markdown
+  multiple: true
+  perm:
+    edit: office

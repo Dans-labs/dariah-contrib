@@ -1,0 +1,54 @@
+set: '$set'
+unset: '$unset'
+lte: '$lte'
+gte: '$gte'
+ex: '$exists'
+match: '$match'
+project: '$project'
+lookup: '$lookup'
+elem: '$arrayElemAt'
+OR: '$or'
+IN: '$in'
+
+showArgs:
+  - aggregate
+  - count
+  - delete_many
+  - delete_one
+  - find
+  - find_one
+  - update_many
+  - update_one
+  - replace_one
+
+otherCommands:
+  - drop
+  - insert_one
+  - insert_many
+
+labels:
+  - bulkContribWorkflow
+  - collect
+  - collectActualItems
+  - clearWorkflow
+  - delItem
+  - delMany
+  - delWorkflow
+  - dependencies
+  - dropWorkflow
+  - entries
+  - getDetails
+  - getItem
+  - getList
+  - getWorkflowItem
+  - insertItem
+  - insertMany
+  - insertUser
+  - insertWorkflow
+  - insertWorkflowMany
+  - localField
+  - foreignField
+  - makeCrit
+  - updateField
+  - updateUser
+  - updateWorkflow

@@ -1,0 +1,563 @@
+locations:
+  BASE_DIR_DEVEL: ~/Documents/DANS/projects/has/dacs
+  BASE_DIR_PROD: /home/dirkr/dariah_data
+  FM_DIR: >-
+    {b}/fm
+  EXPORT_DIR: ~/github/Dans-labs/dariah-contrib/_temp
+  EXPORT_ORIG: >-
+    {e}/contribFromFileMaker.xlsx
+  EXPORT_MONGO: >-
+    {e}/contribInMongoDB.xlsx
+
+xml:
+  FMNS: >-
+    {http://www.filemaker.com/fmpxmlresult}
+
+testAuthority: local
+
+testUsers:
+  - eppn: suzan
+    email: suzan@test.eu
+    firstName: Suzan
+    lastName: Karelse
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: marie
+    email: marie@test.eu
+    firstName: Marie
+    lastName: Pieterse
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: gertjan
+    email: gertjan@test.eu
+    firstName: Gert-Jan
+    lastName: Klein-Holgerink
+    mayLogin: false
+    authority: local
+    group: auth
+  - eppn: lisa
+    email: lisa@test.eu
+    firstName: Lisa
+    lastName: de Leeuw
+    mayLogin: true
+    authority: local
+    group: office
+  - eppn: dirk
+    email: dirk@test.eu
+    firstName: Dirk
+    lastName: Roorda
+    mayLogin: true
+    authority: local
+    group: root
+  - eppn: carsten
+    email: carsten@test.eu
+    firstName: Carsten
+    lastName: Thiel
+    mayLogin: true
+    authority: local
+    group: system
+  - eppn: bart
+    email: bart@test.eu
+    firstName: Bart
+    lastName: Ehrenfest
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: rachel
+    email: rachel@test.eu
+    firstName: Rachel
+    lastName: Goldilocks
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: john
+    email: john@test.eu
+    firstName: John
+    lastName: Smith
+    mayLogin: true
+    authority: local
+    group: auth
+
+rootUser:
+  development: dirk
+  production: DirkRoorda@dariah.eu
+  rootRole: root
+  fallbackRole: office
+
+CREATOR:
+  eppn: HaSProject
+  authority: DARIAH
+  mayLogin: false
+  group: office
+
+# the group table is redundant, the same info
+# is in the permissions yaml file.
+# But we want to use the tool to assign groups to people,
+# so we make a fixed group table
+
+groups:
+  public: user, not logged in
+  auth:   authenticated user
+  own:    authenticated user and creator of records in question
+  office: management user
+  system: system administrator
+  root:   all powerful
+  nobody: nobody
+  edit:   authenticated user and editor of records in question
+  coord:  national coordinator
+
+groupsOrder:
+  - auth
+  - nobody
+  - office
+  - own
+  - public
+  - root
+  - system
+  - edit
+  - coord
+
+countryExtra:
+  AM:
+    name: Armenia
+    latitude: 40
+    longitude: 45
+  AZ:
+    name: Azerbaijan
+    latitude: 40.5
+    longitude: 47.5
+  UZ:
+    name: Uzbekistan
+    longitude: 64
+    latitude: 41
+  VA:
+    name: Vatican State
+    longitude: 12.4
+    latitude: 41.9
+  AT:
+    name: Austria
+    latitude: 47.7
+    longitude: 15.11
+  BE:
+    name: Belgium
+    latitude: 51.3
+    longitude: 3.1
+  HR:
+    name: Croatia
+    latitude: 44.7
+    longitude: 15.6
+  CY:
+    name: Cyprus
+    latitude: 35.0
+    longitude: 32.8
+  CZ:
+    name: Czech Republic
+    latitude: 49.8
+    longitude: 15.2
+  DK:
+    name: Denmark
+    latitude: 55.6
+    longitude: 11.0
+  EE:
+    name: Estonia
+    latitude: 59.0
+    longitude: 25.0
+  FR:
+    name: France
+    latitude: 46.5
+    longitude: 1.9
+  DE:
+    name: Germany
+    latitude: 51.0
+    longitude: 10.4
+  GR:
+    name: Greece
+    latitude: 38.0
+    longitude: 23.8
+  HU:
+    name: Hungary
+    latitude: 46.9
+    longitude: 19.8
+  IE:
+    name: Ireland
+    latitude: 53.1
+    longitude: -8.4
+  IT:
+    name: Italy
+    latitude: 41.6
+    longitude: 13.0
+  LV:
+    name: Latvia
+    latitude: 56.9
+    longitude: 26.8
+  LT:
+    name: Lithuania
+    latitude: 55.2
+    longitude: 24.9
+  LU:
+    name: Luxembourg
+    latitude: 49.6
+    longitude: 6.1
+  MT:
+    name: Malta
+    latitude: 35.9
+    longitude: 14.4
+  NL:
+    name: Netherlands
+    latitude: 52.8
+    longitude: 5.8
+  PL:
+    name: Poland
+    latitude: 52.3
+    longitude: 19.8
+  PT:
+    name: Portugal
+    latitude: 38.7
+    longitude: -9.0
+  RS:
+    name: Serbia
+    latitude: 44.0
+    longitude: 20.8
+  SK:
+    name: Slovakia
+    latitude: 48.8
+    longitude: 19.9
+  SI:
+    name: Slovenia
+    latitude: 46.2
+    longitude: 14.4
+  CH:
+    name: Switzerland
+    latitude: 46.9
+    longitude: 8.3
+  GB:
+    name: United Kingdom
+    latitude: 52.9
+    longitude: -1.8
+  AL:
+    name: Albania
+    latitude: 41.1
+    longitude: 19.9
+  AD:
+    name: Andorra
+    latitude: 42.5
+    longitude: 1.6
+  BY:
+    name: Belarus
+    latitude: 53.8
+    longitude: 29.2
+  BA:
+    name: Bosnia and Herzegovina
+    latitude: 44.2
+    longitude: 18.2
+  BG:
+    name: Bulgaria
+    latitude: 42.9
+    longitude: 26.5
+  FI:
+    name: Finland
+    latitude: 63.3
+    longitude: 27.6
+  GE:
+    name: Georgia
+    latitude: 41.66
+    longitude: 43.68
+  IS:
+    name: Iceland
+    latitude: 65.0
+    longitude: -18.8
+  SM:
+    name: San Marino
+    latitude: 43.8
+    longitude: 12.3
+  KS:
+    name: Kosovo
+    latitude: 43.2
+    longitude: 21.9
+  LI:
+    name: Liechtenstein
+    latitude: 47.2
+    longitude: 9.4
+  MK:
+    name: Macedonia
+    latitude: 41.6
+    longitude: 21.8
+  MD:
+    name: Moldova
+    latitude: 47.3
+    longitude: 28.7
+  MC:
+    name: Monaco
+    latitude: 43.7
+    longitude: 7.4
+  ME:
+    name: Montenegro
+    latitude: 42.3
+    longitude: 19.2
+  "NO":
+    name: Norway
+    latitude: 62.0
+    longitude: 7.1
+  RO:
+    name: Romania
+    latitude: 45.8
+    longitude: 24.8
+  RU:
+    name: Russian Federation
+    latitude: 55.6
+    longitude: 37.7
+  ES:
+    name: Spain
+    latitude: 39.8
+    longitude: -3.4
+  SE:
+    name: Sweden
+    latitude: 59.5
+    longitude: 16.1
+  TR:
+    name: Turkey
+    latitude: 40.0
+    longitude: 32.8
+  UA:
+    name: Ukraine
+    latitude: 49.3
+    longitude: 32.6
+
+testOwner:
+  contrib:
+    owner: dirk
+    search: title
+    field: creator
+    documents:
+      !!set
+      ? 3DHOP
+      ? AAI
+
+decisions:
+  order:
+    - accept
+    - reject
+    - revise
+  values:
+    accept:
+      acro: good
+      rep: Accept
+      participle: Accepted
+      sign: '✔'
+    reject:
+      acro: error
+      rep: Reject
+      participle: Rejected
+      sign: '✘'
+    revise:
+      acro: warning
+      rep: Revise
+      participle: Revision needed
+      sign: '✋'
+
+MAIN_TABLES:
+- contrib
+- country
+
+SKIP_FIELDS:
+  contrib:
+  - dateandtime_ciozero
+  - ikid
+  - ikid_base
+  - find_country_id
+  - find_type
+  - gnewpassword
+  - gnewpassword2
+  - goldpassword
+  - help_description
+  - help_text
+  - message
+  - message_allert
+  - teller
+  - total_costs_total
+  - whois
+  country: {}
+
+PRISTINE: isPristine
+
+MERGE_FIELDS:
+  contrib:
+    academic_entity_url:
+    - academic_entity_url_2
+    contribution_url:
+    - contribution_url_2
+    contact_person_mail:
+    - contact_person_mail_2
+    type_of_inkind:
+    - other_type_of_inkind
+    vcc11_name:
+    - vcc12_name
+    - vcc21_name
+    - vcc22_name
+    - vcc31_name
+    - vcc32_name
+    - vcc41_name
+    - vcc42_name
+    vcc_head_decision_vcc11:
+    - vcc_head_decision_vcc12
+    - vcc_head_decision_vcc21
+    - vcc_head_decision_vcc22
+    - vcc_head_decision_vcc31
+    - vcc_head_decision_vcc32
+    - vcc_head_decision_vcc41
+    - vcc_head_decision_vcc42
+  country: {}
+
+MAP_FIELDS:
+  contrib:
+    approved: approved
+    academic_entity_url: urlAcademic
+    contribution_url: urlContribution
+    contact_person_mail: contactPersonEmail
+    contact_person_name: contactPersonName
+    costs_description: costDescription
+    costs_total: costTotal
+    country: country
+    creation_date_time: dateCreated
+    creator: creator
+    dateandtime_approval: dateApproved
+    dateandtime_cioapproval: dateApprovedCIO
+    description_of_contribution: description
+    disciplines_associated: discipline
+    last_modifier: modifiedBy
+    modification_date_time: dateModified
+    other_keywords: keyword
+    submit: submitted
+    tadirah_research_activities: tadirahActivity
+    tadirah_research_objects: tadirahObject
+    tadirah_research_techniques: tadirahTechnique
+    title: title
+    total_costs_total: costTotalTotal
+    type_of_inkind: typeContribution
+    vcc: vcc
+    vcc11_name: reviewerName
+    vcc_head_decision: vccDecision
+    vcc_head_decision_vcc11: reviewerDecision
+    vcchead_approval: vccApproval
+    vcchead_disapproval: vccDisApproval
+    year: year
+  country:
+    countrycode: iso
+    countryname: name
+    member_dariah: isMember
+
+SPLIT_FIELDS:
+  contrib:
+    discipline: generic
+    keyword: genericComma
+    typeContribution: generic
+    tadirahActivity: generic
+    tadirahObject: generic
+    tadirahTechnique: generic
+    vcc: generic
+  country: {}
+
+HACK_FIELDS:
+  contrib:
+    tadirahActivity: stripNum
+  country: {}
+
+DECOMPOSE_FIELDS:
+  contrib:
+    typeContribution: typeContributionOther
+  country: {}
+
+FIELD_TYPE:
+  contrib:
+    costTotal: valuta
+    dateCreated: datetime
+    dateModified: datetimeiso
+    dateApproved: datetime
+    dateApprovedCIO: datetime
+    contactPersonEmail: email
+    submitted: bool
+    approved: bool
+    reviewerDecision: bool
+    vccApproval: bool
+    vccDecision: bool
+    vccDisApproval: bool
+    isLegacy: bool
+  country:
+    isMember: bool
+
+FIELD_MULTIPLE:
+  contrib:
+    dateModified: 1
+
+DEFAULT_VALUES:
+  contrib:
+    dateCreated: datetime(2000,1,1,0,0,0)
+    creator: admin
+    type_of_inkind: General
+  country: {}
+
+MOVE_FIELDS:
+  contrib:
+    assessmentLegacy:
+      - approved
+      - dateApproved
+      - dateApprovedCIO
+      - submitted
+      - reviewerName
+      - reviewerDecision
+      - vccDecision
+      - vccApproval
+      - vccDisApproval
+  country: {}
+
+VALUE_LISTS:
+  contrib:
+    - keyword
+    - discipline
+    - tadirahActivity
+    - tadirahObject
+    - tadirahTechnique
+    - typeContribution
+    - typeContributionOther:typeContribution
+    - vcc
+    - year
+
+MOVE_MISSING:
+  contrib: description
+
+TYPES:
+  !!set
+  ? bool
+  ? number
+  ? decimal
+  ? text
+  ? valuta
+  ? email
+  ? date
+  ? datetime
+
+NULL_VALUES:
+  -  http://
+  -  https://
+  -  '@'
+
+BOOL_VALUES:
+  True:
+    - true
+    - 1
+    - 'Yes'
+    - 'YES'
+    - 'yes'
+    - '1'
+  False:
+    - false
+    - 0
+    - null
+    - 'No'
+    - 'NO'
+    - 'no'
+    - '0'
+    - 'NULL'
+

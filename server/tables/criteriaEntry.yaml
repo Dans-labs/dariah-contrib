@@ -1,0 +1,26 @@
+seq:
+  label: Number
+  type: int
+  perm:
+    read: auth
+    edit: nobody
+criteria:
+  label: criterion
+  type: criteria
+  perm:
+    read: auth
+    edit: nobody
+score:
+  type: score
+  perm:
+    read: auth
+assessment:
+  type: assessment
+  perm:
+    read: auth
+    edit: nobody
+evidence:
+  type: markdown
+  multiple: true
+  perm:
+    read: auth

@@ -1,0 +1,13 @@
+mainType:
+  label: Main type
+  perm:
+    edit: office
+subType:
+  label: Subtype
+  perm:
+    edit: office
+explanation:
+  type: markdown
+  multiple: true
+  perm:
+    edit: office

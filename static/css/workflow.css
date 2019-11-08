@@ -1,0 +1,132 @@
+.command,
+.status {
+  font-weight: bold;
+  padding: 0.5rem;
+  margin: 0.5rem 1rem;
+  display: inline-block;
+  max-width: 100%;
+}
+.date {
+  font-weight: normal;
+  font-size: small;
+  background-color: var(--user-back);
+  padding: 0.1rem;
+  margin: 0.2rem;
+  border-radius: 0.1rem;
+}
+.datex {
+  font-weight: normal;
+  font-size: small;
+  color: var(--msg-fore);
+  background-color: var(--msg-back);
+  padding: 0.1rem;
+  margin: 0.2rem;
+  border-radius: 0.1rem;
+}
+.command {
+  border-width: 0.3rem;
+  border-style: outset;
+  cursor: pointer;
+}
+.status {
+  border-radius: 0;
+}
+.status.info {
+  color: var(--status-info-fore);
+  background-color: var(--status-info-back);
+  border-color: var(--status-info-border);
+}
+.status.good {
+  color: var(--status-good-fore);
+  background-color: var(--status-good-back);
+  border-color: var(--status-good-border);
+}
+.status.warning {
+  color: var(--status-warning-fore);
+  background-color: var(--status-warning-back);
+  border-color: var(--status-warning-border);
+}
+.status.error {
+  color: var(--status-error-fore);
+  background-color: var(--status-error-back);
+  border-color: var(--status-error-border);
+}
+.command.info {
+  color: var(--command-info-fore);
+  background-color: var(--command-info-back);
+  border-color: var(--command-info-border);
+}
+.command.good {
+  color: var(--command-good-fore);
+  background-color: var(--command-good-back);
+  border-color: var(--command-good-border);
+}
+.command.warning {
+  color: var(--command-warning-fore);
+  background-color: var(--command-warning-back);
+  border-color: var(--command-warning-border);
+}
+.command.error {
+  color: var(--command-error-fore);
+  background-color: var(--command-error-back);
+  border-color: var(--command-error-border);
+}
+.command.info.active,
+.command.good.active,
+.command.warning.active,
+.command.error.active {
+  color: var(--command-active-fore);
+  background-color: var(--command-active-back);
+  border-color: var(--command-active-border);
+}
+.ass-score-box {
+  background-color: var(--score-back);
+  padding: 0.3rem;
+  margin-bottom: 0.3rem;
+  border: 3px solid var(--score-border);
+  border-radius: 0.5rem;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.ass-score {
+  color: var(--score-fore);
+  font-size: xx-large;
+}
+.ass-score-deriv {
+  color: var(--score-fore);
+  font-size: medium;
+}
+.workflow {
+  border-radius: 0.5em;
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 4px solid var(--workflow-border);
+}
+.frozen0,
+.frozen1,
+.frozen2,
+.frozen3 {
+  border-radius: 0.3em;
+  padding: 0.2em;
+  margin: 0.2em;
+}
+.frozen0 {
+  border: 4px solid var(--thaw-border);
+}
+.frozen1 {
+  border: 4px solid var(--frozen-border);
+}
+.frozen2 {
+  border: 8px solid var(--frozen-border);
+}
+.frozen3 {
+  background-color: var(--frozen-back);
+  border: 8px solid var(--frozen-border);
+}
+.workflow-line {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}

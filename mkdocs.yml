@@ -1,0 +1,146 @@
+site_name: Tech Doc DARIAH contribution tool
+site_description: > 
+  The technical documentation of the DARIAH Contribution Tool.
+  Design, specs, rationales, patterns, diagrams.
+
+site_url: "https://dans-labs.github.io/dariah-contrib/" 
+site_author: Dirk Roorda
+
+repo_name: Dans-labs/dariah-contrib
+repo_url: 'https://github.com/dans-labs/dariah-contrib/'
+
+theme:
+  name: dans
+  logo: 'images/inkind_logo.png'
+  favicon: 'icons/favicon.ico'
+  development: true
+  development_label: still in beta
+  production_link: ''
+  client:
+    name: DARIAH
+    url: https://www.dariah.eu
+    logo: images/dariah.png 
+  feature:
+    tabs: true
+
+strict: false
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - codehilite:
+      guess_lang: false
+      linenums: true
+  - def_list
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: Dans-labs
+      repo: mkdocs-dans
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - markdownextradata
+  - search
+  - minify:
+      minify_html: true
+
+extra:
+  # App
+  repoName: dariah-contrib
+  repBase: https://github.com/Dans-labs/dariah-contrib/blob/master
+  liveBase: https://dariah-beta.dans.knaw.nl
+  repo: https://github.com/Dans-labs/dariah-contrib
+  docSite: https://dans-labs.github.io/dariah-contrib/
+  docSiteOrig: https://dans-labs.github.io/dariah/
+
+  # DARIAH
+  dans: https://dans.knaw.nl
+  dariah: https://www.dariah.eu
+  dariahIDP: https://wiki.de.dariah.eu/display/publicde/DARIAH+AAI+Documentation
+  dariahShib: https://wiki.de.dariah.eu/display/publicde/Integrating+Shibboleth+Authentication+into+your+Application
+
+  # TECH
+  ale: https://github.com/w0rp/ale
+  atom: https://atom.io 
+  bash: https://www.gnu.org/software/bash/
+  black: https://black.readthedocs.io/en/stable/
+  cloc: https://github.com/AlDanial/cloc
+  css: https://developer.mozilla.org/en-US/docs/Web/CSS
+  eslint: http://eslint.org
+  flake8: https://github.com/PyCQA/flake8
+  flask: http://flask.pocoo.org/docs/1.0/
+  flexbox: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+  githubBase: https://github.com/
+  hsl: https://en.wikipedia.org/wiki/HSL_and_HSV
+  html: https://developer.mozilla.org/en-US/docs/Web/HTML
+  ide: https://en.wikipedia.org/wiki/Integrated_development_environment 
+  iso8601: https://en.wikipedia.org/wiki/ISO_8601
+  javascript: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference
+  jquery: https://api.jquery.com
+  markdownDoc: https://guides.github.com/features/mastering-markdown/
+  mkdocs: https://github.com/mkdocs/mkdocs
+  mkdocsmaterial: https://github.com/squidfunk/mkdocs-material
+  mkdocsdans: https://dans-labs.github.io/mkdocs-dans
+  mongodb: https://docs.mongodb.com
+  prettier: https://prettier.io
+  python: https://www.python.org
+  pythondl: https://www.python.org/downloads
+  pythondocs: https://docs.python.org/3/
+  sha: https://www.softwareheritage.org
+  shebanq: https://github.com/etcbc/shebanq
+  socket: https://socket.io
+  socketPython: http://python-socketio.readthedocs.io/en/latest/
+  spa: https://en.wikipedia.org/wiki/Single-page_application
+  sublimeText: https://www.sublimetext.com
+  vim: http://www.vim.org
+  vsc: https://code.visualstudio.com
+  webApi: https://developer.mozilla.org/en-US/docs/Web/API/document
+  webstorm: https://www.jetbrains.com/webstorm/
+  wsgi: https://modwsgi.readthedocs.io/en/develop
+  yaml: http://www.yaml.org
+  zenodo: https://zenodo.org
+
+nav:
+  - Home: 'index.md'
+  - About:
+    - Codebase: 'About/Codebase.md'
+    - Stats: 'About/Stats.md'
+    - News: 'About/News.md'
+    - Lessons: 'About/Lessons.md'
+  - Functionality:
+    - Business: 'Functionality/Business.md'
+    - Tables: 'Functionality/Tables.md'
+    - Workflow: 'Functionality/Workflow.md'
+  - Legacy:
+    - Content: 'Legacy/Content.md'
+  - Concepts:
+    - Model: 'Concepts/Model.md'
+  - Server:
+    - Authentication: 'Server/Authentication.md'
+    - Server: 'Server/Server.md'
+  - Technology:
+    - Tech: 'Technology/Tech.md'
+    - ES6: 'Technology/ES6.md'
+  - Integration:
+    - API: 'Integration/API.md'
+  - Maintenance:
+    - Deploy: 'Maintenance/Deploy.md'

@@ -1,0 +1,62 @@
+eppn:
+  perm:
+    edit: office
+email:
+  type: email
+  perm:
+    read: auth
+    edit: office
+name:
+  perm:
+    edit: office
+firstName:
+  label: First name
+  perm:
+    edit: office
+lastName:
+  label: Last name
+  perm:
+    edit: office
+country:
+  type: country
+  perm:
+    edit: office
+org:
+  label: Organization
+  perm:
+    edit: office
+rel:
+  label: Relationship
+  perm:
+    edit: office
+membership:
+  label: Memberships
+  perm:
+    read: auth
+    edit: office
+mayLogin:
+  label: Login allowed
+  type: bool2
+  perm:
+    read: edit
+    edit: office
+authority:
+  label: Authentication authority
+  perm:
+    edit: nobody
+group:
+  label: Permission group
+  type: permissionGroup
+  perm:
+    edit: own
+dateLastLogin:
+  label: last logged in on
+  type: datetime
+  perm:
+    read: auth
+    edit: nobody
+statusLastLogin:
+  label: Status last login
+  perm:
+    read: auth
+    edit: nobody

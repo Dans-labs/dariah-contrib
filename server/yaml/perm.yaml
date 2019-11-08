@@ -1,0 +1,27 @@
+default:
+  read: public
+  edit: edit
+
+roles:
+  - nobody
+  - public
+  - auth
+  - edit
+  - own
+  - coord
+  - office
+  - system
+  - root
+
+names:
+  - group
+  - groupRep
+  - isCoordinated
+  - isEdit
+  - isOwn
+  - mayAdd
+  - mayLogin
+  - mayEdit
+  - mayRead
+  - readonly
+  - sameCountry

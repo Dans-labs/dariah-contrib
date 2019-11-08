@@ -1,0 +1,49 @@
+staticRoot: ../static/
+secretFile: /opt/web-apps/dariah_jwt.secret
+shibKey: Shib-Session-ID
+creator: HaSProject
+
+debug: false
+
+attributes:
+  o: org
+  cn: name
+  givenName: firstName
+  sn: lastName
+  isMemberOf: membership
+  affiliation: rel
+
+objects:
+  - control
+  - db
+  - wf
+  - auth
+  - types
+
+names:
+  - DARIAH
+  - devel
+  - eppn
+  - Guest
+  - isEdit
+  - isOur
+  - isOwn
+  - isPristine
+  - local
+  - mail
+  - master
+  - modified
+  - my
+  - name
+  - No
+  - number
+  - org
+  - patternn
+  - REGIME
+  - read
+  - record
+  - related
+  - text
+  - unknown
+  - Yes
+  - you

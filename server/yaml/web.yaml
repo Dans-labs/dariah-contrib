@@ -1,0 +1,222 @@
+staticRoot: ../static/
+indexPage: index.html
+
+messages:
+  forbidden: Forbidden
+  noPage: Page not found
+  noTable: No table
+  noField: No field
+  refreshCrit: refresh criteria overview
+  refresh: refresh modification history
+  url: http(s)://letters.domain
+  email: name@letters.domain
+  int: only digits
+  decimal: only digits and one floating point/comma
+  money: only digits and one floating point/comma
+  datetime: yyyy-mm-dd hh-mm-ss (you may leave out trailing parts)
+  filter: type to filter
+  wrongCriterionForType: >-
+    N.B. This criterion is not relevant for this type of contribution.
+    Consider copying your entr(ies) to an other criterion and then deleting this one.
+  legacyCriterion: >-
+    This is a legacy criterion.
+  scoreLegend: Score legend
+  orphanedReviewer: >-
+    This reviewer is not currently associated with this assessment.
+  reviewDecision: Review decision
+
+unknown:
+  generic: none
+  number: nonumber
+  country: flag 
+  user: nouser
+  group: nogroup
+  reviewKind: detached
+
+icons:
+  add: ✚
+  calc: ⌨︎
+  chain: ⚭
+  check: ✔︎
+  clear: ✖︎
+  cross: ✘
+  delete: ✖︎
+  detached: ⚮
+  dismiss: ⏏︎
+  edit: ✎
+  flag: ⚐ 
+  info: ℹ︎
+  insert: ✦
+  missing: ☒
+  nogroup: ☺︎☺︎
+  noicon: ☹︎
+  none: ○
+  nonumber: '0'
+  nouser: ☺︎
+  ok: ↩︎
+  prov: ⌚︎
+  refresh: ♺
+  adown: ▾
+  aup: ▴
+  addown: ⇟
+  adup: ⇞
+  cdown: ↓
+  cup: ↑
+
+landing: >-
+  Welcome to the DARIAH contribution tool
+
+request:
+  - GET
+  - POST
+
+
+urls:
+  home:
+    text: Home
+    url: /
+  info:
+    text: Overview
+    url: /info
+  logo:
+    text: Documentation
+    url: https://dans-labs.github.io/dariah-contrib/
+    src: /static/images/logo.png
+    height: 56
+  login:
+    text: log in
+    url: /login
+  logout:
+    text: log out
+    url: /logout
+  slogout:
+    text: log out from DARIAH
+    url: /slogout
+    title: you need to restart your browser for this to take effect
+  shibLogout:
+    url: /Shibboleth.sso/Logout
+  dummy:
+    url: /xxx
+
+urlParts:
+  - edit
+  - favicons
+  - http
+  - https
+  - index
+  - insert
+  - item
+  - list
+  - mailto
+  - org
+  - static
+  - view
+  - www
+
+elements:
+  - a
+  - br
+  - checkbox
+  - dd
+  - details
+  - div
+  - dl
+  - dt
+  - h
+  - input
+  - p
+  - script
+  - span
+  - summary
+  - table
+  - td
+  - th
+  - tr
+  - textarea
+
+emptyElements:
+  - area
+  - base
+  - br
+  - col
+  - embed
+  - hr
+  - img
+  - input
+  - link
+  - meta
+  - param
+  - source
+  - track
+  - wbr
+
+attributeNames:
+  - checked
+  - cls
+  - href
+  - hrefbase
+  - title
+  - type
+  - value
+
+entities:
+  - amp
+  - lt
+  - apos
+  - quot
+
+values:
+  - Approved
+  - _blank
+
+options:
+  assessed:
+    label: 'assessed'
+    table: assessment
+  reviewed:
+    label: 'reviewed'
+    table: review
+
+captions:
+  options: Filter
+  contrib: DARIAH Contributions
+  tasks: Tasks
+  user: User content
+  office: Office content
+  system: System content
+
+filterThreshold: 10
+
+bodyMethods:
+  - compact
+
+fieldActions:
+  - save
+  - edit
+  - view
+
+listActions:
+  - assess
+  - assign
+  - my
+  - our
+  - review
+  - select
+
+names:
+  - action
+  - actual
+  - addClass
+  - body
+  - dismiss
+  - from
+  - html
+  - icon
+  - list
+  - method
+  - option
+  - overview
+  - select
+  - status
+  - symbol
+  - wrapHelp

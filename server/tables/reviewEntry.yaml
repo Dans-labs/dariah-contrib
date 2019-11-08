@@ -1,0 +1,34 @@
+seq:
+  label: Criterion number
+  type: int
+  perm:
+    read: edit
+    edit: nobody
+criteria:
+  label: criterion
+  type: criteria
+  perm:
+    read: auth
+    edit: nobody
+criteriaEntry:
+  label: Assessor entry
+  type: criteriaEntry
+  perm:
+    read: auth
+    edit: nobody
+review:
+  type: review
+  perm:
+    read: edit
+    edit: nobody
+assessment:
+  type: assessment
+  perm:
+    read: auth
+    edit: nobody
+comments:
+  label: Reviewer comments
+  type: markdown
+  multiple: true
+  perm:
+    read: edit

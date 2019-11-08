@@ -1,0 +1,18 @@
+package:
+  type: package
+  perm:
+    edit: office
+typeContribution:
+  label: Type
+  type: typeContribution
+  multiple: true
+  perm:
+    edit: office
+criterion:
+  perm:
+    edit: office
+remarks:
+  type: markdown
+  multiple: true
+  perm:
+    edit: office

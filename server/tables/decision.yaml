@@ -1,0 +1,15 @@
+acro:
+  label: Code
+  perm:
+    edit: nobody
+sign:
+  perm:
+    edit: office
+rep:
+  label: Representation
+  perm:
+    edit: office
+participle:
+  label: Representation as participle
+  perm:
+    edit: office

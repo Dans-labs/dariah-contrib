@@ -1,0 +1,60 @@
+# Technical references
+
+This is an alphabetical list of tech references. Sometimes we refer to a
+technology without making use of it in the app, we have marked those entries
+with an ✗.
+
+## References
+
+???+ abstract "Generic"
+    *   [bash]({{bash}}) shell scripting
+    *   [cloc]({{cloc}}) counting lines of code
+    *   [iso8601]({{iso8601}}) date and time format
+
+???+ abstract "Web design"
+    *   [webApi]({{webApi}}) interacting with the loaded document in a browser
+
+    ???+ "Styling"
+        *   [css](https://developer.mozilla.org/en-US/docs/Web/CSS) cascading stylesheets:
+        *   [flexbox]({{flexbox}}) laying out boxes in flexible ways
+        *   [hsl]({{hsl}}) color space
+
+    *   [html]({{html}}) markup language for the web
+
+    ???+ "Shorthands"
+        *   [markdown]({{markdownDoc}}) rich text from plain text
+        *   [yaml]({{yaml}}) configuration language, as simple as markdown.
+
+???+ abstract "Editing"
+    *   [✗ IDE]({{ide}}) Integrated Developer's Environment
+    *   [✗ Atom]({{atom}}) IDE by GitHub
+    *   [✗ SublimeText]({{sublimeText}}) commercial text editor
+    *   [vim]({{vim}}) old-hands text editor, still competes with IDEs
+        *   [ALE]({{ale}}) runs linters and formatters within vim
+    *   [✗ Visual Studio Code]({{vsc}}) IDE by Microsoft
+    *   [✗ Webstorm]({{webstorm}}) commercial IDE
+
+    ???+ abstract "Linters and formatters
+        *   [flake8]({{flake8}}) code linter for Python
+        *   [black]({{black}}) code formatter for Python
+
+???+ abstract "Client side"
+    ???+ abstract "language"
+        *   [javascript]({{javascript}}) scripting language for the web
+        *   [eslint]({{eslint}}) checks ES6 code against style requirements
+        *   [prettier]({{prettier}}) code formatter for javascript
+
+???+ abstract "Server side"
+    *   [python]({{python}}) data-oriented scripting language
+    *   [flask]({{flask}}) micro web framework
+    *   [wsgi]({{wsgi}}) bridge between the python language and webservers
+    *   [✗ socket]({{socket}}) push messages from server to all connected clients
+        *   [✗ python-socket]({{socketPython}}) python wrapper for *socket.io*
+
+???+ abstract "Database"
+    *   [mongodb]({{mongodb}}) NO-SQL database, JSON/Javascript based
+
+???+ abstract "Other"
+    *   [✗ shebanq]({{shebanq}}) web interface for Hebrew text and linguistic
+        annotations
+

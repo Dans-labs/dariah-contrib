@@ -1,0 +1,184 @@
+userTables:
+  - contrib
+  - assessment
+  - review
+
+userEntryTables:
+  - criteriaEntry
+  - reviewEntry
+
+valueTables:
+  - country
+  - criteria
+  - decision
+  - discipline
+  - keyword
+  - package
+  - permissionGroup
+  - score
+  - tadirahActivity
+  - tadirahObject
+  - tadirahTechnique
+  - typeContribution
+  - user
+  - vcc
+  - year
+
+systemTables:
+  - decision
+  - permissionGroup
+
+actualTables:
+  - criteria
+  - package
+  - typeContribution
+
+refreshTables:
+  - assessment
+
+details:
+  contrib: 
+    - assessment
+    - review
+  assessment:
+    - criteriaEntry
+    - review
+    - reviewEntry
+  criteriaEntry:
+    - reviewEntry
+  review:
+    - reviewEntry
+  criteria:
+    - score
+    - criteriaEntry
+    - reviewEntry
+  package:
+    - criteria
+
+cascade:
+  assessment:
+    - criteriaEntry
+  review:
+    - reviewEntry
+
+items:
+  contrib: [contribution, contributions]
+  country: [country, countries]
+  criteria: [criterion, criteria]
+  criteriaEntry: [criteria entry, criteria entries]
+  reviewEntry: [review entry, review entries]
+  score: [score level, score levels]
+  tadirahActivity: [TADIRAH Activity, TADIRAH Activities]
+  tadirahObject: [TADIRAH Object, TADIRAH Objects]
+  tadirahTechnique: [TADIRAH Technique, TADIRAH Techniques]
+
+defaultType: text
+
+scalarTypes:
+  - text
+  - email
+  - url
+  - int
+  - decimal
+  - money
+  - datetime
+  - bool2
+  - bool3
+  - markdown
+
+boolTypes:
+  bool2:
+    true: check
+    false: cross
+  bool3:
+    true: check
+    null: none
+    false: cross
+
+prov:
+  creator:
+    label: Creator
+    type: user
+    perm:
+      edit: nobody
+  dateCreated:
+    label: Created on
+    type: datetime
+    perm:
+      edit: nobody
+  editors:
+    label: Editor(s)
+    type: user
+    multiple: true
+    perm:
+      read: auth
+  modified:
+    label: modified
+    multiple: true
+    perm:
+      read: auth
+      edit: nobody
+  isPristine:
+    label: Unchanged legacy
+    perm:
+      read: auth
+      edit: nobody
+
+value:
+  rep:
+    label: Representation
+    perm:
+      edit: office
+
+decisions:
+  - Accept
+  - Reject
+  - Revise
+
+withNow:
+  contrib:
+    selected: dateDecided
+  assessment:
+    submitted:
+      - dateSubmitted
+      - dateWithdrawn
+  review:
+    decision: dateDecided
+
+overviewFields:
+  country: country
+  cost: costTotal
+  vcc: vcc
+  year: year
+  title: title
+  type: typeContribution
+  selected: selected
+
+overviewFieldsWorkflow:
+  score: assessment.score.overall
+  cStage: stage
+  aStage: assessment.stage
+  rStage: assessment.reviews.final.stage
+
+names:
+  - _id
+  - active
+  - authority
+  - bool
+  - constrained
+  - eid
+  - fields
+  - isUserTable
+  - isUserEntryTable
+  - itemLabels
+  - legacy
+  - mkTable
+  - orig
+  - orphaned
+  - pattern
+  - reference
+  - sorted
+  - Table
+  - table
+  - tableObj
+  - uid

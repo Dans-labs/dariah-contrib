@@ -1,0 +1,204 @@
+table.mt {
+  font-size: small;
+}
+table.mt td {
+  border: 0.2em solid #ffffff;
+  vertical-align: baseline;
+}
+td.mtl {
+  background-color: #eeeeee;
+  font-weight: bold;
+}
+td.mtd {
+  line-height: 1.5;
+  padding: 0.2em;
+}
+.g-add {
+  background-color: #eeffee;
+}
+.g-rm {
+  background-color: #ffeeff;
+}
+.g-x {
+  background-color: #ffeeee;
+}
+.g-add,
+.g-rm,
+g.x {
+  color: #000000;
+  font-weight: bold;
+  font-size: small;
+  padding: 0.1em 0.2em;
+  margin: 0.2em 0.4em;
+  border-radius: 0.4em;
+  border: 0.1em solid #888888;
+}
+p.countries {
+  line-height: 1.5;
+}
+
+table.cc {
+  font-size: small;
+}
+
+table.cc td {
+  border: 0.2em solid #aaaaaa;
+  padding: 0.2em 0.3em;
+}
+table.cc th {
+  color: #000000;
+  background-color: #ffffff;
+  border: 0.2em solid #dddddd;
+  padding: 0.2em 0.3em;
+  font-size: small;
+}
+table.cc td.c-vcc,
+table.cc th.c-vcc {
+  text-align: left;
+}
+table.cc td.c-year,
+table.cc th.c-year {
+  text-align: center;
+}
+table.cc td.c-type,
+table.cc th.c-type {
+  text-align: center;
+}
+table.cc td.c-cost,
+table.cc th.c-cost {
+  text-align: right;
+}
+table.cc td.c-assessed,
+table.cc th.c-assessed {
+  text-align: left;
+}
+table.cc,
+table.cc {
+  text-align: center;
+  min-width: 6em;
+  max-width: 6em;
+}
+table.cc td.c-selected,
+table.cc th.c-selected {
+  text-align: left;
+}
+table.cc td.c-title,
+table.cc th.c-title {
+  text-align: left;
+}
+
+td.c-vcc {
+  color: #666666;
+}
+td.c-type {
+  color: #222222;
+}
+td.c-year {
+  color: #222222;
+}
+td.c-cost {
+  color: #000000;
+  font-size: medium;
+  font-weight: bold;
+  font-family: monospace;
+  font-weight: medium;
+}
+td.c-selected {
+  background-color: #ffffee;
+  text-align: center;
+}
+td.c-title {
+  font-size: small;
+}
+td.c-assessed {
+  font-weight: bold;
+}
+.c-focus {
+  color: #ffffff;
+  font-size: medium;
+  font-weight: bold;
+  background-color: #0000cc;
+}
+.c-focus.fake {
+  background-color: #00cccc;
+}
+.c-control {
+  color: #0000cc;
+  font-weight: normal;
+  font-size: small;
+  background-color: #eeee;
+}
+.c-control.fake {
+  background-color: #aaffff;
+}
+.c-control,
+.c-focus {
+  padding: 0.1em 0.2em;
+  margin: 0.2em 0.4em;
+  border-radius: 0.2em;
+}
+a[select] {
+  color: #7777ff;
+  font-weight: normal;
+  background-color: #ffffff;
+  padding: 0.1em 0.2em;
+  margin: 0.2em 0.4em;
+  border-radius: 0.2em;
+}
+.och {
+  font-size: medium;
+  text-align: left;
+}
+.och.asc {
+  font-style: italic;
+  background-color: #eeffee;
+}
+.och.desc {
+  font-style: italic;
+  background-color: #ffeeee;
+}
+.subhead {
+  font-weight: bold;
+  color: #000000;
+  background-color: #eeeeee;
+}
+.subhead.c-selected {
+  font-weight: bold;
+  background-color: #ffffee;
+}
+.allhead.c-selected {
+  font-weight: bold;
+  color: #000000;
+  background-color: #eeeeee;
+}
+.subhead.c-assessed,
+.subhead.c-title,
+.subhead.c-cost {
+}
+.subhead.c-title,
+.subhead.c-cost {
+  color: #000000;
+  background-color: #eeeeee;
+}
+.subhead.c-title {
+  font-weight: normal;
+  font-style: italic;
+}
+tr.dd {
+  display: table-row;
+}
+tr.dd.hide {
+  display: none;
+}
+a.dc.cup {
+  display: inline;
+}
+a.dc.hide.cup {
+  display: none;
+}
+a.dc.cdown {
+  display: inline;
+}
+a.dc.hide.cdown {
+  display: none;
+}

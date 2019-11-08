@@ -1,0 +1,38 @@
+title:
+  perm:
+    read: auth
+reviewType:
+  label: Review type
+  type: typeContribution
+  perm:
+    read: auth
+    edit: nobody
+contrib:
+  label: Contribution
+  type: contrib
+  perm:
+    read: auth
+    edit: nobody
+assessment:
+  type: assessment
+  perm:
+    read: auth
+    edit: nobody
+remarks:
+  label: General remarks
+  type: markdown
+  multiple: true
+  perm:
+    read: edit
+    edit: edit
+decision:
+  type: decision
+  perm:
+    read: auth
+    edit: edit
+dateDecided:
+  label: Decided on
+  type: datetime
+  perm:
+    read: auth
+    edit: nobody

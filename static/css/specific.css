@@ -1,0 +1,130 @@
+#cfilter
+{
+	color: var(--edit-text-fore);
+	background-color: var(--edit-text-back);
+	outline: 0px inset var(--edit-text-border);
+	border: 0;
+	font-size: medium;
+	font-family: monospace;
+}
+#cfilter:focus,
+{
+	color: var(--edit-focus-text);
+	background-color: var(--edit-focus-back);
+	outline: 2px inset var(--edit-focus-border);
+	border: 0;
+}
+#cfilter:valid+span:after
+{
+  content: '';
+}
+#cfilter:invalid+span:after
+{
+  content: '';
+}
+details.assessment
+{
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+  font-size: large;
+}
+.record .criteriaentry,
+.record .criteriaentry .record-value
+{
+  color: var(--assessment-quoted-fore);
+  background-color: var(--assessment-quoted-back) ! important;
+}
+.criteria
+{
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+	margin-left: 1rem;
+  color: var(--assessment-quoted-fore);
+  background-color: var(--assessment-quoted-back) ! important;
+	border: 2px solid var(--assessment-quoted-border);
+	border-radius: 0.2rem;
+	padding: 0.2rem;
+}
+
+div.criteriahelp
+{
+	font-size: small;
+	margin-left: 1rem;
+	margin-right: 1rem;
+	margin-bottom: 1rem;
+  color: var(--assessment-quoted-fore);
+  background-color: var(--assessment-quoted-back) ! important;
+	border: 2px solid var(--assessment-quoted-border);
+	border-radius: 0.2rem;
+	padding: 0.2rem;
+}
+
+.assessment-head
+{
+  font-weight: bold;
+}
+
+.scoredesc
+{
+  font-style: italic;
+}
+
+.centrytitle
+{
+  display: inline-flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: calc(100% - 3rem);
+}
+.centrytitle .col1
+{
+  width: 50%;
+}
+.centrytitle .col2
+{
+  width: 30%;
+}
+
+div.reviewers
+{
+  margin-top: 0.5rem;
+  margin-left: 1rem;
+  width: calc(100% -2rem);
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: stretch;
+}
+.record .review,
+.record .review .record-value,
+.record .reviewentry,
+.record .reviewentry .record-value
+{
+  color: var(--review-quoted-fore);
+  background-color: var(--review-quoted-back) ! important;
+}
+div.reviews,
+div.reviewentries
+{
+  width: 50%;
+  margin: 0.3rem;
+  padding: 0.5rem;
+  background-color: var(--review-quoted-back);
+  border: 1pt solid var(--review-quoted-border);
+  border-radius: 0.2rem;
+}
+.record-details .head,
+.reviews .head,
+.reviewentries .head
+{
+  font-weight: bold;
+  font-size: small;
+  text-align: center;
+}
+.rentrytitle
+{
+  font-size: small;
+  color: var(--dim-fore);
+  background-color: var(--dim-back);
+}

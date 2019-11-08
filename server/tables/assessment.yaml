@@ -1,0 +1,52 @@
+title:
+  perm:
+    read: auth
+contrib:
+  label: Contribution
+  type: contrib
+  perm:
+    read: auth
+    edit: nobody
+assessmentType:
+  label: Assessment type
+  type: typeContribution
+  perm:
+    read: auth
+    edit: nobody
+remarks:
+  label: General remarks
+  type: markdown
+  multiple: true
+  perm:
+    read: auth
+submitted:
+  label: Submitted for review
+  type: bool2
+  perm:
+    read: auth
+    edit: office
+dateSubmitted:
+  label: Submitted on
+  type: datetime
+  perm:
+    read: auth
+    edit: nobody
+dateWithdrawn:
+  label: Withdrawn on
+  type: datetime
+  perm:
+    read: auth
+    edit: nobody
+reviewerE:
+  label: Reviewer (1)
+  type: user
+  extensible: email
+  perm:
+    edit: office
+reviewerF:
+  label: Reviewer (2)
+  type: user
+  extensible: email
+  perm:
+    read: auth
+    edit: office
