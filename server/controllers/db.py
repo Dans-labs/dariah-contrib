@@ -54,7 +54,23 @@ MOD_FMT = """{} on {}"""
 
 
 class Db:
+    """All access to the MongoDb will happen through this class
+
+    Some data access will be cached by Control, a higher level class.
+    """
+
     def __init__(self, mongo):
+        """Pick up the connection to MongoDb
+
+        The connection to the database exists before the one object of DB
+        is initialized and will be passed as `mongo` to it.
+
+        creatorId
+        --------
+        This is a userId, fixed by configuration, that represents the system.
+        It is only used when user records are created: those records will said
+        to be created by the system.
+        """
         self.mongo = mongo
 
         self.collect()
@@ -66,6 +82,14 @@ class Db:
         ][0]
 
     def mongoCmd(self, label, table, command, *args):
+        """Wrapper around calls to MongoDb
+
+        All commands fired at the NongoDb go through this wrapper.
+        It will spit out debug information if DEBUG is True.
+
+        There is also a check that only recognized methods are being fired
+        at Mongo.
+        """
         mongo = self.mongo
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
@@ -78,6 +102,21 @@ class Db:
         return None
 
     def collect(self, table=None):
+        """Collect the contents of the value tables
+
+        Value tables have content that is needed almost all the time.
+        All value tables will be completely cached within Db.
+
+        A collect() without arguments collects *all* value tables.
+        By passing a table name, you can collect a single table.
+
+        This will be done in the rare cases when a value table gets modified by
+        an office user.
+
+        This is a complicated app.
+        Some tables have records that specify whether other records are "actual".
+        After collecting a value table, the "actual" items will be recomputed.
+        """
         if table is not None and table not in VALUE_TABLES:
             return
 

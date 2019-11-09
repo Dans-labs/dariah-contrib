@@ -16,6 +16,7 @@ sessions/*
 uploads/*
 errors/*
 cache/*
+site/*
 .cache/*
 _temp
 _temp/*

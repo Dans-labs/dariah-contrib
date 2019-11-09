@@ -7,7 +7,7 @@ function codestats {
     xd=".git,images,fonts,favicons"
     xf="cloc_exclude.lst"
     rf="docs/About/Stats.md"
-    cloc --no-autogen --exclude_dir=$xd --exclude-list-file=$xf --report-file=$rf --md .
+    cloc --counted ~/Downloads/dariah-contrib.lst --no-autogen --exclude_dir=$xd --exclude-list-file=$xf --report-file=$rf --md .
     cat $rf
 }
 
