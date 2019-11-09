@@ -205,18 +205,12 @@ listActions:
 
 names:
   - action
-  - actual
   - addClass
   - body
-  - dismiss
-  - from
-  - html
   - icon
-  - list
   - method
   - option
   - overview
-  - select
-  - status
   - symbol
   - wrapHelp
+  - you

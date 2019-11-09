@@ -11,6 +11,11 @@ def dbaccess():
     MONGO = clientm.dariah
 
 
+def serverprint(msg):
+    sys.stdout.write(f"""{msg}\n""")
+    sys.stdout.flush()
+
+
 def getBlanks():
     """Retrieve blank documents
 
@@ -23,7 +28,7 @@ def getBlanks():
     }
     documents = list(MONGO[DOCTYPE].find(blankFilter))
 
-    print(f"{len(documents)} blank documents")
+    serverprint(f"{len(documents)} blank documents")
 
     checkedDocuments = []
     for document in documents:
@@ -48,25 +53,25 @@ def getBlanks():
     blankDocuments = []
 
     for (i, document) in enumerate(sortedDocuments):
-        print(f"""Blank doc {i + 1} = {document['_id']} by {document["modifiedBy"]}""")
+        serverprint(f"""Blank doc {i + 1} = {document['_id']} by {document["modifiedBy"]}""")
         if "nonempty" in document:
-            print(f"""\tnon empty: {str(document["nonempty"])}""")
+            serverprint(f"""\tnon empty: {str(document["nonempty"])}""")
         else:
             blankDocuments.append(document["_id"])
-    print(f"{len(blankDocuments)} truly blank documents")
+    serverprint(f"{len(blankDocuments)} truly blank documents")
 
     return blankDocuments
 
 
 def delDocs(docIds):
-    print(f"{len(docIds)} documents to remove")
+    serverprint(f"{len(docIds)} documents to remove")
     i = 0
     for docId in docIds:
         sys.stderr.write(f"Deleting {docId} ...")
         MONGO[DOCTYPE].delete_one({"_id": docId})
         sys.stderr.write("done\n")
         i += 1
-    print(f"{i} documents removed")
+    serverprint(f"{i} documents removed")
 
 
 dbaccess()

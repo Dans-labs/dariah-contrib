@@ -14,14 +14,18 @@ roles:
   - root
 
 names:
-  - group
+  - authority
+  - eppn
   - groupRep
+  - Guest
   - isCoordinated
   - isEdit
   - isOwn
-  - mayAdd
+  - isOur
+  - local
   - mayLogin
   - mayEdit
   - mayRead
   - readonly
   - sameCountry
+  - uid

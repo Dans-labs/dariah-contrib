@@ -14,9 +14,6 @@ PAGEX = f"{PAGE}.tsv"
 
 COL_PLURAL = dict(country="countries",)
 
-OVERVIEW_FIELDS = CT.overviewFields
-OVERVIEW_FIELDS_WF = CT.overviewFieldsWorkflow
-
 COLSPECS = (
     ("country", str),
     ("vcc", str, "VCC"),
@@ -120,9 +117,7 @@ class Overview:
         typeType = self.typeType
 
         contribs = {}
-        for record in db.bulkContribWorkflow(
-            chosenCountryId, OVERVIEW_FIELDS, OVERVIEW_FIELDS_WF
-        ):
+        for record in db.bulkContribWorkflow(chosenCountryId):
             contribId = G(record, N._id)
 
             selected = G(record, N.selected)

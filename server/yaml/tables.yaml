@@ -161,24 +161,21 @@ overviewFieldsWorkflow:
   rStage: assessment.reviews.final.stage
 
 names:
-  - _id
-  - active
-  - authority
   - bool
   - constrained
   - eid
-  - fields
   - isUserTable
   - isUserEntryTable
   - itemLabels
   - legacy
+  - master
   - mkTable
+  - name
+  - now
   - orig
-  - orphaned
   - pattern
+  - record
   - reference
+  - related
   - sorted
-  - Table
-  - table
   - tableObj
-  - uid

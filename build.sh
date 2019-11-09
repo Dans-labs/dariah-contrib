@@ -16,7 +16,7 @@ function setvars {
     export REGIME=devel
     export FLASK_APP=index:factory
     export FLASK_RUN_PORT=8001
-    if [[ "$2" != "prod" ]]; then
+    if [[ "$1" != "prod" ]]; then
         export FLASK_ENV=development
     fi
 }
@@ -25,7 +25,7 @@ if [[ "$1" == "mongo" ]]; then
     mongod -f /usr/local/etc/mongod.conf
 elif [[ "$1" == "serve" ]]; then
 	cd server
-    setvars; python3 -m flask run
+    setvars "$2"; python3 -m flask run
 elif [[ "$1" == "stats" ]]; then
     codestats
 elif [[ "$1" == "docs" ]]; then

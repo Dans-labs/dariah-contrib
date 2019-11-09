@@ -1,5 +1,6 @@
 import os
 import yaml
+import re
 
 from controllers.utils import pick as G, serverprint, cap1, E, LOW, HYPHEN
 
@@ -8,6 +9,7 @@ CONFIG_DIR = "yaml"
 TABLE_DIR = "tables"
 
 ALL = "all"
+NAMES = "names"
 
 
 class Config:
@@ -51,25 +53,38 @@ class Names:
         return val.replace(LOW, E).replace(HYPHEN, E).isalnum()
 
     @staticmethod
-    def getNames(val, doString=True):
+    def getNames(source, val, doString=True, inner=False):
+        names = set()
+        pureNames = set()
+
         if type(val) is str:
-            return {val} if doString and Names.isName(val) else set()
+            names = {val} if doString and Names.isName(val) else set()
         elif type(val) is list:
-            names = set()
             for v in val:
                 if type(v) is str and Names.isName(v):
                     names.add(v)
                 elif type(v) is dict:
-                    names |= Names.getNames(v, doString=False)
-            return names
+                    names |= Names.getNames(source, v, doString=False, inner=True)
         elif type(val) is dict:
-            names = set()
             for (k, v) in val.items():
-                if type(k) is str and Names.isName(k):
-                    names.add(k)
-                names |= Names.getNames(v, doString=False)
-            return names
-        return set()
+                if inner or k != NAMES:
+                    if type(k) is str and Names.isName(k):
+                        names.add(k)
+                    names |= Names.getNames(source, v, doString=False, inner=True)
+                else:
+                    for val in v:
+                        if type(val) is not str:
+                            serverprint(
+                                f"NAMES in {source}: "
+                                f"WARNING: wrong type {type(val)} for {val}"
+                            )
+                        else:
+                            pureNames.add(val)
+        return names if inner else (pureNames, names)
+
+    @classmethod
+    def getPureNames(settings):
+        return set(G(settings, NAMES, default=[]))
 
     @classmethod
     def setName(cls, name):
@@ -78,9 +93,11 @@ class Names:
             setattr(cls, nameRep, name)
 
     @classmethod
-    def addNames(cls, settings):
-        for name in cls.getNames(settings):
+    def addNames(cls, source, settings):
+        (pureNames, names) = cls.getNames(source, settings)
+        for name in pureNames | names:
             N.setName(name)
+        return (pureNames, names)
 
     @classmethod
     def showNames(cls):
@@ -92,8 +109,9 @@ class Names:
 N = Names
 C = Config
 
-NAMES = "names"
 
+allPureNames = set()
+allNames = set()
 
 with os.scandir(CONFIG_DIR) as sd:
     files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
@@ -110,7 +128,36 @@ for configFile in files:
         if subsection != NAMES:
             setattr(classObj, subsection, subsettings)
 
-    N.addNames(settings)
+    (pureNames, names) = N.addNames(configFile, settings)
+    allPureNames |= pureNames
+    allNames |= names
+
+spuriousNames = allPureNames & allNames
+if spuriousNames:
+    serverprint(f"NAMES: {len(spuriousNames)} spurious names")
+    serverprint(", ".join(sorted(spuriousNames)))
+else:
+    serverprint(f"NAMES: No spurious names")
+
+NAME_RE = re.compile(r"""\bN\.[A-Za-z0-9_]+""")
+
+usedNames = set()
+
+for (top, subdirs, files) in os.walk("."):
+    for f in files:
+        if not f.endswith(".py"):
+            continue
+        path = f"{top}/{f}"
+        with open(path) as pf:
+            text = pf.read()
+            usedNames |= {name[2:] for name in set(NAME_RE.findall(text))}
+
+unusedNames = allPureNames - usedNames
+if unusedNames:
+    serverprint(f"NAMES: {len(unusedNames)} unused names")
+    serverprint(", ".join(sorted(unusedNames)))
+else:
+    serverprint(f"NAMES: No unused names")
 
 
 CT = C.tables
@@ -166,7 +213,7 @@ for table in tables:
     setattr(Tables, table, specs)
     tables.add(table)
 
-    N.addNames(specs)
+    N.addNames(table, specs)
 
 constrainedPre = {}
 for table in VALUE_TABLES:

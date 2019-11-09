@@ -48,6 +48,9 @@ CASCADE_SPECS = CT.cascade
 WORKFLOW_FIELDS = CF.fields
 FIELD_PROJ = {field: True for field in WORKFLOW_FIELDS}
 
+OVERVIEW_FIELDS = CT.overviewFields
+OVERVIEW_FIELDS_WF = CT.overviewFieldsWorkflow
+
 OPTIONS = CW.options
 
 MOD_FMT = """{} on {}"""
@@ -56,12 +59,17 @@ MOD_FMT = """{} on {}"""
 class Db:
     """All access to the MongoDb will happen through this class
 
-    Some data access will be cached by Control, a higher level class.
+    It will read all content of all value tables and keep it cached.
+
+    The data in the user tables will be cached will be cached by Control, a
+    higher level class.
     """
 
     def __init__(self, mongo):
         """Pick up the connection to MongoDb
 
+        mongo
+        --------
         The connection to the database exists before the one object of DB
         is initialized and will be passed as `mongo` to it.
 
@@ -87,8 +95,25 @@ class Db:
         All commands fired at the NongoDb go through this wrapper.
         It will spit out debug information if DEBUG is True.
 
-        There is also a check that only recognized methods are being fired
-        at Mongo.
+        label
+        --------
+        A string that will be mentioned in debug messages.
+        Very convenient to put here the name of the method that calls mongoCmd.
+
+        table
+        --------
+        The table in MongoDB that is targeted by the command.
+        If the table does not exists, no command will be fired.
+
+        command
+        --------
+        The Mongo command to execute.
+        The command must be listed in the mongo.yaml config file.
+
+        *args
+        --------
+        Additional arguments will be passed straight to the Mongo command.
+
         """
         mongo = self.mongo
 
@@ -107,12 +132,16 @@ class Db:
         Value tables have content that is needed almost all the time.
         All value tables will be completely cached within Db.
 
-        A collect() without arguments collects *all* value tables.
-        By passing a table name, you can collect a single table.
-
         This will be done in the rare cases when a value table gets modified by
         an office user.
 
+        table=None
+        --------
+        A collect() without arguments collects *all* value tables.
+        By passing a table name, you can collect a single table.
+
+        NB:
+        --------
         This is a complicated app.
         Some tables have records that specify whether other records are "actual".
         After collecting a value table, the "actual" items will be recomputed.
@@ -143,9 +172,21 @@ class Db:
                 )
             serverprint(f"""COLLECTED {valueTable}""")
 
-        self.collectActualItems(table=None)
+        self.collectActualItems(table=table)
 
     def collectActualItems(self, table=None):
+        """Determines which items are "actual".
+
+        Actual items are those types and criteria that are specified in a
+        package record that is itself actual.
+        A package record is actual if the current data is between its start
+        and end days.
+
+        table=None
+        --------
+        If a single value table needs to be collected, and that table is not
+        involved in the concept of "actual", nothing has to be done.
+        """
         if table is not None and table not in ACTUAL_TABLES:
             return
 
@@ -188,13 +229,26 @@ class Db:
 
         serverprint(f"""UPDATED {", ".join(ACTUAL_TABLES)}""")
 
-    def bulkContribWorkflow(self, country, fields, fieldsWf):
-        crit = {} if country is None else {"country": country}
-        project = {field: f"${fieldTrans}" for (field, fieldTrans) in fields.items()}
+    def bulkContribWorkflow(self, countryId):
+        """Collects workflow information in bulk.
+
+        When overviews are being produced, workflow info is needed for a lot
+        of records. We do not fetch them one by one, but all in one.
+
+        countryId
+        --------
+        If none, all workflow items will be fetched. Otherwise, this should be
+        the id of a countryId, and only the workflow
+        for items belonging to this country are fetched.
+        """
+        crit = {} if countryId is None else {"country": countryId}
+        project = {
+            field: f"${fieldTrans}" for (field, fieldTrans) in OVERVIEW_FIELDS.items()
+        }
         project.update(
             {
                 field: {M_ELEM: [f"${N.workflow}.{fieldTrans}", 0]}
-                for (field, fieldTrans) in fieldsWf.items()
+                for (field, fieldTrans) in OVERVIEW_FIELDS_WF.items()
             }
         )
         records = self.mongoCmd(
@@ -216,7 +270,34 @@ class Db:
         )
         return records
 
-    def makeCrit(self, mainTable, conditions):
+    def _makeCrit(self, mainTable, conditions):
+        """Translate conditons into a MongoDb criterium
+
+        The conditions come from the options on the interface:
+        whether to constrain to items that have assessments and or reviews.
+
+        mainTable
+        --------
+        The name of the table that is being filtered.
+
+        conditions
+        --------
+        a dictionary keyed by a table name (such as assessment or review)
+        and valued by -1, 0 or 1 (as strings).
+
+        Example: {'assessment': '1'} means: only those things that have an assessment.
+        '-1': means: not having an assessment.
+        '0': means: don't care.
+
+        Result
+        --------
+        A dictionary, keyed by the same table name and valued by a set of mongo ids
+        of items that satisfy the criterion.
+        Only for the criteria that do care!
+
+        The result can be fed into an other Mongo query.
+        It can also be used to filter a list of record that has already been fetched.
+        """
         activeOptions = {
             G(G(OPTIONS, cond), N.table): crit == ONE
             for (cond, crit) in conditions.items()
@@ -257,6 +338,48 @@ class Db:
         unfinished=False,
         **conditions,
     ):
+        """Fetch a list of records from a table.
+
+        It fetches all records of a table, but you can constrain
+        what is fetched and what is returned in several ways, as specified
+        by the optional arguments.
+
+        Some constraints need to fetch more from Mongo than will be returned:
+        post-filtering may be needed.
+
+        table
+        --------
+
+        titleSort
+        --------
+
+        my=None
+        --------
+
+        our=None
+        --------
+
+        assign=False
+        --------
+
+        assessor=None
+        --------
+
+        reviewer=None
+        --------
+
+        select=False
+        --------
+
+        selectable=None
+        --------
+
+        unfinished=False
+        --------
+
+        **condiitons
+        --------
+        """
         crit = {}
         if my:
             crit.update({M_OR: [{N.creator: my}, {N.editors: my}]})
@@ -289,7 +412,7 @@ class Db:
         else:
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
-            criterium = self.makeCrit(table, conditions)
+            criterium = self._makeCrit(table, conditions)
             records = (record for record in records if satisfies(record, criterium))
         return sorted(records, key=titleSort)
 

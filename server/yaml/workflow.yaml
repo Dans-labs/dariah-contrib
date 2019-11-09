@@ -250,8 +250,9 @@ info:
 decisionDelay: 3600
 
 names:
+  - actual
   - commandFields
   - expert
   - final
-  - now
+  - orphaned
   - wfitem
