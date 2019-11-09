@@ -218,10 +218,12 @@ for table in tables:
 constrainedPre = {}
 for table in VALUE_TABLES:
     fieldSpecs = getattr(Tables, table, {})
-    for (field, fieldSpecs) in fieldSpecs.items():
-        tp = G(fieldSpecs, N.type)
+    for (field, fieldSpec) in fieldSpecs.items():
+        tp = G(fieldSpec, N.type)
         if tp in VALUE_TABLES and tp == field:
             constrainedPre[table] = field
+
+print('PRE', constrainedPre)
 
 constrained = {}
 for table in tables:
@@ -232,6 +234,8 @@ for table in tables:
             ctp = G(fieldSpecs[ctable], N.type)
             if ctp == ctable:
                 constrained[ctable] = mfield
+
+print('POST', constrained)
 
 setattr(Tables, ALL, tables)
 setattr(Tables, N.sorted, sortedTables)

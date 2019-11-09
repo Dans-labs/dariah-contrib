@@ -57,7 +57,7 @@ MOD_FMT = """{} on {}"""
 
 
 class Db:
-    """All access to the MongoDb will happen through this class
+    """All access to the MongoDb will happen through this class.
 
     It will read all content of all value tables and keep it cached.
 
@@ -66,7 +66,7 @@ class Db:
     """
 
     def __init__(self, mongo):
-        """Pick up the connection to MongoDb
+        """Pick up the connection to MongoDb.
 
         mongo
         --------
@@ -90,7 +90,7 @@ class Db:
         ][0]
 
     def mongoCmd(self, label, table, command, *args):
-        """Wrapper around calls to MongoDb
+        """Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
         It will spit out debug information if DEBUG is True.
@@ -127,7 +127,7 @@ class Db:
         return None
 
     def collect(self, table=None):
-        """Collect the contents of the value tables
+        """Collect the contents of the value tables.
 
         Value tables have content that is needed almost all the time.
         All value tables will be completely cached within Db.
@@ -271,7 +271,7 @@ class Db:
         return records
 
     def _makeCrit(self, mainTable, conditions):
-        """Translate conditons into a MongoDb criterium
+        """Translate conditons into a MongoDb criterion.
 
         The conditions come from the options on the interface:
         whether to constrain to items that have assessments and or reviews.
@@ -331,11 +331,10 @@ class Db:
         my=None,
         our=None,
         assign=False,
-        assessor=None,
         reviewer=None,
-        select=False,
         selectable=None,
         unfinished=False,
+        select=False,
         **conditions,
     ):
         """Fetch a list of records from a table.
@@ -349,44 +348,82 @@ class Db:
 
         table
         --------
+        The table from which the record are fetched.
 
         titleSort
         --------
+        The sortkey by which the resulting list of records will be sorted.
+        It must be a function that takes a record and returns a key, for example
+        the title string of that record.
 
         my=None
         --------
+        Task: produce a list of "my" records.
+
+        If passed, it should be the id of a user (typically the one that is logged in).
+        Only records that are created/edited by this user will pass through.
+        NB: all records have a field `editors` which contains the ids of users
+        that are allowed to edit it besides the creator.
 
         our=None
         --------
+        Task: produce a list of "our" records (coming from my country).
 
-        assign=False
-        --------
-
-        assessor=None
-        --------
-
-        reviewer=None
-        --------
-
-        select=False
-        --------
-
-        selectable=None
-        --------
+        If passed, it should be the id of a user (typically the one that is logged in).
+        Only records that have a counntry field containing this country id pass
+        through.
 
         unfinished=False
         --------
+        Task: produce a list of "my" assessments that are unfinished.
 
-        **condiitons
+        assign=False
         --------
+        Task: produce a list of assessments that need reviewers.
+
+        Only meaningful if the table is `assessment`.
+        If true, only records that are submitted and who lack at least one
+        reviewer pass through.
+        NB: assessment records have fields `reviewerE` and `reviewerF` that
+        point to the expert reviewer and the final reviewer.
+
+        reviewer=None
+        --------
+        Task: produce a list of assessments that "I" am reviewing.
+
+        Only meaningful if the table is `assessment`.
+        If passed, it should be the id of a user (typically the one that is logged in).
+        Only records pass that have this user in either their `reviewerE` or in their
+        `reviewerF` field.
+
+        selectable=None
+        --------
+        Task: produce a list of contribs that "I" can select as a DARIAH contribution.
+
+        Only meaningful if the table is `contribution`.
+        Pick those contribs whose `selected` field is not yet filled in.
+        The value of `selectable` should be an id of a country.
+        Typically, this is the country of the currently logged in user,
+        andd typically, that user is a National Coordinator.
+
+        select=False, **conditions
+        --------
+        Task: produce a list of records filtered by additional conditions.
+
+        If true, carry out filtering on the retrieved records, where **conditions
+        specify the filtering (through _makeCrit() and satisfy()).
+
+        NB: this capacity is currently not used.
+
+        Returns:
+        --------
+        A sorted list.
         """
         crit = {}
         if my:
             crit.update({M_OR: [{N.creator: my}, {N.editors: my}]})
         if our:
             crit.update({N.country: our})
-        if assessor:
-            crit.update({M_OR: [{N.creator: my}, {N.editors: my}]})
         if assign:
             crit.update(
                 {N.submitted: True, M_OR: [{N.reviewerE: None}, {N.reviewerF: None}]}
@@ -417,6 +454,20 @@ class Db:
         return sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
+        """Fetch a single record from a table.
+
+        table
+        --------
+        The table from which the record is fetched.
+
+        eid
+        --------
+        (Entity) ID of the particular record.
+
+        Returns:
+        --------
+        The record as a dict.
+        """
         if not eid:
             return {}
 
@@ -430,6 +481,20 @@ class Db:
         return record
 
     def getDetails(self, table, masterField, eids, sortKey=None):
+        """Fetch the detail records connected to one or more master records.
+
+        table
+        --------
+        The table from which to fetch the detail records.
+
+        masterField
+        --------
+        The field in the detail records that points to the master record.
+
+        eids
+        --------
+        The ids of the master records. Either a single id, or an iterable of ids.
+        """
         if table in VALUE_TABLES:
             crit = eids if isIterable(eids) else [eids]
             details = [
@@ -443,21 +508,84 @@ class Db:
 
         return sorted(details, key=sortKey) if sortKey else details
 
-    def getValueRecords(
-        self, relTable, constrain=None,
-    ):
-        records = getattr(self, relTable, {}).values()
+    def getValueRecords(self, valueTable, constrain=None):
+        """Fetch records from a value table.
+
+        It will apply some standard and custom constraints.
+
+        The standard constraints are: if the valueTable is
+        * country: only the DARIAH member countries will be delivered
+        * user: only the non-legacy users will be returned.
+
+        valueTable
+        --------
+        The table from which fetch the records.
+
+        constrain
+        --------
+        A custom constraint. If present, it should be a tuple (fieldName, value).
+        Only records with that value in that field will be delivered.
+
+        Explanation
+        --------
+        See the tables config has a key, `constrained`, which is generated by
+        config.py from the field specs of the value tables.
+        This collects the cases where the valid choices for a value are not all
+        available values in the table, but only those that are linked to a certain
+        master record.
+
+        Example:
+        --------
+        If you want to pick a score for an assessment criterion, only those scores
+        that are linked to that criterion record are eligible.
+
+        Returns:
+        --------
+        A list of records.
+        """
+
+        records = getattr(self, valueTable, {}).values()
         return list(
             (r for r in records if G(r, N.isMember) or False)
-            if relTable == N.country
+            if valueTable == N.country
             else (r for r in records if G(r, N.authority) != N.legacy)
-            if relTable == N.user
+            if valueTable == N.user
             else (r for r in records if G(r, constrain[0]) == constrain[1])
             if constrain
             else records
         )
 
     def insertItem(self, table, uid, eppn, **fields):
+        """Inserts a new record in a table.
+
+        The record will be filled with the specified fields, but also with
+        provenance fields.
+
+        The provenance fields are the creation date, the creator,
+        and the start of the trail of modifiers.
+
+        table
+        --------
+        The table in which the record will be inserted.
+
+        uid
+        --------
+        The id of the user that creates the record, typically the logged in user.
+
+        eppn
+        --------
+        The eppn of that same user. This is the unique identifier that comes from
+        the DARIAH authentication service.
+
+        **fields
+        --------
+        The field names and their contents to populate the new record with.
+
+        Returns:
+        --------
+        The id of the newly inserted record.
+        """
+
         justNow = now()
         newRecord = {
             N.dateCreated: justNow,

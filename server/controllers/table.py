@@ -124,7 +124,7 @@ class Table:
             if action == N.my
             else dict(our=countryId)
             if action == N.our
-            else dict(assessor=uid)
+            else dict(my=uid)
             if action == N.assess
             else dict(assign=True)
             if action == N.assign
