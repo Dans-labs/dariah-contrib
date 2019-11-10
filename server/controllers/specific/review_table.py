@@ -43,7 +43,7 @@ class ReviewT(Table):
             N.reviewType: contribType,
             N.title: f"review of {assessmentTitle}",
         }
-        reviewId = db.insertItem(table, uid, eppn, **fields)
+        reviewId = db.insertItem(table, uid, eppn, False, **fields)
 
         criteriaEntries = db.getDetails(
             N.criteriaEntry,

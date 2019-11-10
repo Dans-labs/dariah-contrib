@@ -86,7 +86,7 @@ class Table:
         eppn = self.eppn
         table = self.table
 
-        result = db.insertItem(table, uid, eppn)
+        result = db.insertItem(table, uid, eppn, False)
         if table == MAIN_TABLE:
             self.adjustWorkflow(result)
 

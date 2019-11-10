@@ -159,6 +159,9 @@ if unusedNames:
 else:
     serverprint(f"NAMES: No unused names")
 
+serverprint(f"NAMES: {len(allPureNames | allNames):>4} defined in yaml files")
+serverprint(f"NAMES: {len(usedNames):>4} used in python code")
+
 
 CT = C.tables
 

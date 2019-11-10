@@ -480,9 +480,9 @@ class Value(Related):
         if type(editVal) is list:
             if extensible and editVal:
                 table = self.name
-                extensionField = N.rep if extensible is True else extensible
-                extension = {extensionField: editVal[0]}
-                return db.insertIfNew(table, uid, eppn, extension)
+                fieldName = N.rep if extensible is True else extensible
+                field = {fieldName: editVal[0]}
+                return db.insertIfNew(table, uid, eppn, True, **field)
             else:
                 return None
 

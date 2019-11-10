@@ -42,7 +42,35 @@ Qg = H.icon(CW.unknown[N.group], asChar=True)
 
 
 class Auth:
+    """Deal with user Authentication.
+
+    Facilitates the login/logout process of users.
+    Maintains the attributes that the DARIAH Identity Provider supplies about users.
+
+    Checks whether a user is logged in, annswers the question what authority users
+    have.
+    """
+
     def __init__(self, app, db):
+        """Make sure we know the web app and the database.
+
+        We also detect whether we ru in production or in development,
+        because in production we use the DARIAH Identity provider,
+        while in development we use a simple, console-based way of
+        logging a few test users in.
+
+        app
+        --------
+        The web app, as constructed by the Flask framework.
+        This app has the secret key for sessions, and that is the only thing
+        we need from the app.
+
+        db
+        --------
+        The Db object, which gives us methods to retrieve user info from the database
+        and store user info there.
+        """
+
         self.db = db
         environ = os.environ
         permissionGroupInv = db.permissionGroupInv

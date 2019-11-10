@@ -213,7 +213,7 @@ class Record:
         eid = self.eid
 
         for dtable in G(CASCADE_SPECS, table, default=[]):
-            db.delMany(dtable, {table: eid})
+            db.deleteMany(dtable, {table: eid})
         dependencies = self.getDependencies()
         nRef = G(dependencies, N.reference, default=0)
         return nRef == 0

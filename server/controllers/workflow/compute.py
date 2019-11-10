@@ -95,7 +95,7 @@ class Workflow:
         db = self.db
 
         serverprint(f"WORKFLOW: Delete workflow info {contribId}")
-        db.delWorkflow(contribId)
+        db.deleteWorkflow(contribId)
 
     def getFullItem(self, contribId):
         db = self.db

@@ -38,7 +38,7 @@ class AssessmentT(Table):
             N.assessmentType: contribType,
             N.title: f"assessment of {contribTitle}",
         }
-        assessmentId = db.insertItem(table, uid, eppn, **fields)
+        assessmentId = db.insertItem(table, uid, eppn, False, **fields)
 
         criteria = G(typeCriteria, contribType, default=[])
         records = [

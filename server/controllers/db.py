@@ -73,12 +73,12 @@ class Db:
         The connection to the database exists before the one object of DB
         is initialized and will be passed as `mongo` to it.
 
-        creatorId
-        --------
-        This is a userId, fixed by configuration, that represents the system.
+        There is a userId, fixed by configuration, that represents the system.
         It is only used when user records are created: those records will said
         to be created by the system.
+        The id is stored in the attribute `creatorId`.
         """
+
         self.mongo = mongo
 
         self.collect()
@@ -235,6 +235,11 @@ class Db:
         When overviews are being produced, workflow info is needed for a lot
         of records. We do not fetch them one by one, but all in one.
 
+        We use the MongoDB aggregation pipeline to collect the
+        contrib ids from the contrib table and to lookup the workflow
+        information from the workflow table, and to flatten the nested documents
+        to simple key-value pair.
+
         countryId
         --------
         If none, all workflow items will be fetched. Otherwise, this should be
@@ -306,7 +311,7 @@ class Db:
         if None in activeOptions:
             del activeOptions[None]
 
-        criterium = {}
+        criterion = {}
         for (table, crit) in activeOptions.items():
             eids = {
                 G(record, mainTable)
@@ -318,11 +323,11 @@ class Db:
                     {mainTable: True},
                 )
             }
-            if crit in criterium:
-                criterium[crit] |= eids
+            if crit in criterion:
+                criterion[crit] |= eids
             else:
-                criterium[crit] = eids
-        return criterium
+                criterion[crit] = eids
+        return criterion
 
     def getList(
         self,
@@ -411,7 +416,7 @@ class Db:
         Task: produce a list of records filtered by additional conditions.
 
         If true, carry out filtering on the retrieved records, where **conditions
-        specify the filtering (through _makeCrit() and satisfy()).
+        specify the filtering (through _makeCrit() and satisfies()).
 
         NB: this capacity is currently not used.
 
@@ -449,8 +454,8 @@ class Db:
         else:
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
-            criterium = self._makeCrit(table, conditions)
-            records = (record for record in records if satisfies(record, criterium))
+            criterion = self._makeCrit(table, conditions)
+            records = (record for record in records if satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
@@ -494,6 +499,10 @@ class Db:
         eids
         --------
         The ids of the master records. Either a single id, or an iterable of ids.
+
+        sortKey=None
+        --------
+        A function to sort the resulting records.
         """
         if table in VALUE_TABLES:
             crit = eids if isIterable(eids) else [eids]
@@ -521,7 +530,7 @@ class Db:
         --------
         The table from which fetch the records.
 
-        constrain
+        constrain=None
         --------
         A custom constraint. If present, it should be a tuple (fieldName, value).
         Only records with that value in that field will be delivered.
@@ -555,8 +564,8 @@ class Db:
             else records
         )
 
-    def insertItem(self, table, uid, eppn, **fields):
-        """Inserts a new record in a table.
+    def insertItem(self, table, uid, eppn, onlyIfNew, **fields):
+        """Inserts a new record in a table, possibly only if it is new.
 
         The record will be filled with the specified fields, but also with
         provenance fields.
@@ -572,6 +581,11 @@ class Db:
         --------
         The id of the user that creates the record, typically the logged in user.
 
+        onlyIfNew
+        --------
+        If true, it will be checked whether a record with the specified fields
+        already exists. If so, no record will be inserted.
+
         eppn
         --------
         The eppn of that same user. This is the unique identifier that comes from
@@ -583,8 +597,18 @@ class Db:
 
         Returns:
         --------
-        The id of the newly inserted record.
+        The id of the newly inserted record, or the id of the first existing
+        record found, if `onlyIfNew` is true.
         """
+
+        if onlyIfNew:
+            existing = [
+                G(rec, N._id)
+                for rec in getattr(self, table, {}).values()
+                if all(G(rec, k) == v for (k, v) in fields.items())
+            ]
+            if existing:
+                return existing[0]
 
         justNow = now()
         newRecord = {
@@ -598,28 +622,30 @@ class Db:
             self.collect(table=table)
         return result.inserted_id
 
-    def insertIfNew(self, table, uid, eppn, extension):
-        existing = [
-            G(rec, N._id)
-            for rec in getattr(self, table, {}).values()
-            if all(G(rec, k) == v for (k, v) in extension.items())
-        ]
-        if existing:
-            return existing[0]
-
-        justNow = now()
-        newRecord = {
-            N.dateCreated: justNow,
-            N.creator: uid,
-            N.modified: [MOD_FMT.format(eppn, justNow)],
-            **extension,
-        }
-        result = self.mongoCmd(N.insertItem, table, N.insert_one, newRecord)
-        if table in VALUE_TABLES:
-            self.collect(table=table)
-        return result.inserted_id
-
     def insertMany(self, table, uid, eppn, records):
+        """Insert several records at once.
+
+        Typically used for inserting criteriaEntry en reviewEntry records.
+
+        table
+        --------
+        The table in which the record will be inserted.
+
+        uid
+        --------
+        The id of the user that creates the record, typically the logged in user.
+
+        eppn
+        --------
+        The eppn of that same user. This is the unique identifier that comes from
+        the DARIAH authentication service.
+
+        records
+        --------
+        The records (as dicts) to insert.
+
+        """
+
         justNow = now()
         newRecords = [
             {
@@ -633,6 +659,16 @@ class Db:
         self.mongoCmd(N.insertMany, table, N.insert_many, newRecords)
 
     def insertUser(self, record):
+        """Insert a user record, i.e. a record corresponding to a user.
+
+        NB: the creator of this record is the system, by name of the
+        `creatorId` attribute.
+
+        record
+        --------
+        The user information to be stored, as a dictionary.
+        """
+
         creatorId = self.creatorId
 
         justNow = now()
@@ -651,16 +687,80 @@ class Db:
         return result.inserted_id
 
     def delItem(self, table, eid):
+        """Delete a record.
+
+        table
+        --------
+        The table which holds the record to be deleted.
+
+        eid
+        --------
+        (Entity) id of the record to be deleted.
+        """
+
         self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
 
-    def delMany(self, table, crit):
-        self.mongoCmd(N.delMany, table, N.delete_many, crit)
+    def deleteMany(self, table, crit):
+        """Delete a several records.
+
+        Typically used to delete all detail records of another record.
+
+        table
+        --------
+        The table which holds the records to be deleted.
+
+        crit
+        --------
+        A criterion that specfifies which records must be deleted.
+        Given as a dict.
+        """
+
+        self.mongoCmd(N.deleteMany, table, N.delete_many, crit)
 
     def updateField(
         self, table, eid, field, data, actor, modified, nowFields=[],
     ):
+        """Update a single field in a single record.
+
+        table
+        --------
+        The table which holds the record to be updated.
+
+        eid
+        --------
+        (Entity) id of the record to be updated.
+
+        data
+        --------
+        The new value of for the updated field.
+
+        actor
+        --------
+        The user that has triggered the update action.
+
+        modified
+        --------
+        The current provenance trail of the record, which is a list of
+        strings of the form "person on date".
+        Here "person" is not an ID but a consolidated string representing
+        the name of that person.
+        The provenance trail will be trimmed in order to prevent excessively long
+        trails. On each day, only the last action by each person will be recorded.
+
+        nowFields=[]
+        --------
+        The names of additional fields in which the current datetime will be stored.
+        For exampe, if `submitted` is modified, the current datetime will be saved in
+        `dateSubmitted`.
+
+        NB: whenever a field is updated in a record which has the field `isPristine`,
+        this field will be deleted from the record.
+        The rule is that pristine records are the ones that originate from the
+        legacy data and have not changed since then.
+        """
+
         justNow = now()
         newModified = filterModified((modified or []) + [f"""{actor}{ON}{justNow}"""])
         criterion = {N._id: ObjectId(eid)}
@@ -685,6 +785,16 @@ class Db:
         )
 
     def updateUser(self, record):
+        """Updates user information.
+
+        When users log in, or when they are assigned an other status,
+        some of their attributes will change.
+
+        record
+        --------
+        The new user information as a dict.
+        """
+
         if N.isPristine in record:
             del record[N.isPristine]
         criterion = {N._id: G(record, N._id)}
@@ -694,6 +804,29 @@ class Db:
         self.collect(table=N.user)
 
     def dependencies(self, table, record):
+        """Computes the number of depenedent records of a record.
+
+        A record is dependent on another record if one of the fields of the
+        dependent record contains an id of that other record.
+
+        Detail records are dependent on master records.
+        Also, records that specify a choice in a value table, are dependent on
+        the chosen value record.
+
+        table
+        --------
+        The table in which the record resides of which we want to know the
+        dependencies.
+
+        record
+        --------
+        The record, given as dict, of which we want to know the dependencies.
+
+        Returns:
+        --------
+        The number of all dependent records in all tables.
+        """
+
         eid = G(record, N._id)
         if eid is None:
             return True
@@ -721,12 +854,52 @@ class Db:
         return depResult
 
     def dropWorkflow(self):
+        """Drop the entire workflow table.
+
+        This happens at startup of the server.
+        All workflow information will be computed from scratch before the server starts
+        serving pages.
+        """
+
         self.mongoCmd(N.dropWorkflow, N.workflow, N.drop)
 
     def clearWorkflow(self):
+        """Clear the entire workflow table.
+
+        The table is not deleted, but all of its records are.
+        This happens when the workflow information is reinitialized while the
+        webserver remains running, e.g. by command of a sysadmin or office user.
+        (Currently this function is not used).
+        """
+
         self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many)
 
     def entries(self, table, crit={}):
+        """Get relevant records from a table as a dictionary of entries.
+
+        table
+        --------
+        Table from which the entries are taken.
+
+        crit={}
+        --------
+        Criteria to select which records should be used.
+
+        Result:
+        --------
+        A dictionary keyed by the ids of the selected records. The records themselves
+        are the values.
+
+        Example:
+        --------
+        This function is used to collect the records that carry user content in order
+        to compute workflow information.
+
+        Its more targeted use is to fetch the records that are relevant to a single
+        contribution from the assessment and review tables.
+        review
+        """
+
         entries = {}
         for record in list(self.mongoCmd(N.entries, table, N.find, crit, FIELD_PROJ)):
             entries[G(record, N._id)] = record
@@ -734,20 +907,61 @@ class Db:
         return entries
 
     def insertWorkflowMany(self, records):
+        """Bulk insert records into the workflow table.
+
+        records
+        --------
+        The records to be inserted, as an iterable of dicts.
+        """
+
         self.mongoCmd(N.insertWorkflowMany, N.workflow, N.insert_many, records)
 
     def insertWorkflow(self, record):
+        """Insert a single workflow record.
+
+        record
+        --------
+        The record to be inserted, as a dict.
+        """
+
         self.mongoCmd(N.insertWorkflow, N.workflow, N.insert_one, record)
 
     def updateWorkflow(self, contribId, record):
+        """Replace a workflow record by an other one.
+
+        contribId
+        --------
+        The id of the workflow record that has to be replaced with new information.
+
+        record
+        --------
+        The new record which acts as replacement.
+
+        NB: Workflow records have an id that is identical to the id of the contribution
+        they are about.
+        """
+
         crit = {N._id: contribId}
         self.mongoCmd(N.updateWorkflow, N.workflow, N.replace_one, crit, record)
 
-    def delWorkflow(self, contribId):
+    def deleteWorkflow(self, contribId):
+        """Delete a workflow record.
+
+        contribId
+        --------
+        The id of the workflow item to be deleted.
+        """
+
         crit = {N._id: contribId}
-        self.mongoCmd(N.delWorkflow, N.workflow, N.delete_one, crit)
+        self.mongoCmd(N.deleteWorkflow, N.workflow, N.delete_one, crit)
 
     def getWorkflowItem(self, contribId):
+        """Fetch a single workflow record.
+
+        contribId
+        --------
+        The id of the workflow item to be fetched.
+        """
         if contribId is None:
             return {}
 
@@ -756,13 +970,44 @@ class Db:
         return entries[0] if entries else {}
 
 
-def satisfies(record, criterium):
+def satisfies(record, criterion):
+    """Test whether a record satifies a criterion.
+
+    record
+    --------
+    A dict of fields.
+
+    criterion
+    --------
+    A dict keyed by a boolean and valued by sets of ids.
+    The ids under True are the ones that must contain the id of the record in question.
+    The ids under False are the onse that may not contain the id of that record.
+
+    NB: the program does not currently use it in cases that happen.
+
+    returns
+    --------
+    True if the conditions are satisfied, False otherwise.
+    """
+
     eid = G(record, N._id)
-    for (crit, eids) in criterium.items():
+    for (crit, eids) in criterion.items():
         if crit and eid not in eids or not crit and eid in eids:
             return False
     return True
 
 
 def inCrit(items):
+    """Compiles a list of items into a Monngo DB `$in` criterion.
+
+    items
+    --------
+    A list of things, typically ids.
+
+    Returns:
+    --------
+    A MongoDB criterion that tests whether the thing in question is one of the items
+    given.
+    """
+
     return {M_IN: list(items)}
