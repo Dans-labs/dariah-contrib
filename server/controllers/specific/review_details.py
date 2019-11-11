@@ -17,9 +17,8 @@ class ReviewD(Details):
         if not wfitem:
             return super().wrap(*args, **kwargs)
 
-        eid = self.eid
         kind = self.kind
 
-        statusRep = wfitem.status(N.review, eid, kind=kind)
+        statusRep = wfitem.status(N.review, kind=kind)
 
         return H.div(statusRep)

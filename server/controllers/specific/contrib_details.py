@@ -13,12 +13,10 @@ class ContribD(Details):
         if not wfitem:
             return super().wrap(*args, **kwargs)
 
-        eid = self.eid
-
         self.fetchDetails(
             N.assessment, sortKey=lambda r: G(r, N.dateCreated, default=0),
         )
 
-        statusRep = wfitem.status(N.contrib, eid)
+        statusRep = wfitem.status(N.contrib)
 
         return H.div([statusRep, self.wrapDetail(N.assessment)])

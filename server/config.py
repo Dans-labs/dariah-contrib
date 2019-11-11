@@ -2,6 +2,8 @@ import os
 import yaml
 import re
 
+from itertools import chain
+
 from controllers.utils import pick as G, serverprint, cap1, E, LOW, HYPHEN
 
 CONFIG_EXT = ".yaml"
@@ -180,7 +182,8 @@ MAIN_TABLE = CT.userTables[0]
 USER_TABLES = set(CT.userTables)
 USER_ENTRY_TABLES = set(CT.userEntryTables)
 VALUE_TABLES = set(CT.valueTables)
-SCALAR_TYPES = set(CT.scalarTypes)
+SCALAR_TYPES = CT.scalarTypes
+SCALAR_TYPE_SET = set(chain.from_iterable(SCALAR_TYPES.values()))
 PROV_SPECS = CT.prov
 VALUE_SPECS = CT.value
 CASCADE = CT.cascade
@@ -207,7 +210,7 @@ for table in tables:
 
     for (field, fieldSpecs) in specs.items():
         fieldType = G(fieldSpecs, N.type)
-        if fieldType and fieldType not in SCALAR_TYPES:
+        if fieldType and fieldType not in SCALAR_TYPE_SET:
             cascaded = set(G(CASCADE, fieldType, default=[]))
             if table in cascaded:
                 cascade.setdefault(fieldType, {}).setdefault(table, set()).add(field)

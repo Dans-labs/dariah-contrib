@@ -3,7 +3,7 @@ from flask import request
 from config import Config as C, Names as N
 from controllers.html import HtmlElements as H
 from controllers.utils import pick as G, cap1, E, Q, AMP, ZERO
-from controllers.types import Country
+from controllers.datatypes.types import Country
 
 from controllers.specific.factory_table import make as mkTable
 

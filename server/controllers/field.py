@@ -2,7 +2,7 @@ from flask import request
 
 from config import Config as C, Names as N
 from controllers.html import HtmlElements as H
-from controllers.utils import pick as G, cap1, E, BLANK, ONE
+from controllers.utils import pick as G, bencode, cap1, E, BLANK, ONE
 from controllers.perm import getPerms
 
 CT = C.tables
@@ -282,8 +282,10 @@ class Field:
         atts = dict(wtype=widgetType)
 
         if editable:
-            origStr = types.toOrig(value, tp, multiple)
-            atts[N.orig] = origStr
+            typeObj = getattr(types, tp, None)
+            method = typeObj.toOrig
+            origStr = [method(v) for v in value or []] if multiple else method(value)
+            atts[N.orig] = bencode(origStr)
         if multiple:
             atts[N.multiple] = ONE
         if extensible:

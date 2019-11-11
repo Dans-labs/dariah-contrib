@@ -420,7 +420,7 @@ class Db:
 
         NB: this capacity is currently not used.
 
-        Returns:
+        Result:
         --------
         A sorted list.
         """
@@ -469,7 +469,7 @@ class Db:
         --------
         (Entity) ID of the particular record.
 
-        Returns:
+        Result:
         --------
         The record as a dict.
         """
@@ -484,6 +484,25 @@ class Db:
         records = list(self.mongoCmd(N.getItem, table, N.find, {N._id: oid}))
         record = records[0] if len(records) else {}
         return record
+
+    def getWorkflowItem(self, contribId):
+        """Fetch a single workflow record.
+
+        contribId
+        --------
+        The id of the workflow item to be fetched.
+
+        Result:
+        --------
+        The record wrapped in a WorkflowItem object (see workflow/apply.py).
+        """
+
+        if contribId is None:
+            return {}
+
+        crit = {N._id: contribId}
+        entries = list(self.mongoCmd(N.getWorkflowItem, N.workflow, N.find, crit))
+        return entries[0] if entries else {}
 
     def getDetails(self, table, masterField, eids, sortKey=None):
         """Fetch the detail records connected to one or more master records.
@@ -548,7 +567,7 @@ class Db:
         If you want to pick a score for an assessment criterion, only those scores
         that are linked to that criterion record are eligible.
 
-        Returns:
+        Result:
         --------
         A list of records.
         """
@@ -595,7 +614,7 @@ class Db:
         --------
         The field names and their contents to populate the new record with.
 
-        Returns:
+        Result:
         --------
         The id of the newly inserted record, or the id of the first existing
         record found, if `onlyIfNew` is true.
@@ -686,7 +705,7 @@ class Db:
         self.collect(table=N.user)
         return result.inserted_id
 
-    def delItem(self, table, eid):
+    def deleteItem(self, table, eid):
         """Delete a record.
 
         table
@@ -822,7 +841,7 @@ class Db:
         --------
         The record, given as dict, of which we want to know the dependencies.
 
-        Returns:
+        Result:
         --------
         The number of all dependent records in all tables.
         """
@@ -955,20 +974,6 @@ class Db:
         crit = {N._id: contribId}
         self.mongoCmd(N.deleteWorkflow, N.workflow, N.delete_one, crit)
 
-    def getWorkflowItem(self, contribId):
-        """Fetch a single workflow record.
-
-        contribId
-        --------
-        The id of the workflow item to be fetched.
-        """
-        if contribId is None:
-            return {}
-
-        crit = {N._id: contribId}
-        entries = list(self.mongoCmd(N.getWorkflowItem, N.workflow, N.find, crit))
-        return entries[0] if entries else {}
-
 
 def satisfies(record, criterion):
     """Test whether a record satifies a criterion.
@@ -1004,7 +1009,7 @@ def inCrit(items):
     --------
     A list of things, typically ids.
 
-    Returns:
+    Result:
     --------
     A MongoDB criterion that tests whether the thing in question is one of the items
     given.

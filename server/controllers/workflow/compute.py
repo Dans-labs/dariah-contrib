@@ -19,7 +19,42 @@ DEBUG = "5a1690a32179c013250d932a"
 
 
 class Workflow:
+    """Manages workflow information.
+
+    Workflow is the concept that contributions, assessments and reviews
+    undergo steps in a certain order, and that their treatment is dependent on
+    the stage they are in. See the workflow.yaml config file.
+
+    Workflow information is represented in records that correspond to contrib records
+    in that the contrib record and the workflow record have one and the same id.
+
+    A workflow record for a contrib contains all the relevant info (as far as workflow
+    is concerned) of the contrib record and its (valid) assessment and their (valid)
+    reviews.
+
+    At startup time, the workflow information is computed from scratch and stored
+    in the database.
+
+    This class is about computing and managing the workflow information.
+
+    In workflow/apply.py the class WorkflowItem is defined, which takes care of
+    applying workflow information.
+    """
+
     def __init__(self, db):
+        """Sets up workflow information.
+
+        Several pieces of data that will be used many times in workflow computations
+        are fetched and stored as attributes.
+
+        The previous workflow table is dropped and replaced by a freshly computed one.
+
+        db
+        --------
+        The database is needed to store computed workflow information, so we store
+        the Db object as attribute `db`.
+        """
+
         self.db = db
         decisionRecords = db.getValueRecords(N.decision)
         self.decisions = {
@@ -51,6 +86,16 @@ class Workflow:
         self.initWorkflow(drop=True)
 
     def initWorkflow(self, drop=False):
+        """(Re)fills the workflow table.
+
+        drop
+        --------
+        If True, the complete table will first be dropped and then
+        recreated.
+        Otherwise, the table will merely be cleared.
+        This is not yet used in the application.
+        """
+
         db = self.db
 
         if drop:
@@ -66,7 +111,7 @@ class Workflow:
             entries[table] = db.entries(table)
 
         serverprint("WORKFLOW: Link masters and details")
-        aggregate(entries)
+        self._aggregate(entries)
 
         serverprint("WORKFLOW: Compute workflow info")
         wfRecords = []
@@ -78,6 +123,13 @@ class Workflow:
         serverprint("WORKFLOW: Initialization done")
 
     def insert(self, contribId):
+        """Computes and stores workflow for a single contribution.
+
+        contribId
+        --------
+        The id of the contrib for which to compute workflow.
+        """
+
         db = self.db
 
         info = self.computeWorkflow(contribId=contribId)
@@ -86,37 +138,54 @@ class Workflow:
         db.insertWorkflow(info)
 
     def recompute(self, contribId):
+        """Recomputes and replaces workflow for a single contribution.
+
+        contribId
+        --------
+        The id of the contrib for which to compute workflow.
+        """
+
         db = self.db
 
         info = self.computeWorkflow(contribId=contribId)
         db.updateWorkflow(contribId, info)
 
     def delete(self, contribId):
+        """Deletes workflow for a single contribution.
+
+        contribId
+        --------
+        The id of the contrib for which to delete workflow.
+        """
+
         db = self.db
 
         serverprint(f"WORKFLOW: Delete workflow info {contribId}")
         db.deleteWorkflow(contribId)
 
-    def getFullItem(self, contribId):
-        db = self.db
-
-        entries = {}
-        for table in WORKFLOW_TABLES_LIST:
-            crit = (
-                {N._id: contribId}
-                if table == MAIN_TABLE
-                else {N.contrib: contribId}
-                if table in CT.userTables
-                else {INTER_TABLE: inCrit(G(entries, INTER_TABLE, default={}))}
-            )
-            entries[table] = db.entries(table, crit)
-        aggregate(entries)
-
-        return G(G(entries, MAIN_TABLE), contribId)
-
     def computeWorkflow(self, record=None, contribId=None):
+        """Computes workflow for a single contribution.
+
+        Part of the work will be delegated to functions that
+        retrieve workflow info off assessment and review records.
+
+        record
+        --------
+        The full contrib record for which to compute workflow.
+        If not given, the record will be retrieved on the basis
+        of `contribId` parameter.
+
+        contribId
+        --------
+        The id of the contrib for which to compute workflow.
+
+        Result:
+        --------
+        A dict of workflow attributes.
+        """
+
         if record is None:
-            record = self.getFullItem(contribId)
+            record = self._getFullItem(contribId)
 
         contribId = G(record, N._id)
         if contribId is None:
@@ -168,6 +237,38 @@ class Workflow:
         }
 
     def computeWorkflowAssessment(self, record, frozen):
+        """Computes workflow info derived from an assessment record.
+
+        This includes workflow information associated with the reviews
+        of this assessment. However, that will be delegated to another function.
+
+        record
+        --------
+        The assessment record that is the information source for the
+        workflow information.
+
+        frozen
+        --------
+        This is a (boolean) attribute of the workflow, derived from the
+        contribution record.
+        It should be inherited by the associated assessment and review records.
+        Hence it is passed down.
+
+        Result:
+        --------
+        A tuple consisting of
+
+        locked
+        ~~~~~~~~
+        A (boolean) workflow attribute that derives from the assessment and/or
+        its reviews. It is also important for the contribution, hence it will
+        be passed upwards to it.
+
+        attributes
+        ~~~~~~~~
+        A dict of workflow attributes.
+        """
+
         db = self.db
         typeCriteria = db.typeCriteria
 
@@ -286,6 +387,28 @@ class Workflow:
         )
 
     def computeWorkflowReview(self, kind, record, frozen):
+        """Computes workflow info derived from a review record.
+
+        kind
+        --------
+        The kind or review: `expert` or `final`.
+        Nothing in the review itself indicates what kind a review is.
+        But the associated assessment specifies an expert reviewer and a final reviewer.
+        Hence the creator of a review will tell what kind of review it is.
+
+        record
+        --------
+        The review record that is the information source for the
+        workflow information.
+
+        frozen
+        --------
+        This is a (boolean) attribute of the workflow, derived from the
+        contribution record.
+        It should be inherited by the associated assessment and review records.
+        Hence it is passed from there to here.
+        """
+
         decisions = self.decisions
 
         decision = G(decisions, G(record, N.decision))
@@ -314,7 +437,26 @@ class Workflow:
             N.frozen: frozen,
         }
 
-    def computeScore(self, cEntries):
+    def computeScore(self, criteriaEntries):
+        """Computes the score of an assessment.
+
+        The assessment an average of the score given by the assessor to his/her
+        criteriaEntries.
+
+        criteriaEntries
+        --------
+        The records in which an assessor enters his/her evalutation.
+        Each record gets a score.
+        The overall score is a simple average of all scores.
+        However, some criteria are not required, and a zero score for them
+        does not add to the average.
+
+        Result:
+        --------
+        A dict of quantities, including the overall score.
+        The other qunatities serve to present a derivation of the overall score.
+        """
+
         scoreMapping = self.scoreMapping
         maxScoreByCrit = self.maxScoreByCrit
         theseScores = [
@@ -323,7 +465,7 @@ class Workflow:
                 G(scoreMapping, G(cEntry, N.score)) or 0,
                 G(maxScoreByCrit, G(cEntry, N.criteria)) or 0,
             )
-            for cEntry in cEntries
+            for cEntry in criteriaEntries
         ]
 
         allMax = sum(x[2] for x in theseScores)
@@ -343,25 +485,64 @@ class Workflow:
             allN=allN,
         )
 
+    def _getFullItem(self, contribId):
+        """Collect a contribution with all relevant assessments and reviews.
 
-def aggregate(entries):
-    for (masterTable, detailTables) in DETAILS.items():
-        if masterTable in WORKFLOW_TABLES:
-            detailTablesWf = [
-                detailTable
-                for detailTable in detailTables
-                if detailTable in WORKFLOW_TABLES
-            ]
-            for detailTable in detailTablesWf:
-                serverprint(
-                    f"WORKFLOW: {masterTable}: lookup details from {detailTable}"
-                )
-                for record in sorted(
-                    G(entries, detailTable, default={}).values(),
-                    key=lambda r: G(r, N.dateCreated, default=0),
-                ):
-                    masterId = G(record, masterTable)
-                    if masterId:
-                        entries.setdefault(masterTable, {}).setdefault(
-                            masterId, {}
-                        ).setdefault(detailTable, []).append(record)
+        contribId
+        --------
+        The id of the contrib whose information we want to gather.
+        """
+
+        db = self.db
+
+        entries = {}
+        for table in WORKFLOW_TABLES_LIST:
+            crit = (
+                {N._id: contribId}
+                if table == MAIN_TABLE
+                else {N.contrib: contribId}
+                if table in CT.userTables
+                else {INTER_TABLE: inCrit(G(entries, INTER_TABLE, default={}))}
+            )
+            entries[table] = db.entries(table, crit)
+        self._aggregate(entries)
+
+        return G(G(entries, MAIN_TABLE), contribId)
+
+    @staticmethod
+    def _aggregate(entries):
+        """Aggregates a details records in the record of their master.
+
+        entries
+        --------
+        a dict keyed by table name and valued by lists of records of that table.
+
+        Result:
+        --------
+        In place, in entries.
+        For every item (detailTable, detailRecords) in entries, where
+        detailTable is relevant to the workflow,
+        a possibly new key masterTable will be made in entries, and the
+        detailRecords will be put under that key as a dict keyed by id.
+        """
+
+        for (masterTable, detailTables) in DETAILS.items():
+            if masterTable in WORKFLOW_TABLES:
+                detailTablesWf = [
+                    detailTable
+                    for detailTable in detailTables
+                    if detailTable in WORKFLOW_TABLES
+                ]
+                for detailTable in detailTablesWf:
+                    serverprint(
+                        f"WORKFLOW: {masterTable}: lookup details from {detailTable}"
+                    )
+                    for record in sorted(
+                        G(entries, detailTable, default={}).values(),
+                        key=lambda r: G(r, N.dateCreated, default=0),
+                    ):
+                        masterId = G(record, masterTable)
+                        if masterId:
+                            entries.setdefault(masterTable, {}).setdefault(
+                                masterId, {}
+                            ).setdefault(detailTable, []).append(record)

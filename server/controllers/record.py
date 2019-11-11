@@ -199,7 +199,7 @@ class Record:
         table = self.table
         eid = self.eid
 
-        control.delItem(table, eid)
+        control.deleteItem(table, eid)
 
         if table == MAIN_TABLE:
             self.adjustWorkflow(delete=True)

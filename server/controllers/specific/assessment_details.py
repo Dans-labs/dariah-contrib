@@ -19,8 +19,6 @@ class AssessmentD(Details):
         if not wfitem:
             return super().wrap(*args, **kwargs)
 
-        eid = self.eid
-
         (reviewer, reviewers) = wfitem.info(N.assessment, N.reviewer, N.reviewers)
 
         self.fetchDetails(N.criteriaEntry, sortKey=cEntrySort)
@@ -71,7 +69,7 @@ class AssessmentD(Details):
             else E
         )
 
-        statusRep = wfitem.status(N.assessment, eid)
+        statusRep = wfitem.status(N.assessment)
 
         return H.div(
             [criteriaPart, statusRep, H.div(REVIEW_DECISION, cls="head"), reviewPart],

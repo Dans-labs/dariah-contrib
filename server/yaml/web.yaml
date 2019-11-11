@@ -1,6 +1,14 @@
 staticRoot: ../static/
 indexPage: index.html
 
+wrongType:
+  url: http(s)://letters.domain
+  email: name@letters.domain
+  int: only digits
+  decimal: only digits and one floating point/comma
+  money: only digits and one floating point/comma
+  datetime: yyyy-mm-dd hh-mm-ss (you may leave out trailing parts)
+
 messages:
   forbidden: Forbidden
   noPage: Page not found
@@ -8,12 +16,6 @@ messages:
   noField: No field
   refreshCrit: refresh criteria overview
   refresh: refresh modification history
-  url: http(s)://letters.domain
-  email: name@letters.domain
-  int: only digits
-  decimal: only digits and one floating point/comma
-  money: only digits and one floating point/comma
-  datetime: yyyy-mm-dd hh-mm-ss (you may leave out trailing parts)
   filter: type to filter
   wrongCriterionForType: >-
     N.B. This criterion is not relevant for this type of contribution.

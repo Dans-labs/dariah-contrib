@@ -75,16 +75,20 @@ items:
 defaultType: text
 
 scalarTypes:
-  - text
-  - email
-  - url
-  - int
-  - decimal
-  - money
-  - datetime
-  - bool2
-  - bool3
-  - markdown
+  TypeBase:
+    - text
+    - markdown
+    - datetime
+  Text:
+    - email
+    - url
+  Numeric:
+    - int
+    - decimal
+    - money
+  Bool:
+    - bool2
+    - bool3
 
 boolTypes:
   bool2:
