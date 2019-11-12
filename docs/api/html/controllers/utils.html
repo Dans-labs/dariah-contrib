@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>controllers.utils API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Things that do not find a more logical place …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,16 +20,25 @@
 <h1 class="title">Module <code>controllers.utils</code></h1>
 </header>
 <section id="section-intro">
+<p>Things that do not find a more logical place.</p>
+<ul>
+<li>Utitility functions</li>
+<li>Character constants</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import sys
+<pre><code class="python">&#34;&#34;&#34;Things that do not find a more logical place.
+
+*   Utitility functions
+*   Character constants
+&#34;&#34;&#34;
+
+import sys
 import json
 from base64 import b64encode, b64decode
 from datetime import datetime as dt
-from flask.json import JSONEncoder
-from bson.objectid import ObjectId
 
 
 REGION_SHIFT = 0x1F1E6 - ord(&#34;A&#34;)
@@ -82,6 +91,16 @@ ITER = &#34;__iter__&#34;
 
 
 def factory(name, Base, Deriveds):
+    &#34;&#34;&#34;Find the base or derived class by registered name.
+
+    Parameters
+    ----------
+    Base: class
+        Start the lookup here.
+    Deriveds: iterable of (name, class)
+        A list of derived classes with their names.
+    &#34;&#34;&#34;
+
     Derived = Base
     for (nm, NmCl) in Deriveds:
         if nm == name:
@@ -91,48 +110,110 @@ def factory(name, Base, Deriveds):
     return Derived
 
 
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, dt):
-            return obj.isoformat()
-        elif isinstance(obj, ObjectId):
-            return str(obj)
-        return JSONEncoder.default(self, obj)
-
-
-dbjson = CustomJSONEncoder().encode
-
-
 def utf8FromLatin1(s):
+    &#34;&#34;&#34;Get Unicode from a latin1 string.
+
+    Parameters
+    ----------
+    s: string(latin1)
+
+    Returns
+    -------
+    string(utf8)
+
+    !!! hint
+        Needed to process the values of environment variables, in particular
+        those from the identity provider..
+    &#34;&#34;&#34;
     return str(bytes(s, encoding=LATIN1), encoding=UTF8)
 
 
 def bencode(s):
+    &#34;&#34;&#34;Serialize a complex data structure into a plain ASCII string.
+
+    Parameters
+    ----------
+    s: Python value
+
+    Returns
+    -------
+    string(ascii)
+
+    !!! hint
+        Needed to pass the original value into an edit widget, so that the Javascript
+        has a way to know whether an edited value is dirty or not.
+    &#34;&#34;&#34;
+
     return b64encode(json.dumps(s, separators=(COMMA, COLON)).encode()).decode()
 
 
 def bdecode(s):
+    &#34;&#34;&#34;Interpets a serialized value as a Python value.
+
+    Parameters
+    ----------
+    s: string(ascii)
+
+    Returns
+    -------
+    Python value.
+    &#34;&#34;&#34;
+
     return json.loads(b64decode(s.encode()).decode())
 
 
-def cap1(string):
-    return E if not string else string[0].upper() + string[1:]
+def cap1(s):
+    &#34;&#34;&#34;The first letter capitalized.
+
+    Parameters
+    ----------
+    s: string
+
+    Returns
+    -------
+    string
+    &#34;&#34;&#34;
+
+    return E if not s else s[0].upper() + s[1:]
 
 
-def shiftRegional(region):
-    return E.join(chr(ord(r) + REGION_SHIFT) for r in region)
+def shiftRegional(iso):
+    &#34;&#34;&#34;Transpose iso country code into flag.
+
+    By shifting the 2-letter iso country code with a fixed offset,
+    we get two Unicode characters that browsers know to render as a flag symbol
+    for that country.
+
+    Parameters
+    ----------
+    iso: string
+        2-letter iso country code.
+
+    Returns
+    -------
+    flag:string
+        2-letter unicode, starting from `controllers.utils.REGION_SHIFT`.
+    &#34;&#34;&#34;
+
+    return E.join(chr(ord(r) + REGION_SHIFT) for r in iso)
 
 
 def now():
+    &#34;&#34;&#34;The current moment in time as a `datetime` value.&#34;&#34;&#34;
+
     return dt.utcnow()
 
 
 def serverprint(msg):
+    &#34;&#34;&#34;Print a message to the console immediately.&#34;&#34;&#34;
+
     sys.stdout.write(f&#34;&#34;&#34;{msg}{NL}&#34;&#34;&#34;)
     sys.stdout.flush()
 
 
 def dtm(isostr):
+    &#34;&#34;&#34;Get a datetime value from an ISO string representing time.&#34;&#34;&#34;
+
     isostr = isostr.rstrip(Z)
     try:
         date = dt.strptime(isostr, ISO_DTP)
@@ -148,32 +229,99 @@ def dtm(isostr):
 
 
 def isIterable(value):
+    &#34;&#34;&#34;Whether a value is a non-string iterable.
+
+    !!! note
+        Strings are iterables.
+        We want to know whether a value is a string or an iterable of strings.
+    &#34;&#34;&#34;
+
     return type(value) is not str and hasattr(value, ITER)
 
 
 def asIterable(value):
+    &#34;&#34;&#34;Turn a value into a singleton iterable if it is not yet an iterable.
+
+    We mean: non-string iterables here.
+    &#34;&#34;&#34;
+
     return value if isIterable(value) else [value]
 
 
 def asString(value):
+    &#34;&#34;&#34;Join an iterable of strings into a string.
+
+    And if the value is already a string, return it, and if it is `None`
+    return the empty string.
+    &#34;&#34;&#34;
+
     return E if value is None else E.join(value) if isIterable(value) else value
 
 
 def getLast(sequence):
+    &#34;&#34;&#34;Get the last element of a sequence or `None` if the sequence is empty.&#34;&#34;&#34;
+
     return sequence[-1] if sequence else None
 
 
 def pick(record, field, default=None):
+    &#34;&#34;&#34;Get the value for a key in a dict, or None if there is no dict.
+
+    Parameters
+    ----------
+    record: dict | `None`
+        `pick` should work in both cases.
+    field: string
+        The field in `record` we want to extract.
+    default: mixed
+        Default value.
+
+    Returns
+    -------
+    value | `None`
+        The value is the default if the record is `None`, or if the record has no
+        `field`.
+        Otherwise it is the value for `field` from the record.
+
+    !!! warning
+        But if the value for `field` in the record is `None`, `None` will be returned.
+    &#34;&#34;&#34;
+
     return default if record is None else record.get(field, default)
 
 
 def creators(record, creatorField, editorsField):
+    &#34;&#34;&#34;List all ids in two fields of a record.
+
+    Parameters
+    ----------
+    record: dict
+        The source record
+    creatorField: string
+        The name of a field with a single id value.
+    editorsFields: string
+        The name of a field with multiple id values.
+
+    Returns
+    -------
+    list
+        A sorted list of all ids encountered in those fields.
+    &#34;&#34;&#34;
+
     editors = set(pick(record, editorsField, default=[]))
     editors.add(pick(record, creatorField))
     return sorted(editors)
 
 
 def filterModified(modified):
+    &#34;&#34;&#34;Filter a provenance trail.
+
+    The provenance trail is a list of strings shaped as `&#34;actor on date&#34;` corresponding
+    to changes in a record.
+
+    After filtering we retain for each day only the last modification event per person.
+    &#34;&#34;&#34;
+
     logicM = decomposeM(modified)
     chunks = perDay(logicM)
     thinned = thinM(chunks)
@@ -181,19 +329,35 @@ def filterModified(modified):
 
 
 def decomposeM(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: split an entry into name and date.&#34;&#34;&#34;
+
     splits = [m.rsplit(ON, 1) for m in modified]
     return [(m[0], dtm(m[1].replace(BLANK, T))[1]) for m in splits]
 
 
 def trimM(mdt, trim):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: trim the secoonds part.
+
+    Parameters
+    ----------
+    mdt: string
+        Modification date in iso shape.
+    trim: boolean
+        Whether or not to trim the decimal parts of the seconds aways.
+    &#34;&#34;&#34;
+
     return str(mdt).split(BLANK)[0] if trim == 1 else str(mdt).split(DOT)[0]
 
 
 def composeM(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: compose the trimmed parts.&#34;&#34;&#34;
+
     return [f&#34;&#34;&#34;{m[0]}{ON}{trimM(m[1], trim)}&#34;&#34;&#34; for (m, trim) in reversed(modified)]
 
 
 def perDay(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: chunk the trails into daily bits.&#34;&#34;&#34;
+
     chunks = {}
     for m in modified:
         chunks.setdefault(dt.date(m[1]), []).append(m)
@@ -201,6 +365,8 @@ def perDay(modified):
 
 
 def thinM(chunks):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: weed out the non-last  items per day.&#34;&#34;&#34;
+
     modified = []
     nChunks = len(chunks)
     for (i, chunk) in enumerate(chunks):
@@ -227,12 +393,18 @@ def thinM(chunks):
 <span>def <span class="ident">asIterable</span></span>(<span>value)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Turn a value into a singleton iterable if it is not yet an iterable.</p>
+<p>We mean: non-string iterables here.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def asIterable(value):
+    &#34;&#34;&#34;Turn a value into a singleton iterable if it is not yet an iterable.
+
+    We mean: non-string iterables here.
+    &#34;&#34;&#34;
+
     return value if isIterable(value) else [value]</code></pre>
 </details>
 </dd>
@@ -240,12 +412,20 @@ def thinM(chunks):
 <span>def <span class="ident">asString</span></span>(<span>value)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Join an iterable of strings into a string.</p>
+<p>And if the value is already a string, return it, and if it is <code>None</code>
+return the empty string.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def asString(value):
+    &#34;&#34;&#34;Join an iterable of strings into a string.
+
+    And if the value is already a string, return it, and if it is `None`
+    return the empty string.
+    &#34;&#34;&#34;
+
     return E if value is None else E.join(value) if isIterable(value) else value</code></pre>
 </details>
 </dd>
@@ -253,12 +433,30 @@ def thinM(chunks):
 <span>def <span class="ident">bdecode</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Interpets a serialized value as a Python value.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>s</code></strong> :&ensp;<code>string</code>(<code>ascii</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Python value.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bdecode(s):
+    &#34;&#34;&#34;Interpets a serialized value as a Python value.
+
+    Parameters
+    ----------
+    s: string(ascii)
+
+    Returns
+    -------
+    Python value.
+    &#34;&#34;&#34;
+
     return json.loads(b64decode(s.encode()).decode())</code></pre>
 </details>
 </dd>
@@ -266,38 +464,91 @@ def thinM(chunks):
 <span>def <span class="ident">bencode</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Serialize a complex data structure into a plain ASCII string.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>s</code></strong> :&ensp;<code>Python</code> <code>value</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>ascii</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Needed to pass the original value into an edit widget, so that the Javascript
+has a way to know whether an edited value is dirty or not.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bencode(s):
+    &#34;&#34;&#34;Serialize a complex data structure into a plain ASCII string.
+
+    Parameters
+    ----------
+    s: Python value
+
+    Returns
+    -------
+    string(ascii)
+
+    !!! hint
+        Needed to pass the original value into an edit widget, so that the Javascript
+        has a way to know whether an edited value is dirty or not.
+    &#34;&#34;&#34;
+
     return b64encode(json.dumps(s, separators=(COMMA, COLON)).encode()).decode()</code></pre>
 </details>
 </dd>
 <dt id="controllers.utils.cap1"><code class="name flex">
-<span>def <span class="ident">cap1</span></span>(<span>string)</span>
+<span>def <span class="ident">cap1</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The first letter capitalized.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>s</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def cap1(string):
-    return E if not string else string[0].upper() + string[1:]</code></pre>
+<pre><code class="python">def cap1(s):
+    &#34;&#34;&#34;The first letter capitalized.
+
+    Parameters
+    ----------
+    s: string
+
+    Returns
+    -------
+    string
+    &#34;&#34;&#34;
+
+    return E if not s else s[0].upper() + s[1:]</code></pre>
 </details>
 </dd>
 <dt id="controllers.utils.composeM"><code class="name flex">
 <span>def <span class="ident">composeM</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Auxiliary in provenance filtering: compose the trimmed parts.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def composeM(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: compose the trimmed parts.&#34;&#34;&#34;
+
     return [f&#34;&#34;&#34;{m[0]}{ON}{trimM(m[1], trim)}&#34;&#34;&#34; for (m, trim) in reversed(modified)]</code></pre>
 </details>
 </dd>
@@ -305,12 +556,43 @@ def thinM(chunks):
 <span>def <span class="ident">creators</span></span>(<span>record, creatorField, editorsField)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>List all ids in two fields of a record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The source record</dd>
+<dt><strong><code>creatorField</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of a field with a single id value.</dd>
+<dt><strong><code>editorsFields</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of a field with multiple id values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>A sorted list of all ids encountered in those fields.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def creators(record, creatorField, editorsField):
+    &#34;&#34;&#34;List all ids in two fields of a record.
+
+    Parameters
+    ----------
+    record: dict
+        The source record
+    creatorField: string
+        The name of a field with a single id value.
+    editorsFields: string
+        The name of a field with multiple id values.
+
+    Returns
+    -------
+    list
+        A sorted list of all ids encountered in those fields.
+    &#34;&#34;&#34;
+
     editors = set(pick(record, editorsField, default=[]))
     editors.add(pick(record, creatorField))
     return sorted(editors)</code></pre>
@@ -320,12 +602,14 @@ def thinM(chunks):
 <span>def <span class="ident">decomposeM</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Auxiliary in provenance filtering: split an entry into name and date.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def decomposeM(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: split an entry into name and date.&#34;&#34;&#34;
+
     splits = [m.rsplit(ON, 1) for m in modified]
     return [(m[0], dtm(m[1].replace(BLANK, T))[1]) for m in splits]</code></pre>
 </details>
@@ -334,12 +618,14 @@ def thinM(chunks):
 <span>def <span class="ident">dtm</span></span>(<span>isostr)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Get a datetime value from an ISO string representing time.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def dtm(isostr):
+    &#34;&#34;&#34;Get a datetime value from an ISO string representing time.&#34;&#34;&#34;
+
     isostr = isostr.rstrip(Z)
     try:
         date = dt.strptime(isostr, ISO_DTP)
@@ -358,12 +644,29 @@ def thinM(chunks):
 <span>def <span class="ident">factory</span></span>(<span>name, Base, Deriveds)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Find the base or derived class by registered name.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>Base</code></strong> :&ensp;<code>class</code></dt>
+<dd>Start the lookup here.</dd>
+<dt><strong><code>Deriveds</code></strong> :&ensp;<code>iterable</code> of (<code>name</code>, <code>class</code>)</dt>
+<dd>A list of derived classes with their names.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def factory(name, Base, Deriveds):
+    &#34;&#34;&#34;Find the base or derived class by registered name.
+
+    Parameters
+    ----------
+    Base: class
+        Start the lookup here.
+    Deriveds: iterable of (name, class)
+        A list of derived classes with their names.
+    &#34;&#34;&#34;
+
     Derived = Base
     for (nm, NmCl) in Deriveds:
         if nm == name:
@@ -377,12 +680,23 @@ def thinM(chunks):
 <span>def <span class="ident">filterModified</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Filter a provenance trail.</p>
+<p>The provenance trail is a list of strings shaped as <code>"actor on date"</code> corresponding
+to changes in a record.</p>
+<p>After filtering we retain for each day only the last modification event per person.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def filterModified(modified):
+    &#34;&#34;&#34;Filter a provenance trail.
+
+    The provenance trail is a list of strings shaped as `&#34;actor on date&#34;` corresponding
+    to changes in a record.
+
+    After filtering we retain for each day only the last modification event per person.
+    &#34;&#34;&#34;
+
     logicM = decomposeM(modified)
     chunks = perDay(logicM)
     thinned = thinM(chunks)
@@ -393,12 +707,14 @@ def thinM(chunks):
 <span>def <span class="ident">getLast</span></span>(<span>sequence)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Get the last element of a sequence or <code>None</code> if the sequence is empty.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def getLast(sequence):
+    &#34;&#34;&#34;Get the last element of a sequence or `None` if the sequence is empty.&#34;&#34;&#34;
+
     return sequence[-1] if sequence else None</code></pre>
 </details>
 </dd>
@@ -406,12 +722,24 @@ def thinM(chunks):
 <span>def <span class="ident">isIterable</span></span>(<span>value)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Whether a value is a non-string iterable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Strings are iterables.
+We want to know whether a value is a string or an iterable of strings.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isIterable(value):
+    &#34;&#34;&#34;Whether a value is a non-string iterable.
+
+    !!! note
+        Strings are iterables.
+        We want to know whether a value is a string or an iterable of strings.
+    &#34;&#34;&#34;
+
     return type(value) is not str and hasattr(value, ITER)</code></pre>
 </details>
 </dd>
@@ -419,12 +747,14 @@ def thinM(chunks):
 <span>def <span class="ident">now</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The current moment in time as a <code>datetime</code> value.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def now():
+    &#34;&#34;&#34;The current moment in time as a `datetime` value.&#34;&#34;&#34;
+
     return dt.utcnow()</code></pre>
 </details>
 </dd>
@@ -432,12 +762,14 @@ def thinM(chunks):
 <span>def <span class="ident">perDay</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Auxiliary in provenance filtering: chunk the trails into daily bits.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def perDay(modified):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: chunk the trails into daily bits.&#34;&#34;&#34;
+
     chunks = {}
     for m in modified:
         chunks.setdefault(dt.date(m[1]), []).append(m)
@@ -448,12 +780,52 @@ def thinM(chunks):
 <span>def <span class="ident">pick</span></span>(<span>record, field, default=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Get the value for a key in a dict, or None if there is no dict.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
+<dd><code>pick</code> should work in both cases.</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>The field in <code>record</code> we want to extract.</dd>
+<dt><strong><code>default</code></strong> :&ensp;<code>mixed</code></dt>
+<dd>Default value.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>value | <code>None</code>
+The value is the default if the record is <code>None</code>, or if the record has no
+<code>field</code>.
+Otherwise it is the value for <code>field</code> from the record.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>But if the value for <code>field</code> in the record is <code>None</code>, <code>None</code> will be returned.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def pick(record, field, default=None):
+    &#34;&#34;&#34;Get the value for a key in a dict, or None if there is no dict.
+
+    Parameters
+    ----------
+    record: dict | `None`
+        `pick` should work in both cases.
+    field: string
+        The field in `record` we want to extract.
+    default: mixed
+        Default value.
+
+    Returns
+    -------
+    value | `None`
+        The value is the default if the record is `None`, or if the record has no
+        `field`.
+        Otherwise it is the value for `field` from the record.
+
+    !!! warning
+        But if the value for `field` in the record is `None`, `None` will be returned.
+    &#34;&#34;&#34;
+
     return default if record is None else record.get(field, default)</code></pre>
 </details>
 </dd>
@@ -461,39 +833,74 @@ def thinM(chunks):
 <span>def <span class="ident">serverprint</span></span>(<span>msg)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Print a message to the console immediately.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def serverprint(msg):
+    &#34;&#34;&#34;Print a message to the console immediately.&#34;&#34;&#34;
+
     sys.stdout.write(f&#34;&#34;&#34;{msg}{NL}&#34;&#34;&#34;)
     sys.stdout.flush()</code></pre>
 </details>
 </dd>
 <dt id="controllers.utils.shiftRegional"><code class="name flex">
-<span>def <span class="ident">shiftRegional</span></span>(<span>region)</span>
+<span>def <span class="ident">shiftRegional</span></span>(<span>iso)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Transpose iso country code into flag.</p>
+<p>By shifting the 2-letter iso country code with a fixed offset,
+we get two Unicode characters that browsers know to render as a flag symbol
+for that country.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>iso</code></strong> :&ensp;<code>string</code></dt>
+<dd>2-letter iso country code.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>flag</code>:<code>string</code></dt>
+<dd>2-letter unicode, starting from <code>controllers.utils.REGION_SHIFT</code>.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def shiftRegional(region):
-    return E.join(chr(ord(r) + REGION_SHIFT) for r in region)</code></pre>
+<pre><code class="python">def shiftRegional(iso):
+    &#34;&#34;&#34;Transpose iso country code into flag.
+
+    By shifting the 2-letter iso country code with a fixed offset,
+    we get two Unicode characters that browsers know to render as a flag symbol
+    for that country.
+
+    Parameters
+    ----------
+    iso: string
+        2-letter iso country code.
+
+    Returns
+    -------
+    flag:string
+        2-letter unicode, starting from `controllers.utils.REGION_SHIFT`.
+    &#34;&#34;&#34;
+
+    return E.join(chr(ord(r) + REGION_SHIFT) for r in iso)</code></pre>
 </details>
 </dd>
 <dt id="controllers.utils.thinM"><code class="name flex">
 <span>def <span class="ident">thinM</span></span>(<span>chunks)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Auxiliary in provenance filtering: weed out the non-last
+items per day.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def thinM(chunks):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: weed out the non-last  items per day.&#34;&#34;&#34;
+
     modified = []
     nChunks = len(chunks)
     for (i, chunk) in enumerate(chunks):
@@ -513,12 +920,29 @@ def thinM(chunks):
 <span>def <span class="ident">trimM</span></span>(<span>mdt, trim)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Auxiliary in provenance filtering: trim the secoonds part.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>mdt</code></strong> :&ensp;<code>string</code></dt>
+<dd>Modification date in iso shape.</dd>
+<dt><strong><code>trim</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether or not to trim the decimal parts of the seconds aways.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def trimM(mdt, trim):
+    &#34;&#34;&#34;Auxiliary in provenance filtering: trim the secoonds part.
+
+    Parameters
+    ----------
+    mdt: string
+        Modification date in iso shape.
+    trim: boolean
+        Whether or not to trim the decimal parts of the seconds aways.
+    &#34;&#34;&#34;
+
     return str(mdt).split(BLANK)[0] if trim == 1 else str(mdt).split(DOT)[0]</code></pre>
 </details>
 </dd>
@@ -526,120 +950,47 @@ def thinM(chunks):
 <span>def <span class="ident">utf8FromLatin1</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Get Unicode from a latin1 string.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>s</code></strong> :&ensp;<code>string</code>(<code>latin1</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>utf8</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Needed to process the values of environment variables, in particular
+those from the identity provider..</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def utf8FromLatin1(s):
+    &#34;&#34;&#34;Get Unicode from a latin1 string.
+
+    Parameters
+    ----------
+    s: string(latin1)
+
+    Returns
+    -------
+    string(utf8)
+
+    !!! hint
+        Needed to process the values of environment variables, in particular
+        those from the identity provider..
+    &#34;&#34;&#34;
     return str(bytes(s, encoding=LATIN1), encoding=UTF8)</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="controllers.utils.CustomJSONEncoder"><code class="flex name class">
-<span>class <span class="ident">CustomJSONEncoder</span></span>
-<span>(</span><span>*, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, sort_keys=False, indent=None, separators=None, default=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>The default Flask JSON encoder.
-This one extends the default simplejson
-encoder by also supporting <code>datetime</code> objects, <code>UUID</code> as well as
-<code>Markup</code> objects which are serialized as RFC 822 datetime strings (same
-as the HTTP date format).
-In order to support more data types override the
-:meth:<code>default</code> method.</p>
-<p>Constructor for JSONEncoder, with sensible defaults.</p>
-<p>If skipkeys is false, then it is a TypeError to attempt
-encoding of keys that are not str, int, float or None.
-If
-skipkeys is True, such items are simply skipped.</p>
-<p>If ensure_ascii is true, the output is guaranteed to be str
-objects with all incoming non-ASCII characters escaped.
-If
-ensure_ascii is false, the output can contain non-ASCII characters.</p>
-<p>If check_circular is true, then lists, dicts, and custom encoded
-objects will be checked for circular references during encoding to
-prevent an infinite recursion (which would cause an OverflowError).
-Otherwise, no such check takes place.</p>
-<p>If allow_nan is true, then NaN, Infinity, and -Infinity will be
-encoded as such.
-This behavior is not JSON specification compliant,
-but is consistent with most JavaScript based encoders and decoders.
-Otherwise, it will be a ValueError to encode such floats.</p>
-<p>If sort_keys is true, then the output of dictionaries will be
-sorted by key; this is useful for regression tests to ensure
-that JSON serializations can be compared on a day-to-day basis.</p>
-<p>If indent is a non-negative integer, then JSON array
-elements and object members will be pretty-printed with that
-indent level.
-An indent level of 0 will only insert newlines.
-None is the most compact representation.</p>
-<p>If specified, separators should be an (item_separator, key_separator)
-tuple.
-The default is (', ', ': ') if <em>indent</em> is <code>None</code> and
-(',', ': ') otherwise.
-To get the most compact JSON representation,
-you should specify (',', ':') to eliminate whitespace.</p>
-<p>If specified, default is a function that gets called for objects
-that can't otherwise be serialized.
-It should return a JSON encodable
-version of the object or raise a <code>TypeError</code>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, dt):
-            return obj.isoformat()
-        elif isinstance(obj, ObjectId):
-            return str(obj)
-        return JSONEncoder.default(self, obj)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>flask.json.JSONEncoder</li>
-<li>json.encoder.JSONEncoder</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="controllers.utils.CustomJSONEncoder.default"><code class="name flex">
-<span>def <span class="ident">default</span></span>(<span>self, obj)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Implement this method in a subclass such that it returns a
-serializable object for <code>o</code>, or calls the base implementation (to
-raise a :exc:<code>TypeError</code>).</p>
-<p>For example, to support arbitrary iterators, you could implement
-default like this::</p>
-<pre><code>def default(self, o):
-    try:
-        iterable = iter(o)
-    except TypeError:
-        pass
-    else:
-        return list(iterable)
-    return JSONEncoder.default(self, o)
-</code></pre></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def default(self, obj):
-    if isinstance(obj, dt):
-        return obj.isoformat()
-    elif isinstance(obj, ObjectId):
-        return str(obj)
-    return JSONEncoder.default(self, obj)</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -676,16 +1027,6 @@ default like this::</p>
 <li><code><a title="controllers.utils.thinM" href="#controllers.utils.thinM">thinM</a></code></li>
 <li><code><a title="controllers.utils.trimM" href="#controllers.utils.trimM">trimM</a></code></li>
 <li><code><a title="controllers.utils.utf8FromLatin1" href="#controllers.utils.utf8FromLatin1">utf8FromLatin1</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="controllers.utils.CustomJSONEncoder" href="#controllers.utils.CustomJSONEncoder">CustomJSONEncoder</a></code></h4>
-<ul class="">
-<li><code><a title="controllers.utils.CustomJSONEncoder.default" href="#controllers.utils.CustomJSONEncoder.default">default</a></code></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>

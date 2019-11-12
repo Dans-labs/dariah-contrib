@@ -58,18 +58,6 @@ ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
 
 
-def wrapStatus(contrib, compact=True):
-    aStage = G(contrib, N.aStage)
-    score = G(contrib, N.score)
-    baseLabel = ASSESSED_LABELS.get(aStage, "??")
-    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
-    if compact:
-        aLabel = baseLabel if score is None else f"score {score}%"
-    else:
-        aLabel = f"{score}% - {baseLabel}"
-    return (aLabel, aClass)
-
-
 class Overview:
     def __init__(self, control):
         self.control = control
@@ -182,7 +170,7 @@ class Overview:
 
         if chosenCountryId is not None:
             colSpecs = COLSPECS[1:]
-            groups = rmGroup(groups.split(","), "country")
+            groups = self.rmGroup(groups.split(","), "country")
             groupCols = GROUP_COLS[1:]
 
         cols = [c[0] for c in colSpecs]
@@ -242,11 +230,17 @@ class Overview:
             urlStart1 = f"{PAGE}{urlArgs}"
             urlStart = f"{urlStart1}" f"&groups="
             availableReps = E.join(
-                H.a(f"+{g}", (f"{urlStart}{addGroup(groupsChosen, g)}"), cls="g-add",)
+                H.a(
+                    f"+{g}",
+                    (f"{urlStart}{self.addGroup(groupsChosen, g)}"),
+                    cls="g-add",
+                )
                 for g in groupsAvailable
             )
             chosenReps = E.join(
-                H.a(f"-{g}", (f"{urlStart}{rmGroup(groupsChosen, g)}"), cls="g-rm",)
+                H.a(
+                    f"-{g}", (f"{urlStart}{self.rmGroup(groupsChosen, g)}"), cls="g-rm",
+                )
                 for g in groupsChosen
             )
             clearGroups = (
@@ -435,12 +429,12 @@ class Overview:
                 groupValuesT[thisGroup] = groupValues[thisGroup]
             # groupValuesT.update(groupValues)
             groupValuesT["cost"] = cost
-            groupValuesT["title"] = colRep("contribution", nRecords)
+            groupValuesT["title"] = self.colRep("contribution", nRecords)
             groupValuesT["_cn"] = groupValues.get("country", None)
             if depth == 0:
                 for g in groupCols + ["title"]:
                     label = selectedCountry if g == "country" else "all"
-                    controls = expandAcontrols(g) if g in groups or g == "title" else ""
+                    controls = self.expandAcontrols(g) if g in groups or g == "title" else ""
                     groupValuesT[g] = label if asTsv else f"{label} {controls}"
             material[headIndex] = self.formatContrib(
                 groupValuesT,
@@ -488,18 +482,18 @@ class Overview:
         if allHead:
             selected = contrib.get("selected", "")
             if asTsv:
-                selected = valTri(selected)
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+                selected = self.valTri(selected)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
             assessedClass = ""
         else:
             selected = contrib.get("selected", None)
             selected = (
-                (valTri(selected) if asTsv else self.roTri(selected))
+                (self.valTri(selected) if asTsv else self.roTri(selected))
                 if "selected" in contrib
                 else ""
             )
 
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
         rawTitle = contrib.get("title", "")
         title = (
             rawTitle
@@ -519,7 +513,7 @@ class Overview:
             "vcc": (contrib["vcc"] or "??") if "vcc" in contrib else "",
             "year": (contrib["year"] or "??") if "year" in contrib else "",
             "type": (contrib["type"] or "??") if "type" in contrib else "",
-            "cost": euro(contrib.get("cost", None), subHead)
+            "cost": self.euro(contrib.get("cost", None), subHead)
             if "cost" in contrib
             else "",
             "assessed": assessedLabel,
@@ -530,16 +524,16 @@ class Overview:
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth < groupLen else "title"
             xName = "contribution" if xGroup == "title" else xGroup
-            xRep = colRep(xName, nGroups)
+            xRep = self.colRep(xName, nGroups)
             values[xGroup] = (
                 xRep
                 if asTsv
                 else (
-                    f"{expandControls(thisGroupId, True)} {xRep}"
+                    f"{self.expandControls(thisGroupId, True)} {xRep}"
                     if xGroup == "title"
-                    else f"{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}"
+                    else f"{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"
                     if depth > 0
-                    else f"{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}"
+                    else f"{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"
                 )
             )
         if not asTsv:
@@ -556,7 +550,7 @@ class Overview:
                     dict(
                         cls=(
                             "{classes[col]} "
-                            "{subHeadClass(col, groupSet, subHead, allHead)}"
+                            "{self.subHeadClass(col, groupSet, subHead, allHead)}"
                         )
                     ),
                 )
@@ -654,54 +648,66 @@ class Overview:
         value = values[colName] if disclosed else "undisclosed"
         return value
 
+    @staticmethod
+    def wrapStatus(contrib, compact=True):
+        aStage = G(contrib, N.aStage)
+        score = G(contrib, N.score)
+        baseLabel = ASSESSED_LABELS.get(aStage, "??")
+        aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+        if compact:
+            aLabel = baseLabel if score is None else f"score {score}%"
+        else:
+            aLabel = f"{score}% - {baseLabel}"
+        return (aLabel, aClass)
 
-def colRep(col, n):
-    itemRep = col if n == 1 else COL_PLURAL.get(col, f"{col}s")
-    return f"{n} {itemRep}"
+    @staticmethod
+    def colRep(col, n):
+        itemRep = col if n == 1 else COL_PLURAL.get(col, f"{col}s")
+        return f"{n} {itemRep}"
 
+    @staticmethod
+    def addGroup(groups, g):
+        return ",".join(groups + [g])
 
-def addGroup(groups, g):
-    return ",".join(groups + [g])
+    @staticmethod
+    def rmGroup(groups, g):
+        return ",".join(h for h in groups if h != g)
 
-
-def rmGroup(groups, g):
-    return ",".join(h for h in groups if h != g)
-
-
-def expandControls(gid, hide=False):
-    hideRep = " hide" if hide else ""
-    showRep = "" if hide else " hide"
-    return E.join(
-        (
-            H.iconx(N.cdown, cls=f"dc{showRep}", gid=gid),
-            H.iconx(N.cup, cls=f"dc{hideRep}", gid=gid),
+    @staticmethod
+    def expandControls(gid, hide=False):
+        hideRep = " hide" if hide else ""
+        showRep = "" if hide else " hide"
+        return E.join(
+            (
+                H.iconx(N.cdown, cls=f"dc{showRep}", gid=gid),
+                H.iconx(N.cup, cls=f"dc{hideRep}", gid=gid),
+            )
         )
-    )
 
-
-def expandAcontrols(group):
-    return E.join(
-        (
-            H.iconx(N.addown, cls=f"dca", gn=group),
-            H.iconx(N.adup, cls=f"dca", ggn=group),
+    @staticmethod
+    def expandAcontrols(group):
+        return E.join(
+            (
+                H.iconx(N.addown, cls=f"dca", gn=group),
+                H.iconx(N.adup, cls=f"dca", ggn=group),
+            )
         )
-    )
 
+    @staticmethod
+    def euro(amount, subHead):
+        return "??" if amount is None else f"{int(round(amount)):,}"
 
-def euro(amount, subHead):
-    return "??" if amount is None else f"{int(round(amount)):,}"
+    @staticmethod
+    def valTri(tri):
+        return "" if tri is None else "+" if tri else "-"
 
-
-def valTri(tri):
-    return "" if tri is None else "+" if tri else "-"
-
-
-def subHeadClass(col, groupSet, subHead, allHead):
-    theClass = (
-        "allhead"
-        if allHead and col == "selected"
-        else "subhead"
-        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
-        else ""
-    )
-    return f" {theClass}" if theClass else ""
+    @staticmethod
+    def subHeadClass(col, groupSet, subHead, allHead):
+        theClass = (
+            "allhead"
+            if allHead and col == "selected"
+            else "subhead"
+            if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+            else ""
+        )
+        return f" {theClass}" if theClass else ""

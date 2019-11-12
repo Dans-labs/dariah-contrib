@@ -1,5 +1,5 @@
 from config import Config as C, Names as N
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 
 from controllers.utils import pick as G, E
 
@@ -113,7 +113,7 @@ class TypeBase:
             Possibly with nice formatting depending on the nature of the value.
         """
 
-        return QQ if val is None else H.span(he(self.normalize(str(val))))
+        return QQ if val is None else H.span(H.he(self.normalize(str(val))))
 
     def toEdit(self, val):
         """Turns a real value into a string for editable display.

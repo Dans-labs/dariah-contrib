@@ -1,5 +1,5 @@
 from config import Names as N
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.utils import pick as G, E, WHYPHEN
 from controllers.datatypes.value import Value
 
@@ -16,7 +16,7 @@ class TypeContribution(Value):
         mainType = G(record, N.mainType) or E
         subType = G(record, N.subType) or E
         sep = WHYPHEN if mainType and subType else E
-        return he(f"""{mainType}{sep}{subType}""")
+        return H.he(f"""{mainType}{sep}{subType}""")
 
     def titleHint(self, record):
         return H.join(G(record, N.explanation) or [])

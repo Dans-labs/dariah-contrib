@@ -13,10 +13,25 @@ LOGO = URLS[N.logo]
 
 
 class Topbar:
+    """Present the topbar on the interface.
+
+    It shows the current user, buttons to log in/out and a logo.
+    """
+
     def __init__(self, control):
+        """Store the incoming information.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        """
+
         self.control = control
 
     def wrap(self):
+        """Wrap it all up."""
+
         control = self.control
         auth = control.auth
 

@@ -61,7 +61,7 @@ class Types:
         see `controllers.datatypes.master.Master`
     *   value types
         values are ids in value tables,
-        see `controllers.datatypes.master.Value`
+        see `controllers.datatypes.master.Master`
 
     (see the tables.yaml configuration file).
 

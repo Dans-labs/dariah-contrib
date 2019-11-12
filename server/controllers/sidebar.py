@@ -26,7 +26,23 @@ OVERVIEW = G(G(CW.urls, N.info), N.url)
 
 
 class Sidebar:
+    """Show a sidebar with navigation links and buttons on the interface."""
+
     def __init__(self, control, path):
+        """Store the incoming information and set up attributes for collecting items.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        path: url
+            The current url.
+
+        !!! hint
+            The `path` is needed to determine which items in the sidebar are the active
+            items, so that they can be highlighted by means of a navigation CSS class.
+        """
+
         self.control = control
         self.path = path
         self.entries = []
@@ -43,6 +59,20 @@ class Sidebar:
         }
 
     def makeCaption(self, label, entries, rule=False):
+        """Produce the caption for a section of navigation items.
+
+        Parameters
+        ----------
+        label: string
+            Points to a key in web.yaml, under `captions`,
+            where the full text of the caption can be founnd.
+        entries: iterable of (path, string(html))
+            The path is used to determine whether this entry is active;
+            the string is the formatted html of the entry.
+        rule: boolean
+            Whether there should be a rule before the first entry.
+        """
+
         if not entries:
             return E
 
@@ -59,6 +89,11 @@ class Sidebar:
         return H.details(label, entriesRep, label, **atts)
 
     def makeOptions(self):
+        """Produce an options widget.
+
+        The options are defined in web.yaml, under the key `options`.
+        """
+
         options = self.options
 
         filterRep = [
@@ -75,6 +110,21 @@ class Sidebar:
         return [("XXX", rep) for rep in filterRep + optionsRep]
 
     def makeEntry(self, label, path, withOptions=False, command=False):
+        """Produce an entry.
+
+        Parameters
+        ----------
+        label: string
+            The text of the entry
+        path: url
+            The destination after the entry is clicked.
+        withOptions: boolean, optional `False`
+            Whether to include the options widget.
+        command: boolean, optional `False`
+            Display the entry as a big workflow command button or as a modest
+            hyperlink.
+        """
+
         options = self.options
         active = path == self.path
 
@@ -109,6 +159,23 @@ class Sidebar:
         withOptions=False,
         command=False,
     ):
+        """Produce a table entry.
+
+        A table entry is a link or button to show a table.
+
+        Parameters
+        ----------
+        table: string
+        prefix, item, postfix: string, optional `None`
+            These make up the text of the link in that order.
+            If `item` is left out, the tables.yaml file has a suitable
+            string under the key `items`
+        action: string {`my`, `our`, ...}, optional, `None`
+            If left out, all items will be retrieved. Otherwise, a selection is made.
+            See web.yaml under `listActions` for all possible values.
+            See also `controllers.table.Table.wrap`.
+        """
+
         control = self.control
 
         tableObj = mkTable(control, table)
@@ -125,6 +192,16 @@ class Sidebar:
         )
 
     def wrap(self):
+        """Wrap it all up.
+
+        Produce a list geared to the current user, with actions that make sense
+        to him/her.
+
+        Take care that only permitted actions are presented.
+
+        Actions that belong to workflow are presented as conspicuous workflow commands.
+        """
+
         control = self.control
         auth = control.auth
         isAuth = auth.authenticated()

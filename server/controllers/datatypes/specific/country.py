@@ -1,6 +1,6 @@
 from config import Config as C, Names as N
 from controllers.utils import pick as G, shiftRegional
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.value import Value
 
 
@@ -19,7 +19,7 @@ class Country(Value):
     def titleStr(self, record):
         """Puts the 2-letter iso code plus the flag characters in the title."""
 
-        iso = he(G(record, N.iso))
+        iso = H.he(G(record, N.iso))
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):

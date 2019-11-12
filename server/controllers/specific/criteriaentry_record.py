@@ -1,5 +1,5 @@
 from config import Config as C, Names as N
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.utils import pick as G, E, DOT, Q, NBSP
 from controllers.record import Record
 
@@ -69,7 +69,7 @@ class CriteriaEntryR(Record):
         evidence = H.div(self.field(N.evidence).wrap(asEdit=G(perm, N.isEdit)))
         entry = H.div(
             [
-                H.div(he(msg), cls="heavy") if msg else E,
+                H.div(H.he(msg), cls="heavy") if msg else E,
                 infoShow,
                 infoHide,
                 infoBody,

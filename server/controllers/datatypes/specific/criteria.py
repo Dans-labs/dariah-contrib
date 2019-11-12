@@ -1,6 +1,6 @@
 from config import Config as C, Names as N
 from controllers.utils import pick as G
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.value import Value
 
 
@@ -18,4 +18,4 @@ class Criteria(Value):
     def titleStr(self, record):
         """The title is the short criterion text."""
 
-        return he(G(record, N.criterion)) or Qq
+        return H.he(G(record, N.criterion)) or Qq

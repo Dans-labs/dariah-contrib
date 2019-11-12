@@ -1,4 +1,4 @@
-from controllers.html import htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.value import Value
 
 
@@ -24,4 +24,4 @@ class User(Value):
         control = self.control
         auth = control.auth
 
-        return he(auth.identity(record))
+        return H.he(auth.identity(record))

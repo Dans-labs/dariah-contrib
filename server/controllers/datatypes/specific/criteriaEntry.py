@@ -1,6 +1,6 @@
 from config import Config as C, Names as N
 from controllers.utils import pick as G
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.master import Master
 
 CW = C.web
@@ -21,7 +21,7 @@ class CriteriaEntry(Master):
         control = self.control
         types = control.types
 
-        seq = he(G(record, N.seq)) or Qn
+        seq = H.he(G(record, N.seq)) or Qn
         eid = G(record, N.criteria)
         title = Qq if eid is None else types.criteria.title(eid=eid)
         return f"""{seq}. {title}"""

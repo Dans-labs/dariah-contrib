@@ -1,5 +1,5 @@
 from config import Config as C, Names as N
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.utils import pick as G
 from controllers.datatypes.value import Value
 
@@ -20,6 +20,6 @@ class Score(Value):
         score = G(record, N.score)
         if score is None:
             return Qq
-        score = he(score)
-        level = he(G(record, N.level)) or Qq
+        score = H.he(score)
+        level = H.he(G(record, N.level)) or Qq
         return f"""{score} - {level}"""

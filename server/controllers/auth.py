@@ -467,12 +467,12 @@ class Auth:
         user = self.user
         return authenticated(user)
 
-    def coordinator(self, country=None):
+    def coordinator(self, countryId=None):
         """Is the current user a national coordinator?
 
         Parameters
         ----------
-        country: dict, optional `None`
+        countryId: dict, optional `None`
             If passed, it is the country of which the currently logged in
             user is supposed to be National Coordinator.
             Otherwise, the country of the logged in user will be used.
@@ -488,7 +488,7 @@ class Auth:
         """
 
         user = self.user
-        return coordinator(user, country)
+        return coordinator(user, countryId)
 
     def officeuser(self):
         """Is the current user a backoffice user?

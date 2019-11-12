@@ -39,10 +39,25 @@ LOGO = URLS[N.logo]
 
 
 class Topbar:
+    &#34;&#34;&#34;Present the topbar on the interface.
+
+    It shows the current user, buttons to log in/out and a logo.
+    &#34;&#34;&#34;
+
     def __init__(self, control):
+        &#34;&#34;&#34;Store the incoming information.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        &#34;&#34;&#34;
+
         self.control = control
 
     def wrap(self):
+        &#34;&#34;&#34;Wrap it all up.&#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
 
@@ -98,16 +113,38 @@ class Topbar:
 <span>(</span><span>control)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Present the topbar on the interface.</p>
+<p>It shows the current user, buttons to log in/out and a logo.</p>
+<p>Store the incoming information.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>control</code></strong> :&ensp;<code>object</code></dt>
+<dd>A <a title="controllers.control.Control" href="control.html#controllers.control.Control"><code>Control</code></a> singleton</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Topbar:
+    &#34;&#34;&#34;Present the topbar on the interface.
+
+    It shows the current user, buttons to log in/out and a logo.
+    &#34;&#34;&#34;
+
     def __init__(self, control):
+        &#34;&#34;&#34;Store the incoming information.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        &#34;&#34;&#34;
+
         self.control = control
 
     def wrap(self):
+        &#34;&#34;&#34;Wrap it all up.&#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
 
@@ -154,12 +191,14 @@ class Topbar:
 <span>def <span class="ident">wrap</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap it all up.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrap(self):
+    &#34;&#34;&#34;Wrap it all up.&#34;&#34;&#34;
+
     control = self.control
     auth = control.auth
 

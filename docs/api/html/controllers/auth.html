@@ -493,12 +493,12 @@ class Auth:
         user = self.user
         return authenticated(user)
 
-    def coordinator(self, country=None):
+    def coordinator(self, countryId=None):
         &#34;&#34;&#34;Is the current user a national coordinator?
 
         Parameters
         ----------
-        country: dict, optional `None`
+        countryId: dict, optional `None`
             If passed, it is the country of which the currently logged in
             user is supposed to be National Coordinator.
             Otherwise, the country of the logged in user will be used.
@@ -514,7 +514,7 @@ class Auth:
         &#34;&#34;&#34;
 
         user = self.user
-        return coordinator(user, country)
+        return coordinator(user, countryId)
 
     def officeuser(self):
         &#34;&#34;&#34;Is the current user a backoffice user?
@@ -1056,12 +1056,12 @@ info from the database and store user info there.</dd>
         user = self.user
         return authenticated(user)
 
-    def coordinator(self, country=None):
+    def coordinator(self, countryId=None):
         &#34;&#34;&#34;Is the current user a national coordinator?
 
         Parameters
         ----------
-        country: dict, optional `None`
+        countryId: dict, optional `None`
             If passed, it is the country of which the currently logged in
             user is supposed to be National Coordinator.
             Otherwise, the country of the logged in user will be used.
@@ -1077,7 +1077,7 @@ info from the database and store user info there.</dd>
         &#34;&#34;&#34;
 
         user = self.user
-        return coordinator(user, country)
+        return coordinator(user, countryId)
 
     def officeuser(self):
         &#34;&#34;&#34;Is the current user a backoffice user?
@@ -1343,13 +1343,13 @@ for an unauthenticated user will take their place.</p></section>
 </details>
 </dd>
 <dt id="controllers.auth.Auth.coordinator"><code class="name flex">
-<span>def <span class="ident">coordinator</span></span>(<span>self, country=None)</span>
+<span>def <span class="ident">coordinator</span></span>(<span>self, countryId=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Is the current user a national coordinator?</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>country</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
+<dt><strong><code>countryId</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
 <dd>If passed, it is the country of which the currently logged in
 user is supposed to be National Coordinator.
 Otherwise, the country of the logged in user will be used.</dd>
@@ -1369,12 +1369,12 @@ of his/her country in greater detail, but not those of other countries.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def coordinator(self, country=None):
+<pre><code class="python">def coordinator(self, countryId=None):
     &#34;&#34;&#34;Is the current user a national coordinator?
 
     Parameters
     ----------
-    country: dict, optional `None`
+    countryId: dict, optional `None`
         If passed, it is the country of which the currently logged in
         user is supposed to be National Coordinator.
         Otherwise, the country of the logged in user will be used.
@@ -1390,7 +1390,7 @@ of his/her country in greater detail, but not those of other countries.</p>
     &#34;&#34;&#34;
 
     user = self.user
-    return coordinator(user, country)</code></pre>
+    return coordinator(user, countryId)</code></pre>
 </details>
 </dd>
 <dt id="controllers.auth.Auth.country"><code class="name flex">

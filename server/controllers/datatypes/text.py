@@ -3,7 +3,7 @@ import re
 from markdown import markdown
 
 from config import Config as C, Names as N
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.utils import E, DOT
 from controllers.datatypes.base import TypeBase
 
@@ -49,7 +49,7 @@ class Url(Text):
         if val is None:
             return QQ
 
-        val = he(self.normalize(str(val)))
+        val = H.he(self.normalize(str(val)))
         return H.a(val, val)
 
 
@@ -68,7 +68,7 @@ class Email(Text):
         if val is None:
             return QQ
 
-        val = he(self.normalize(str(val)))
+        val = H.he(self.normalize(str(val)))
         return H.a(val, val)
 
 

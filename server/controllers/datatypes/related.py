@@ -1,6 +1,6 @@
 from config import Config as C, Names as N
 from controllers.utils import pick as G, E
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.base import TypeBase
 
 
@@ -28,7 +28,7 @@ class Related(TypeBase):
         return self.title(eid=val, markup=True)[1]
 
     def titleStr(self, record):
-        return he(G(record, N.title)) or he(G(record, N.rep)) or Qq
+        return H.he(G(record, N.title)) or H.he(G(record, N.rep)) or Qq
 
     def titleHint(self, record):
         return None

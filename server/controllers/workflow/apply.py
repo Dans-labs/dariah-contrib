@@ -276,7 +276,7 @@ class WorkflowItem:
 
         myKind = self.mykind
 
-        (locked, frozen, mayAdd, stage, stageDate, creators, country) = self.info(
+        (locked, frozen, mayAdd, stage, stageDate, creators, countryId) = self.info(
             table,
             N.locked,
             N.frozen,
@@ -288,7 +288,7 @@ class WorkflowItem:
             kind=kind,
         )
 
-        isCoord = auth.coordinator(country=country)
+        isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
         commandInfo = allowedCommands[command]
@@ -391,7 +391,7 @@ class WorkflowItem:
 
         The stage of a record is stored in the workflow attribute `stage`,
         so the only thing needed is to ask for that attribute with
-        `controllers.workflow.apply.info`.
+        `controllers.workflow.apply.WorkflowItem.info`.
 
         Parameters
         ----------
