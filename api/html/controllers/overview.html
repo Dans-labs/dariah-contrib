@@ -1,0 +1,2208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>controllers.overview API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>controllers.overview</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import json
+from flask import request, make_response
+
+from config import Config as C, Names as N
+from controllers.utils import pick as G, E, NBSP
+from controllers.html import HtmlElements as H
+
+
+CT = C.tables
+CW = C.web
+
+PAGE = G(G(CW.urls, N.info), N.url)
+PAGEX = f&#34;{PAGE}.tsv&#34;
+
+COL_PLURAL = dict(country=&#34;countries&#34;,)
+
+COLSPECS = (
+    (&#34;country&#34;, str),
+    (&#34;vcc&#34;, str, &#34;VCC&#34;),
+    (&#34;year&#34;, int),
+    (&#34;type&#34;, str),
+    (&#34;cost&#34;, int, &#34;cost (€)&#34;),
+    (&#34;assessed&#34;, tuple),
+    (&#34;selected&#34;, bool),
+    (&#34;title&#34;, str),
+)
+
+GROUP_COLS = &#34;&#34;&#34;
+      country
+      vcc
+      year
+      type
+      assessed
+      selected
+&#34;&#34;&#34;.strip().split()
+
+SUBHEAD_X_COLS = set(
+    &#34;&#34;&#34;
+  cost
+  title
+&#34;&#34;&#34;.strip().split()
+)
+
+ASSESSED_STATUS = {
+    None: (&#34;no&#34;, &#34;a-none&#34;),
+    N.incomplete: (&#34;started&#34;, &#34;a-started&#34;),
+    N.incompleteRevised: (&#34;revision&#34;, &#34;a-started&#34;),
+    N.complete: (&#34;submitted&#34;, &#34;a-self&#34;),
+    N.completeRevised: (&#34;revised&#34;, &#34;a-self&#34;),
+    N.submitted: (&#34;in review&#34;, &#34;a-inreview&#34;),
+    N.submittedRevised: (&#34;in review&#34;, &#34;a-inreview&#34;),
+    N.reviewReject: (&#34;rejected&#34;, &#34;a-rejected&#34;),
+    N.reviewAccept: (&#34;accepted&#34;, &#34;a-accepted&#34;),
+}
+ASSESSED_LABELS = {stage: info[0] for (stage, info) in ASSESSED_STATUS.items()}
+ASSESSED_CLASS = {stage: info[1] for (stage, info) in ASSESSED_STATUS.items()}
+ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
+ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
+
+
+def wrapStatus(contrib, compact=True):
+    aStage = G(contrib, N.aStage)
+    score = G(contrib, N.score)
+    baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
+    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+    if compact:
+        aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
+    else:
+        aLabel = f&#34;{score}% - {baseLabel}&#34;
+    return (aLabel, aClass)
+
+
+class Overview:
+    def __init__(self, control):
+        self.control = control
+
+        types = control.types
+        self.bool3Obj = types.bool3
+        self.countryType = types.country
+        self.vccType = types.vcc
+        self.yearType = types.year
+        self.typeType = types.typeContribution
+
+    def getCountry(self, country):
+        control = self.control
+        db = control.db
+        auth = control.auth
+        user = auth.user
+        countryType = self.countryType
+
+        self.userGroup = auth.groupRep()
+        self.myCountry = auth.countryRep()
+
+        userCountryId = G(user, N.country)
+        chosenCountry = None
+        chosenCountryIso = None
+        chosenCountryId = None
+
+        countryId = G(db.countryInv, country) if country else userCountryId
+
+        if countryId is not None:
+            countryInfo = G(db.country, countryId, default={})
+            chosenCountry = countryType.titleStr(countryInfo)
+            chosenCountryIso = G(countryInfo, N.iso)
+
+        self.chosenCountry = chosenCountry
+        self.chosenCountryId = chosenCountryId
+        self.chosenCountryIso = chosenCountryIso
+
+    def getContribs(self):
+        control = self.control
+        db = control.db
+        chosenCountryId = self.chosenCountryId
+        countryType = self.countryType
+        vccType = self.vccType
+        yearType = self.yearType
+        typeType = self.typeType
+
+        contribs = {}
+        for record in db.bulkContribWorkflow(chosenCountryId):
+            contribId = G(record, N._id)
+
+            selected = G(record, N.selected)
+            aStage = G(record, N.aStage)
+            score = G(record, N.score)
+            assessed = ASSESSED_STATUS[aStage][0]
+            if assessed != N.reviewAccept:
+                score = None
+
+            countryRep = countryType.titleStr(G(db.country, G(record, N.country)))
+            yearRep = yearType.titleStr(G(db.year, G(record, N.year)))
+            typeRep = typeType.titleStr(
+                G(db.typeContribution, G(record, N.typeContribution))
+            )
+            vccRep = &#34; + &#34;.join(
+                vccType.titleStr(G(db.vcc, v)) for v in G(record, N.vcc, default=[])
+            )
+
+            contribs[contribId] = {
+                &#34;_id&#34;: contribId,
+                &#34;_cn&#34;: countryRep,
+                &#34;country&#34;: countryRep,
+                &#34;vcc&#34;: vccRep,
+                &#34;year&#34;: yearRep,
+                &#34;type&#34;: typeRep,
+                &#34;title&#34;: G(record, N.title),
+                &#34;cost&#34;: G(record, N.costTotal),
+                &#34;assessed&#34;: (assessed, score),
+                &#34;selected&#34;: selected,
+            }
+
+        self.contribs = contribs
+
+    def roTri(self, tri):
+        return self.bool3Obj.toDisplay(tri)
+
+    def wrap(self, asTsv=False):
+        control = self.control
+        db = control.db
+        auth = control.auth
+        countryType = self.countryType
+
+        self.isSuperUser = auth.superuser()
+        self.isCoord = auth.coordinator()
+
+        accessRep = auth.credentials()[1]
+
+        rawSortCol = request.args.get(&#34;sortcol&#34;, &#34;&#34;)
+        rawReverse = request.args.get(&#34;reverse&#34;, &#34;&#34;)
+        country = request.args.get(&#34;country&#34;, &#34;&#34;)
+        groups = request.args.get(&#34;groups&#34;, &#34;&#34;)
+
+        self.getCountry(country)
+        self.getContribs()
+
+        chosenCountry = self.chosenCountry
+        chosenCountryId = self.chosenCountryId
+        chosenCountryIso = self.chosenCountryIso
+
+        colSpecs = COLSPECS
+        groupCols = GROUP_COLS
+
+        if chosenCountryId is not None:
+            colSpecs = COLSPECS[1:]
+            groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+            groupCols = GROUP_COLS[1:]
+
+        cols = [c[0] for c in colSpecs]
+        colSet = {c[0] for c in colSpecs}
+
+        self.types = dict((c[0], c[1]) for c in colSpecs)
+        labels = dict((c[0], c[2] if len(c) &gt; 2 else c[0]) for c in colSpecs)
+        sortDefault = cols[-1]
+
+        allGroupSet = set(groupCols)
+        groupsChosen = [] if not groups else groups.split(&#34;,&#34;)
+        groupSet = set(groupsChosen)
+        groupStr = (&#34;-by-&#34; if groupSet else &#34;&#34;) + &#34;-&#34;.join(sorted(groupSet))
+
+        sortCol = sortDefault if rawSortCol not in colSet else rawSortCol
+        reverse = False if rawReverse not in {&#34;-1&#34;, &#34;1&#34;} else rawReverse == &#34;-1&#34;
+
+        self.cols = cols
+        self.labels = labels
+        self.groupCols = groupCols
+        self.sortCol = sortCol
+        self.reverse = reverse
+
+        material = []
+        if not asTsv:
+            material.append(H.h(3, &#34;&#34;&#34;Country selection&#34;&#34;&#34;))
+
+            countryItems = []
+            for (cid, countryInfo) in db.country.items():
+                if not G(countryInfo, N.isMember):
+                    continue
+                name = countryType.titleStr(countryInfo)
+                iso = G(countryInfo, N.iso)
+
+                countryItems.append(
+                    H.span(name, cls=&#34;c-focus&#34;)
+                    if cid == chosenCountryId
+                    else H.a(
+                        name,
+                        (
+                            f&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;
+                            f&#34;reverse={rawReverse}&amp;groups={groups}&#34;
+                        ),
+                        cls=&#34;c-control&#34;,
+                    )
+                )
+            material.append(H.p(countryItems, cls=&#34;countries&#34;))
+
+        groupsAvailable = sorted(allGroupSet - set(groupsChosen))
+        groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
+
+        if not asTsv:
+            urlArgs = (
+                f&#34;?country={chosenCountryIso}&amp;&#34;
+                f&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;
+            )
+            urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
+            urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
+            availableReps = E.join(
+                H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+                for g in groupsAvailable
+            )
+            chosenReps = E.join(
+                H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+                for g in groupsChosen
+            )
+            clearGroups = (
+                &#34;&#34;
+                if len(chosenReps) == 0
+                else H.iconx(
+                    N.clear, (f&#34;{urlStart1}&#34;), cls=&#34;g-x&#34;, title=&#34;clear all groups&#34;
+                )
+            )
+            rArgs = f&#34;{urlArgs}groups={groups}&#34;
+
+        headerLine = self.ourCountryHeaders(
+            country, groups, asTsv, groupOrder=groupOrder,
+        )
+
+        if not asTsv:
+            material.append(H.h(3, &#34;Grouping&#34;))
+            material.append(
+                H.table(
+                    [],
+                    [
+                        (
+                            [
+                                (&#34;available groups&#34;, dict(cls=&#34;mtl&#34;)),
+                                (availableReps, dict(cls=&#34;mtd&#34;)),
+                                (NBSP, {}),
+                            ],
+                            {},
+                        ),
+                        (
+                            [
+                                (&#34;chosen groups&#34;, dict(cls=&#34;mtl&#34;)),
+                                (chosenReps, dict(cls=&#34;mtd&#34;)),
+                                (clearGroups, {}),
+                            ],
+                            {},
+                        ),
+                    ],
+                    cls=&#34;mt&#34;,
+                )
+            )
+            material.append(
+                H.h(
+                    3,
+                    [
+                        f&#34;Contributions from {chosenCountry}&#34;,
+                        H.a(
+                            &#34;Download as Excel&#34;,
+                            f&#34;{PAGEX}{rArgs}&#34;,
+                            target=&#34;_blank&#34;,
+                            cls=&#34;button large&#34;,
+                        ),
+                    ],
+                )
+            )
+
+        (thisMaterial, groupRel) = self.groupList(
+            groupsChosen, chosenCountry, chosenCountry, asTsv,
+        )
+
+        if asTsv:
+            material.append(thisMaterial)
+        else:
+            material.append(H.table([headerLine], thisMaterial, cls=&#34;cc&#34;))
+            material.append(groupRel)
+
+        if asTsv:
+            fileName = f&#39;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#39;
+            headers = {
+                &#34;Expires&#34;: &#34;0&#34;,
+                &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
+                &#34;Content-Type&#34;: &#34;text/csv&#34;,
+                &#34;Content-Disposition&#34;: f&#39;attachment; filename=&#34;{fileName}&#34;&#39;,
+                &#34;Content-Encoding&#34;: &#34;identity&#34;,
+            }
+            tsv = f&#34;\ufeff{headerLine}\n{E.join(material)}&#34;.encode(&#34;utf_16_le&#34;)
+            data = make_response(tsv, headers)
+        else:
+            data = E.join(material)
+        return data
+
+    def groupList(
+        self, groups, selectedCountry, chosenCountry, asTsv,
+    ):
+        cols = self.cols
+        groupCols = self.groupCols
+        contribs = self.contribs
+        sortCol = self.sortCol
+        reverse = self.reverse
+
+        if len(groups) == 0:
+            groupedList = sorted(
+                contribs.values(), key=self.contribKey(sortCol), reverse=reverse
+            )
+            if asTsv:
+                return (
+                    &#34;\n&#34;.join(
+                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        for contrib in groupedList
+                    ),
+                    &#34;&#34;,
+                )
+            else:
+                return (
+                    [
+                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        for contrib in groupedList
+                    ],
+                    &#34;&#34;,
+                )
+
+        preGroups = groups[0:-1]
+        lastGroup = groups[-1]
+
+        groupLen = len(groups)
+        groupSet = set(groups)
+        groupOrder = groups + [g for g in cols if g not in groupSet]
+
+        groupedList = {}
+
+        for c in contribs.values():
+            dest = groupedList
+            for g in preGroups:
+                dest = dest.setdefault(c.get(g, None), {})
+            dest = dest.setdefault(c.get(lastGroup, None), [])
+            dest.append(c)
+
+        material = []
+        maxGroupId = 1
+        groupRel = {}
+
+        def groupMaterial(gList, depth, groupValues, parentGroupId):
+            groupSet = set(groupValues.keys())
+
+            nonlocal maxGroupId
+            maxGroupId += 1
+            thisGroupId = maxGroupId
+            groupRel.setdefault(str(parentGroupId), []).append(str(thisGroupId))
+
+            headIndex = len(material)
+            material.append(&#34;-&#34; if asTsv else ([(&#34;-&#34;, {})], {}))
+            nRecords = 0
+            nGroups = 0
+            cost = 0
+            if type(gList) is list:
+                for rec in sorted(
+                    (
+                        {k: v for (k, v) in list(d.items()) if k not in groupValues}
+                        for d in gList
+                    ),
+                    key=self.contribKey(sortCol),
+                    reverse=reverse,
+                ):
+                    nRecords += 1
+                    nGroups += 1
+                    cost += rec.get(&#34;cost&#34;, 0) or 0
+                    material.append(
+                        self.formatContrib(
+                            rec,
+                            thisGroupId,
+                            chosenCountry,
+                            asTsv,
+                            groupOrder=groupOrder,
+                            hide=True,
+                        )
+                    )
+            else:
+                newGroup = groups[depth]
+                for groupValue in sorted(
+                    gList.keys(),
+                    key=self.contribKey(newGroup, individual=True),
+                    reverse=reverse,
+                ):
+                    nGroups += 1
+                    newGroupValues = {}
+                    newGroupValues.update(groupValues)
+                    newGroupValues[newGroup] = groupValue
+                    (nRecordsG, costG) = groupMaterial(
+                        gList[groupValue], depth + 1, newGroupValues, thisGroupId,
+                    )
+                    nRecords += nRecordsG
+                    cost += costG
+            groupValuesT = {}
+            if depth &gt; 0:
+                thisGroup = groups[depth - 1]
+                groupValuesT[thisGroup] = groupValues[thisGroup]
+            # groupValuesT.update(groupValues)
+            groupValuesT[&#34;cost&#34;] = cost
+            groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+            groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
+            if depth == 0:
+                for g in groupCols + [&#34;title&#34;]:
+                    label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
+                    controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                    groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
+            material[headIndex] = self.formatContrib(
+                groupValuesT,
+                parentGroupId,
+                chosenCountry,
+                asTsv,
+                groupOrder=groupOrder,
+                groupSet=groupSet,
+                subHead=True,
+                allHead=depth == 0,
+                groupLen=groupLen,
+                depth=depth,
+                thisGroupId=thisGroupId,
+                nGroups=nGroups,
+            )
+            return (nRecords, cost)
+
+        groupMaterial(groupedList, 0, {}, 1)
+        return (
+            E.join(material) if asTsv else material,
+            H.script(f&#34;var groupRel = {json.dumps(groupRel)}&#34;),
+        )
+
+    def formatContrib(
+        self,
+        contrib,
+        groupId,
+        chosenCountry,
+        asTsv,
+        groupOrder=None,
+        groupSet=set(),
+        subHead=False,
+        allHead=False,
+        groupLen=None,
+        depth=None,
+        thisGroupId=None,
+        nGroups=None,
+        hide=False,
+    ):
+        cols = self.cols
+
+        if groupOrder is None:
+            groupOrder = cols
+        contribId = contrib.get(&#34;_id&#34;, None)
+        if allHead:
+            selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
+            if asTsv:
+                selected = valTri(selected)
+            (assessedLabel, assessedClass) = wrapStatus(contrib)
+            assessedClass = &#34;&#34;
+        else:
+            selected = contrib.get(&#34;selected&#34;, None)
+            selected = (
+                (valTri(selected) if asTsv else self.roTri(selected))
+                if &#34;selected&#34; in contrib
+                else &#34;&#34;
+            )
+
+            (assessedLabel, assessedClass) = wrapStatus(contrib)
+        rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
+        title = (
+            rawTitle
+            if asTsv
+            else rawTitle
+            if subHead
+            else H.a(
+                f&#34;{rawTitle or &#39;? missing title ?&#39;}&#34;,
+                f&#34;/{N.contrib}/{N.item}/{contribId}&#34;,
+            )
+            if &#34;title&#34; in contrib
+            else &#34;&#34;
+        )
+
+        values = {
+            &#34;country&#34;: (contrib[&#34;country&#34;] or &#34;??&#34;) if &#34;country&#34; in contrib else &#34;&#34;,
+            &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
+            &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
+            &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
+            &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+            if &#34;cost&#34; in contrib
+            else &#34;&#34;,
+            &#34;assessed&#34;: assessedLabel,
+            &#34;selected&#34;: selected,
+            &#34;title&#34;: title,
+        }
+        recCountry = contrib.get(&#34;_cn&#34;, None) or values.get(&#34;country&#34;, None)
+        if depth is not None:
+            xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
+            xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
+            xRep = colRep(xName, nGroups)
+            values[xGroup] = (
+                xRep
+                if asTsv
+                else (
+                    f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                    if xGroup == &#34;title&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    if depth &gt; 0
+                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                )
+            )
+        if not asTsv:
+            classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
+            classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+        if asTsv:
+            columns = &#34;\t&#34;.join(
+                self.disclose(values, col, recCountry) for col in groupOrder
+            )
+        else:
+            columns = [
+                (
+                    self.disclose(values, col, recCountry),
+                    dict(
+                        cls=(
+                            &#34;{classes[col]} &#34;
+                            &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                        )
+                    ),
+                )
+                for col in groupOrder
+            ]
+        if not asTsv:
+            hideRep = &#34; hide&#34; if hide else &#34;&#34;
+            displayAtts = (
+                {} if groupId is None else dict(cls=f&#34;dd{hideRep}&#34;, gid=groupId)
+            )
+        return columns if asTsv else (columns, displayAtts)
+
+    def contribKey(self, col, individual=False):
+        types = self.types
+
+        colType = types[col]
+
+        def makeKey(contrib):
+            if col == &#34;assessed&#34;:
+                (stage, score) = contrib.get(col, (None, None))
+                return (ASSESSED_RANK.get(N.stage, 0), score)
+            value = contrib.get(col, None)
+            if value is None:
+                return &#34;&#34; if colType is str else 0
+            if colType is str:
+                return value.lower()
+            if colType is bool:
+                return 1 if value else -1
+            return value
+
+        def makeKeyInd(value):
+            if col == &#34;assessed&#34;:
+                return value
+            if value is None:
+                return &#34;&#34; if colType is str else 0
+            if colType is str:
+                return value.lower()
+            if colType is bool:
+                return 1 if value else -1
+            return value
+
+        return makeKeyInd if individual else makeKey
+
+    def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
+        cols = self.cols
+        labels = self.labels
+        sortCol = self.sortCol
+        reverse = self.reverse
+
+        if groupOrder is None:
+            groupOrder = cols
+
+        if asTsv:
+            headers = &#34;&#34;
+            sep = &#34;&#34;
+            for col in groupOrder:
+                label = labels[col]
+                colControl = label
+                headers += f&#34;{sep}{colControl}&#34;
+                sep = &#34;\t&#34;
+
+        else:
+            headers = []
+            dirClass = &#34;desc&#34; if reverse else &#34;asc&#34;
+            dirIcon = &#34;adown&#34; if reverse else &#34;aup&#34;
+            urlStart = f&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;
+            for col in groupOrder:
+                isSorted = col == sortCol
+                thisClass = f&#34;c-{col}&#34;
+                icon = E
+                if isSorted:
+                    thisClass += f&#34; {dirClass}&#34;
+                    nextReverse = not reverse
+                    icon = H.iconx(dirIcon)
+                else:
+                    nextReverse = False
+                reverseRep = -1 if nextReverse else 1
+                label = labels[col]
+                sep = NBSP if icon else E
+                colControl = H.a(
+                    f&#34;{label}{icon}&#34;, f&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;
+                )
+                headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
+            headers = (headers, {})
+
+        return headers
+
+    def disclose(self, values, colName, recCountry):
+        control = self.control
+        auth = control.auth
+        isSuperUser = self.isSuperUser
+        isCoord = auth.coordinator(country=recCountry)
+
+        disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
+        value = values[colName] if disclosed else &#34;undisclosed&#34;
+        return value
+
+
+def colRep(col, n):
+    itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
+    return f&#34;{n} {itemRep}&#34;
+
+
+def addGroup(groups, g):
+    return &#34;,&#34;.join(groups + [g])
+
+
+def rmGroup(groups, g):
+    return &#34;,&#34;.join(h for h in groups if h != g)
+
+
+def expandControls(gid, hide=False):
+    hideRep = &#34; hide&#34; if hide else &#34;&#34;
+    showRep = &#34;&#34; if hide else &#34; hide&#34;
+    return E.join(
+        (
+            H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
+            H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+        )
+    )
+
+
+def expandAcontrols(group):
+    return E.join(
+        (
+            H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
+            H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+        )
+    )
+
+
+def euro(amount, subHead):
+    return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;
+
+
+def valTri(tri):
+    return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;
+
+
+def subHeadClass(col, groupSet, subHead, allHead):
+    theClass = (
+        &#34;allhead&#34;
+        if allHead and col == &#34;selected&#34;
+        else &#34;subhead&#34;
+        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+        else &#34;&#34;
+    )
+    return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="controllers.overview.addGroup"><code class="name flex">
+<span>def <span class="ident">addGroup</span></span>(<span>groups, g)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def addGroup(groups, g):
+    return &#34;,&#34;.join(groups + [g])</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.colRep"><code class="name flex">
+<span>def <span class="ident">colRep</span></span>(<span>col, n)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def colRep(col, n):
+    itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
+    return f&#34;{n} {itemRep}&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.euro"><code class="name flex">
+<span>def <span class="ident">euro</span></span>(<span>amount, subHead)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def euro(amount, subHead):
+    return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.expandAcontrols"><code class="name flex">
+<span>def <span class="ident">expandAcontrols</span></span>(<span>group)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def expandAcontrols(group):
+    return E.join(
+        (
+            H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
+            H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.expandControls"><code class="name flex">
+<span>def <span class="ident">expandControls</span></span>(<span>gid, hide=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def expandControls(gid, hide=False):
+    hideRep = &#34; hide&#34; if hide else &#34;&#34;
+    showRep = &#34;&#34; if hide else &#34; hide&#34;
+    return E.join(
+        (
+            H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
+            H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.rmGroup"><code class="name flex">
+<span>def <span class="ident">rmGroup</span></span>(<span>groups, g)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rmGroup(groups, g):
+    return &#34;,&#34;.join(h for h in groups if h != g)</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.subHeadClass"><code class="name flex">
+<span>def <span class="ident">subHeadClass</span></span>(<span>col, groupSet, subHead, allHead)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def subHeadClass(col, groupSet, subHead, allHead):
+    theClass = (
+        &#34;allhead&#34;
+        if allHead and col == &#34;selected&#34;
+        else &#34;subhead&#34;
+        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+        else &#34;&#34;
+    )
+    return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.valTri"><code class="name flex">
+<span>def <span class="ident">valTri</span></span>(<span>tri)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def valTri(tri):
+    return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.wrapStatus"><code class="name flex">
+<span>def <span class="ident">wrapStatus</span></span>(<span>contrib, compact=True)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrapStatus(contrib, compact=True):
+    aStage = G(contrib, N.aStage)
+    score = G(contrib, N.score)
+    baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
+    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+    if compact:
+        aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
+    else:
+        aLabel = f&#34;{score}% - {baseLabel}&#34;
+    return (aLabel, aClass)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="controllers.overview.Overview"><code class="flex name class">
+<span>class <span class="ident">Overview</span></span>
+<span>(</span><span>control)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Overview:
+    def __init__(self, control):
+        self.control = control
+
+        types = control.types
+        self.bool3Obj = types.bool3
+        self.countryType = types.country
+        self.vccType = types.vcc
+        self.yearType = types.year
+        self.typeType = types.typeContribution
+
+    def getCountry(self, country):
+        control = self.control
+        db = control.db
+        auth = control.auth
+        user = auth.user
+        countryType = self.countryType
+
+        self.userGroup = auth.groupRep()
+        self.myCountry = auth.countryRep()
+
+        userCountryId = G(user, N.country)
+        chosenCountry = None
+        chosenCountryIso = None
+        chosenCountryId = None
+
+        countryId = G(db.countryInv, country) if country else userCountryId
+
+        if countryId is not None:
+            countryInfo = G(db.country, countryId, default={})
+            chosenCountry = countryType.titleStr(countryInfo)
+            chosenCountryIso = G(countryInfo, N.iso)
+
+        self.chosenCountry = chosenCountry
+        self.chosenCountryId = chosenCountryId
+        self.chosenCountryIso = chosenCountryIso
+
+    def getContribs(self):
+        control = self.control
+        db = control.db
+        chosenCountryId = self.chosenCountryId
+        countryType = self.countryType
+        vccType = self.vccType
+        yearType = self.yearType
+        typeType = self.typeType
+
+        contribs = {}
+        for record in db.bulkContribWorkflow(chosenCountryId):
+            contribId = G(record, N._id)
+
+            selected = G(record, N.selected)
+            aStage = G(record, N.aStage)
+            score = G(record, N.score)
+            assessed = ASSESSED_STATUS[aStage][0]
+            if assessed != N.reviewAccept:
+                score = None
+
+            countryRep = countryType.titleStr(G(db.country, G(record, N.country)))
+            yearRep = yearType.titleStr(G(db.year, G(record, N.year)))
+            typeRep = typeType.titleStr(
+                G(db.typeContribution, G(record, N.typeContribution))
+            )
+            vccRep = &#34; + &#34;.join(
+                vccType.titleStr(G(db.vcc, v)) for v in G(record, N.vcc, default=[])
+            )
+
+            contribs[contribId] = {
+                &#34;_id&#34;: contribId,
+                &#34;_cn&#34;: countryRep,
+                &#34;country&#34;: countryRep,
+                &#34;vcc&#34;: vccRep,
+                &#34;year&#34;: yearRep,
+                &#34;type&#34;: typeRep,
+                &#34;title&#34;: G(record, N.title),
+                &#34;cost&#34;: G(record, N.costTotal),
+                &#34;assessed&#34;: (assessed, score),
+                &#34;selected&#34;: selected,
+            }
+
+        self.contribs = contribs
+
+    def roTri(self, tri):
+        return self.bool3Obj.toDisplay(tri)
+
+    def wrap(self, asTsv=False):
+        control = self.control
+        db = control.db
+        auth = control.auth
+        countryType = self.countryType
+
+        self.isSuperUser = auth.superuser()
+        self.isCoord = auth.coordinator()
+
+        accessRep = auth.credentials()[1]
+
+        rawSortCol = request.args.get(&#34;sortcol&#34;, &#34;&#34;)
+        rawReverse = request.args.get(&#34;reverse&#34;, &#34;&#34;)
+        country = request.args.get(&#34;country&#34;, &#34;&#34;)
+        groups = request.args.get(&#34;groups&#34;, &#34;&#34;)
+
+        self.getCountry(country)
+        self.getContribs()
+
+        chosenCountry = self.chosenCountry
+        chosenCountryId = self.chosenCountryId
+        chosenCountryIso = self.chosenCountryIso
+
+        colSpecs = COLSPECS
+        groupCols = GROUP_COLS
+
+        if chosenCountryId is not None:
+            colSpecs = COLSPECS[1:]
+            groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+            groupCols = GROUP_COLS[1:]
+
+        cols = [c[0] for c in colSpecs]
+        colSet = {c[0] for c in colSpecs}
+
+        self.types = dict((c[0], c[1]) for c in colSpecs)
+        labels = dict((c[0], c[2] if len(c) &gt; 2 else c[0]) for c in colSpecs)
+        sortDefault = cols[-1]
+
+        allGroupSet = set(groupCols)
+        groupsChosen = [] if not groups else groups.split(&#34;,&#34;)
+        groupSet = set(groupsChosen)
+        groupStr = (&#34;-by-&#34; if groupSet else &#34;&#34;) + &#34;-&#34;.join(sorted(groupSet))
+
+        sortCol = sortDefault if rawSortCol not in colSet else rawSortCol
+        reverse = False if rawReverse not in {&#34;-1&#34;, &#34;1&#34;} else rawReverse == &#34;-1&#34;
+
+        self.cols = cols
+        self.labels = labels
+        self.groupCols = groupCols
+        self.sortCol = sortCol
+        self.reverse = reverse
+
+        material = []
+        if not asTsv:
+            material.append(H.h(3, &#34;&#34;&#34;Country selection&#34;&#34;&#34;))
+
+            countryItems = []
+            for (cid, countryInfo) in db.country.items():
+                if not G(countryInfo, N.isMember):
+                    continue
+                name = countryType.titleStr(countryInfo)
+                iso = G(countryInfo, N.iso)
+
+                countryItems.append(
+                    H.span(name, cls=&#34;c-focus&#34;)
+                    if cid == chosenCountryId
+                    else H.a(
+                        name,
+                        (
+                            f&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;
+                            f&#34;reverse={rawReverse}&amp;groups={groups}&#34;
+                        ),
+                        cls=&#34;c-control&#34;,
+                    )
+                )
+            material.append(H.p(countryItems, cls=&#34;countries&#34;))
+
+        groupsAvailable = sorted(allGroupSet - set(groupsChosen))
+        groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
+
+        if not asTsv:
+            urlArgs = (
+                f&#34;?country={chosenCountryIso}&amp;&#34;
+                f&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;
+            )
+            urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
+            urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
+            availableReps = E.join(
+                H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+                for g in groupsAvailable
+            )
+            chosenReps = E.join(
+                H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+                for g in groupsChosen
+            )
+            clearGroups = (
+                &#34;&#34;
+                if len(chosenReps) == 0
+                else H.iconx(
+                    N.clear, (f&#34;{urlStart1}&#34;), cls=&#34;g-x&#34;, title=&#34;clear all groups&#34;
+                )
+            )
+            rArgs = f&#34;{urlArgs}groups={groups}&#34;
+
+        headerLine = self.ourCountryHeaders(
+            country, groups, asTsv, groupOrder=groupOrder,
+        )
+
+        if not asTsv:
+            material.append(H.h(3, &#34;Grouping&#34;))
+            material.append(
+                H.table(
+                    [],
+                    [
+                        (
+                            [
+                                (&#34;available groups&#34;, dict(cls=&#34;mtl&#34;)),
+                                (availableReps, dict(cls=&#34;mtd&#34;)),
+                                (NBSP, {}),
+                            ],
+                            {},
+                        ),
+                        (
+                            [
+                                (&#34;chosen groups&#34;, dict(cls=&#34;mtl&#34;)),
+                                (chosenReps, dict(cls=&#34;mtd&#34;)),
+                                (clearGroups, {}),
+                            ],
+                            {},
+                        ),
+                    ],
+                    cls=&#34;mt&#34;,
+                )
+            )
+            material.append(
+                H.h(
+                    3,
+                    [
+                        f&#34;Contributions from {chosenCountry}&#34;,
+                        H.a(
+                            &#34;Download as Excel&#34;,
+                            f&#34;{PAGEX}{rArgs}&#34;,
+                            target=&#34;_blank&#34;,
+                            cls=&#34;button large&#34;,
+                        ),
+                    ],
+                )
+            )
+
+        (thisMaterial, groupRel) = self.groupList(
+            groupsChosen, chosenCountry, chosenCountry, asTsv,
+        )
+
+        if asTsv:
+            material.append(thisMaterial)
+        else:
+            material.append(H.table([headerLine], thisMaterial, cls=&#34;cc&#34;))
+            material.append(groupRel)
+
+        if asTsv:
+            fileName = f&#39;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#39;
+            headers = {
+                &#34;Expires&#34;: &#34;0&#34;,
+                &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
+                &#34;Content-Type&#34;: &#34;text/csv&#34;,
+                &#34;Content-Disposition&#34;: f&#39;attachment; filename=&#34;{fileName}&#34;&#39;,
+                &#34;Content-Encoding&#34;: &#34;identity&#34;,
+            }
+            tsv = f&#34;\ufeff{headerLine}\n{E.join(material)}&#34;.encode(&#34;utf_16_le&#34;)
+            data = make_response(tsv, headers)
+        else:
+            data = E.join(material)
+        return data
+
+    def groupList(
+        self, groups, selectedCountry, chosenCountry, asTsv,
+    ):
+        cols = self.cols
+        groupCols = self.groupCols
+        contribs = self.contribs
+        sortCol = self.sortCol
+        reverse = self.reverse
+
+        if len(groups) == 0:
+            groupedList = sorted(
+                contribs.values(), key=self.contribKey(sortCol), reverse=reverse
+            )
+            if asTsv:
+                return (
+                    &#34;\n&#34;.join(
+                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        for contrib in groupedList
+                    ),
+                    &#34;&#34;,
+                )
+            else:
+                return (
+                    [
+                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        for contrib in groupedList
+                    ],
+                    &#34;&#34;,
+                )
+
+        preGroups = groups[0:-1]
+        lastGroup = groups[-1]
+
+        groupLen = len(groups)
+        groupSet = set(groups)
+        groupOrder = groups + [g for g in cols if g not in groupSet]
+
+        groupedList = {}
+
+        for c in contribs.values():
+            dest = groupedList
+            for g in preGroups:
+                dest = dest.setdefault(c.get(g, None), {})
+            dest = dest.setdefault(c.get(lastGroup, None), [])
+            dest.append(c)
+
+        material = []
+        maxGroupId = 1
+        groupRel = {}
+
+        def groupMaterial(gList, depth, groupValues, parentGroupId):
+            groupSet = set(groupValues.keys())
+
+            nonlocal maxGroupId
+            maxGroupId += 1
+            thisGroupId = maxGroupId
+            groupRel.setdefault(str(parentGroupId), []).append(str(thisGroupId))
+
+            headIndex = len(material)
+            material.append(&#34;-&#34; if asTsv else ([(&#34;-&#34;, {})], {}))
+            nRecords = 0
+            nGroups = 0
+            cost = 0
+            if type(gList) is list:
+                for rec in sorted(
+                    (
+                        {k: v for (k, v) in list(d.items()) if k not in groupValues}
+                        for d in gList
+                    ),
+                    key=self.contribKey(sortCol),
+                    reverse=reverse,
+                ):
+                    nRecords += 1
+                    nGroups += 1
+                    cost += rec.get(&#34;cost&#34;, 0) or 0
+                    material.append(
+                        self.formatContrib(
+                            rec,
+                            thisGroupId,
+                            chosenCountry,
+                            asTsv,
+                            groupOrder=groupOrder,
+                            hide=True,
+                        )
+                    )
+            else:
+                newGroup = groups[depth]
+                for groupValue in sorted(
+                    gList.keys(),
+                    key=self.contribKey(newGroup, individual=True),
+                    reverse=reverse,
+                ):
+                    nGroups += 1
+                    newGroupValues = {}
+                    newGroupValues.update(groupValues)
+                    newGroupValues[newGroup] = groupValue
+                    (nRecordsG, costG) = groupMaterial(
+                        gList[groupValue], depth + 1, newGroupValues, thisGroupId,
+                    )
+                    nRecords += nRecordsG
+                    cost += costG
+            groupValuesT = {}
+            if depth &gt; 0:
+                thisGroup = groups[depth - 1]
+                groupValuesT[thisGroup] = groupValues[thisGroup]
+            # groupValuesT.update(groupValues)
+            groupValuesT[&#34;cost&#34;] = cost
+            groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+            groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
+            if depth == 0:
+                for g in groupCols + [&#34;title&#34;]:
+                    label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
+                    controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                    groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
+            material[headIndex] = self.formatContrib(
+                groupValuesT,
+                parentGroupId,
+                chosenCountry,
+                asTsv,
+                groupOrder=groupOrder,
+                groupSet=groupSet,
+                subHead=True,
+                allHead=depth == 0,
+                groupLen=groupLen,
+                depth=depth,
+                thisGroupId=thisGroupId,
+                nGroups=nGroups,
+            )
+            return (nRecords, cost)
+
+        groupMaterial(groupedList, 0, {}, 1)
+        return (
+            E.join(material) if asTsv else material,
+            H.script(f&#34;var groupRel = {json.dumps(groupRel)}&#34;),
+        )
+
+    def formatContrib(
+        self,
+        contrib,
+        groupId,
+        chosenCountry,
+        asTsv,
+        groupOrder=None,
+        groupSet=set(),
+        subHead=False,
+        allHead=False,
+        groupLen=None,
+        depth=None,
+        thisGroupId=None,
+        nGroups=None,
+        hide=False,
+    ):
+        cols = self.cols
+
+        if groupOrder is None:
+            groupOrder = cols
+        contribId = contrib.get(&#34;_id&#34;, None)
+        if allHead:
+            selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
+            if asTsv:
+                selected = valTri(selected)
+            (assessedLabel, assessedClass) = wrapStatus(contrib)
+            assessedClass = &#34;&#34;
+        else:
+            selected = contrib.get(&#34;selected&#34;, None)
+            selected = (
+                (valTri(selected) if asTsv else self.roTri(selected))
+                if &#34;selected&#34; in contrib
+                else &#34;&#34;
+            )
+
+            (assessedLabel, assessedClass) = wrapStatus(contrib)
+        rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
+        title = (
+            rawTitle
+            if asTsv
+            else rawTitle
+            if subHead
+            else H.a(
+                f&#34;{rawTitle or &#39;? missing title ?&#39;}&#34;,
+                f&#34;/{N.contrib}/{N.item}/{contribId}&#34;,
+            )
+            if &#34;title&#34; in contrib
+            else &#34;&#34;
+        )
+
+        values = {
+            &#34;country&#34;: (contrib[&#34;country&#34;] or &#34;??&#34;) if &#34;country&#34; in contrib else &#34;&#34;,
+            &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
+            &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
+            &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
+            &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+            if &#34;cost&#34; in contrib
+            else &#34;&#34;,
+            &#34;assessed&#34;: assessedLabel,
+            &#34;selected&#34;: selected,
+            &#34;title&#34;: title,
+        }
+        recCountry = contrib.get(&#34;_cn&#34;, None) or values.get(&#34;country&#34;, None)
+        if depth is not None:
+            xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
+            xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
+            xRep = colRep(xName, nGroups)
+            values[xGroup] = (
+                xRep
+                if asTsv
+                else (
+                    f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                    if xGroup == &#34;title&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    if depth &gt; 0
+                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                )
+            )
+        if not asTsv:
+            classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
+            classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+        if asTsv:
+            columns = &#34;\t&#34;.join(
+                self.disclose(values, col, recCountry) for col in groupOrder
+            )
+        else:
+            columns = [
+                (
+                    self.disclose(values, col, recCountry),
+                    dict(
+                        cls=(
+                            &#34;{classes[col]} &#34;
+                            &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                        )
+                    ),
+                )
+                for col in groupOrder
+            ]
+        if not asTsv:
+            hideRep = &#34; hide&#34; if hide else &#34;&#34;
+            displayAtts = (
+                {} if groupId is None else dict(cls=f&#34;dd{hideRep}&#34;, gid=groupId)
+            )
+        return columns if asTsv else (columns, displayAtts)
+
+    def contribKey(self, col, individual=False):
+        types = self.types
+
+        colType = types[col]
+
+        def makeKey(contrib):
+            if col == &#34;assessed&#34;:
+                (stage, score) = contrib.get(col, (None, None))
+                return (ASSESSED_RANK.get(N.stage, 0), score)
+            value = contrib.get(col, None)
+            if value is None:
+                return &#34;&#34; if colType is str else 0
+            if colType is str:
+                return value.lower()
+            if colType is bool:
+                return 1 if value else -1
+            return value
+
+        def makeKeyInd(value):
+            if col == &#34;assessed&#34;:
+                return value
+            if value is None:
+                return &#34;&#34; if colType is str else 0
+            if colType is str:
+                return value.lower()
+            if colType is bool:
+                return 1 if value else -1
+            return value
+
+        return makeKeyInd if individual else makeKey
+
+    def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
+        cols = self.cols
+        labels = self.labels
+        sortCol = self.sortCol
+        reverse = self.reverse
+
+        if groupOrder is None:
+            groupOrder = cols
+
+        if asTsv:
+            headers = &#34;&#34;
+            sep = &#34;&#34;
+            for col in groupOrder:
+                label = labels[col]
+                colControl = label
+                headers += f&#34;{sep}{colControl}&#34;
+                sep = &#34;\t&#34;
+
+        else:
+            headers = []
+            dirClass = &#34;desc&#34; if reverse else &#34;asc&#34;
+            dirIcon = &#34;adown&#34; if reverse else &#34;aup&#34;
+            urlStart = f&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;
+            for col in groupOrder:
+                isSorted = col == sortCol
+                thisClass = f&#34;c-{col}&#34;
+                icon = E
+                if isSorted:
+                    thisClass += f&#34; {dirClass}&#34;
+                    nextReverse = not reverse
+                    icon = H.iconx(dirIcon)
+                else:
+                    nextReverse = False
+                reverseRep = -1 if nextReverse else 1
+                label = labels[col]
+                sep = NBSP if icon else E
+                colControl = H.a(
+                    f&#34;{label}{icon}&#34;, f&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;
+                )
+                headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
+            headers = (headers, {})
+
+        return headers
+
+    def disclose(self, values, colName, recCountry):
+        control = self.control
+        auth = control.auth
+        isSuperUser = self.isSuperUser
+        isCoord = auth.coordinator(country=recCountry)
+
+        disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
+        value = values[colName] if disclosed else &#34;undisclosed&#34;
+        return value</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="controllers.overview.Overview.contribKey"><code class="name flex">
+<span>def <span class="ident">contribKey</span></span>(<span>self, col, individual=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def contribKey(self, col, individual=False):
+    types = self.types
+
+    colType = types[col]
+
+    def makeKey(contrib):
+        if col == &#34;assessed&#34;:
+            (stage, score) = contrib.get(col, (None, None))
+            return (ASSESSED_RANK.get(N.stage, 0), score)
+        value = contrib.get(col, None)
+        if value is None:
+            return &#34;&#34; if colType is str else 0
+        if colType is str:
+            return value.lower()
+        if colType is bool:
+            return 1 if value else -1
+        return value
+
+    def makeKeyInd(value):
+        if col == &#34;assessed&#34;:
+            return value
+        if value is None:
+            return &#34;&#34; if colType is str else 0
+        if colType is str:
+            return value.lower()
+        if colType is bool:
+            return 1 if value else -1
+        return value
+
+    return makeKeyInd if individual else makeKey</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.disclose"><code class="name flex">
+<span>def <span class="ident">disclose</span></span>(<span>self, values, colName, recCountry)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def disclose(self, values, colName, recCountry):
+    control = self.control
+    auth = control.auth
+    isSuperUser = self.isSuperUser
+    isCoord = auth.coordinator(country=recCountry)
+
+    disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
+    value = values[colName] if disclosed else &#34;undisclosed&#34;
+    return value</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.formatContrib"><code class="name flex">
+<span>def <span class="ident">formatContrib</span></span>(<span>self, contrib, groupId, chosenCountry, asTsv, groupOrder=None, groupSet=set(), subHead=False, allHead=False, groupLen=None, depth=None, thisGroupId=None, nGroups=None, hide=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def formatContrib(
+    self,
+    contrib,
+    groupId,
+    chosenCountry,
+    asTsv,
+    groupOrder=None,
+    groupSet=set(),
+    subHead=False,
+    allHead=False,
+    groupLen=None,
+    depth=None,
+    thisGroupId=None,
+    nGroups=None,
+    hide=False,
+):
+    cols = self.cols
+
+    if groupOrder is None:
+        groupOrder = cols
+    contribId = contrib.get(&#34;_id&#34;, None)
+    if allHead:
+        selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
+        if asTsv:
+            selected = valTri(selected)
+        (assessedLabel, assessedClass) = wrapStatus(contrib)
+        assessedClass = &#34;&#34;
+    else:
+        selected = contrib.get(&#34;selected&#34;, None)
+        selected = (
+            (valTri(selected) if asTsv else self.roTri(selected))
+            if &#34;selected&#34; in contrib
+            else &#34;&#34;
+        )
+
+        (assessedLabel, assessedClass) = wrapStatus(contrib)
+    rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
+    title = (
+        rawTitle
+        if asTsv
+        else rawTitle
+        if subHead
+        else H.a(
+            f&#34;{rawTitle or &#39;? missing title ?&#39;}&#34;,
+            f&#34;/{N.contrib}/{N.item}/{contribId}&#34;,
+        )
+        if &#34;title&#34; in contrib
+        else &#34;&#34;
+    )
+
+    values = {
+        &#34;country&#34;: (contrib[&#34;country&#34;] or &#34;??&#34;) if &#34;country&#34; in contrib else &#34;&#34;,
+        &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
+        &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
+        &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
+        &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+        if &#34;cost&#34; in contrib
+        else &#34;&#34;,
+        &#34;assessed&#34;: assessedLabel,
+        &#34;selected&#34;: selected,
+        &#34;title&#34;: title,
+    }
+    recCountry = contrib.get(&#34;_cn&#34;, None) or values.get(&#34;country&#34;, None)
+    if depth is not None:
+        xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
+        xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
+        xRep = colRep(xName, nGroups)
+        values[xGroup] = (
+            xRep
+            if asTsv
+            else (
+                f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                if xGroup == &#34;title&#34;
+                else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                if depth &gt; 0
+                else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+            )
+        )
+    if not asTsv:
+        classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
+        classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+    if asTsv:
+        columns = &#34;\t&#34;.join(
+            self.disclose(values, col, recCountry) for col in groupOrder
+        )
+    else:
+        columns = [
+            (
+                self.disclose(values, col, recCountry),
+                dict(
+                    cls=(
+                        &#34;{classes[col]} &#34;
+                        &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                    )
+                ),
+            )
+            for col in groupOrder
+        ]
+    if not asTsv:
+        hideRep = &#34; hide&#34; if hide else &#34;&#34;
+        displayAtts = (
+            {} if groupId is None else dict(cls=f&#34;dd{hideRep}&#34;, gid=groupId)
+        )
+    return columns if asTsv else (columns, displayAtts)</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.getContribs"><code class="name flex">
+<span>def <span class="ident">getContribs</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getContribs(self):
+    control = self.control
+    db = control.db
+    chosenCountryId = self.chosenCountryId
+    countryType = self.countryType
+    vccType = self.vccType
+    yearType = self.yearType
+    typeType = self.typeType
+
+    contribs = {}
+    for record in db.bulkContribWorkflow(chosenCountryId):
+        contribId = G(record, N._id)
+
+        selected = G(record, N.selected)
+        aStage = G(record, N.aStage)
+        score = G(record, N.score)
+        assessed = ASSESSED_STATUS[aStage][0]
+        if assessed != N.reviewAccept:
+            score = None
+
+        countryRep = countryType.titleStr(G(db.country, G(record, N.country)))
+        yearRep = yearType.titleStr(G(db.year, G(record, N.year)))
+        typeRep = typeType.titleStr(
+            G(db.typeContribution, G(record, N.typeContribution))
+        )
+        vccRep = &#34; + &#34;.join(
+            vccType.titleStr(G(db.vcc, v)) for v in G(record, N.vcc, default=[])
+        )
+
+        contribs[contribId] = {
+            &#34;_id&#34;: contribId,
+            &#34;_cn&#34;: countryRep,
+            &#34;country&#34;: countryRep,
+            &#34;vcc&#34;: vccRep,
+            &#34;year&#34;: yearRep,
+            &#34;type&#34;: typeRep,
+            &#34;title&#34;: G(record, N.title),
+            &#34;cost&#34;: G(record, N.costTotal),
+            &#34;assessed&#34;: (assessed, score),
+            &#34;selected&#34;: selected,
+        }
+
+    self.contribs = contribs</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.getCountry"><code class="name flex">
+<span>def <span class="ident">getCountry</span></span>(<span>self, country)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getCountry(self, country):
+    control = self.control
+    db = control.db
+    auth = control.auth
+    user = auth.user
+    countryType = self.countryType
+
+    self.userGroup = auth.groupRep()
+    self.myCountry = auth.countryRep()
+
+    userCountryId = G(user, N.country)
+    chosenCountry = None
+    chosenCountryIso = None
+    chosenCountryId = None
+
+    countryId = G(db.countryInv, country) if country else userCountryId
+
+    if countryId is not None:
+        countryInfo = G(db.country, countryId, default={})
+        chosenCountry = countryType.titleStr(countryInfo)
+        chosenCountryIso = G(countryInfo, N.iso)
+
+    self.chosenCountry = chosenCountry
+    self.chosenCountryId = chosenCountryId
+    self.chosenCountryIso = chosenCountryIso</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.groupList"><code class="name flex">
+<span>def <span class="ident">groupList</span></span>(<span>self, groups, selectedCountry, chosenCountry, asTsv)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def groupList(
+    self, groups, selectedCountry, chosenCountry, asTsv,
+):
+    cols = self.cols
+    groupCols = self.groupCols
+    contribs = self.contribs
+    sortCol = self.sortCol
+    reverse = self.reverse
+
+    if len(groups) == 0:
+        groupedList = sorted(
+            contribs.values(), key=self.contribKey(sortCol), reverse=reverse
+        )
+        if asTsv:
+            return (
+                &#34;\n&#34;.join(
+                    self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                    for contrib in groupedList
+                ),
+                &#34;&#34;,
+            )
+        else:
+            return (
+                [
+                    self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                    for contrib in groupedList
+                ],
+                &#34;&#34;,
+            )
+
+    preGroups = groups[0:-1]
+    lastGroup = groups[-1]
+
+    groupLen = len(groups)
+    groupSet = set(groups)
+    groupOrder = groups + [g for g in cols if g not in groupSet]
+
+    groupedList = {}
+
+    for c in contribs.values():
+        dest = groupedList
+        for g in preGroups:
+            dest = dest.setdefault(c.get(g, None), {})
+        dest = dest.setdefault(c.get(lastGroup, None), [])
+        dest.append(c)
+
+    material = []
+    maxGroupId = 1
+    groupRel = {}
+
+    def groupMaterial(gList, depth, groupValues, parentGroupId):
+        groupSet = set(groupValues.keys())
+
+        nonlocal maxGroupId
+        maxGroupId += 1
+        thisGroupId = maxGroupId
+        groupRel.setdefault(str(parentGroupId), []).append(str(thisGroupId))
+
+        headIndex = len(material)
+        material.append(&#34;-&#34; if asTsv else ([(&#34;-&#34;, {})], {}))
+        nRecords = 0
+        nGroups = 0
+        cost = 0
+        if type(gList) is list:
+            for rec in sorted(
+                (
+                    {k: v for (k, v) in list(d.items()) if k not in groupValues}
+                    for d in gList
+                ),
+                key=self.contribKey(sortCol),
+                reverse=reverse,
+            ):
+                nRecords += 1
+                nGroups += 1
+                cost += rec.get(&#34;cost&#34;, 0) or 0
+                material.append(
+                    self.formatContrib(
+                        rec,
+                        thisGroupId,
+                        chosenCountry,
+                        asTsv,
+                        groupOrder=groupOrder,
+                        hide=True,
+                    )
+                )
+        else:
+            newGroup = groups[depth]
+            for groupValue in sorted(
+                gList.keys(),
+                key=self.contribKey(newGroup, individual=True),
+                reverse=reverse,
+            ):
+                nGroups += 1
+                newGroupValues = {}
+                newGroupValues.update(groupValues)
+                newGroupValues[newGroup] = groupValue
+                (nRecordsG, costG) = groupMaterial(
+                    gList[groupValue], depth + 1, newGroupValues, thisGroupId,
+                )
+                nRecords += nRecordsG
+                cost += costG
+        groupValuesT = {}
+        if depth &gt; 0:
+            thisGroup = groups[depth - 1]
+            groupValuesT[thisGroup] = groupValues[thisGroup]
+        # groupValuesT.update(groupValues)
+        groupValuesT[&#34;cost&#34;] = cost
+        groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+        groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
+        if depth == 0:
+            for g in groupCols + [&#34;title&#34;]:
+                label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
+                controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
+        material[headIndex] = self.formatContrib(
+            groupValuesT,
+            parentGroupId,
+            chosenCountry,
+            asTsv,
+            groupOrder=groupOrder,
+            groupSet=groupSet,
+            subHead=True,
+            allHead=depth == 0,
+            groupLen=groupLen,
+            depth=depth,
+            thisGroupId=thisGroupId,
+            nGroups=nGroups,
+        )
+        return (nRecords, cost)
+
+    groupMaterial(groupedList, 0, {}, 1)
+    return (
+        E.join(material) if asTsv else material,
+        H.script(f&#34;var groupRel = {json.dumps(groupRel)}&#34;),
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.ourCountryHeaders"><code class="name flex">
+<span>def <span class="ident">ourCountryHeaders</span></span>(<span>self, country, groups, asTsv, groupOrder=None)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
+    cols = self.cols
+    labels = self.labels
+    sortCol = self.sortCol
+    reverse = self.reverse
+
+    if groupOrder is None:
+        groupOrder = cols
+
+    if asTsv:
+        headers = &#34;&#34;
+        sep = &#34;&#34;
+        for col in groupOrder:
+            label = labels[col]
+            colControl = label
+            headers += f&#34;{sep}{colControl}&#34;
+            sep = &#34;\t&#34;
+
+    else:
+        headers = []
+        dirClass = &#34;desc&#34; if reverse else &#34;asc&#34;
+        dirIcon = &#34;adown&#34; if reverse else &#34;aup&#34;
+        urlStart = f&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;
+        for col in groupOrder:
+            isSorted = col == sortCol
+            thisClass = f&#34;c-{col}&#34;
+            icon = E
+            if isSorted:
+                thisClass += f&#34; {dirClass}&#34;
+                nextReverse = not reverse
+                icon = H.iconx(dirIcon)
+            else:
+                nextReverse = False
+            reverseRep = -1 if nextReverse else 1
+            label = labels[col]
+            sep = NBSP if icon else E
+            colControl = H.a(
+                f&#34;{label}{icon}&#34;, f&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;
+            )
+            headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
+        headers = (headers, {})
+
+    return headers</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.roTri"><code class="name flex">
+<span>def <span class="ident">roTri</span></span>(<span>self, tri)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def roTri(self, tri):
+    return self.bool3Obj.toDisplay(tri)</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>self, asTsv=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap(self, asTsv=False):
+    control = self.control
+    db = control.db
+    auth = control.auth
+    countryType = self.countryType
+
+    self.isSuperUser = auth.superuser()
+    self.isCoord = auth.coordinator()
+
+    accessRep = auth.credentials()[1]
+
+    rawSortCol = request.args.get(&#34;sortcol&#34;, &#34;&#34;)
+    rawReverse = request.args.get(&#34;reverse&#34;, &#34;&#34;)
+    country = request.args.get(&#34;country&#34;, &#34;&#34;)
+    groups = request.args.get(&#34;groups&#34;, &#34;&#34;)
+
+    self.getCountry(country)
+    self.getContribs()
+
+    chosenCountry = self.chosenCountry
+    chosenCountryId = self.chosenCountryId
+    chosenCountryIso = self.chosenCountryIso
+
+    colSpecs = COLSPECS
+    groupCols = GROUP_COLS
+
+    if chosenCountryId is not None:
+        colSpecs = COLSPECS[1:]
+        groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+        groupCols = GROUP_COLS[1:]
+
+    cols = [c[0] for c in colSpecs]
+    colSet = {c[0] for c in colSpecs}
+
+    self.types = dict((c[0], c[1]) for c in colSpecs)
+    labels = dict((c[0], c[2] if len(c) &gt; 2 else c[0]) for c in colSpecs)
+    sortDefault = cols[-1]
+
+    allGroupSet = set(groupCols)
+    groupsChosen = [] if not groups else groups.split(&#34;,&#34;)
+    groupSet = set(groupsChosen)
+    groupStr = (&#34;-by-&#34; if groupSet else &#34;&#34;) + &#34;-&#34;.join(sorted(groupSet))
+
+    sortCol = sortDefault if rawSortCol not in colSet else rawSortCol
+    reverse = False if rawReverse not in {&#34;-1&#34;, &#34;1&#34;} else rawReverse == &#34;-1&#34;
+
+    self.cols = cols
+    self.labels = labels
+    self.groupCols = groupCols
+    self.sortCol = sortCol
+    self.reverse = reverse
+
+    material = []
+    if not asTsv:
+        material.append(H.h(3, &#34;&#34;&#34;Country selection&#34;&#34;&#34;))
+
+        countryItems = []
+        for (cid, countryInfo) in db.country.items():
+            if not G(countryInfo, N.isMember):
+                continue
+            name = countryType.titleStr(countryInfo)
+            iso = G(countryInfo, N.iso)
+
+            countryItems.append(
+                H.span(name, cls=&#34;c-focus&#34;)
+                if cid == chosenCountryId
+                else H.a(
+                    name,
+                    (
+                        f&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;
+                        f&#34;reverse={rawReverse}&amp;groups={groups}&#34;
+                    ),
+                    cls=&#34;c-control&#34;,
+                )
+            )
+        material.append(H.p(countryItems, cls=&#34;countries&#34;))
+
+    groupsAvailable = sorted(allGroupSet - set(groupsChosen))
+    groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
+
+    if not asTsv:
+        urlArgs = (
+            f&#34;?country={chosenCountryIso}&amp;&#34;
+            f&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;
+        )
+        urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
+        urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
+        availableReps = E.join(
+            H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+            for g in groupsAvailable
+        )
+        chosenReps = E.join(
+            H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+            for g in groupsChosen
+        )
+        clearGroups = (
+            &#34;&#34;
+            if len(chosenReps) == 0
+            else H.iconx(
+                N.clear, (f&#34;{urlStart1}&#34;), cls=&#34;g-x&#34;, title=&#34;clear all groups&#34;
+            )
+        )
+        rArgs = f&#34;{urlArgs}groups={groups}&#34;
+
+    headerLine = self.ourCountryHeaders(
+        country, groups, asTsv, groupOrder=groupOrder,
+    )
+
+    if not asTsv:
+        material.append(H.h(3, &#34;Grouping&#34;))
+        material.append(
+            H.table(
+                [],
+                [
+                    (
+                        [
+                            (&#34;available groups&#34;, dict(cls=&#34;mtl&#34;)),
+                            (availableReps, dict(cls=&#34;mtd&#34;)),
+                            (NBSP, {}),
+                        ],
+                        {},
+                    ),
+                    (
+                        [
+                            (&#34;chosen groups&#34;, dict(cls=&#34;mtl&#34;)),
+                            (chosenReps, dict(cls=&#34;mtd&#34;)),
+                            (clearGroups, {}),
+                        ],
+                        {},
+                    ),
+                ],
+                cls=&#34;mt&#34;,
+            )
+        )
+        material.append(
+            H.h(
+                3,
+                [
+                    f&#34;Contributions from {chosenCountry}&#34;,
+                    H.a(
+                        &#34;Download as Excel&#34;,
+                        f&#34;{PAGEX}{rArgs}&#34;,
+                        target=&#34;_blank&#34;,
+                        cls=&#34;button large&#34;,
+                    ),
+                ],
+            )
+        )
+
+    (thisMaterial, groupRel) = self.groupList(
+        groupsChosen, chosenCountry, chosenCountry, asTsv,
+    )
+
+    if asTsv:
+        material.append(thisMaterial)
+    else:
+        material.append(H.table([headerLine], thisMaterial, cls=&#34;cc&#34;))
+        material.append(groupRel)
+
+    if asTsv:
+        fileName = f&#39;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#39;
+        headers = {
+            &#34;Expires&#34;: &#34;0&#34;,
+            &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
+            &#34;Content-Type&#34;: &#34;text/csv&#34;,
+            &#34;Content-Disposition&#34;: f&#39;attachment; filename=&#34;{fileName}&#34;&#39;,
+            &#34;Content-Encoding&#34;: &#34;identity&#34;,
+        }
+        tsv = f&#34;\ufeff{headerLine}\n{E.join(material)}&#34;.encode(&#34;utf_16_le&#34;)
+        data = make_response(tsv, headers)
+    else:
+        data = E.join(material)
+    return data</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="controllers" href="index.html">controllers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="controllers.overview.addGroup" href="#controllers.overview.addGroup">addGroup</a></code></li>
+<li><code><a title="controllers.overview.colRep" href="#controllers.overview.colRep">colRep</a></code></li>
+<li><code><a title="controllers.overview.euro" href="#controllers.overview.euro">euro</a></code></li>
+<li><code><a title="controllers.overview.expandAcontrols" href="#controllers.overview.expandAcontrols">expandAcontrols</a></code></li>
+<li><code><a title="controllers.overview.expandControls" href="#controllers.overview.expandControls">expandControls</a></code></li>
+<li><code><a title="controllers.overview.rmGroup" href="#controllers.overview.rmGroup">rmGroup</a></code></li>
+<li><code><a title="controllers.overview.subHeadClass" href="#controllers.overview.subHeadClass">subHeadClass</a></code></li>
+<li><code><a title="controllers.overview.valTri" href="#controllers.overview.valTri">valTri</a></code></li>
+<li><code><a title="controllers.overview.wrapStatus" href="#controllers.overview.wrapStatus">wrapStatus</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="controllers.overview.Overview" href="#controllers.overview.Overview">Overview</a></code></h4>
+<ul class="two-column">
+<li><code><a title="controllers.overview.Overview.contribKey" href="#controllers.overview.Overview.contribKey">contribKey</a></code></li>
+<li><code><a title="controllers.overview.Overview.disclose" href="#controllers.overview.Overview.disclose">disclose</a></code></li>
+<li><code><a title="controllers.overview.Overview.formatContrib" href="#controllers.overview.Overview.formatContrib">formatContrib</a></code></li>
+<li><code><a title="controllers.overview.Overview.getContribs" href="#controllers.overview.Overview.getContribs">getContribs</a></code></li>
+<li><code><a title="controllers.overview.Overview.getCountry" href="#controllers.overview.Overview.getCountry">getCountry</a></code></li>
+<li><code><a title="controllers.overview.Overview.groupList" href="#controllers.overview.Overview.groupList">groupList</a></code></li>
+<li><code><a title="controllers.overview.Overview.ourCountryHeaders" href="#controllers.overview.Overview.ourCountryHeaders">ourCountryHeaders</a></code></li>
+<li><code><a title="controllers.overview.Overview.roTri" href="#controllers.overview.Overview.roTri">roTri</a></code></li>
+<li><code><a title="controllers.overview.Overview.wrap" href="#controllers.overview.Overview.wrap">wrap</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

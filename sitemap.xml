@@ -2,82 +2,87 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/About/Codebase/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/About/Stats/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/About/News/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/About/Lessons/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Functionality/Business/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Functionality/Tables/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Functionality/Workflow/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Legacy/Content/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Concepts/Model/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Server/Authentication/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Server/Server/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Technology/Tech/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Technology/ES6/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Integration/API/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>https://dans-labs.github.io/dariah-contrib/Maintenance/Deploy/</loc>
-     <lastmod>2019-11-11</lastmod>
+     <lastmod>2019-11-12</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://dans-labs.github.io/dariah-contrib/api/html/controllers/</loc>
+     <lastmod>2019-11-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
