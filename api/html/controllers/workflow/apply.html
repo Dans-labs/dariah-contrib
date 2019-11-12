@@ -302,7 +302,7 @@ class WorkflowItem:
 
         myKind = self.mykind
 
-        (locked, frozen, mayAdd, stage, stageDate, creators, country) = self.info(
+        (locked, frozen, mayAdd, stage, stageDate, creators, countryId) = self.info(
             table,
             N.locked,
             N.frozen,
@@ -314,7 +314,7 @@ class WorkflowItem:
             kind=kind,
         )
 
-        isCoord = auth.coordinator(country=country)
+        isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
         commandInfo = allowedCommands[command]
@@ -417,7 +417,7 @@ class WorkflowItem:
 
         The stage of a record is stored in the workflow attribute `stage`,
         so the only thing needed is to ask for that attribute with
-        `controllers.workflow.apply.info`.
+        `controllers.workflow.apply.WorkflowItem.info`.
 
         Parameters
         ----------
@@ -1008,7 +1008,7 @@ user is, if any, and store that in attribute <code>mykind</code>.</p>
 
         myKind = self.mykind
 
-        (locked, frozen, mayAdd, stage, stageDate, creators, country) = self.info(
+        (locked, frozen, mayAdd, stage, stageDate, creators, countryId) = self.info(
             table,
             N.locked,
             N.frozen,
@@ -1020,7 +1020,7 @@ user is, if any, and store that in attribute <code>mykind</code>.</p>
             kind=kind,
         )
 
-        isCoord = auth.coordinator(country=country)
+        isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
         commandInfo = allowedCommands[command]
@@ -1123,7 +1123,7 @@ user is, if any, and store that in attribute <code>mykind</code>.</p>
 
         The stage of a record is stored in the workflow attribute `stage`,
         so the only thing needed is to ask for that attribute with
-        `controllers.workflow.apply.info`.
+        `controllers.workflow.apply.WorkflowItem.info`.
 
         Parameters
         ----------
@@ -2083,7 +2083,7 @@ workflow.yaml under <code>commands</code>.</dd>
 
     myKind = self.mykind
 
-    (locked, frozen, mayAdd, stage, stageDate, creators, country) = self.info(
+    (locked, frozen, mayAdd, stage, stageDate, creators, countryId) = self.info(
         table,
         N.locked,
         N.frozen,
@@ -2095,7 +2095,7 @@ workflow.yaml under <code>commands</code>.</dd>
         kind=kind,
     )
 
-    isCoord = auth.coordinator(country=country)
+    isCoord = auth.coordinator(countryId=countryId)
     isSuper = auth.superuser()
 
     commandInfo = allowedCommands[command]
@@ -2200,7 +2200,7 @@ workflow.yaml under <code>commands</code>.</dd>
 <p>Workflow stages are listed in workflow.yaml, under <code>stageAtts</code>.</p>
 <p>The stage of a record is stored in the workflow attribute <code>stage</code>,
 so the only thing needed is to ask for that attribute with
-<code>controllers.workflow.apply.info</code>.</p>
+<a title="controllers.workflow.apply.WorkflowItem.info" href="#controllers.workflow.apply.WorkflowItem.info"><code>WorkflowItem.info()</code></a>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -2223,7 +2223,7 @@ See workflow.yaml for the complete list.</p></section>
 
     The stage of a record is stored in the workflow attribute `stage`,
     so the only thing needed is to ask for that attribute with
-    `controllers.workflow.apply.info`.
+    `controllers.workflow.apply.WorkflowItem.info`.
 
     Parameters
     ----------

@@ -24,7 +24,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from controllers.html import htmlEscape as he
+<pre><code class="python">from controllers.html import HtmlElements as H
 from controllers.datatypes.value import Value
 
 
@@ -50,7 +50,7 @@ class User(Value):
         control = self.control
         auth = control.auth
 
-        return he(auth.identity(record))</code></pre>
+        return H.he(auth.identity(record))</code></pre>
 </details>
 </section>
 <section>
@@ -111,7 +111,7 @@ to display titles for users cautiously.</p>
         control = self.control
         auth = control.auth
 
-        return he(auth.identity(record))</code></pre>
+        return H.he(auth.identity(record))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -134,7 +134,7 @@ to display titles for users cautiously.</p>
     control = self.control
     auth = control.auth
 
-    return he(auth.identity(record))</code></pre>
+    return H.he(auth.identity(record))</code></pre>
 </details>
 </dd>
 </dl>

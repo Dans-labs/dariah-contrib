@@ -52,7 +52,23 @@ OVERVIEW = G(G(CW.urls, N.info), N.url)
 
 
 class Sidebar:
+    &#34;&#34;&#34;Show a sidebar with navigation links and buttons on the interface.&#34;&#34;&#34;
+
     def __init__(self, control, path):
+        &#34;&#34;&#34;Store the incoming information and set up attributes for collecting items.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        path: url
+            The current url.
+
+        !!! hint
+            The `path` is needed to determine which items in the sidebar are the active
+            items, so that they can be highlighted by means of a navigation CSS class.
+        &#34;&#34;&#34;
+
         self.control = control
         self.path = path
         self.entries = []
@@ -69,6 +85,20 @@ class Sidebar:
         }
 
     def makeCaption(self, label, entries, rule=False):
+        &#34;&#34;&#34;Produce the caption for a section of navigation items.
+
+        Parameters
+        ----------
+        label: string
+            Points to a key in web.yaml, under `captions`,
+            where the full text of the caption can be founnd.
+        entries: iterable of (path, string(html))
+            The path is used to determine whether this entry is active;
+            the string is the formatted html of the entry.
+        rule: boolean
+            Whether there should be a rule before the first entry.
+        &#34;&#34;&#34;
+
         if not entries:
             return E
 
@@ -85,6 +115,11 @@ class Sidebar:
         return H.details(label, entriesRep, label, **atts)
 
     def makeOptions(self):
+        &#34;&#34;&#34;Produce an options widget.
+
+        The options are defined in web.yaml, under the key `options`.
+        &#34;&#34;&#34;
+
         options = self.options
 
         filterRep = [
@@ -101,6 +136,21 @@ class Sidebar:
         return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
 
     def makeEntry(self, label, path, withOptions=False, command=False):
+        &#34;&#34;&#34;Produce an entry.
+
+        Parameters
+        ----------
+        label: string
+            The text of the entry
+        path: url
+            The destination after the entry is clicked.
+        withOptions: boolean, optional `False`
+            Whether to include the options widget.
+        command: boolean, optional `False`
+            Display the entry as a big workflow command button or as a modest
+            hyperlink.
+        &#34;&#34;&#34;
+
         options = self.options
         active = path == self.path
 
@@ -135,6 +185,23 @@ class Sidebar:
         withOptions=False,
         command=False,
     ):
+        &#34;&#34;&#34;Produce a table entry.
+
+        A table entry is a link or button to show a table.
+
+        Parameters
+        ----------
+        table: string
+        prefix, item, postfix: string, optional `None`
+            These make up the text of the link in that order.
+            If `item` is left out, the tables.yaml file has a suitable
+            string under the key `items`
+        action: string {`my`, `our`, ...}, optional, `None`
+            If left out, all items will be retrieved. Otherwise, a selection is made.
+            See web.yaml under `listActions` for all possible values.
+            See also `controllers.table.Table.wrap`.
+        &#34;&#34;&#34;
+
         control = self.control
 
         tableObj = mkTable(control, table)
@@ -151,6 +218,16 @@ class Sidebar:
         )
 
     def wrap(self):
+        &#34;&#34;&#34;Wrap it all up.
+
+        Produce a list geared to the current user, with actions that make sense
+        to him/her.
+
+        Take care that only permitted actions are presented.
+
+        Actions that belong to workflow are presented as conspicuous workflow commands.
+        &#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
         isAuth = auth.authenticated()
@@ -320,13 +397,42 @@ class Sidebar:
 <span>(</span><span>control, path)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Show a sidebar with navigation links and buttons on the interface.</p>
+<p>Store the incoming information and set up attributes for collecting items.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>control</code></strong> :&ensp;<code>object</code></dt>
+<dd>A <a title="controllers.control.Control" href="control.html#controllers.control.Control"><code>Control</code></a> singleton</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>url</code></dt>
+<dd>The current url.</dd>
+</dl>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The <code>path</code> is needed to determine which items in the sidebar are the active
+items, so that they can be highlighted by means of a navigation CSS class.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Sidebar:
+    &#34;&#34;&#34;Show a sidebar with navigation links and buttons on the interface.&#34;&#34;&#34;
+
     def __init__(self, control, path):
+        &#34;&#34;&#34;Store the incoming information and set up attributes for collecting items.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        path: url
+            The current url.
+
+        !!! hint
+            The `path` is needed to determine which items in the sidebar are the active
+            items, so that they can be highlighted by means of a navigation CSS class.
+        &#34;&#34;&#34;
+
         self.control = control
         self.path = path
         self.entries = []
@@ -343,6 +449,20 @@ class Sidebar:
         }
 
     def makeCaption(self, label, entries, rule=False):
+        &#34;&#34;&#34;Produce the caption for a section of navigation items.
+
+        Parameters
+        ----------
+        label: string
+            Points to a key in web.yaml, under `captions`,
+            where the full text of the caption can be founnd.
+        entries: iterable of (path, string(html))
+            The path is used to determine whether this entry is active;
+            the string is the formatted html of the entry.
+        rule: boolean
+            Whether there should be a rule before the first entry.
+        &#34;&#34;&#34;
+
         if not entries:
             return E
 
@@ -359,6 +479,11 @@ class Sidebar:
         return H.details(label, entriesRep, label, **atts)
 
     def makeOptions(self):
+        &#34;&#34;&#34;Produce an options widget.
+
+        The options are defined in web.yaml, under the key `options`.
+        &#34;&#34;&#34;
+
         options = self.options
 
         filterRep = [
@@ -375,6 +500,21 @@ class Sidebar:
         return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
 
     def makeEntry(self, label, path, withOptions=False, command=False):
+        &#34;&#34;&#34;Produce an entry.
+
+        Parameters
+        ----------
+        label: string
+            The text of the entry
+        path: url
+            The destination after the entry is clicked.
+        withOptions: boolean, optional `False`
+            Whether to include the options widget.
+        command: boolean, optional `False`
+            Display the entry as a big workflow command button or as a modest
+            hyperlink.
+        &#34;&#34;&#34;
+
         options = self.options
         active = path == self.path
 
@@ -409,6 +549,23 @@ class Sidebar:
         withOptions=False,
         command=False,
     ):
+        &#34;&#34;&#34;Produce a table entry.
+
+        A table entry is a link or button to show a table.
+
+        Parameters
+        ----------
+        table: string
+        prefix, item, postfix: string, optional `None`
+            These make up the text of the link in that order.
+            If `item` is left out, the tables.yaml file has a suitable
+            string under the key `items`
+        action: string {`my`, `our`, ...}, optional, `None`
+            If left out, all items will be retrieved. Otherwise, a selection is made.
+            See web.yaml under `listActions` for all possible values.
+            See also `controllers.table.Table.wrap`.
+        &#34;&#34;&#34;
+
         control = self.control
 
         tableObj = mkTable(control, table)
@@ -425,6 +582,16 @@ class Sidebar:
         )
 
     def wrap(self):
+        &#34;&#34;&#34;Wrap it all up.
+
+        Produce a list geared to the current user, with actions that make sense
+        to him/her.
+
+        Take care that only permitted actions are presented.
+
+        Actions that belong to workflow are presented as conspicuous workflow commands.
+        &#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
         isAuth = auth.authenticated()
@@ -585,12 +752,37 @@ class Sidebar:
 <span>def <span class="ident">makeCaption</span></span>(<span>self, label, entries, rule=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Produce the caption for a section of navigation items.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
+<dd>Points to a key in web.yaml, under <code>captions</code>,
+where the full text of the caption can be founnd.</dd>
+<dt><strong><code>entries</code></strong> :&ensp;<code>iterable</code> of (<code>path</code>, <code>string</code>(<code>html</code>))</dt>
+<dd>The path is used to determine whether this entry is active;
+the string is the formatted html of the entry.</dd>
+<dt><strong><code>rule</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether there should be a rule before the first entry.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeCaption(self, label, entries, rule=False):
+    &#34;&#34;&#34;Produce the caption for a section of navigation items.
+
+    Parameters
+    ----------
+    label: string
+        Points to a key in web.yaml, under `captions`,
+        where the full text of the caption can be founnd.
+    entries: iterable of (path, string(html))
+        The path is used to determine whether this entry is active;
+        the string is the formatted html of the entry.
+    rule: boolean
+        Whether there should be a rule before the first entry.
+    &#34;&#34;&#34;
+
     if not entries:
         return E
 
@@ -611,12 +803,39 @@ class Sidebar:
 <span>def <span class="ident">makeEntry</span></span>(<span>self, label, path, withOptions=False, command=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Produce an entry.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
+<dd>The text of the entry</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>url</code></dt>
+<dd>The destination after the entry is clicked.</dd>
+<dt><strong><code>withOptions</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to include the options widget.</dd>
+<dt><strong><code>command</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Display the entry as a big workflow command button or as a modest
+hyperlink.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeEntry(self, label, path, withOptions=False, command=False):
+    &#34;&#34;&#34;Produce an entry.
+
+    Parameters
+    ----------
+    label: string
+        The text of the entry
+    path: url
+        The destination after the entry is clicked.
+    withOptions: boolean, optional `False`
+        Whether to include the options widget.
+    command: boolean, optional `False`
+        Display the entry as a big workflow command button or as a modest
+        hyperlink.
+    &#34;&#34;&#34;
+
     options = self.options
     active = path == self.path
 
@@ -646,12 +865,18 @@ class Sidebar:
 <span>def <span class="ident">makeOptions</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Produce an options widget.</p>
+<p>The options are defined in web.yaml, under the key <code>options</code>.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def makeOptions(self):
+    &#34;&#34;&#34;Produce an options widget.
+
+    The options are defined in web.yaml, under the key `options`.
+    &#34;&#34;&#34;
+
     options = self.options
 
     filterRep = [
@@ -672,7 +897,21 @@ class Sidebar:
 <span>def <span class="ident">tableEntry</span></span>(<span>self, table, prefix=None, item=None, postfix=None, action=None, withOptions=False, command=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Produce a table entry.</p>
+<p>A table entry is a link or button to show a table.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>prefix</code></strong>, <strong><code>item</code></strong>, <strong><code>postfix</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dd>These make up the text of the link in that order.
+If <code>item</code> is left out, the tables.yaml file has a suitable
+string under the key <code>items</code></dd>
+<dt><strong><code>action</code></strong> :&ensp;<code>string</code> {<code>my</code>, <code>our</code>, <code>...</code>}, optional, <code>None</code></dt>
+<dd>If left out, all items will be retrieved. Otherwise, a selection is made.
+See web.yaml under <code>listActions</code> for all possible values.
+See also <code>controllers.table.Table.wrap</code>.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -687,6 +926,23 @@ class Sidebar:
     withOptions=False,
     command=False,
 ):
+    &#34;&#34;&#34;Produce a table entry.
+
+    A table entry is a link or button to show a table.
+
+    Parameters
+    ----------
+    table: string
+    prefix, item, postfix: string, optional `None`
+        These make up the text of the link in that order.
+        If `item` is left out, the tables.yaml file has a suitable
+        string under the key `items`
+    action: string {`my`, `our`, ...}, optional, `None`
+        If left out, all items will be retrieved. Otherwise, a selection is made.
+        See web.yaml under `listActions` for all possible values.
+        See also `controllers.table.Table.wrap`.
+    &#34;&#34;&#34;
+
     control = self.control
 
     tableObj = mkTable(control, table)
@@ -707,12 +963,26 @@ class Sidebar:
 <span>def <span class="ident">wrap</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap it all up.</p>
+<p>Produce a list geared to the current user, with actions that make sense
+to him/her.</p>
+<p>Take care that only permitted actions are presented.</p>
+<p>Actions that belong to workflow are presented as conspicuous workflow commands.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrap(self):
+    &#34;&#34;&#34;Wrap it all up.
+
+    Produce a list geared to the current user, with actions that make sense
+    to him/her.
+
+    Take care that only permitted actions are presented.
+
+    Actions that belong to workflow are presented as conspicuous workflow commands.
+    &#34;&#34;&#34;
+
     control = self.control
     auth = control.auth
     isAuth = auth.authenticated()

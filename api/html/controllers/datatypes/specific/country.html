@@ -26,7 +26,7 @@
 </summary>
 <pre><code class="python">from config import Config as C, Names as N
 from controllers.utils import pick as G, shiftRegional
-from controllers.html import HtmlElements as H, htmlEscape as he
+from controllers.html import HtmlElements as H
 from controllers.datatypes.value import Value
 
 
@@ -45,7 +45,7 @@ class Country(Value):
     def titleStr(self, record):
         &#34;&#34;&#34;Puts the 2-letter iso code plus the flag characters in the title.&#34;&#34;&#34;
 
-        iso = he(G(record, N.iso))
+        iso = H.he(G(record, N.iso))
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):
@@ -88,7 +88,7 @@ class Country(Value):
     def titleStr(self, record):
         &#34;&#34;&#34;Puts the 2-letter iso code plus the flag characters in the title.&#34;&#34;&#34;
 
-        iso = he(G(record, N.iso))
+        iso = H.he(G(record, N.iso))
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):
@@ -131,7 +131,7 @@ class Country(Value):
 <pre><code class="python">def titleStr(self, record):
     &#34;&#34;&#34;Puts the 2-letter iso code plus the flag characters in the title.&#34;&#34;&#34;
 
-    iso = he(G(record, N.iso))
+    iso = H.he(G(record, N.iso))
     return iso + shiftRegional(iso) if iso else Qc</code></pre>
 </details>
 </dd>

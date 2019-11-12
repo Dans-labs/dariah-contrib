@@ -50,7 +50,23 @@ FORBIDDEN = CW.messages[N.forbidden]
 
 
 class Table:
+    &#34;&#34;&#34;Deals with tables.
+    &#34;&#34;&#34;
+
     def __init__(self, control, table):
+        &#34;&#34;&#34;Store the incoming information.
+
+        Set the RecordClass to a suitable derived class of Record,
+        otherwise to the base class `controllers.record.Record` itself.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        table: string
+            Name of the table in question.
+        &#34;&#34;&#34;
+
         self.control = control
 
         auth = control.auth
@@ -92,6 +108,32 @@ class Table:
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
     ):
+        &#34;&#34;&#34;Factory function to wrap a record object around the data of arecord.
+        Parameters
+        ----------
+        eid: ObjectId, optional `None`
+            Entity id to identify the record
+        record: dict
+            The full record
+        withDetails: boolean, optional `False`
+            Whther to present a list of detail records below the record
+        readonly: boolean, optional `False`
+            Whether to present the complete record in readonly mode
+        bodyMethod: function, optional `None`
+            How to compose the HTML for the record.
+            If `None` is passed, the default will be chosen:
+            `controllers.record.Record.body`.
+            Some particular tables have their own implementation of `body()`
+            and they may supply alternative body methods as well.
+
+        Returns
+        -------
+        A `controllers.record.Record` object.
+
+        !!! note
+            Only  one of `eid` or `record` needs to be passed.
+        &#34;&#34;&#34;
+
         return self.RecordClass(
             self,
             eid=eid,
@@ -102,6 +144,31 @@ class Table:
         )
 
     def insert(self, force=False):
+        &#34;&#34;&#34;Insert a new, (blank) record into the table.
+
+
+        Parameters
+        ----------
+        force: boolean, optional `False`
+            Permissions are respected, unless `force=True`.
+
+        !!! note
+            The permission is defined upon intialization of the record.
+            See `controllers.table.Table` .
+
+            The rules are:
+            *   authenticated users may create new records in the main user tables:
+                `contrib`, `assessment`, `review` (under additional workflow
+                constraints)
+            *   superusers may create new value records (under additional
+                constraints)
+            *   system admins may create new records in system tables
+
+        !!! note
+            `force=True` is used when the system needs to insert additional
+            records in other tables. The code for specific tables will instruct so.
+        &#34;&#34;&#34;
+
         mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
@@ -119,6 +186,18 @@ class Table:
         return result
 
     def adjustWorkflow(self, contribId, new=True):
+        &#34;&#34;&#34;Adjust the `controllers.workflow.apply.WorkflowItem`
+        that is dependent on changed data.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item.
+        new: boolean, optional `True`
+            If `True`, insert the computed workflow as a new item;
+            otherwise update the existing item.
+        &#34;&#34;&#34;
+
         control = self.control
         wf = control.wf
 
@@ -128,12 +207,56 @@ class Table:
             wf.recompute(contribId)
 
     def stage(self, record, table, kind=None):
+        &#34;&#34;&#34;Retrieve the workflow attribute `stage` from a record, if existing.
+
+        This is a quick and direct way to retrieve workflow info for a record.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+        table: string {contrib, assessment, review}
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+        &#34;&#34;&#34;
+
         recordObj = self.record(record=record)
 
         wfitem = recordObj.wfitem
         return wfitem.stage(table, kind=kind) if wfitem else None
 
     def wrap(self, openEid, action=None):
+        &#34;&#34;&#34;Wrap the list of records into HTML.
+
+        Parameters
+        ----------
+        openEid: ObjectId
+            The id of a record that must forcibly be opened.
+        action: string, optional, `None`
+            If present, a specific record selection will be presented,
+            otherwise all records go to the interface.
+
+        action | selection
+        --- | ---
+        `my` | records that the current user has created or is an editor of
+        `our` | records that the current user can edit, assess, review, or select
+        `assess` | records that the current user is assessing
+        `assign` | records that the current office user must assign to reviewers
+        `reviewer` | records that the current user is reviewing
+        `select` | records that the current national coordinator user can select
+
+        Permissions will be checked before executing one of these list actions.
+        See `controllers.table.Table.mayList`.
+
+        !!! note
+            Whether records are presented  in an opened or closed state
+            depends onn how the user has last left them.
+            This information is  stored in `localStorage` inn the browser.
+            However, if the last action was the creation of a nnew record,
+            we want to open the list with the new record open and scrolled to,
+            so that the usercan start filling in the blank record straightaway.
+        &#34;&#34;&#34;
+
         if not self.mayList(action=action):
             return FORBIDDEN
 
@@ -197,7 +320,7 @@ class Table:
                             fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
                             urltitle=E,
                             urlextra=E,
-                            **forceOpen(G(record, N._id), openEid),
+                            **self.forceOpen(G(record, N._id), openEid),
                         )
                         for record in records
                     ),
@@ -207,6 +330,11 @@ class Table:
         )
 
     def insertButton(self):
+        &#34;&#34;&#34;Present an insert button on the interface.
+
+        Only if the user has rights to insert new items in this table.
+        &#34;&#34;&#34;
+
         mayInsert = self.mayInsert
 
         if not mayInsert:
@@ -223,6 +351,26 @@ class Table:
         )
 
     def mayList(self, action=None):
+        &#34;&#34;&#34;Checks permission for a list action.
+
+        Parameters
+        ----------
+        action: string, optional `None`
+            The action to check permissions for.
+            If not present, it will be checked whether
+            the user may see the list of all records.
+
+        Returns
+        -------
+        boolean
+
+        Hera are the rules:
+
+        *   all users may see the whole contrib table (not all fields!);
+        *   superusers may see all tables with all list actions;
+        *   authenticated users may see all contribs, assessments and value tables.
+        &#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
         isMainTable = self.isMainTable
@@ -237,12 +385,32 @@ class Table:
         )
 
     def title(self, record):
+        &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
+
+        When record titles have to be generated for many records in a list,
+        we forego the sophistications of the special tables, and we pick some
+        fields from the record itself.
+
+        The proper way would be:
+
+        ``` python
+        return obj.record(record=record).title(**atts)
+        ```
+         but that is painfully slow for the contribution table.
+        &#34;&#34;&#34;
+
         # return obj.record(record=record).title(**atts)
         return self.RecordClass.titleRaw(self, record)
 
+    @staticmethod
+    def forceOpen(theEid, openEid):
+        &#34;&#34;&#34;Give HTML attributes to a record for forced opening.
 
-def forceOpen(theEid, openEid):
-    return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
+        With these attributes the Javascript will find it and force it to open
+        after loading.
+        &#34;&#34;&#34;
+
+        return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
 </details>
 </section>
 <section>
@@ -250,22 +418,6 @@ def forceOpen(theEid, openEid):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="controllers.table.forceOpen"><code class="name flex">
-<span>def <span class="ident">forceOpen</span></span>(<span>theEid, openEid)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forceOpen(theEid, openEid):
-    return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -275,13 +427,39 @@ def forceOpen(theEid, openEid):
 <span>(</span><span>control, table)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Deals with tables.</p>
+<p>Store the incoming information.</p>
+<p>Set the RecordClass to a suitable derived class of Record,
+otherwise to the base class <a title="controllers.record.Record" href="record.html#controllers.record.Record"><code>Record</code></a> itself.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>control</code></strong> :&ensp;<code>object</code></dt>
+<dd>A <a title="controllers.control.Control" href="control.html#controllers.control.Control"><code>Control</code></a> singleton</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the table in question.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Table:
+    &#34;&#34;&#34;Deals with tables.
+    &#34;&#34;&#34;
+
     def __init__(self, control, table):
+        &#34;&#34;&#34;Store the incoming information.
+
+        Set the RecordClass to a suitable derived class of Record,
+        otherwise to the base class `controllers.record.Record` itself.
+
+        Parameters
+        ----------
+        control: object
+            A `controllers.control.Control` singleton
+        table: string
+            Name of the table in question.
+        &#34;&#34;&#34;
+
         self.control = control
 
         auth = control.auth
@@ -323,6 +501,32 @@ def forceOpen(theEid, openEid):
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
     ):
+        &#34;&#34;&#34;Factory function to wrap a record object around the data of arecord.
+        Parameters
+        ----------
+        eid: ObjectId, optional `None`
+            Entity id to identify the record
+        record: dict
+            The full record
+        withDetails: boolean, optional `False`
+            Whther to present a list of detail records below the record
+        readonly: boolean, optional `False`
+            Whether to present the complete record in readonly mode
+        bodyMethod: function, optional `None`
+            How to compose the HTML for the record.
+            If `None` is passed, the default will be chosen:
+            `controllers.record.Record.body`.
+            Some particular tables have their own implementation of `body()`
+            and they may supply alternative body methods as well.
+
+        Returns
+        -------
+        A `controllers.record.Record` object.
+
+        !!! note
+            Only  one of `eid` or `record` needs to be passed.
+        &#34;&#34;&#34;
+
         return self.RecordClass(
             self,
             eid=eid,
@@ -333,6 +537,31 @@ def forceOpen(theEid, openEid):
         )
 
     def insert(self, force=False):
+        &#34;&#34;&#34;Insert a new, (blank) record into the table.
+
+
+        Parameters
+        ----------
+        force: boolean, optional `False`
+            Permissions are respected, unless `force=True`.
+
+        !!! note
+            The permission is defined upon intialization of the record.
+            See `controllers.table.Table` .
+
+            The rules are:
+            *   authenticated users may create new records in the main user tables:
+                `contrib`, `assessment`, `review` (under additional workflow
+                constraints)
+            *   superusers may create new value records (under additional
+                constraints)
+            *   system admins may create new records in system tables
+
+        !!! note
+            `force=True` is used when the system needs to insert additional
+            records in other tables. The code for specific tables will instruct so.
+        &#34;&#34;&#34;
+
         mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
@@ -350,6 +579,18 @@ def forceOpen(theEid, openEid):
         return result
 
     def adjustWorkflow(self, contribId, new=True):
+        &#34;&#34;&#34;Adjust the `controllers.workflow.apply.WorkflowItem`
+        that is dependent on changed data.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item.
+        new: boolean, optional `True`
+            If `True`, insert the computed workflow as a new item;
+            otherwise update the existing item.
+        &#34;&#34;&#34;
+
         control = self.control
         wf = control.wf
 
@@ -359,12 +600,56 @@ def forceOpen(theEid, openEid):
             wf.recompute(contribId)
 
     def stage(self, record, table, kind=None):
+        &#34;&#34;&#34;Retrieve the workflow attribute `stage` from a record, if existing.
+
+        This is a quick and direct way to retrieve workflow info for a record.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+        table: string {contrib, assessment, review}
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+        &#34;&#34;&#34;
+
         recordObj = self.record(record=record)
 
         wfitem = recordObj.wfitem
         return wfitem.stage(table, kind=kind) if wfitem else None
 
     def wrap(self, openEid, action=None):
+        &#34;&#34;&#34;Wrap the list of records into HTML.
+
+        Parameters
+        ----------
+        openEid: ObjectId
+            The id of a record that must forcibly be opened.
+        action: string, optional, `None`
+            If present, a specific record selection will be presented,
+            otherwise all records go to the interface.
+
+        action | selection
+        --- | ---
+        `my` | records that the current user has created or is an editor of
+        `our` | records that the current user can edit, assess, review, or select
+        `assess` | records that the current user is assessing
+        `assign` | records that the current office user must assign to reviewers
+        `reviewer` | records that the current user is reviewing
+        `select` | records that the current national coordinator user can select
+
+        Permissions will be checked before executing one of these list actions.
+        See `controllers.table.Table.mayList`.
+
+        !!! note
+            Whether records are presented  in an opened or closed state
+            depends onn how the user has last left them.
+            This information is  stored in `localStorage` inn the browser.
+            However, if the last action was the creation of a nnew record,
+            we want to open the list with the new record open and scrolled to,
+            so that the usercan start filling in the blank record straightaway.
+        &#34;&#34;&#34;
+
         if not self.mayList(action=action):
             return FORBIDDEN
 
@@ -428,7 +713,7 @@ def forceOpen(theEid, openEid):
                             fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
                             urltitle=E,
                             urlextra=E,
-                            **forceOpen(G(record, N._id), openEid),
+                            **self.forceOpen(G(record, N._id), openEid),
                         )
                         for record in records
                     ),
@@ -438,6 +723,11 @@ def forceOpen(theEid, openEid):
         )
 
     def insertButton(self):
+        &#34;&#34;&#34;Present an insert button on the interface.
+
+        Only if the user has rights to insert new items in this table.
+        &#34;&#34;&#34;
+
         mayInsert = self.mayInsert
 
         if not mayInsert:
@@ -454,6 +744,26 @@ def forceOpen(theEid, openEid):
         )
 
     def mayList(self, action=None):
+        &#34;&#34;&#34;Checks permission for a list action.
+
+        Parameters
+        ----------
+        action: string, optional `None`
+            The action to check permissions for.
+            If not present, it will be checked whether
+            the user may see the list of all records.
+
+        Returns
+        -------
+        boolean
+
+        Hera are the rules:
+
+        *   all users may see the whole contrib table (not all fields!);
+        *   superusers may see all tables with all list actions;
+        *   authenticated users may see all contribs, assessments and value tables.
+        &#34;&#34;&#34;
+
         control = self.control
         auth = control.auth
         isMainTable = self.isMainTable
@@ -468,26 +778,96 @@ def forceOpen(theEid, openEid):
         )
 
     def title(self, record):
+        &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
+
+        When record titles have to be generated for many records in a list,
+        we forego the sophistications of the special tables, and we pick some
+        fields from the record itself.
+
+        The proper way would be:
+
+        ``` python
+        return obj.record(record=record).title(**atts)
+        ```
+         but that is painfully slow for the contribution table.
+        &#34;&#34;&#34;
+
         # return obj.record(record=record).title(**atts)
-        return self.RecordClass.titleRaw(self, record)</code></pre>
+        return self.RecordClass.titleRaw(self, record)
+
+    @staticmethod
+    def forceOpen(theEid, openEid):
+        &#34;&#34;&#34;Give HTML attributes to a record for forced opening.
+
+        With these attributes the Javascript will find it and force it to open
+        after loading.
+        &#34;&#34;&#34;
+
+        return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="controllers.specific.assessment_table.AssessmentT" href="specific/assessment_table.html#controllers.specific.assessment_table.AssessmentT">AssessmentT</a></li>
 <li><a title="controllers.specific.review_table.ReviewT" href="specific/review_table.html#controllers.specific.review_table.ReviewT">ReviewT</a></li>
 </ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="controllers.table.Table.forceOpen"><code class="name flex">
+<span>def <span class="ident">forceOpen</span></span>(<span>theEid, openEid)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Give HTML attributes to a record for forced opening.</p>
+<p>With these attributes the Javascript will find it and force it to open
+after loading.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def forceOpen(theEid, openEid):
+    &#34;&#34;&#34;Give HTML attributes to a record for forced opening.
+
+    With these attributes the Javascript will find it and force it to open
+    after loading.
+    &#34;&#34;&#34;
+
+    return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="controllers.table.Table.adjustWorkflow"><code class="name flex">
 <span>def <span class="ident">adjustWorkflow</span></span>(<span>self, contribId, new=True)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Adjust the <a title="controllers.workflow.apply.WorkflowItem" href="workflow/apply.html#controllers.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a>
+that is dependent on changed data.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The id of the workflow item.</dd>
+<dt><strong><code>new</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>If <code>True</code>, insert the computed workflow as a new item;
+otherwise update the existing item.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def adjustWorkflow(self, contribId, new=True):
+    &#34;&#34;&#34;Adjust the `controllers.workflow.apply.WorkflowItem`
+    that is dependent on changed data.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The id of the workflow item.
+    new: boolean, optional `True`
+        If `True`, insert the computed workflow as a new item;
+        otherwise update the existing item.
+    &#34;&#34;&#34;
+
     control = self.control
     wf = control.wf
 
@@ -501,12 +881,62 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">insert</span></span>(<span>self, force=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Insert a new, (blank) record into the table.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>force</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Permissions are respected, unless <code>force=True</code>.</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The permission is defined upon intialization of the record.
+See <code>controllers.table.Table</code> .</p>
+<p>The rules are:
+*
+authenticated users may create new records in the main user tables:
+<code>contrib</code>, <code>assessment</code>, <code>review</code> (under additional workflow
+constraints)
+*
+superusers may create new value records (under additional
+constraints)
+*
+system admins may create new records in system tables</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>force=True</code> is used when the system needs to insert additional
+records in other tables. The code for specific tables will instruct so.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def insert(self, force=False):
+    &#34;&#34;&#34;Insert a new, (blank) record into the table.
+
+
+    Parameters
+    ----------
+    force: boolean, optional `False`
+        Permissions are respected, unless `force=True`.
+
+    !!! note
+        The permission is defined upon intialization of the record.
+        See `controllers.table.Table` .
+
+        The rules are:
+        *   authenticated users may create new records in the main user tables:
+            `contrib`, `assessment`, `review` (under additional workflow
+            constraints)
+        *   superusers may create new value records (under additional
+            constraints)
+        *   system admins may create new records in system tables
+
+    !!! note
+        `force=True` is used when the system needs to insert additional
+        records in other tables. The code for specific tables will instruct so.
+    &#34;&#34;&#34;
+
     mayInsert = force or self.mayInsert
     if not mayInsert:
         return None
@@ -528,12 +958,18 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">insertButton</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Present an insert button on the interface.</p>
+<p>Only if the user has rights to insert new items in this table.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def insertButton(self):
+    &#34;&#34;&#34;Present an insert button on the interface.
+
+    Only if the user has rights to insert new items in this table.
+    &#34;&#34;&#34;
+
     mayInsert = self.mayInsert
 
     if not mayInsert:
@@ -554,12 +990,51 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">mayList</span></span>(<span>self, action=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Checks permission for a list action.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dd>The action to check permissions for.
+If not present, it will be checked whether
+the user may see the list of all records.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>boolean</code></dt>
+<dd>&nbsp;</dd>
+<dt><code>Hera</code> <code>are</code> <code>the</code> <code>rules</code>:</dt>
+<dd>&nbsp;</dd>
+</dl>
+<ul>
+<li>all users may see the whole contrib table (not all fields!);</li>
+<li>superusers may see all tables with all list actions;</li>
+<li>authenticated users may see all contribs, assessments and value tables.</li>
+</ul></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def mayList(self, action=None):
+    &#34;&#34;&#34;Checks permission for a list action.
+
+    Parameters
+    ----------
+    action: string, optional `None`
+        The action to check permissions for.
+        If not present, it will be checked whether
+        the user may see the list of all records.
+
+    Returns
+    -------
+    boolean
+
+    Hera are the rules:
+
+    *   all users may see the whole contrib table (not all fields!);
+    *   superusers may see all tables with all list actions;
+    *   authenticated users may see all contribs, assessments and value tables.
+    &#34;&#34;&#34;
+
     control = self.control
     auth = control.auth
     isMainTable = self.isMainTable
@@ -578,7 +1053,32 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">record</span></span>(<span>self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Factory function to wrap a record object around the data of arecord.
+Parameters</p>
+<hr>
+<dl>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code>, optional <code>None</code></dt>
+<dd>Entity id to identify the record</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The full record</dd>
+<dt><strong><code>withDetails</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whther to present a list of detail records below the record</dd>
+<dt><strong><code>readonly</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to present the complete record in readonly mode</dd>
+<dt><strong><code>bodyMethod</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
+<dd>How to compose the HTML for the record.
+If <code>None</code> is passed, the default will be chosen:
+<code>controllers.record.Record.body</code>.
+Some particular tables have their own implementation of <code>body()</code>
+and they may supply alternative body methods as well.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A <code>controllers.record.Record</code> object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only
+one of <code>eid</code> or <code>record</code> needs to be passed.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -586,6 +1086,32 @@ def forceOpen(theEid, openEid):
 <pre><code class="python">def record(
     self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
 ):
+    &#34;&#34;&#34;Factory function to wrap a record object around the data of arecord.
+    Parameters
+    ----------
+    eid: ObjectId, optional `None`
+        Entity id to identify the record
+    record: dict
+        The full record
+    withDetails: boolean, optional `False`
+        Whther to present a list of detail records below the record
+    readonly: boolean, optional `False`
+        Whether to present the complete record in readonly mode
+    bodyMethod: function, optional `None`
+        How to compose the HTML for the record.
+        If `None` is passed, the default will be chosen:
+        `controllers.record.Record.body`.
+        Some particular tables have their own implementation of `body()`
+        and they may supply alternative body methods as well.
+
+    Returns
+    -------
+    A `controllers.record.Record` object.
+
+    !!! note
+        Only  one of `eid` or `record` needs to be passed.
+    &#34;&#34;&#34;
+
     return self.RecordClass(
         self,
         eid=eid,
@@ -600,12 +1126,35 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">stage</span></span>(<span>self, record, table, kind=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Retrieve the workflow attribute <code>stage</code> from a record, if existing.</p>
+<p>This is a quick and direct way to retrieve workflow info for a record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The full record</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code> {<code>contrib</code>, <code>assessment</code>, <code>review</code>}</dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}, optional <code>None</code></dt>
+<dd>Only if we want review attributes</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def stage(self, record, table, kind=None):
+    &#34;&#34;&#34;Retrieve the workflow attribute `stage` from a record, if existing.
+
+    This is a quick and direct way to retrieve workflow info for a record.
+
+    Parameters
+    ----------
+    record: dict
+        The full record
+    table: string {contrib, assessment, review}
+    kind: string {`expert`, `final`}, optional `None`
+        Only if we want review attributes
+    &#34;&#34;&#34;
+
     recordObj = self.record(record=record)
 
     wfitem = recordObj.wfitem
@@ -616,12 +1165,33 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">title</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Fast way to get a title on the basis of the record only.</p>
+<p>When record titles have to be generated for many records in a list,
+we forego the sophistications of the special tables, and we pick some
+fields from the record itself.</p>
+<p>The proper way would be:</p>
+<pre><code class="python">return obj.record(record=record).title(**atts)
+</code></pre>
+<p>but that is painfully slow for the contribution table.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def title(self, record):
+    &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
+
+    When record titles have to be generated for many records in a list,
+    we forego the sophistications of the special tables, and we pick some
+    fields from the record itself.
+
+    The proper way would be:
+
+    ``` python
+    return obj.record(record=record).title(**atts)
+    ```
+     but that is painfully slow for the contribution table.
+    &#34;&#34;&#34;
+
     # return obj.record(record=record).title(**atts)
     return self.RecordClass.titleRaw(self, record)</code></pre>
 </details>
@@ -630,12 +1200,98 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">wrap</span></span>(<span>self, openEid, action=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap the list of records into HTML.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>openEid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The id of a record that must forcibly be opened.</dd>
+<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dd>If present, a specific record selection will be presented,
+otherwise all records go to the interface.</dd>
+</dl>
+<table>
+<thead>
+<tr>
+<th>action</th>
+<th>selection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>my</code></td>
+<td>records that the current user has created or is an editor of</td>
+</tr>
+<tr>
+<td><code>our</code></td>
+<td>records that the current user can edit, assess, review, or select</td>
+</tr>
+<tr>
+<td><code>assess</code></td>
+<td>records that the current user is assessing</td>
+</tr>
+<tr>
+<td><code>assign</code></td>
+<td>records that the current office user must assign to reviewers</td>
+</tr>
+<tr>
+<td><code>reviewer</code></td>
+<td>records that the current user is reviewing</td>
+</tr>
+<tr>
+<td><code>select</code></td>
+<td>records that the current national coordinator user can select</td>
+</tr>
+</tbody>
+</table>
+<p>Permissions will be checked before executing one of these list actions.
+See <code>controllers.table.Table.mayList</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whether records are presented
+in an opened or closed state
+depends onn how the user has last left them.
+This information is
+stored in <code>localStorage</code> inn the browser.
+However, if the last action was the creation of a nnew record,
+we want to open the list with the new record open and scrolled to,
+so that the usercan start filling in the blank record straightaway.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrap(self, openEid, action=None):
+    &#34;&#34;&#34;Wrap the list of records into HTML.
+
+    Parameters
+    ----------
+    openEid: ObjectId
+        The id of a record that must forcibly be opened.
+    action: string, optional, `None`
+        If present, a specific record selection will be presented,
+        otherwise all records go to the interface.
+
+    action | selection
+    --- | ---
+    `my` | records that the current user has created or is an editor of
+    `our` | records that the current user can edit, assess, review, or select
+    `assess` | records that the current user is assessing
+    `assign` | records that the current office user must assign to reviewers
+    `reviewer` | records that the current user is reviewing
+    `select` | records that the current national coordinator user can select
+
+    Permissions will be checked before executing one of these list actions.
+    See `controllers.table.Table.mayList`.
+
+    !!! note
+        Whether records are presented  in an opened or closed state
+        depends onn how the user has last left them.
+        This information is  stored in `localStorage` inn the browser.
+        However, if the last action was the creation of a nnew record,
+        we want to open the list with the new record open and scrolled to,
+        so that the usercan start filling in the blank record straightaway.
+    &#34;&#34;&#34;
+
     if not self.mayList(action=action):
         return FORBIDDEN
 
@@ -699,7 +1355,7 @@ def forceOpen(theEid, openEid):
                         fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
                         urltitle=E,
                         urlextra=E,
-                        **forceOpen(G(record, N._id), openEid),
+                        **self.forceOpen(G(record, N._id), openEid),
                     )
                     for record in records
                 ),
@@ -725,17 +1381,13 @@ def forceOpen(theEid, openEid):
 <li><code><a title="controllers" href="index.html">controllers</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="controllers.table.forceOpen" href="#controllers.table.forceOpen">forceOpen</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="controllers.table.Table" href="#controllers.table.Table">Table</a></code></h4>
 <ul class="two-column">
 <li><code><a title="controllers.table.Table.adjustWorkflow" href="#controllers.table.Table.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="controllers.table.Table.forceOpen" href="#controllers.table.Table.forceOpen">forceOpen</a></code></li>
 <li><code><a title="controllers.table.Table.insert" href="#controllers.table.Table.insert">insert</a></code></li>
 <li><code><a title="controllers.table.Table.insertButton" href="#controllers.table.Table.insertButton">insertButton</a></code></li>
 <li><code><a title="controllers.table.Table.mayList" href="#controllers.table.Table.mayList">mayList</a></code></li>

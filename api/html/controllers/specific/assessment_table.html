@@ -91,7 +91,17 @@ class AssessmentT(Table):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Deals with tables.</p>
+<p>Store the incoming information.</p>
+<p>Set the RecordClass to a suitable derived class of Record,
+otherwise to the base class <a title="controllers.record.Record" href="../record.html#controllers.record.Record"><code>Record</code></a> itself.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>control</code></strong> :&ensp;<code>object</code></dt>
+<dd>A <a title="controllers.control.Control" href="../control.html#controllers.control.Control"><code>Control</code></a> singleton</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the table in question.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -145,60 +155,22 @@ class AssessmentT(Table):
 <ul class="hlist">
 <li><a title="controllers.table.Table" href="../table.html#controllers.table.Table">Table</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="controllers.specific.assessment_table.AssessmentT.insert"><code class="name flex">
-<span>def <span class="ident">insert</span></span>(<span>self, masterTable=None, masterId=None)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def insert(self, masterTable=None, masterId=None):
-    mayInsert = self.mayInsert
-    if not mayInsert:
-        return None
-
-    if not masterTable or not masterId:
-        return None
-
-    control = self.control
-    db = control.db
-    uid = self.uid
-    eppn = self.eppn
-    table = self.table
-    typeCriteria = db.typeCriteria
-
-    masterOid = ObjectId(masterId)
-
-    wfitem = control.getWorkflowItem(masterOid)
-
-    if not wfitem.permission(N.contrib, N.startAssessment):
-        return masterId
-
-    (contribType, contribTitle) = wfitem.info(N.contrib, N.type, N.title)
-
-    fields = {
-        masterTable: masterOid,
-        N.assessmentType: contribType,
-        N.title: f&#34;assessment of {contribTitle}&#34;,
-    }
-    assessmentId = db.insertItem(table, uid, eppn, False, **fields)
-
-    criteria = G(typeCriteria, contribType, default=[])
-    records = [
-        {N.seq: seq, N.criteria: crit, N.assessment: assessmentId}
-        for (seq, crit) in enumerate(criteria)
-    ]
-    db.insertMany(N.criteriaEntry, uid, eppn, records)
-    self.adjustWorkflow(masterOid, new=False)
-
-    return masterId</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="controllers.table.Table" href="../table.html#controllers.table.Table">Table</a></b></code>:
+<ul class="hlist">
+<li><code><a title="controllers.table.Table.adjustWorkflow" href="../table.html#controllers.table.Table.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="controllers.table.Table.forceOpen" href="../table.html#controllers.table.Table.forceOpen">forceOpen</a></code></li>
+<li><code><a title="controllers.table.Table.insert" href="../table.html#controllers.table.Table.insert">insert</a></code></li>
+<li><code><a title="controllers.table.Table.insertButton" href="../table.html#controllers.table.Table.insertButton">insertButton</a></code></li>
+<li><code><a title="controllers.table.Table.mayList" href="../table.html#controllers.table.Table.mayList">mayList</a></code></li>
+<li><code><a title="controllers.table.Table.record" href="../table.html#controllers.table.Table.record">record</a></code></li>
+<li><code><a title="controllers.table.Table.stage" href="../table.html#controllers.table.Table.stage">stage</a></code></li>
+<li><code><a title="controllers.table.Table.title" href="../table.html#controllers.table.Table.title">title</a></code></li>
+<li><code><a title="controllers.table.Table.wrap" href="../table.html#controllers.table.Table.wrap">wrap</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -218,9 +190,6 @@ class AssessmentT(Table):
 <ul>
 <li>
 <h4><code><a title="controllers.specific.assessment_table.AssessmentT" href="#controllers.specific.assessment_table.AssessmentT">AssessmentT</a></code></h4>
-<ul class="">
-<li><code><a title="controllers.specific.assessment_table.AssessmentT.insert" href="#controllers.specific.assessment_table.AssessmentT.insert">insert</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

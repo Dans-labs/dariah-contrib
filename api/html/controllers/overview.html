@@ -84,18 +84,6 @@ ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
 
 
-def wrapStatus(contrib, compact=True):
-    aStage = G(contrib, N.aStage)
-    score = G(contrib, N.score)
-    baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
-    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
-    if compact:
-        aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
-    else:
-        aLabel = f&#34;{score}% - {baseLabel}&#34;
-    return (aLabel, aClass)
-
-
 class Overview:
     def __init__(self, control):
         self.control = control
@@ -208,7 +196,7 @@ class Overview:
 
         if chosenCountryId is not None:
             colSpecs = COLSPECS[1:]
-            groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+            groups = self.rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
             groupCols = GROUP_COLS[1:]
 
         cols = [c[0] for c in colSpecs]
@@ -268,11 +256,17 @@ class Overview:
             urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
             urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
             availableReps = E.join(
-                H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+                H.a(
+                    f&#34;+{g}&#34;,
+                    (f&#34;{urlStart}{self.addGroup(groupsChosen, g)}&#34;),
+                    cls=&#34;g-add&#34;,
+                )
                 for g in groupsAvailable
             )
             chosenReps = E.join(
-                H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+                H.a(
+                    f&#34;-{g}&#34;, (f&#34;{urlStart}{self.rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,
+                )
                 for g in groupsChosen
             )
             clearGroups = (
@@ -461,12 +455,12 @@ class Overview:
                 groupValuesT[thisGroup] = groupValues[thisGroup]
             # groupValuesT.update(groupValues)
             groupValuesT[&#34;cost&#34;] = cost
-            groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+            groupValuesT[&#34;title&#34;] = self.colRep(&#34;contribution&#34;, nRecords)
             groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
             if depth == 0:
                 for g in groupCols + [&#34;title&#34;]:
                     label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
-                    controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                    controls = self.expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
                     groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
             material[headIndex] = self.formatContrib(
                 groupValuesT,
@@ -514,18 +508,18 @@ class Overview:
         if allHead:
             selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
             if asTsv:
-                selected = valTri(selected)
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+                selected = self.valTri(selected)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
             assessedClass = &#34;&#34;
         else:
             selected = contrib.get(&#34;selected&#34;, None)
             selected = (
-                (valTri(selected) if asTsv else self.roTri(selected))
+                (self.valTri(selected) if asTsv else self.roTri(selected))
                 if &#34;selected&#34; in contrib
                 else &#34;&#34;
             )
 
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
         rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
         title = (
             rawTitle
@@ -545,7 +539,7 @@ class Overview:
             &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
             &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
             &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
-            &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+            &#34;cost&#34;: self.euro(contrib.get(&#34;cost&#34;, None), subHead)
             if &#34;cost&#34; in contrib
             else &#34;&#34;,
             &#34;assessed&#34;: assessedLabel,
@@ -556,16 +550,16 @@ class Overview:
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
             xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
-            xRep = colRep(xName, nGroups)
+            xRep = self.colRep(xName, nGroups)
             values[xGroup] = (
                 xRep
                 if asTsv
                 else (
-                    f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                    f&#34;{self.expandControls(thisGroupId, True)} {xRep}&#34;
                     if xGroup == &#34;title&#34;
-                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
                     if depth &gt; 0
-                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
                 )
             )
         if not asTsv:
@@ -582,7 +576,7 @@ class Overview:
                     dict(
                         cls=(
                             &#34;{classes[col]} &#34;
-                            &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                            &#34;{self.subHeadClass(col, groupSet, subHead, allHead)}&#34;
                         )
                     ),
                 )
@@ -680,57 +674,69 @@ class Overview:
         value = values[colName] if disclosed else &#34;undisclosed&#34;
         return value
 
+    @staticmethod
+    def wrapStatus(contrib, compact=True):
+        aStage = G(contrib, N.aStage)
+        score = G(contrib, N.score)
+        baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
+        aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+        if compact:
+            aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
+        else:
+            aLabel = f&#34;{score}% - {baseLabel}&#34;
+        return (aLabel, aClass)
 
-def colRep(col, n):
-    itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
-    return f&#34;{n} {itemRep}&#34;
+    @staticmethod
+    def colRep(col, n):
+        itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
+        return f&#34;{n} {itemRep}&#34;
 
+    @staticmethod
+    def addGroup(groups, g):
+        return &#34;,&#34;.join(groups + [g])
 
-def addGroup(groups, g):
-    return &#34;,&#34;.join(groups + [g])
+    @staticmethod
+    def rmGroup(groups, g):
+        return &#34;,&#34;.join(h for h in groups if h != g)
 
-
-def rmGroup(groups, g):
-    return &#34;,&#34;.join(h for h in groups if h != g)
-
-
-def expandControls(gid, hide=False):
-    hideRep = &#34; hide&#34; if hide else &#34;&#34;
-    showRep = &#34;&#34; if hide else &#34; hide&#34;
-    return E.join(
-        (
-            H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
-            H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+    @staticmethod
+    def expandControls(gid, hide=False):
+        hideRep = &#34; hide&#34; if hide else &#34;&#34;
+        showRep = &#34;&#34; if hide else &#34; hide&#34;
+        return E.join(
+            (
+                H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
+                H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+            )
         )
-    )
 
-
-def expandAcontrols(group):
-    return E.join(
-        (
-            H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
-            H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+    @staticmethod
+    def expandAcontrols(group):
+        return E.join(
+            (
+                H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
+                H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+            )
         )
-    )
 
+    @staticmethod
+    def euro(amount, subHead):
+        return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;
 
-def euro(amount, subHead):
-    return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;
+    @staticmethod
+    def valTri(tri):
+        return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;
 
-
-def valTri(tri):
-    return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;
-
-
-def subHeadClass(col, groupSet, subHead, allHead):
-    theClass = (
-        &#34;allhead&#34;
-        if allHead and col == &#34;selected&#34;
-        else &#34;subhead&#34;
-        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
-        else &#34;&#34;
-    )
-    return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
+    @staticmethod
+    def subHeadClass(col, groupSet, subHead, allHead):
+        theClass = (
+            &#34;allhead&#34;
+            if allHead and col == &#34;selected&#34;
+            else &#34;subhead&#34;
+            if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+            else &#34;&#34;
+        )
+        return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -738,154 +744,6 @@ def subHeadClass(col, groupSet, subHead, allHead):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="controllers.overview.addGroup"><code class="name flex">
-<span>def <span class="ident">addGroup</span></span>(<span>groups, g)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def addGroup(groups, g):
-    return &#34;,&#34;.join(groups + [g])</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.colRep"><code class="name flex">
-<span>def <span class="ident">colRep</span></span>(<span>col, n)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def colRep(col, n):
-    itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
-    return f&#34;{n} {itemRep}&#34;</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.euro"><code class="name flex">
-<span>def <span class="ident">euro</span></span>(<span>amount, subHead)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def euro(amount, subHead):
-    return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.expandAcontrols"><code class="name flex">
-<span>def <span class="ident">expandAcontrols</span></span>(<span>group)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def expandAcontrols(group):
-    return E.join(
-        (
-            H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
-            H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
-        )
-    )</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.expandControls"><code class="name flex">
-<span>def <span class="ident">expandControls</span></span>(<span>gid, hide=False)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def expandControls(gid, hide=False):
-    hideRep = &#34; hide&#34; if hide else &#34;&#34;
-    showRep = &#34;&#34; if hide else &#34; hide&#34;
-    return E.join(
-        (
-            H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
-            H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
-        )
-    )</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.rmGroup"><code class="name flex">
-<span>def <span class="ident">rmGroup</span></span>(<span>groups, g)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def rmGroup(groups, g):
-    return &#34;,&#34;.join(h for h in groups if h != g)</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.subHeadClass"><code class="name flex">
-<span>def <span class="ident">subHeadClass</span></span>(<span>col, groupSet, subHead, allHead)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def subHeadClass(col, groupSet, subHead, allHead):
-    theClass = (
-        &#34;allhead&#34;
-        if allHead and col == &#34;selected&#34;
-        else &#34;subhead&#34;
-        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
-        else &#34;&#34;
-    )
-    return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.valTri"><code class="name flex">
-<span>def <span class="ident">valTri</span></span>(<span>tri)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def valTri(tri):
-    return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;</code></pre>
-</details>
-</dd>
-<dt id="controllers.overview.wrapStatus"><code class="name flex">
-<span>def <span class="ident">wrapStatus</span></span>(<span>contrib, compact=True)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def wrapStatus(contrib, compact=True):
-    aStage = G(contrib, N.aStage)
-    score = G(contrib, N.score)
-    baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
-    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
-    if compact:
-        aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
-    else:
-        aLabel = f&#34;{score}% - {baseLabel}&#34;
-    return (aLabel, aClass)</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -1012,7 +870,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
 
         if chosenCountryId is not None:
             colSpecs = COLSPECS[1:]
-            groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+            groups = self.rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
             groupCols = GROUP_COLS[1:]
 
         cols = [c[0] for c in colSpecs]
@@ -1072,11 +930,17 @@ def subHeadClass(col, groupSet, subHead, allHead):
             urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
             urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
             availableReps = E.join(
-                H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+                H.a(
+                    f&#34;+{g}&#34;,
+                    (f&#34;{urlStart}{self.addGroup(groupsChosen, g)}&#34;),
+                    cls=&#34;g-add&#34;,
+                )
                 for g in groupsAvailable
             )
             chosenReps = E.join(
-                H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+                H.a(
+                    f&#34;-{g}&#34;, (f&#34;{urlStart}{self.rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,
+                )
                 for g in groupsChosen
             )
             clearGroups = (
@@ -1265,12 +1129,12 @@ def subHeadClass(col, groupSet, subHead, allHead):
                 groupValuesT[thisGroup] = groupValues[thisGroup]
             # groupValuesT.update(groupValues)
             groupValuesT[&#34;cost&#34;] = cost
-            groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+            groupValuesT[&#34;title&#34;] = self.colRep(&#34;contribution&#34;, nRecords)
             groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
             if depth == 0:
                 for g in groupCols + [&#34;title&#34;]:
                     label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
-                    controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                    controls = self.expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
                     groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
             material[headIndex] = self.formatContrib(
                 groupValuesT,
@@ -1318,18 +1182,18 @@ def subHeadClass(col, groupSet, subHead, allHead):
         if allHead:
             selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
             if asTsv:
-                selected = valTri(selected)
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+                selected = self.valTri(selected)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
             assessedClass = &#34;&#34;
         else:
             selected = contrib.get(&#34;selected&#34;, None)
             selected = (
-                (valTri(selected) if asTsv else self.roTri(selected))
+                (self.valTri(selected) if asTsv else self.roTri(selected))
                 if &#34;selected&#34; in contrib
                 else &#34;&#34;
             )
 
-            (assessedLabel, assessedClass) = wrapStatus(contrib)
+            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
         rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
         title = (
             rawTitle
@@ -1349,7 +1213,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
             &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
             &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
             &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
-            &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+            &#34;cost&#34;: self.euro(contrib.get(&#34;cost&#34;, None), subHead)
             if &#34;cost&#34; in contrib
             else &#34;&#34;,
             &#34;assessed&#34;: assessedLabel,
@@ -1360,16 +1224,16 @@ def subHeadClass(col, groupSet, subHead, allHead):
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
             xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
-            xRep = colRep(xName, nGroups)
+            xRep = self.colRep(xName, nGroups)
             values[xGroup] = (
                 xRep
                 if asTsv
                 else (
-                    f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                    f&#34;{self.expandControls(thisGroupId, True)} {xRep}&#34;
                     if xGroup == &#34;title&#34;
-                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
                     if depth &gt; 0
-                    else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                    else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
                 )
             )
         if not asTsv:
@@ -1386,7 +1250,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
                     dict(
                         cls=(
                             &#34;{classes[col]} &#34;
-                            &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                            &#34;{self.subHeadClass(col, groupSet, subHead, allHead)}&#34;
                         )
                     ),
                 )
@@ -1482,8 +1346,229 @@ def subHeadClass(col, groupSet, subHead, allHead):
 
         disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
         value = values[colName] if disclosed else &#34;undisclosed&#34;
-        return value</code></pre>
+        return value
+
+    @staticmethod
+    def wrapStatus(contrib, compact=True):
+        aStage = G(contrib, N.aStage)
+        score = G(contrib, N.score)
+        baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
+        aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+        if compact:
+            aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
+        else:
+            aLabel = f&#34;{score}% - {baseLabel}&#34;
+        return (aLabel, aClass)
+
+    @staticmethod
+    def colRep(col, n):
+        itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
+        return f&#34;{n} {itemRep}&#34;
+
+    @staticmethod
+    def addGroup(groups, g):
+        return &#34;,&#34;.join(groups + [g])
+
+    @staticmethod
+    def rmGroup(groups, g):
+        return &#34;,&#34;.join(h for h in groups if h != g)
+
+    @staticmethod
+    def expandControls(gid, hide=False):
+        hideRep = &#34; hide&#34; if hide else &#34;&#34;
+        showRep = &#34;&#34; if hide else &#34; hide&#34;
+        return E.join(
+            (
+                H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
+                H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+            )
+        )
+
+    @staticmethod
+    def expandAcontrols(group):
+        return E.join(
+            (
+                H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
+                H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+            )
+        )
+
+    @staticmethod
+    def euro(amount, subHead):
+        return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;
+
+    @staticmethod
+    def valTri(tri):
+        return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;
+
+    @staticmethod
+    def subHeadClass(col, groupSet, subHead, allHead):
+        theClass = (
+            &#34;allhead&#34;
+            if allHead and col == &#34;selected&#34;
+            else &#34;subhead&#34;
+            if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+            else &#34;&#34;
+        )
+        return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
 </details>
+<h3>Static methods</h3>
+<dl>
+<dt id="controllers.overview.Overview.addGroup"><code class="name flex">
+<span>def <span class="ident">addGroup</span></span>(<span>groups, g)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def addGroup(groups, g):
+    return &#34;,&#34;.join(groups + [g])</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.colRep"><code class="name flex">
+<span>def <span class="ident">colRep</span></span>(<span>col, n)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def colRep(col, n):
+    itemRep = col if n == 1 else COL_PLURAL.get(col, f&#34;{col}s&#34;)
+    return f&#34;{n} {itemRep}&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.euro"><code class="name flex">
+<span>def <span class="ident">euro</span></span>(<span>amount, subHead)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def euro(amount, subHead):
+    return &#34;??&#34; if amount is None else f&#34;{int(round(amount)):,}&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.expandAcontrols"><code class="name flex">
+<span>def <span class="ident">expandAcontrols</span></span>(<span>group)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def expandAcontrols(group):
+    return E.join(
+        (
+            H.iconx(N.addown, cls=f&#34;dca&#34;, gn=group),
+            H.iconx(N.adup, cls=f&#34;dca&#34;, ggn=group),
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.expandControls"><code class="name flex">
+<span>def <span class="ident">expandControls</span></span>(<span>gid, hide=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def expandControls(gid, hide=False):
+    hideRep = &#34; hide&#34; if hide else &#34;&#34;
+    showRep = &#34;&#34; if hide else &#34; hide&#34;
+    return E.join(
+        (
+            H.iconx(N.cdown, cls=f&#34;dc{showRep}&#34;, gid=gid),
+            H.iconx(N.cup, cls=f&#34;dc{hideRep}&#34;, gid=gid),
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.rmGroup"><code class="name flex">
+<span>def <span class="ident">rmGroup</span></span>(<span>groups, g)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def rmGroup(groups, g):
+    return &#34;,&#34;.join(h for h in groups if h != g)</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.subHeadClass"><code class="name flex">
+<span>def <span class="ident">subHeadClass</span></span>(<span>col, groupSet, subHead, allHead)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def subHeadClass(col, groupSet, subHead, allHead):
+    theClass = (
+        &#34;allhead&#34;
+        if allHead and col == &#34;selected&#34;
+        else &#34;subhead&#34;
+        if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
+        else &#34;&#34;
+    )
+    return f&#34; {theClass}&#34; if theClass else &#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.valTri"><code class="name flex">
+<span>def <span class="ident">valTri</span></span>(<span>tri)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def valTri(tri):
+    return &#34;&#34; if tri is None else &#34;+&#34; if tri else &#34;-&#34;</code></pre>
+</details>
+</dd>
+<dt id="controllers.overview.Overview.wrapStatus"><code class="name flex">
+<span>def <span class="ident">wrapStatus</span></span>(<span>contrib, compact=True)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def wrapStatus(contrib, compact=True):
+    aStage = G(contrib, N.aStage)
+    score = G(contrib, N.score)
+    baseLabel = ASSESSED_LABELS.get(aStage, &#34;??&#34;)
+    aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
+    if compact:
+        aLabel = baseLabel if score is None else f&#34;score {score}%&#34;
+    else:
+        aLabel = f&#34;{score}% - {baseLabel}&#34;
+    return (aLabel, aClass)</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="controllers.overview.Overview.contribKey"><code class="name flex">
@@ -1580,18 +1665,18 @@ def subHeadClass(col, groupSet, subHead, allHead):
     if allHead:
         selected = contrib.get(&#34;selected&#34;, &#34;&#34;)
         if asTsv:
-            selected = valTri(selected)
-        (assessedLabel, assessedClass) = wrapStatus(contrib)
+            selected = self.valTri(selected)
+        (assessedLabel, assessedClass) = self.wrapStatus(contrib)
         assessedClass = &#34;&#34;
     else:
         selected = contrib.get(&#34;selected&#34;, None)
         selected = (
-            (valTri(selected) if asTsv else self.roTri(selected))
+            (self.valTri(selected) if asTsv else self.roTri(selected))
             if &#34;selected&#34; in contrib
             else &#34;&#34;
         )
 
-        (assessedLabel, assessedClass) = wrapStatus(contrib)
+        (assessedLabel, assessedClass) = self.wrapStatus(contrib)
     rawTitle = contrib.get(&#34;title&#34;, &#34;&#34;)
     title = (
         rawTitle
@@ -1611,7 +1696,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
         &#34;vcc&#34;: (contrib[&#34;vcc&#34;] or &#34;??&#34;) if &#34;vcc&#34; in contrib else &#34;&#34;,
         &#34;year&#34;: (contrib[&#34;year&#34;] or &#34;??&#34;) if &#34;year&#34; in contrib else &#34;&#34;,
         &#34;type&#34;: (contrib[&#34;type&#34;] or &#34;??&#34;) if &#34;type&#34; in contrib else &#34;&#34;,
-        &#34;cost&#34;: euro(contrib.get(&#34;cost&#34;, None), subHead)
+        &#34;cost&#34;: self.euro(contrib.get(&#34;cost&#34;, None), subHead)
         if &#34;cost&#34; in contrib
         else &#34;&#34;,
         &#34;assessed&#34;: assessedLabel,
@@ -1622,16 +1707,16 @@ def subHeadClass(col, groupSet, subHead, allHead):
     if depth is not None:
         xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else &#34;title&#34;
         xName = &#34;contribution&#34; if xGroup == &#34;title&#34; else xGroup
-        xRep = colRep(xName, nGroups)
+        xRep = self.colRep(xName, nGroups)
         values[xGroup] = (
             xRep
             if asTsv
             else (
-                f&#34;{expandControls(thisGroupId, True)} {xRep}&#34;
+                f&#34;{self.expandControls(thisGroupId, True)} {xRep}&#34;
                 if xGroup == &#34;title&#34;
-                else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
                 if depth &gt; 0
-                else f&#34;{values[xGroup]} ({xRep}) {expandControls(thisGroupId)}&#34;
+                else f&#34;{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}&#34;
             )
         )
     if not asTsv:
@@ -1648,7 +1733,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
                 dict(
                     cls=(
                         &#34;{classes[col]} &#34;
-                        &#34;{subHeadClass(col, groupSet, subHead, allHead)}&#34;
+                        &#34;{self.subHeadClass(col, groupSet, subHead, allHead)}&#34;
                     )
                 ),
             )
@@ -1868,12 +1953,12 @@ def subHeadClass(col, groupSet, subHead, allHead):
             groupValuesT[thisGroup] = groupValues[thisGroup]
         # groupValuesT.update(groupValues)
         groupValuesT[&#34;cost&#34;] = cost
-        groupValuesT[&#34;title&#34;] = colRep(&#34;contribution&#34;, nRecords)
+        groupValuesT[&#34;title&#34;] = self.colRep(&#34;contribution&#34;, nRecords)
         groupValuesT[&#34;_cn&#34;] = groupValues.get(&#34;country&#34;, None)
         if depth == 0:
             for g in groupCols + [&#34;title&#34;]:
                 label = selectedCountry if g == &#34;country&#34; else &#34;all&#34;
-                controls = expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
+                controls = self.expandAcontrols(g) if g in groups or g == &#34;title&#34; else &#34;&#34;
                 groupValuesT[g] = label if asTsv else f&#34;{label} {controls}&#34;
         material[headIndex] = self.formatContrib(
             groupValuesT,
@@ -2002,7 +2087,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
 
     if chosenCountryId is not None:
         colSpecs = COLSPECS[1:]
-        groups = rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
+        groups = self.rmGroup(groups.split(&#34;,&#34;), &#34;country&#34;)
         groupCols = GROUP_COLS[1:]
 
     cols = [c[0] for c in colSpecs]
@@ -2062,11 +2147,17 @@ def subHeadClass(col, groupSet, subHead, allHead):
         urlStart1 = f&#34;{PAGE}{urlArgs}&#34;
         urlStart = f&#34;{urlStart1}&#34; f&#34;&amp;groups=&#34;
         availableReps = E.join(
-            H.a(f&#34;+{g}&#34;, (f&#34;{urlStart}{addGroup(groupsChosen, g)}&#34;), cls=&#34;g-add&#34;,)
+            H.a(
+                f&#34;+{g}&#34;,
+                (f&#34;{urlStart}{self.addGroup(groupsChosen, g)}&#34;),
+                cls=&#34;g-add&#34;,
+            )
             for g in groupsAvailable
         )
         chosenReps = E.join(
-            H.a(f&#34;-{g}&#34;, (f&#34;{urlStart}{rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,)
+            H.a(
+                f&#34;-{g}&#34;, (f&#34;{urlStart}{self.rmGroup(groupsChosen, g)}&#34;), cls=&#34;g-rm&#34;,
+            )
             for g in groupsChosen
         )
         clearGroups = (
@@ -2165,33 +2256,29 @@ def subHeadClass(col, groupSet, subHead, allHead):
 <li><code><a title="controllers" href="index.html">controllers</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="controllers.overview.addGroup" href="#controllers.overview.addGroup">addGroup</a></code></li>
-<li><code><a title="controllers.overview.colRep" href="#controllers.overview.colRep">colRep</a></code></li>
-<li><code><a title="controllers.overview.euro" href="#controllers.overview.euro">euro</a></code></li>
-<li><code><a title="controllers.overview.expandAcontrols" href="#controllers.overview.expandAcontrols">expandAcontrols</a></code></li>
-<li><code><a title="controllers.overview.expandControls" href="#controllers.overview.expandControls">expandControls</a></code></li>
-<li><code><a title="controllers.overview.rmGroup" href="#controllers.overview.rmGroup">rmGroup</a></code></li>
-<li><code><a title="controllers.overview.subHeadClass" href="#controllers.overview.subHeadClass">subHeadClass</a></code></li>
-<li><code><a title="controllers.overview.valTri" href="#controllers.overview.valTri">valTri</a></code></li>
-<li><code><a title="controllers.overview.wrapStatus" href="#controllers.overview.wrapStatus">wrapStatus</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="controllers.overview.Overview" href="#controllers.overview.Overview">Overview</a></code></h4>
 <ul class="two-column">
+<li><code><a title="controllers.overview.Overview.addGroup" href="#controllers.overview.Overview.addGroup">addGroup</a></code></li>
+<li><code><a title="controllers.overview.Overview.colRep" href="#controllers.overview.Overview.colRep">colRep</a></code></li>
 <li><code><a title="controllers.overview.Overview.contribKey" href="#controllers.overview.Overview.contribKey">contribKey</a></code></li>
 <li><code><a title="controllers.overview.Overview.disclose" href="#controllers.overview.Overview.disclose">disclose</a></code></li>
+<li><code><a title="controllers.overview.Overview.euro" href="#controllers.overview.Overview.euro">euro</a></code></li>
+<li><code><a title="controllers.overview.Overview.expandAcontrols" href="#controllers.overview.Overview.expandAcontrols">expandAcontrols</a></code></li>
+<li><code><a title="controllers.overview.Overview.expandControls" href="#controllers.overview.Overview.expandControls">expandControls</a></code></li>
 <li><code><a title="controllers.overview.Overview.formatContrib" href="#controllers.overview.Overview.formatContrib">formatContrib</a></code></li>
 <li><code><a title="controllers.overview.Overview.getContribs" href="#controllers.overview.Overview.getContribs">getContribs</a></code></li>
 <li><code><a title="controllers.overview.Overview.getCountry" href="#controllers.overview.Overview.getCountry">getCountry</a></code></li>
 <li><code><a title="controllers.overview.Overview.groupList" href="#controllers.overview.Overview.groupList">groupList</a></code></li>
 <li><code><a title="controllers.overview.Overview.ourCountryHeaders" href="#controllers.overview.Overview.ourCountryHeaders">ourCountryHeaders</a></code></li>
+<li><code><a title="controllers.overview.Overview.rmGroup" href="#controllers.overview.Overview.rmGroup">rmGroup</a></code></li>
 <li><code><a title="controllers.overview.Overview.roTri" href="#controllers.overview.Overview.roTri">roTri</a></code></li>
+<li><code><a title="controllers.overview.Overview.subHeadClass" href="#controllers.overview.Overview.subHeadClass">subHeadClass</a></code></li>
+<li><code><a title="controllers.overview.Overview.valTri" href="#controllers.overview.Overview.valTri">valTri</a></code></li>
 <li><code><a title="controllers.overview.Overview.wrap" href="#controllers.overview.Overview.wrap">wrap</a></code></li>
+<li><code><a title="controllers.overview.Overview.wrapStatus" href="#controllers.overview.Overview.wrapStatus">wrapStatus</a></code></li>
 </ul>
 </li>
 </ul>

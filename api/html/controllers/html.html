@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>controllers.html API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="HTML generation made easy …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,25 @@
 <h1 class="title">Module <code>controllers.html</code></h1>
 </header>
 <section id="section-intro">
+<p>HTML generation made easy.</p>
+<ul>
+<li>for each HTML element there is a function to wrap attributes and content in it.</li>
+<li>additional support for more involved patches of HTML (<code>details</code>, <code>input</code>, icons)</li>
+<li>escaping of HTML elements.</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Config as C, Names as N
+<pre><code class="python">&#34;&#34;&#34;HTML generation made easy.
+
+*   for each HTML element there is a function to wrap attributes and content in it.
+*   additional support for more involved patches of HTML (`details`, `input`, icons)
+*   escaping of HTML elements.
+
+&#34;&#34;&#34;
+
+from config import Config as C, Names as N
 from controllers.utils import (
     pick as G,
     cap1,
@@ -47,48 +61,95 @@ ICONS = CW.icons
 CLASS = &#34;class&#34;
 
 
-def htmlEscape(val):
-    return (
-        E
-        if val is None
-        else (
-            str(val)
-            .replace(AMP, f&#34;&#34;&#34;&amp;{N.amp};&#34;&#34;&#34;)
-            .replace(LT, f&#34;&#34;&#34;&amp;{N.lt};&#34;&#34;&#34;)
-            .replace(APOS, f&#34;&#34;&#34;&amp;{N.apos};&#34;&#34;&#34;)
-            .replace(QUOT, f&#34;&#34;&#34;&amp;{N.quot};&#34;&#34;&#34;)
-            .replace(DOLLAR, f&#34;&#34;&#34;&lt;{N.span}&gt;{DOLLAR}&lt;/{N.span}&gt;&#34;&#34;&#34;)
-        )
-    )
-
-
-def atNormal(k):
-    return CLASS if k == N.cls else k
-
-
-def attStr(atts, addClass=None):
-    if addClass:
-        if atts and N.cls in atts:
-            atts[N.cls] += f&#34; {addClass}&#34;
-        elif atts:
-            atts[N.cls] = addClass
-        else:
-            atts = dict(cls=addClass)
-    return E.join(
-        f&#34;&#34;&#34; {atNormal(k)}&#34;&#34;&#34; + (E if v is True else f&#34;&#34;&#34;=&#39;{v}&#39;&#34;&#34;&#34;)
-        for (k, v) in atts.items()
-        if v is not None
-    )
-
-
 class HtmlElement:
+    &#34;&#34;&#34;Wrapping of attributes and content into an HTML element.&#34;&#34;&#34;
+
     def __init__(self, name):
+        &#34;&#34;&#34;An HtmlElement object.
+
+        Parameters
+        ----------
+        name: string
+            The element name.
+        &#34;&#34;&#34;
+
         self.name = name
 
+    @staticmethod
+    def atNormal(k):
+        &#34;&#34;&#34;Substitute the `cls` attribute name with `class`. &#34;&#34;&#34;
+
+        return CLASS if k == N.cls else k
+
+    @staticmethod
+    def attStr(atts, addClass=None):
+        &#34;&#34;&#34;Stringify attributes.
+
+        Parameters
+        ----------
+        atts: dict
+            A dictionary of attributes.
+        addClass: string
+            An extra `class` attribute. If there is already a class attribute
+            `addClass` will be appended to it.
+            Otherwise a fresh class attribute will be created.
+
+        Returns
+        -------
+        string
+            The serialzed attributes.
+
+        !!! hint
+            Attributes with value `True` are represented as bare attributes, without
+            value. For example: `{open=True}` translates into `open`.
+
+        !!! caution
+            Use the name `cls` to get a `class` attribute inside an HTML element.
+            The name `class` interferes too much with Python syntax to be usable
+            as a keyowrd argument.
+        &#34;&#34;&#34;
+
+        if addClass:
+            if atts and N.cls in atts:
+                atts[N.cls] += f&#34; {addClass}&#34;
+            elif atts:
+                atts[N.cls] = addClass
+            else:
+                atts = dict(cls=addClass)
+        return E.join(
+            f&#34;&#34;&#34; {HtmlElement.atNormal(k)}&#34;&#34;&#34; + (E if v is True else f&#34;&#34;&#34;=&#39;{v}&#39;&#34;&#34;&#34;)
+            for (k, v) in atts.items()
+            if v is not None
+        )
+
     def wrap(self, material, addClass=None, **atts):
+        &#34;&#34;&#34;Wraps attributes and content into an element.
+
+        Parameters
+        ----------
+        material: string | iterable
+            The element content. If the material is not a string but another
+            iterable, the items will be joined by the empty string.
+
+        addClass: string
+            An extra `class` attribute. If there is already a class attribute
+            `addClass` will be appended to it.
+            Otherwise a fresh class attribute will be created.
+
+        !!! caution
+            No HTML escaping of special characters will take place.
+            You have to use `cotrollers.html.HtmlElements.he` yourself.
+
+        Returns
+        -------
+        string
+            The serialzed element.
+
+        &#34;&#34;&#34;
+
         name = self.name
         content = asString(material)
-        attributes = attStr(atts, addClass=addClass)
+        attributes = HtmlElement.attStr(atts, addClass=addClass)
         return (
             f&#34;&#34;&#34;&lt;{name}{attributes}&gt;&#34;&#34;&#34;
             if name in EMPTY_ELEMENTS
@@ -97,20 +158,108 @@ class HtmlElement:
 
 
 class HtmlElements:
+    &#34;&#34;&#34;Wrap specific HTML elements and patterns.
+
+    !!! note
+        Nearly all elements accept an arbitrary supply of attributes
+        in the `**atts` parameter, which will not further be documented.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def he(val):
+        &#34;&#34;&#34;Escape HTML characters.
+
+        The following characters will be replaced by entities:
+        ```
+        &amp; &lt; &#39; &#34;
+        ```
+
+        The dollar sign will be wrapped into a `&lt;span&gt;`.
+        &#34;&#34;&#34;
+
+        return (
+            E
+            if val is None
+            else (
+                str(val)
+                .replace(AMP, f&#34;&#34;&#34;&amp;{N.amp};&#34;&#34;&#34;)
+                .replace(LT, f&#34;&#34;&#34;&amp;{N.lt};&#34;&#34;&#34;)
+                .replace(APOS, f&#34;&#34;&#34;&amp;{N.apos};&#34;&#34;&#34;)
+                .replace(QUOT, f&#34;&#34;&#34;&amp;{N.quot};&#34;&#34;&#34;)
+                .replace(DOLLAR, f&#34;&#34;&#34;&lt;{N.span}&gt;{DOLLAR}&lt;/{N.span}&gt;&#34;&#34;&#34;)
+            )
+        )
+
     @staticmethod
     def a(material, href, **atts):
+        &#34;&#34;&#34;A.
+
+        Hyperlink.
+
+        Parameters
+        ----------
+        material: string | iterable
+            Text of the link.
+        href: url
+            Destination of the link.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.a).wrap(material, href=href, **atts)
 
     @staticmethod
     def br():
+        &#34;&#34;&#34;BR.
+
+        Line break.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.br).wrap(E)
 
     @staticmethod
     def dd(material, **atts):
+        &#34;&#34;&#34;DD.
+
+        The definition part of a term.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dd).wrap(material, **atts)
 
     @staticmethod
     def details(summary, material, itemkey, **atts):
+        &#34;&#34;&#34;DETAILS.
+
+        Collapsible details element.
+
+        Parameters
+        ----------
+        summary: string | iterable
+            The summary.
+        material: string | iterable
+            The expansion.
+        itemkey: string
+            Identifier for reference from Javascript.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
         return HtmlElement(N.details).wrap(
             HtmlElement(N.summary).wrap(summary) + content, itemkey=itemkey, **atts
@@ -120,6 +269,36 @@ class HtmlElements:
     def detailx(
         icons, material, itemkey, openAtts={}, closeAtts={}, **atts,
     ):
+        &#34;&#34;&#34;detailx.
+
+        Collapsible details pseudo element.
+
+        Unlike the HTML `details` element, this one allows separate open and close
+        controls. There is no summary.
+
+        Parameters
+        ----------
+        icons: string | (string, string)
+            Names of the icons that open and close the element.
+        itemkey: string
+            Identifier for reference from Javascript.
+        openAtts: dict, optinal, `{}`
+            Attributes for the open icon.
+        closeAtts: dict, optinal, `{}`
+            Attributes for the close icon.
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+
+        !!! hint
+            The `atts` go to the outermost `div` of the result.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
         (iconOpen, iconClose) = (icons, icons) if type(icons) is str else icons
         triggerElements = [
@@ -138,10 +317,35 @@ class HtmlElements:
 
     @staticmethod
     def div(material, **atts):
+        &#34;&#34;&#34;DIV.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.div).wrap(material, **atts)
 
     @staticmethod
     def dl(items, **atts):
+        &#34;&#34;&#34;DL.
+
+        Definition list.
+
+        Parameters
+        ----------
+        items: iterable of (string, string)
+            These are the list items, which are term-definition pairs.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dl).wrap(
             [
                 HtmlElement(N.dt).wrap(item[0]) + HtmlElement(N.dd).wrap(item[1])
@@ -152,14 +356,63 @@ class HtmlElements:
 
     @staticmethod
     def dt(material, **atts):
+        &#34;&#34;&#34;DT.
+
+        Term of a definition.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dt).wrap(material, **atts)
 
     @staticmethod
     def h(level, material, **atts):
+        &#34;&#34;&#34;H1, H2, H3, H4, H5, H6.
+
+        Parameters
+        ----------
+        level: int
+            The heading level.
+        material: string | iterable
+            The heading content.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(f&#34;{N.h}{level}&#34;).wrap(material, **atts)
 
     @staticmethod
     def icon(icon, asChar=False, **atts):
+        &#34;&#34;&#34;icon.
+
+        Pseudo element for an icon.
+
+        Parameters
+        ----------
+        icon: string
+            Name of the icon.
+        asChar: boolean, optional, `False`
+            If `True`, just output the icon character.
+            Otherwise, wrap it in a `&lt;span&gt;` with all
+            attributes that might have been passed.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         if asChar:
             return G(ICONS, icon, default=ICONS[N.noicon])
@@ -168,6 +421,27 @@ class HtmlElements:
 
     @staticmethod
     def iconx(icon, href=None, **atts):
+        &#34;&#34;&#34;iconx.
+
+        Pseudo element for a clickable icon.
+        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+
+        Parameters
+        ----------
+        icon: string
+            Name of the icon.
+        href: url, optional, `None`
+            Destination of the icon when clicked.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         addClass = f&#34;{N.icon} i-{icon} &#34;
         return (
@@ -178,6 +452,31 @@ class HtmlElements:
 
     @staticmethod
     def iconr(itemKey, tag, msg=None):
+        &#34;&#34;&#34;iconr.
+
+        Refresh icon.
+        Special case of `iconx`, but used for refreshing an element.
+
+        Parameters
+        ----------
+        itemkey: string
+            Identifier for reference from Javascript.
+        tag: string
+            Attribute `tag`, used by Javascript for scrolling to this
+            element after the refresh. It is meant to distinhuish it from
+            other refresh icons for the same element.
+        msg: string, optional, `None`
+            Message for in the tooltip.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         if msg is None:
             msg = E
         return HtmlElements.iconx(
@@ -191,6 +490,33 @@ class HtmlElements:
 
     @staticmethod
     def img(src, href=None, title=None, imgAtts={}, **atts):
+        &#34;&#34;&#34;IMG.
+
+        Image element.
+
+        Parameters
+        ----------
+        src: url
+            The url of the image.
+        href: url, optional, `None`
+            The destination to navigate to if the image is clicked.
+            The images is then wrapped in an `&lt;a&gt;` element.
+            If missing, the image is not wrapped further.
+        title: string, optional, `None`
+            Tooltip.
+        imgAtts: dict, optional `{}`
+            Attributes that go to the `&lt;img&gt;` element.
+
+        !!! note
+            The `atts` go to the outer element, which is either `&lt;img&gt;` if it is
+            not further wrapped, or `&lt;a&gt;`.
+            The `imgAtts` only go to the `&lt;img&gt;` element.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return (
             HtmlElements.a(
                 HtmlElement(N.img).wrap(E, src=src, **imgAtts),
@@ -204,55 +530,188 @@ class HtmlElements:
 
     @staticmethod
     def input(material, **atts):
+        &#34;&#34;&#34;INPUT.
+
+        The element to receive types user input.
+
+        !!! caution
+            Do not use this for checkboxes. Use
+            `controllers.html.HtmlElements.checkbox` instead.
+
+        Parameters
+        ----------
+        material: string | iterable
+            This goes into the `value` attribute of the element, after HTML escaping.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
-        return HtmlElement(N.input).wrap(E, value=htmlEscape(content), **atts)
+        return HtmlElement(N.input).wrap(E, value=HtmlElements.he(content), **atts)
 
     @staticmethod
     def join(material):
+        &#34;&#34;&#34;fragment.
+
+        This is a pseudo element.
+        The material will be joined together, without wrapping it in an element.
+        There are no attributes.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return asString(material)
 
     @staticmethod
     def checkbox(var, **atts):
+        &#34;&#34;&#34;INPUT type=checkbox.
+
+        The element to receive user clicks.
+
+        Parameters
+        ----------
+        var: string
+            The name of an identifier for the element.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.input).wrap(
             E, type=N.checkbox, id=var, addClass=N.option, **atts,
         )
 
     @staticmethod
     def p(material, **atts):
+        &#34;&#34;&#34;P.
+
+        Paragraph.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.p).wrap(material, **atts)
 
     @staticmethod
     def script(material, **atts):
+        &#34;&#34;&#34;SCRIPT.
+
+        Parameters
+        ----------
+        material: string | iterable
+            The Javascript.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.script).wrap(material, **atts)
 
     @staticmethod
     def span(material, **atts):
+        &#34;&#34;&#34;SPAN.
+
+        Inline element.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.span).wrap(material, **atts)
 
     @staticmethod
     def table(headers, rows, **atts):
+        &#34;&#34;&#34;TABLE.
+
+        The table element.
+
+        Parameters
+        ----------
+        headers, rows: iterables of iterables
+            An iterable of rows.
+            Each row is a tuple: an iterable of cells, and a CSS class for the row.
+            Each cell is a tuple: material for the cell, and a CSS class for the cell.
+
+        !!! note
+            Cells in normal rows are wrapped in `&lt;td&gt;`, cells in header rows go
+            into `&lt;th&gt;`.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         th = HtmlElement(N.th).wrap
         td = HtmlElement(N.td).wrap
-        headerMaterial = wrapTable(headers, th)
-        rowMaterial = wrapTable(rows, td)
+        headerMaterial = HtmlElements.wrapTable(headers, th)
+        rowMaterial = HtmlElements.wrapTable(rows, td)
         material = HtmlElement(N.body).wrap(headerMaterial + rowMaterial)
         return HtmlElement(N.table).wrap(material, **atts)
 
     @staticmethod
     def textarea(material, **atts):
+        &#34;&#34;&#34;TEXTAREA.
+
+        Input element for larger text, typically Markdown.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
         return HtmlElement(N.textarea).wrap(content, **atts)
 
+    @staticmethod
+    def wrapTable(data, td):
+        &#34;&#34;&#34;Rows and cells.
 
-def wrapTable(data, td):
-    tr = HtmlElement(N.tr).wrap
-    material = []
-    for (rowData, rowAtts) in data:
-        rowMaterial = []
-        for (cellData, cellAtts) in rowData:
-            rowMaterial.append(td(cellData, **cellAtts))
-        material.append(tr(rowMaterial, **rowAtts))
-    return material</code></pre>
+        Parameters
+        ----------
+        data: iterable of iterables.
+            Rows and cells within them, both with CSS classes.
+        td: function
+            Funnction for wrapping the cells, typically boiling down
+            to wrapping them in either `&lt;th&gt;` or `&lt;td&gt;` elements.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
+        tr = HtmlElement(N.tr).wrap
+        material = []
+        for (rowData, rowAtts) in data:
+            rowMaterial = []
+            for (cellData, cellAtts) in rowData:
+                rowMaterial.append(td(cellData, **cellAtts))
+            material.append(tr(rowMaterial, **rowAtts))
+        return material</code></pre>
 </details>
 </section>
 <section>
@@ -260,90 +719,6 @@ def wrapTable(data, td):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="controllers.html.atNormal"><code class="name flex">
-<span>def <span class="ident">atNormal</span></span>(<span>k)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def atNormal(k):
-    return CLASS if k == N.cls else k</code></pre>
-</details>
-</dd>
-<dt id="controllers.html.attStr"><code class="name flex">
-<span>def <span class="ident">attStr</span></span>(<span>atts, addClass=None)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def attStr(atts, addClass=None):
-    if addClass:
-        if atts and N.cls in atts:
-            atts[N.cls] += f&#34; {addClass}&#34;
-        elif atts:
-            atts[N.cls] = addClass
-        else:
-            atts = dict(cls=addClass)
-    return E.join(
-        f&#34;&#34;&#34; {atNormal(k)}&#34;&#34;&#34; + (E if v is True else f&#34;&#34;&#34;=&#39;{v}&#39;&#34;&#34;&#34;)
-        for (k, v) in atts.items()
-        if v is not None
-    )</code></pre>
-</details>
-</dd>
-<dt id="controllers.html.htmlEscape"><code class="name flex">
-<span>def <span class="ident">htmlEscape</span></span>(<span>val)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def htmlEscape(val):
-    return (
-        E
-        if val is None
-        else (
-            str(val)
-            .replace(AMP, f&#34;&#34;&#34;&amp;{N.amp};&#34;&#34;&#34;)
-            .replace(LT, f&#34;&#34;&#34;&amp;{N.lt};&#34;&#34;&#34;)
-            .replace(APOS, f&#34;&#34;&#34;&amp;{N.apos};&#34;&#34;&#34;)
-            .replace(QUOT, f&#34;&#34;&#34;&amp;{N.quot};&#34;&#34;&#34;)
-            .replace(DOLLAR, f&#34;&#34;&#34;&lt;{N.span}&gt;{DOLLAR}&lt;/{N.span}&gt;&#34;&#34;&#34;)
-        )
-    )</code></pre>
-</details>
-</dd>
-<dt id="controllers.html.wrapTable"><code class="name flex">
-<span>def <span class="ident">wrapTable</span></span>(<span>data, td)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def wrapTable(data, td):
-    tr = HtmlElement(N.tr).wrap
-    material = []
-    for (rowData, rowAtts) in data:
-        rowMaterial = []
-        for (cellData, cellAtts) in rowData:
-            rowMaterial.append(td(cellData, **cellAtts))
-        material.append(tr(rowMaterial, **rowAtts))
-    return material</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -353,40 +728,266 @@ def wrapTable(data, td):
 <span>(</span><span>name)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrapping of attributes and content into an HTML element.</p>
+<p>An HtmlElement object.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>The element name.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class HtmlElement:
+    &#34;&#34;&#34;Wrapping of attributes and content into an HTML element.&#34;&#34;&#34;
+
     def __init__(self, name):
+        &#34;&#34;&#34;An HtmlElement object.
+
+        Parameters
+        ----------
+        name: string
+            The element name.
+        &#34;&#34;&#34;
+
         self.name = name
 
+    @staticmethod
+    def atNormal(k):
+        &#34;&#34;&#34;Substitute the `cls` attribute name with `class`. &#34;&#34;&#34;
+
+        return CLASS if k == N.cls else k
+
+    @staticmethod
+    def attStr(atts, addClass=None):
+        &#34;&#34;&#34;Stringify attributes.
+
+        Parameters
+        ----------
+        atts: dict
+            A dictionary of attributes.
+        addClass: string
+            An extra `class` attribute. If there is already a class attribute
+            `addClass` will be appended to it.
+            Otherwise a fresh class attribute will be created.
+
+        Returns
+        -------
+        string
+            The serialzed attributes.
+
+        !!! hint
+            Attributes with value `True` are represented as bare attributes, without
+            value. For example: `{open=True}` translates into `open`.
+
+        !!! caution
+            Use the name `cls` to get a `class` attribute inside an HTML element.
+            The name `class` interferes too much with Python syntax to be usable
+            as a keyowrd argument.
+        &#34;&#34;&#34;
+
+        if addClass:
+            if atts and N.cls in atts:
+                atts[N.cls] += f&#34; {addClass}&#34;
+            elif atts:
+                atts[N.cls] = addClass
+            else:
+                atts = dict(cls=addClass)
+        return E.join(
+            f&#34;&#34;&#34; {HtmlElement.atNormal(k)}&#34;&#34;&#34; + (E if v is True else f&#34;&#34;&#34;=&#39;{v}&#39;&#34;&#34;&#34;)
+            for (k, v) in atts.items()
+            if v is not None
+        )
+
     def wrap(self, material, addClass=None, **atts):
+        &#34;&#34;&#34;Wraps attributes and content into an element.
+
+        Parameters
+        ----------
+        material: string | iterable
+            The element content. If the material is not a string but another
+            iterable, the items will be joined by the empty string.
+
+        addClass: string
+            An extra `class` attribute. If there is already a class attribute
+            `addClass` will be appended to it.
+            Otherwise a fresh class attribute will be created.
+
+        !!! caution
+            No HTML escaping of special characters will take place.
+            You have to use `cotrollers.html.HtmlElements.he` yourself.
+
+        Returns
+        -------
+        string
+            The serialzed element.
+
+        &#34;&#34;&#34;
+
         name = self.name
         content = asString(material)
-        attributes = attStr(atts, addClass=addClass)
+        attributes = HtmlElement.attStr(atts, addClass=addClass)
         return (
             f&#34;&#34;&#34;&lt;{name}{attributes}&gt;&#34;&#34;&#34;
             if name in EMPTY_ELEMENTS
             else f&#34;&#34;&#34;&lt;{name}{attributes}&gt;{content}&lt;/{name}&gt;&#34;&#34;&#34;
         )</code></pre>
 </details>
+<h3>Static methods</h3>
+<dl>
+<dt id="controllers.html.HtmlElement.atNormal"><code class="name flex">
+<span>def <span class="ident">atNormal</span></span>(<span>k)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Substitute the <code>cls</code> attribute name with <code>class</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def atNormal(k):
+    &#34;&#34;&#34;Substitute the `cls` attribute name with `class`. &#34;&#34;&#34;
+
+    return CLASS if k == N.cls else k</code></pre>
+</details>
+</dd>
+<dt id="controllers.html.HtmlElement.attStr"><code class="name flex">
+<span>def <span class="ident">attStr</span></span>(<span>atts, addClass=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Stringify attributes.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>atts</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dictionary of attributes.</dd>
+<dt><strong><code>addClass</code></strong> :&ensp;<code>string</code></dt>
+<dd>An extra <code>class</code> attribute. If there is already a class attribute
+<code>addClass</code> will be appended to it.
+Otherwise a fresh class attribute will be created.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd>The serialzed attributes.</dd>
+</dl>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Attributes with value <code>True</code> are represented as bare attributes, without
+value. For example: <code>{open=True}</code> translates into <code>open</code>.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Use the name <code>cls</code> to get a <code>class</code> attribute inside an HTML element.
+The name <code>class</code> interferes too much with Python syntax to be usable
+as a keyowrd argument.</p>
+</div></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def attStr(atts, addClass=None):
+    &#34;&#34;&#34;Stringify attributes.
+
+    Parameters
+    ----------
+    atts: dict
+        A dictionary of attributes.
+    addClass: string
+        An extra `class` attribute. If there is already a class attribute
+        `addClass` will be appended to it.
+        Otherwise a fresh class attribute will be created.
+
+    Returns
+    -------
+    string
+        The serialzed attributes.
+
+    !!! hint
+        Attributes with value `True` are represented as bare attributes, without
+        value. For example: `{open=True}` translates into `open`.
+
+    !!! caution
+        Use the name `cls` to get a `class` attribute inside an HTML element.
+        The name `class` interferes too much with Python syntax to be usable
+        as a keyowrd argument.
+    &#34;&#34;&#34;
+
+    if addClass:
+        if atts and N.cls in atts:
+            atts[N.cls] += f&#34; {addClass}&#34;
+        elif atts:
+            atts[N.cls] = addClass
+        else:
+            atts = dict(cls=addClass)
+    return E.join(
+        f&#34;&#34;&#34; {HtmlElement.atNormal(k)}&#34;&#34;&#34; + (E if v is True else f&#34;&#34;&#34;=&#39;{v}&#39;&#34;&#34;&#34;)
+        for (k, v) in atts.items()
+        if v is not None
+    )</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="controllers.html.HtmlElement.wrap"><code class="name flex">
 <span>def <span class="ident">wrap</span></span>(<span>self, material, addClass=None, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wraps attributes and content into an element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>The element content. If the material is not a string but another
+iterable, the items will be joined by the empty string.</dd>
+<dt><strong><code>addClass</code></strong> :&ensp;<code>string</code></dt>
+<dd>An extra <code>class</code> attribute. If there is already a class attribute
+<code>addClass</code> will be appended to it.
+Otherwise a fresh class attribute will be created.</dd>
+</dl>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>No HTML escaping of special characters will take place.
+You have to use <code>cotrollers.html.HtmlElements.he</code> yourself.</p>
+</div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd>The serialzed element.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrap(self, material, addClass=None, **atts):
+    &#34;&#34;&#34;Wraps attributes and content into an element.
+
+    Parameters
+    ----------
+    material: string | iterable
+        The element content. If the material is not a string but another
+        iterable, the items will be joined by the empty string.
+
+    addClass: string
+        An extra `class` attribute. If there is already a class attribute
+        `addClass` will be appended to it.
+        Otherwise a fresh class attribute will be created.
+
+    !!! caution
+        No HTML escaping of special characters will take place.
+        You have to use `cotrollers.html.HtmlElements.he` yourself.
+
+    Returns
+    -------
+    string
+        The serialzed element.
+
+    &#34;&#34;&#34;
+
     name = self.name
     content = asString(material)
-    attributes = attStr(atts, addClass=addClass)
+    attributes = HtmlElement.attStr(atts, addClass=addClass)
     return (
         f&#34;&#34;&#34;&lt;{name}{attributes}&gt;&#34;&#34;&#34;
         if name in EMPTY_ELEMENTS
@@ -401,26 +1002,119 @@ def wrapTable(data, td):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap specific HTML elements and patterns.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nearly all elements accept an arbitrary supply of attributes
+in the <code>**atts</code> parameter, which will not further be documented.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class HtmlElements:
+    &#34;&#34;&#34;Wrap specific HTML elements and patterns.
+
+    !!! note
+        Nearly all elements accept an arbitrary supply of attributes
+        in the `**atts` parameter, which will not further be documented.
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def he(val):
+        &#34;&#34;&#34;Escape HTML characters.
+
+        The following characters will be replaced by entities:
+        ```
+        &amp; &lt; &#39; &#34;
+        ```
+
+        The dollar sign will be wrapped into a `&lt;span&gt;`.
+        &#34;&#34;&#34;
+
+        return (
+            E
+            if val is None
+            else (
+                str(val)
+                .replace(AMP, f&#34;&#34;&#34;&amp;{N.amp};&#34;&#34;&#34;)
+                .replace(LT, f&#34;&#34;&#34;&amp;{N.lt};&#34;&#34;&#34;)
+                .replace(APOS, f&#34;&#34;&#34;&amp;{N.apos};&#34;&#34;&#34;)
+                .replace(QUOT, f&#34;&#34;&#34;&amp;{N.quot};&#34;&#34;&#34;)
+                .replace(DOLLAR, f&#34;&#34;&#34;&lt;{N.span}&gt;{DOLLAR}&lt;/{N.span}&gt;&#34;&#34;&#34;)
+            )
+        )
+
     @staticmethod
     def a(material, href, **atts):
+        &#34;&#34;&#34;A.
+
+        Hyperlink.
+
+        Parameters
+        ----------
+        material: string | iterable
+            Text of the link.
+        href: url
+            Destination of the link.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.a).wrap(material, href=href, **atts)
 
     @staticmethod
     def br():
+        &#34;&#34;&#34;BR.
+
+        Line break.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.br).wrap(E)
 
     @staticmethod
     def dd(material, **atts):
+        &#34;&#34;&#34;DD.
+
+        The definition part of a term.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dd).wrap(material, **atts)
 
     @staticmethod
     def details(summary, material, itemkey, **atts):
+        &#34;&#34;&#34;DETAILS.
+
+        Collapsible details element.
+
+        Parameters
+        ----------
+        summary: string | iterable
+            The summary.
+        material: string | iterable
+            The expansion.
+        itemkey: string
+            Identifier for reference from Javascript.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
         return HtmlElement(N.details).wrap(
             HtmlElement(N.summary).wrap(summary) + content, itemkey=itemkey, **atts
@@ -430,6 +1124,36 @@ def wrapTable(data, td):
     def detailx(
         icons, material, itemkey, openAtts={}, closeAtts={}, **atts,
     ):
+        &#34;&#34;&#34;detailx.
+
+        Collapsible details pseudo element.
+
+        Unlike the HTML `details` element, this one allows separate open and close
+        controls. There is no summary.
+
+        Parameters
+        ----------
+        icons: string | (string, string)
+            Names of the icons that open and close the element.
+        itemkey: string
+            Identifier for reference from Javascript.
+        openAtts: dict, optinal, `{}`
+            Attributes for the open icon.
+        closeAtts: dict, optinal, `{}`
+            Attributes for the close icon.
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+
+        !!! hint
+            The `atts` go to the outermost `div` of the result.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
         (iconOpen, iconClose) = (icons, icons) if type(icons) is str else icons
         triggerElements = [
@@ -448,10 +1172,35 @@ def wrapTable(data, td):
 
     @staticmethod
     def div(material, **atts):
+        &#34;&#34;&#34;DIV.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.div).wrap(material, **atts)
 
     @staticmethod
     def dl(items, **atts):
+        &#34;&#34;&#34;DL.
+
+        Definition list.
+
+        Parameters
+        ----------
+        items: iterable of (string, string)
+            These are the list items, which are term-definition pairs.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dl).wrap(
             [
                 HtmlElement(N.dt).wrap(item[0]) + HtmlElement(N.dd).wrap(item[1])
@@ -462,14 +1211,63 @@ def wrapTable(data, td):
 
     @staticmethod
     def dt(material, **atts):
+        &#34;&#34;&#34;DT.
+
+        Term of a definition.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.dt).wrap(material, **atts)
 
     @staticmethod
     def h(level, material, **atts):
+        &#34;&#34;&#34;H1, H2, H3, H4, H5, H6.
+
+        Parameters
+        ----------
+        level: int
+            The heading level.
+        material: string | iterable
+            The heading content.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(f&#34;{N.h}{level}&#34;).wrap(material, **atts)
 
     @staticmethod
     def icon(icon, asChar=False, **atts):
+        &#34;&#34;&#34;icon.
+
+        Pseudo element for an icon.
+
+        Parameters
+        ----------
+        icon: string
+            Name of the icon.
+        asChar: boolean, optional, `False`
+            If `True`, just output the icon character.
+            Otherwise, wrap it in a `&lt;span&gt;` with all
+            attributes that might have been passed.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         if asChar:
             return G(ICONS, icon, default=ICONS[N.noicon])
@@ -478,6 +1276,27 @@ def wrapTable(data, td):
 
     @staticmethod
     def iconx(icon, href=None, **atts):
+        &#34;&#34;&#34;iconx.
+
+        Pseudo element for a clickable icon.
+        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+
+        Parameters
+        ----------
+        icon: string
+            Name of the icon.
+        href: url, optional, `None`
+            Destination of the icon when clicked.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         addClass = f&#34;{N.icon} i-{icon} &#34;
         return (
@@ -488,6 +1307,31 @@ def wrapTable(data, td):
 
     @staticmethod
     def iconr(itemKey, tag, msg=None):
+        &#34;&#34;&#34;iconr.
+
+        Refresh icon.
+        Special case of `iconx`, but used for refreshing an element.
+
+        Parameters
+        ----------
+        itemkey: string
+            Identifier for reference from Javascript.
+        tag: string
+            Attribute `tag`, used by Javascript for scrolling to this
+            element after the refresh. It is meant to distinhuish it from
+            other refresh icons for the same element.
+        msg: string, optional, `None`
+            Message for in the tooltip.
+
+        Returns
+        -------
+        string(html)
+
+        !!! warning
+            The `icon` names must be listed in the web.yaml config file
+            under the key `icons`. The icon itself is a Unicode character.
+        &#34;&#34;&#34;
+
         if msg is None:
             msg = E
         return HtmlElements.iconx(
@@ -501,6 +1345,33 @@ def wrapTable(data, td):
 
     @staticmethod
     def img(src, href=None, title=None, imgAtts={}, **atts):
+        &#34;&#34;&#34;IMG.
+
+        Image element.
+
+        Parameters
+        ----------
+        src: url
+            The url of the image.
+        href: url, optional, `None`
+            The destination to navigate to if the image is clicked.
+            The images is then wrapped in an `&lt;a&gt;` element.
+            If missing, the image is not wrapped further.
+        title: string, optional, `None`
+            Tooltip.
+        imgAtts: dict, optional `{}`
+            Attributes that go to the `&lt;img&gt;` element.
+
+        !!! note
+            The `atts` go to the outer element, which is either `&lt;img&gt;` if it is
+            not further wrapped, or `&lt;a&gt;`.
+            The `imgAtts` only go to the `&lt;img&gt;` element.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return (
             HtmlElements.a(
                 HtmlElement(N.img).wrap(E, src=src, **imgAtts),
@@ -514,44 +1385,188 @@ def wrapTable(data, td):
 
     @staticmethod
     def input(material, **atts):
+        &#34;&#34;&#34;INPUT.
+
+        The element to receive types user input.
+
+        !!! caution
+            Do not use this for checkboxes. Use
+            `controllers.html.HtmlElements.checkbox` instead.
+
+        Parameters
+        ----------
+        material: string | iterable
+            This goes into the `value` attribute of the element, after HTML escaping.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
-        return HtmlElement(N.input).wrap(E, value=htmlEscape(content), **atts)
+        return HtmlElement(N.input).wrap(E, value=HtmlElements.he(content), **atts)
 
     @staticmethod
     def join(material):
+        &#34;&#34;&#34;fragment.
+
+        This is a pseudo element.
+        The material will be joined together, without wrapping it in an element.
+        There are no attributes.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return asString(material)
 
     @staticmethod
     def checkbox(var, **atts):
+        &#34;&#34;&#34;INPUT type=checkbox.
+
+        The element to receive user clicks.
+
+        Parameters
+        ----------
+        var: string
+            The name of an identifier for the element.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.input).wrap(
             E, type=N.checkbox, id=var, addClass=N.option, **atts,
         )
 
     @staticmethod
     def p(material, **atts):
+        &#34;&#34;&#34;P.
+
+        Paragraph.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.p).wrap(material, **atts)
 
     @staticmethod
     def script(material, **atts):
+        &#34;&#34;&#34;SCRIPT.
+
+        Parameters
+        ----------
+        material: string | iterable
+            The Javascript.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.script).wrap(material, **atts)
 
     @staticmethod
     def span(material, **atts):
+        &#34;&#34;&#34;SPAN.
+
+        Inline element.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         return HtmlElement(N.span).wrap(material, **atts)
 
     @staticmethod
     def table(headers, rows, **atts):
+        &#34;&#34;&#34;TABLE.
+
+        The table element.
+
+        Parameters
+        ----------
+        headers, rows: iterables of iterables
+            An iterable of rows.
+            Each row is a tuple: an iterable of cells, and a CSS class for the row.
+            Each cell is a tuple: material for the cell, and a CSS class for the cell.
+
+        !!! note
+            Cells in normal rows are wrapped in `&lt;td&gt;`, cells in header rows go
+            into `&lt;th&gt;`.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         th = HtmlElement(N.th).wrap
         td = HtmlElement(N.td).wrap
-        headerMaterial = wrapTable(headers, th)
-        rowMaterial = wrapTable(rows, td)
+        headerMaterial = HtmlElements.wrapTable(headers, th)
+        rowMaterial = HtmlElements.wrapTable(rows, td)
         material = HtmlElement(N.body).wrap(headerMaterial + rowMaterial)
         return HtmlElement(N.table).wrap(material, **atts)
 
     @staticmethod
     def textarea(material, **atts):
+        &#34;&#34;&#34;TEXTAREA.
+
+        Input element for larger text, typically Markdown.
+
+        Parameters
+        ----------
+        material: string | iterable
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         content = asString(material)
-        return HtmlElement(N.textarea).wrap(content, **atts)</code></pre>
+        return HtmlElement(N.textarea).wrap(content, **atts)
+
+    @staticmethod
+    def wrapTable(data, td):
+        &#34;&#34;&#34;Rows and cells.
+
+        Parameters
+        ----------
+        data: iterable of iterables.
+            Rows and cells within them, both with CSS classes.
+        td: function
+            Funnction for wrapping the cells, typically boiling down
+            to wrapping them in either `&lt;th&gt;` or `&lt;td&gt;` elements.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
+        tr = HtmlElement(N.tr).wrap
+        material = []
+        for (rowData, rowAtts) in data:
+            rowMaterial = []
+            for (cellData, cellAtts) in rowData:
+                rowMaterial.append(td(cellData, **cellAtts))
+            material.append(tr(rowMaterial, **rowAtts))
+        return material</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -559,13 +1574,42 @@ def wrapTable(data, td):
 <span>def <span class="ident">a</span></span>(<span>material, href, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>A.</p>
+<p>Hyperlink.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>Text of the link.</dd>
+<dt><strong><code>href</code></strong> :&ensp;<code>url</code></dt>
+<dd>Destination of the link.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def a(material, href, **atts):
+    &#34;&#34;&#34;A.
+
+    Hyperlink.
+
+    Parameters
+    ----------
+    material: string | iterable
+        Text of the link.
+    href: url
+        Destination of the link.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.a).wrap(material, href=href, **atts)</code></pre>
 </details>
 </dd>
@@ -573,13 +1617,28 @@ def a(material, href, **atts):
 <span>def <span class="ident">br</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>BR.</p>
+<p>Line break.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def br():
+    &#34;&#34;&#34;BR.
+
+    Line break.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.br).wrap(E)</code></pre>
 </details>
 </dd>
@@ -587,13 +1646,38 @@ def br():
 <span>def <span class="ident">checkbox</span></span>(<span>var, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>INPUT type=checkbox.</p>
+<p>The element to receive user clicks.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>var</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of an identifier for the element.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def checkbox(var, **atts):
+    &#34;&#34;&#34;INPUT type=checkbox.
+
+    The element to receive user clicks.
+
+    Parameters
+    ----------
+    var: string
+        The name of an identifier for the element.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.input).wrap(
         E, type=N.checkbox, id=var, addClass=N.option, **atts,
     )</code></pre>
@@ -603,13 +1687,37 @@ def checkbox(var, **atts):
 <span>def <span class="ident">dd</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>DD.</p>
+<p>The definition part of a term.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def dd(material, **atts):
+    &#34;&#34;&#34;DD.
+
+    The definition part of a term.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.dd).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -617,13 +1725,46 @@ def dd(material, **atts):
 <span>def <span class="ident">details</span></span>(<span>summary, material, itemkey, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>DETAILS.</p>
+<p>Collapsible details element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>summary</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>The summary.</dd>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>The expansion.</dd>
+<dt><strong><code>itemkey</code></strong> :&ensp;<code>string</code></dt>
+<dd>Identifier for reference from Javascript.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def details(summary, material, itemkey, **atts):
+    &#34;&#34;&#34;DETAILS.
+
+    Collapsible details element.
+
+    Parameters
+    ----------
+    summary: string | iterable
+        The summary.
+    material: string | iterable
+        The expansion.
+    itemkey: string
+        Identifier for reference from Javascript.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     content = asString(material)
     return HtmlElement(N.details).wrap(
         HtmlElement(N.summary).wrap(summary) + content, itemkey=itemkey, **atts
@@ -634,7 +1775,35 @@ def details(summary, material, itemkey, **atts):
 <span>def <span class="ident">detailx</span></span>(<span>icons, material, itemkey, openAtts={}, closeAtts={}, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>detailx.</p>
+<p>Collapsible details pseudo element.</p>
+<p>Unlike the HTML <code>details</code> element, this one allows separate open and close
+controls. There is no summary.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>icons</code></strong> :&ensp;<code>string</code> | (<code>string</code>, <code>string</code>)</dt>
+<dd>Names of the icons that open and close the element.</dd>
+<dt><strong><code>itemkey</code></strong> :&ensp;<code>string</code></dt>
+<dd>Identifier for reference from Javascript.</dd>
+<dt><strong><code>openAtts</code></strong> :&ensp;<code>dict</code>, <code>optinal</code>, <code>{}</code></dt>
+<dd>Attributes for the open icon.</dd>
+<dt><strong><code>closeAtts</code></strong> :&ensp;<code>dict</code>, <code>optinal</code>, <code>{}</code></dt>
+<dd>Attributes for the close icon.</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>icon</code> names must be listed in the web.yaml config file
+under the key <code>icons</code>. The icon itself is a Unicode character.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The <code>atts</code> go to the outermost <code>div</code> of the result.</p>
+</div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -643,6 +1812,36 @@ def details(summary, material, itemkey, **atts):
 def detailx(
     icons, material, itemkey, openAtts={}, closeAtts={}, **atts,
 ):
+    &#34;&#34;&#34;detailx.
+
+    Collapsible details pseudo element.
+
+    Unlike the HTML `details` element, this one allows separate open and close
+    controls. There is no summary.
+
+    Parameters
+    ----------
+    icons: string | (string, string)
+        Names of the icons that open and close the element.
+    itemkey: string
+        Identifier for reference from Javascript.
+    openAtts: dict, optinal, `{}`
+        Attributes for the open icon.
+    closeAtts: dict, optinal, `{}`
+        Attributes for the close icon.
+
+    !!! warning
+        The `icon` names must be listed in the web.yaml config file
+        under the key `icons`. The icon itself is a Unicode character.
+
+    !!! hint
+        The `atts` go to the outermost `div` of the result.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     content = asString(material)
     (iconOpen, iconClose) = (icons, icons) if type(icons) is str else icons
     triggerElements = [
@@ -664,13 +1863,34 @@ def detailx(
 <span>def <span class="ident">div</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>DIV.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def div(material, **atts):
+    &#34;&#34;&#34;DIV.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.div).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -678,13 +1898,38 @@ def div(material, **atts):
 <span>def <span class="ident">dl</span></span>(<span>items, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>DL.</p>
+<p>Definition list.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>items</code></strong> :&ensp;<code>iterable</code> of (<code>string</code>, <code>string</code>)</dt>
+<dd>These are the list items, which are term-definition pairs.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def dl(items, **atts):
+    &#34;&#34;&#34;DL.
+
+    Definition list.
+
+    Parameters
+    ----------
+    items: iterable of (string, string)
+        These are the list items, which are term-definition pairs.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.dl).wrap(
         [
             HtmlElement(N.dt).wrap(item[0]) + HtmlElement(N.dd).wrap(item[1])
@@ -698,13 +1943,37 @@ def dl(items, **atts):
 <span>def <span class="ident">dt</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>DT.</p>
+<p>Term of a definition.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def dt(material, **atts):
+    &#34;&#34;&#34;DT.
+
+    Term of a definition.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.dt).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -712,27 +1981,134 @@ def dt(material, **atts):
 <span>def <span class="ident">h</span></span>(<span>level, material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>H1, H2, H3, H4, H5, H6.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>level</code></strong> :&ensp;<code>int</code></dt>
+<dd>The heading level.</dd>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>The heading content.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def h(level, material, **atts):
+    &#34;&#34;&#34;H1, H2, H3, H4, H5, H6.
+
+    Parameters
+    ----------
+    level: int
+        The heading level.
+    material: string | iterable
+        The heading content.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(f&#34;{N.h}{level}&#34;).wrap(material, **atts)</code></pre>
+</details>
+</dd>
+<dt id="controllers.html.HtmlElements.he"><code class="name flex">
+<span>def <span class="ident">he</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Escape HTML characters.</p>
+<p>The following characters will be replaced by entities:</p>
+<pre><code>&amp; &lt; ' &quot;
+</code></pre>
+<p>The dollar sign will be wrapped into a <code>&lt;span&gt;</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def he(val):
+    &#34;&#34;&#34;Escape HTML characters.
+
+    The following characters will be replaced by entities:
+    ```
+    &amp; &lt; &#39; &#34;
+    ```
+
+    The dollar sign will be wrapped into a `&lt;span&gt;`.
+    &#34;&#34;&#34;
+
+    return (
+        E
+        if val is None
+        else (
+            str(val)
+            .replace(AMP, f&#34;&#34;&#34;&amp;{N.amp};&#34;&#34;&#34;)
+            .replace(LT, f&#34;&#34;&#34;&amp;{N.lt};&#34;&#34;&#34;)
+            .replace(APOS, f&#34;&#34;&#34;&amp;{N.apos};&#34;&#34;&#34;)
+            .replace(QUOT, f&#34;&#34;&#34;&amp;{N.quot};&#34;&#34;&#34;)
+            .replace(DOLLAR, f&#34;&#34;&#34;&lt;{N.span}&gt;{DOLLAR}&lt;/{N.span}&gt;&#34;&#34;&#34;)
+        )
+    )</code></pre>
 </details>
 </dd>
 <dt id="controllers.html.HtmlElements.icon"><code class="name flex">
 <span>def <span class="ident">icon</span></span>(<span>icon, asChar=False, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>icon.</p>
+<p>Pseudo element for an icon.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>icon</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the icon.</dd>
+<dt><strong><code>asChar</code></strong> :&ensp;<code>boolean</code>, optional, <code>False</code></dt>
+<dd>If <code>True</code>, just output the icon character.
+Otherwise, wrap it in a <code>&lt;span&gt;</code> with all
+attributes that might have been passed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>icon</code> names must be listed in the web.yaml config file
+under the key <code>icons</code>. The icon itself is a Unicode character.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def icon(icon, asChar=False, **atts):
+    &#34;&#34;&#34;icon.
+
+    Pseudo element for an icon.
+
+    Parameters
+    ----------
+    icon: string
+        Name of the icon.
+    asChar: boolean, optional, `False`
+        If `True`, just output the icon character.
+        Otherwise, wrap it in a `&lt;span&gt;` with all
+        attributes that might have been passed.
+
+    Returns
+    -------
+    string(html)
+
+    !!! warning
+        The `icon` names must be listed in the web.yaml config file
+        under the key `icons`. The icon itself is a Unicode character.
+    &#34;&#34;&#34;
+
     iconChar = G(ICONS, icon, default=ICONS[N.noicon])
     if asChar:
         return G(ICONS, icon, default=ICONS[N.noicon])
@@ -744,13 +2120,61 @@ def icon(icon, asChar=False, **atts):
 <span>def <span class="ident">iconr</span></span>(<span>itemKey, tag, msg=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>iconr.</p>
+<p>Refresh icon.
+Special case of <code>iconx</code>, but used for refreshing an element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>itemkey</code></strong> :&ensp;<code>string</code></dt>
+<dd>Identifier for reference from Javascript.</dd>
+<dt><strong><code>tag</code></strong> :&ensp;<code>string</code></dt>
+<dd>Attribute <code>tag</code>, used by Javascript for scrolling to this
+element after the refresh. It is meant to distinhuish it from
+other refresh icons for the same element.</dd>
+<dt><strong><code>msg</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dd>Message for in the tooltip.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>icon</code> names must be listed in the web.yaml config file
+under the key <code>icons</code>. The icon itself is a Unicode character.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def iconr(itemKey, tag, msg=None):
+    &#34;&#34;&#34;iconr.
+
+    Refresh icon.
+    Special case of `iconx`, but used for refreshing an element.
+
+    Parameters
+    ----------
+    itemkey: string
+        Identifier for reference from Javascript.
+    tag: string
+        Attribute `tag`, used by Javascript for scrolling to this
+        element after the refresh. It is meant to distinhuish it from
+        other refresh icons for the same element.
+    msg: string, optional, `None`
+        Message for in the tooltip.
+
+    Returns
+    -------
+    string(html)
+
+    !!! warning
+        The `icon` names must be listed in the web.yaml config file
+        under the key `icons`. The icon itself is a Unicode character.
+    &#34;&#34;&#34;
+
     if msg is None:
         msg = E
     return HtmlElements.iconx(
@@ -767,13 +2191,53 @@ def iconr(itemKey, tag, msg=None):
 <span>def <span class="ident">iconx</span></span>(<span>icon, href=None, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>iconx.</p>
+<p>Pseudo element for a clickable icon.
+It will be wrapped in an <code>&lt;a href="..."&gt;...&lt;/a&gt;</code> element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>icon</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the icon.</dd>
+<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional, <code>None</code></dt>
+<dd>Destination of the icon when clicked.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>icon</code> names must be listed in the web.yaml config file
+under the key <code>icons</code>. The icon itself is a Unicode character.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def iconx(icon, href=None, **atts):
+    &#34;&#34;&#34;iconx.
+
+    Pseudo element for a clickable icon.
+    It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+
+    Parameters
+    ----------
+    icon: string
+        Name of the icon.
+    href: url, optional, `None`
+        Destination of the icon when clicked.
+
+    Returns
+    -------
+    string(html)
+
+    !!! warning
+        The `icon` names must be listed in the web.yaml config file
+        under the key `icons`. The icon itself is a Unicode character.
+    &#34;&#34;&#34;
+
     iconChar = G(ICONS, icon, default=ICONS[N.noicon])
     addClass = f&#34;{N.icon} i-{icon} &#34;
     return (
@@ -787,13 +2251,65 @@ def iconx(icon, href=None, **atts):
 <span>def <span class="ident">img</span></span>(<span>src, href=None, title=None, imgAtts={}, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>IMG.</p>
+<p>Image element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>src</code></strong> :&ensp;<code>url</code></dt>
+<dd>The url of the image.</dd>
+<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional, <code>None</code></dt>
+<dd>The destination to navigate to if the image is clicked.
+The images is then wrapped in an <code>&lt;a&gt;</code> element.
+If missing, the image is not wrapped further.</dd>
+<dt><strong><code>title</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dd>Tooltip.</dd>
+<dt><strong><code>imgAtts</code></strong> :&ensp;<code>dict</code>, optional <code>{}</code></dt>
+<dd>Attributes that go to the <code>&lt;img&gt;</code> element.</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>atts</code> go to the outer element, which is either <code>&lt;img&gt;</code> if it is
+not further wrapped, or <code>&lt;a&gt;</code>.
+The <code>imgAtts</code> only go to the <code>&lt;img&gt;</code> element.</p>
+</div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def img(src, href=None, title=None, imgAtts={}, **atts):
+    &#34;&#34;&#34;IMG.
+
+    Image element.
+
+    Parameters
+    ----------
+    src: url
+        The url of the image.
+    href: url, optional, `None`
+        The destination to navigate to if the image is clicked.
+        The images is then wrapped in an `&lt;a&gt;` element.
+        If missing, the image is not wrapped further.
+    title: string, optional, `None`
+        Tooltip.
+    imgAtts: dict, optional `{}`
+        Attributes that go to the `&lt;img&gt;` element.
+
+    !!! note
+        The `atts` go to the outer element, which is either `&lt;img&gt;` if it is
+        not further wrapped, or `&lt;a&gt;`.
+        The `imgAtts` only go to the `&lt;img&gt;` element.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return (
         HtmlElements.a(
             HtmlElement(N.img).wrap(E, src=src, **imgAtts),
@@ -810,28 +2326,90 @@ def img(src, href=None, title=None, imgAtts={}, **atts):
 <span>def <span class="ident">input</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>INPUT.</p>
+<p>The element to receive types user input.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Do not use this for checkboxes. Use
+<a title="controllers.html.HtmlElements.checkbox" href="#controllers.html.HtmlElements.checkbox"><code>HtmlElements.checkbox()</code></a> instead.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>This goes into the <code>value</code> attribute of the element, after HTML escaping.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def input(material, **atts):
+    &#34;&#34;&#34;INPUT.
+
+    The element to receive types user input.
+
+    !!! caution
+        Do not use this for checkboxes. Use
+        `controllers.html.HtmlElements.checkbox` instead.
+
+    Parameters
+    ----------
+    material: string | iterable
+        This goes into the `value` attribute of the element, after HTML escaping.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     content = asString(material)
-    return HtmlElement(N.input).wrap(E, value=htmlEscape(content), **atts)</code></pre>
+    return HtmlElement(N.input).wrap(E, value=HtmlElements.he(content), **atts)</code></pre>
 </details>
 </dd>
 <dt id="controllers.html.HtmlElements.join"><code class="name flex">
 <span>def <span class="ident">join</span></span>(<span>material)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>fragment.</p>
+<p>This is a pseudo element.
+The material will be joined together, without wrapping it in an element.
+There are no attributes.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def join(material):
+    &#34;&#34;&#34;fragment.
+
+    This is a pseudo element.
+    The material will be joined together, without wrapping it in an element.
+    There are no attributes.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return asString(material)</code></pre>
 </details>
 </dd>
@@ -839,13 +2417,37 @@ def join(material):
 <span>def <span class="ident">p</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>P.</p>
+<p>Paragraph.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def p(material, **atts):
+    &#34;&#34;&#34;P.
+
+    Paragraph.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.p).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -853,13 +2455,35 @@ def p(material, **atts):
 <span>def <span class="ident">script</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>SCRIPT.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>The Javascript.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def script(material, **atts):
+    &#34;&#34;&#34;SCRIPT.
+
+    Parameters
+    ----------
+    material: string | iterable
+        The Javascript.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.script).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -867,13 +2491,37 @@ def script(material, **atts):
 <span>def <span class="ident">span</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>SPAN.</p>
+<p>Inline element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def span(material, **atts):
+    &#34;&#34;&#34;SPAN.
+
+    Inline element.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     return HtmlElement(N.span).wrap(material, **atts)</code></pre>
 </details>
 </dd>
@@ -881,17 +2529,55 @@ def span(material, **atts):
 <span>def <span class="ident">table</span></span>(<span>headers, rows, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>TABLE.</p>
+<p>The table element.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>headers</code></strong>, <strong><code>rows</code></strong> :&ensp;<code>iterables</code> of <code>iterables</code></dt>
+<dd>An iterable of rows.
+Each row is a tuple: an iterable of cells, and a CSS class for the row.
+Each cell is a tuple: material for the cell, and a CSS class for the cell.</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Cells in normal rows are wrapped in <code>&lt;td&gt;</code>, cells in header rows go
+into <code>&lt;th&gt;</code>.</p>
+</div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def table(headers, rows, **atts):
+    &#34;&#34;&#34;TABLE.
+
+    The table element.
+
+    Parameters
+    ----------
+    headers, rows: iterables of iterables
+        An iterable of rows.
+        Each row is a tuple: an iterable of cells, and a CSS class for the row.
+        Each cell is a tuple: material for the cell, and a CSS class for the cell.
+
+    !!! note
+        Cells in normal rows are wrapped in `&lt;td&gt;`, cells in header rows go
+        into `&lt;th&gt;`.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     th = HtmlElement(N.th).wrap
     td = HtmlElement(N.td).wrap
-    headerMaterial = wrapTable(headers, th)
-    rowMaterial = wrapTable(rows, td)
+    headerMaterial = HtmlElements.wrapTable(headers, th)
+    rowMaterial = HtmlElements.wrapTable(rows, td)
     material = HtmlElement(N.body).wrap(headerMaterial + rowMaterial)
     return HtmlElement(N.table).wrap(material, **atts)</code></pre>
 </details>
@@ -900,15 +2586,88 @@ def table(headers, rows, **atts):
 <span>def <span class="ident">textarea</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>TEXTAREA.</p>
+<p>Input element for larger text, typically Markdown.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def textarea(material, **atts):
+    &#34;&#34;&#34;TEXTAREA.
+
+    Input element for larger text, typically Markdown.
+
+    Parameters
+    ----------
+    material: string | iterable
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     content = asString(material)
     return HtmlElement(N.textarea).wrap(content, **atts)</code></pre>
+</details>
+</dd>
+<dt id="controllers.html.HtmlElements.wrapTable"><code class="name flex">
+<span>def <span class="ident">wrapTable</span></span>(<span>data, td)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Rows and cells.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt>data: iterable of iterables.</dt>
+<dt>Rows and cells within them, both with CSS classes.</dt>
+<dt><strong><code>td</code></strong> :&ensp;<code>function</code></dt>
+<dd>Funnction for wrapping the cells, typically boiling down
+to wrapping them in either <code>&lt;th&gt;</code> or <code>&lt;td&gt;</code> elements.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def wrapTable(data, td):
+    &#34;&#34;&#34;Rows and cells.
+
+    Parameters
+    ----------
+    data: iterable of iterables.
+        Rows and cells within them, both with CSS classes.
+    td: function
+        Funnction for wrapping the cells, typically boiling down
+        to wrapping them in either `&lt;th&gt;` or `&lt;td&gt;` elements.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
+    tr = HtmlElement(N.tr).wrap
+    material = []
+    for (rowData, rowAtts) in data:
+        rowMaterial = []
+        for (cellData, cellAtts) in rowData:
+            rowMaterial.append(td(cellData, **cellAtts))
+        material.append(tr(rowMaterial, **rowAtts))
+    return material</code></pre>
 </details>
 </dd>
 </dl>
@@ -927,19 +2686,13 @@ def textarea(material, **atts):
 <li><code><a title="controllers" href="index.html">controllers</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="controllers.html.atNormal" href="#controllers.html.atNormal">atNormal</a></code></li>
-<li><code><a title="controllers.html.attStr" href="#controllers.html.attStr">attStr</a></code></li>
-<li><code><a title="controllers.html.htmlEscape" href="#controllers.html.htmlEscape">htmlEscape</a></code></li>
-<li><code><a title="controllers.html.wrapTable" href="#controllers.html.wrapTable">wrapTable</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="controllers.html.HtmlElement" href="#controllers.html.HtmlElement">HtmlElement</a></code></h4>
 <ul class="">
+<li><code><a title="controllers.html.HtmlElement.atNormal" href="#controllers.html.HtmlElement.atNormal">atNormal</a></code></li>
+<li><code><a title="controllers.html.HtmlElement.attStr" href="#controllers.html.HtmlElement.attStr">attStr</a></code></li>
 <li><code><a title="controllers.html.HtmlElement.wrap" href="#controllers.html.HtmlElement.wrap">wrap</a></code></li>
 </ul>
 </li>
@@ -956,6 +2709,7 @@ def textarea(material, **atts):
 <li><code><a title="controllers.html.HtmlElements.dl" href="#controllers.html.HtmlElements.dl">dl</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.dt" href="#controllers.html.HtmlElements.dt">dt</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.h" href="#controllers.html.HtmlElements.h">h</a></code></li>
+<li><code><a title="controllers.html.HtmlElements.he" href="#controllers.html.HtmlElements.he">he</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.icon" href="#controllers.html.HtmlElements.icon">icon</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.iconr" href="#controllers.html.HtmlElements.iconr">iconr</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.iconx" href="#controllers.html.HtmlElements.iconx">iconx</a></code></li>
@@ -967,6 +2721,7 @@ def textarea(material, **atts):
 <li><code><a title="controllers.html.HtmlElements.span" href="#controllers.html.HtmlElements.span">span</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.table" href="#controllers.html.HtmlElements.table">table</a></code></li>
 <li><code><a title="controllers.html.HtmlElements.textarea" href="#controllers.html.HtmlElements.textarea">textarea</a></code></li>
+<li><code><a title="controllers.html.HtmlElements.wrapTable" href="#controllers.html.HtmlElements.wrapTable">wrapTable</a></code></li>
 </ul>
 </li>
 </ul>
