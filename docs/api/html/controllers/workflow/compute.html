@@ -1,0 +1,1892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>controllers.workflow.compute API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>controllers.workflow.compute</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from config import Config as C, Names as N
+from controllers.utils import getLast, pick as G, serverprint, creators
+
+
+CT = C.tables
+CF = C.workflow
+CM = C.mongo
+
+USER_TABLES_LIST = CT.userTables
+MAIN_TABLE = USER_TABLES_LIST[0]
+INTER_TABLE = USER_TABLES_LIST[1]
+DETAILS = CT.details
+WORKFLOW_TABLES_LIST = CT.userTables + CT.userEntryTables
+
+WORKFLOW_TABLES = set(WORKFLOW_TABLES_LIST)
+
+DEBUG = &#34;5a1690a32179c013250d932a&#34;
+
+
+class Workflow:
+    &#34;&#34;&#34;Manages workflow information.
+
+    Workflow is the concept that contributions, assessments and reviews
+    undergo steps in a certain order, and that their treatment is dependent on
+    the stage they are in. See the workflow.yaml config file.
+
+    Workflow information is represented in records that correspond to contrib records
+    in that the contrib record and the workflow record have one and the same id.
+
+    A workflow record for a contrib contains all the relevant info (as far as workflow
+    is concerned) of the contrib record and its (valid) assessment and their (valid)
+    reviews. See `controllers.workflow.apply.WorkflowItem`.
+    There it is defined how workflow information is *applied*.
+
+    At startup time, the workflow information is computed from scratch and stored
+    in the database.
+
+    This class is about computing and managing the workflow information.
+    &#34;&#34;&#34;
+
+    def __init__(self, db):
+        &#34;&#34;&#34;Sets up workflow information.
+
+        Several pieces of data that will be used many times in workflow computations
+        are fetched and stored as attributes.
+
+        The previous workflow table is dropped and replaced by a freshly computed one.
+
+        Parameters
+        ----------
+        db: object
+            The database is needed to store computed workflow information, so we store
+            the Db singleton as attribute `db`.
+        &#34;&#34;&#34;
+
+        self.db = db
+        decisionRecords = db.getValueRecords(N.decision)
+        self.decisions = {
+            G(record, N._id): G(record, N.rep) for record in decisionRecords
+        }
+        self.decisionParticiple = {
+            G(record, N._id): G(record, N.participle) for record in decisionRecords
+        }
+
+        scoreData = db.getValueRecords(N.score)
+        self.scoreMapping = {
+            G(record, N._id): G(record, N.score)
+            for record in scoreData
+            if N.score in record
+        }
+
+        maxScoreByCrit = {}
+        for record in scoreData:
+            crit = G(record, N.criteria)
+            if crit is None:
+                continue
+            score = G(record, N.score, default=0)
+            prevMax = maxScoreByCrit.setdefault(crit, None)
+            if prevMax is None or score &gt; prevMax:
+                maxScoreByCrit[crit] = score
+
+        self.maxScoreByCrit = maxScoreByCrit
+
+        self.initWorkflow(drop=True)
+
+    def initWorkflow(self, drop=False):
+        &#34;&#34;&#34;(Re)fills the workflow table.
+
+        Parameters
+        ----------
+        drop: boolean
+            If True, the complete table will first be dropped and then
+            recreated.
+            Otherwise, the table will merely be cleared.
+
+        !!! caution
+            Clearing is not yet used in the applicatio, only dropping.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        if drop:
+            serverprint(&#34;WORKFLOW: Drop exisiting table&#34;)
+            db.dropWorkflow()
+        else:
+            serverprint(&#34;WORKFLOW: Clear exisiting table&#34;)
+            db.clearWorkflow()
+
+        entries = {}
+        serverprint(&#34;WORKFLOW: Read user (entry) tables&#34;)
+        for table in WORKFLOW_TABLES:
+            entries[table] = db.entries(table)
+
+        serverprint(&#34;WORKFLOW: Link masters and details&#34;)
+        self.aggregate(entries)
+
+        serverprint(&#34;WORKFLOW: Compute workflow info&#34;)
+        wfRecords = []
+        for mainRecord in G(entries, MAIN_TABLE, default={}).values():
+            info = self.computeWorkflow(record=mainRecord)
+            wfRecords.append(info)
+        serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+        db.insertWorkflowMany(wfRecords)
+        serverprint(&#34;WORKFLOW: Initialization done&#34;)
+
+    def insert(self, contribId):
+        &#34;&#34;&#34;Computes and stores workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to compute workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        info = self.computeWorkflow(contribId=contribId)
+        info[N._id] = contribId
+        serverprint(f&#34;WORKFLOW: New workflow info {contribId}&#34;)
+        db.insertWorkflow(info)
+
+    def recompute(self, contribId):
+        &#34;&#34;&#34;Recomputes and replaces workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to compute workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        info = self.computeWorkflow(contribId=contribId)
+        db.updateWorkflow(contribId, info)
+
+    def delete(self, contribId):
+        &#34;&#34;&#34;Deletes workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to delete workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        serverprint(f&#34;WORKFLOW: Delete workflow info {contribId}&#34;)
+        db.deleteWorkflow(contribId)
+
+    def computeWorkflow(self, record=None, contribId=None):
+        &#34;&#34;&#34;Computes workflow for a single contribution.
+
+        Part of the work will be delegated to functions that
+        retrieve workflow info off assessment and review records.
+
+        Parameters
+        ----------
+        record: dict
+            The full contrib record for which to compute workflow.
+            If not given, the record will be retrieved on the basis
+            of `contribId` parameter.
+        contribId: ObjectId
+            The id of the contrib for which to compute workflow.
+
+        Returns
+        -------
+        dict
+            Workflow attributes.
+        &#34;&#34;&#34;
+
+        if record is None:
+            record = self.getFullItem(contribId)
+
+        contribId = G(record, N._id)
+        if contribId is None:
+            return {}
+
+        contribType = G(record, N.typeContribution)
+        selected = G(record, N.selected)
+        dateDecided = G(record, N.dateDecided)
+
+        stage = (
+            N.selectYes
+            if selected
+            else N.selectNone
+            if selected is None
+            else N.selectNo
+        )
+        frozen = stage != N.selectNone
+
+        assessmentValid = getLast(
+            [
+                aRecord
+                for aRecord in G(record, N.assessment, default=[])
+                if contribType is not None
+                and G(aRecord, N.assessmentType) == contribType
+            ]
+        )
+        if str(contribId) == DEBUG:
+            pass
+        (locked, assessmentWf) = (
+            self.computeWorkflowAssessment(assessmentValid, frozen)
+            if assessmentValid
+            else (False, {})
+        )
+
+        mayAdd = not locked and not frozen and not assessmentValid
+
+        return {
+            N._id: contribId,
+            N.creators: creators(record, N.creator, N.editors),
+            N.country: G(record, N.country),
+            N.type: contribType,
+            N.title: G(record, N.title),
+            N.assessment: assessmentWf,
+            N.stage: stage,
+            N.stageDate: dateDecided,
+            N.frozen: frozen,
+            N.locked: locked,
+            N.mayAdd: mayAdd,
+        }
+
+    def computeWorkflowAssessment(self, record, frozen):
+        &#34;&#34;&#34;Computes workflow info derived from an assessment record.
+
+        This includes workflow information associated with the reviews
+        of this assessment. However, that will be delegated to another function.
+
+        Parameters
+        ----------
+        record: dict
+            The assessment record that is the information source for the
+            workflow information.
+        frozen: boolean
+            This is an  attribute of the workflow, derived from the
+            contribution record.
+            It should be inherited by the associated assessment and review records.
+            Hence it is passed down.
+
+        Returns
+        -------
+        locked: boolean
+            Workflow attribute that derives from the assessment and/or
+            its reviews. It is also important for the contribution, hence it will
+            be passed upwards to it.
+        attributes: dict
+            Workflow attributes
+        &#34;&#34;&#34;
+
+        db = self.db
+        typeCriteria = db.typeCriteria
+
+        assessmentId = G(record, N._id)
+        assessmentType = G(record, N.assessmentType)
+        nCriteria = len(G(typeCriteria, assessmentType, default=[]))
+
+        centries = [
+            rec
+            for rec in G(record, N.criteriaEntry, default=[])
+            if (
+                assessmentId is not None
+                and G(rec, N.criteria) is not None
+                and G(rec, N.assessment) == assessmentId
+            )
+        ]
+        complete = len(centries) == nCriteria and all(
+            G(rec, N.score) and G(rec, N.evidence) for rec in centries
+        )
+        submitted = G(record, N.submitted)
+        dateSubmitted = G(record, N.dateSubmitted)
+        dateWithdrawn = G(record, N.dateWithdrawn)
+        withdrawn = not submitted and dateWithdrawn
+
+        score = self.computeScore(centries)
+
+        reviewer = {
+            N.expert: G(record, N.reviewerE),
+            N.final: G(record, N.reviewerF),
+        }
+        reviewers = sorted(set(reviewer.values()) - {None})
+
+        reviewsWf = {}
+
+        for (kind, theReviewer) in reviewer.items():
+            reviewValid = getLast(
+                [
+                    rec
+                    for rec in G(record, N.review, default=[])
+                    if G(rec, N.creator) == theReviewer
+                    and G(rec, N.reviewType) == assessmentType
+                ]
+            )
+            reviewWf = self.computeWorkflowReview(kind, reviewValid, frozen)
+            reviewsWf[kind] = reviewWf
+
+        finalReviewStage = None
+
+        expertReviewWf = G(reviewsWf, N.expert)
+        expertReviewStage = G(expertReviewWf, N.stage)
+        finalReviewWf = G(reviewsWf, N.final)
+        finalReviewStage = G(finalReviewWf, N.stage)
+
+        finalReviewDate = G(finalReviewWf, N.stageDate)
+        revisedProgress = (
+            submitted
+            and finalReviewStage == N.reviewRevise
+            and finalReviewDate &gt; dateSubmitted
+        )
+        revisedDone = (
+            submitted
+            and finalReviewStage == N.reviewRevise
+            and finalReviewDate &lt; dateSubmitted
+        )
+
+        stage = (
+            (N.completeWithdrawn if complete else N.incompleteWithdrawn)
+            if withdrawn
+            else (N.completeRevised if complete else N.incompleteRevised)
+            if revisedProgress
+            else N.submittedRevised
+            if revisedDone
+            else (
+                N.submitted if submitted else N.complete if complete else N.incomplete
+            )
+        )
+        stageDate = dateWithdrawn if withdrawn else dateSubmitted
+
+        aLocked = stage in {N.submitted, N.submittedRevised}
+
+        rLocked = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+
+        if rLocked:
+            finalReviewWf[N.locked] = True
+            if expertReviewWf:
+                expertReviewWf[N.locked] = True
+        else:
+            if finalReviewWf:
+                finalReviewWf[N.locked] = not expertReviewStage
+            if expertReviewWf:
+                expertReviewWf[N.locked] = False
+
+        locked = aLocked or rLocked
+
+        mayAdd = {
+            kind: not locked and not frozen and not G(reviewsWf, kind)
+            for kind in (N.expert, N.final)
+        }
+
+        return (
+            locked,
+            {
+                N._id: assessmentId,
+                N.creators: creators(record, N.creator, N.editors),
+                N.title: G(record, N.title),
+                N.reviewer: reviewer,
+                N.reviewers: reviewers,
+                N.reviews: reviewsWf,
+                N.score: score,
+                N.stage: stage,
+                N.stageDate: stageDate,
+                N.frozen: frozen,
+                N.locked: locked or aLocked,
+                N.mayAdd: mayAdd,
+            },
+        )
+
+    def computeWorkflowReview(self, kind, record, frozen):
+        &#34;&#34;&#34;Computes workflow info derived from a review record.
+
+        Parameters
+        ----------
+        kind: string {`expert`, `final`}
+            The kind of review.
+        record: dict
+            The review record that is the information source for the
+            workflow information.
+        frozen: boolean
+            This is an  attribute of the workflow, derived from the
+            contribution record.
+            It should be inherited by the associated assessment and review records.
+            Hence it is passed from there to here.
+
+        !!! note
+            Nothing in the review itself indicates what kind a review is.
+            But the associated assessment specifies an expert reviewer and a
+            final reviewer.
+            Hence the creator of a review will tell what kind of review it is.
+        &#34;&#34;&#34;
+
+        decisions = self.decisions
+
+        decision = G(decisions, G(record, N.decision))
+
+        stage = (
+            (N.reviewExpert if decision else None)
+            if kind == N.expert
+            else (
+                N.reviewAccept
+                if decision == N.Accept
+                else N.reviewReject
+                if decision == N.Reject
+                else N.reviewRevise
+                if decision == N.Revise
+                else None
+            )
+        )
+
+        return {
+            N._id: G(record, N._id),
+            N.creators: creators(record, N.creator, N.editors),
+            N.title: G(record, N.title),
+            N.kind: kind,
+            N.stage: stage,
+            N.stageDate: G(record, N.dateDecided),
+            N.frozen: frozen,
+        }
+
+    def computeScore(self, criteriaEntries):
+        &#34;&#34;&#34;Computes the score of an assessment.
+
+        The assessment an average of the score given by the assessor to his/her
+        criteriaEntries.
+
+        Parameters
+        ----------
+        criteriaEntries: iterable of dict
+            The records in which an assessor enters his/her evalutation.
+            Each record gets a score.
+            The overall score is a simple average of all scores.
+            However, some criteria are not required, and a zero score for them
+            does not add to the average.
+
+        Returns
+        -------
+        dict
+            Overall score plus other quantities that serve to present a
+            derivation of the overall score.
+        &#34;&#34;&#34;
+
+        scoreMapping = self.scoreMapping
+        maxScoreByCrit = self.maxScoreByCrit
+        theseScores = [
+            (
+                G(cEntry, N.criteria),
+                G(scoreMapping, G(cEntry, N.score)) or 0,
+                G(maxScoreByCrit, G(cEntry, N.criteria)) or 0,
+            )
+            for cEntry in criteriaEntries
+        ]
+
+        allMax = sum(x[2] for x in theseScores)
+        allN = len(theseScores)
+
+        relevantCriteriaEntries = [x for x in theseScores if x[1] &gt;= 0]
+        relevantMax = sum(x[2] for x in relevantCriteriaEntries)
+        relevantScore = sum(x[1] for x in relevantCriteriaEntries)
+        relevantN = len(relevantCriteriaEntries)
+        overall = 0 if relevantMax == 0 else (round(relevantScore * 100 / relevantMax))
+        return dict(
+            overall=overall,
+            relevantScore=relevantScore,
+            relevantMax=relevantMax,
+            allMax=allMax,
+            relevantN=relevantN,
+            allN=allN,
+        )
+
+    def getFullItem(self, contribId):
+        &#34;&#34;&#34;Collect a contribution with all relevant assessments and reviews.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib whose information we want to gather.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        entries = {}
+        for table in WORKFLOW_TABLES_LIST:
+            crit = (
+                {N._id: contribId}
+                if table == MAIN_TABLE
+                else {N.contrib: contribId}
+                if table in CT.userTables
+                else {INTER_TABLE: db.inCrit(G(entries, INTER_TABLE, default={}))}
+            )
+            entries[table] = db.entries(table, crit)
+        self.aggregate(entries)
+
+        return G(G(entries, MAIN_TABLE), contribId)
+
+    @staticmethod
+    def aggregate(entries):
+        &#34;&#34;&#34;Aggregates details records in the record of their master.
+
+        Parameters
+        ----------
+        entries: dict
+            a dict keyed by table name and valued by lists of records of that table.
+
+        Returns
+        -------
+        void
+            This fuction works in place, in `entries`.
+            For every item `(detailTable, detailRecords)` in entries, where
+            detailTable is relevant to the workflow,
+            a possibly new key masterTable will be made in entries, and the
+            detailRecords will be put under that key as a dict keyed by id.
+        &#34;&#34;&#34;
+
+        for (masterTable, detailTables) in DETAILS.items():
+            if masterTable in WORKFLOW_TABLES:
+                detailTablesWf = [
+                    detailTable
+                    for detailTable in detailTables
+                    if detailTable in WORKFLOW_TABLES
+                ]
+                for detailTable in detailTablesWf:
+                    serverprint(
+                        f&#34;WORKFLOW: {masterTable}: lookup details from {detailTable}&#34;
+                    )
+                    for record in sorted(
+                        G(entries, detailTable, default={}).values(),
+                        key=lambda r: G(r, N.dateCreated, default=0),
+                    ):
+                        masterId = G(record, masterTable)
+                        if masterId:
+                            entries.setdefault(masterTable, {}).setdefault(
+                                masterId, {}
+                            ).setdefault(detailTable, []).append(record)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="controllers.workflow.compute.Workflow"><code class="flex name class">
+<span>class <span class="ident">Workflow</span></span>
+<span>(</span><span>db)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Manages workflow information.</p>
+<p>Workflow is the concept that contributions, assessments and reviews
+undergo steps in a certain order, and that their treatment is dependent on
+the stage they are in. See the workflow.yaml config file.</p>
+<p>Workflow information is represented in records that correspond to contrib records
+in that the contrib record and the workflow record have one and the same id.</p>
+<p>A workflow record for a contrib contains all the relevant info (as far as workflow
+is concerned) of the contrib record and its (valid) assessment and their (valid)
+reviews. See <a title="controllers.workflow.apply.WorkflowItem" href="apply.html#controllers.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a>.
+There it is defined how workflow information is <em>applied</em>.</p>
+<p>At startup time, the workflow information is computed from scratch and stored
+in the database.</p>
+<p>This class is about computing and managing the workflow information.</p>
+<p>Sets up workflow information.</p>
+<p>Several pieces of data that will be used many times in workflow computations
+are fetched and stored as attributes.</p>
+<p>The previous workflow table is dropped and replaced by a freshly computed one.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
+<dd>The database is needed to store computed workflow information, so we store
+the Db singleton as attribute <code>db</code>.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Workflow:
+    &#34;&#34;&#34;Manages workflow information.
+
+    Workflow is the concept that contributions, assessments and reviews
+    undergo steps in a certain order, and that their treatment is dependent on
+    the stage they are in. See the workflow.yaml config file.
+
+    Workflow information is represented in records that correspond to contrib records
+    in that the contrib record and the workflow record have one and the same id.
+
+    A workflow record for a contrib contains all the relevant info (as far as workflow
+    is concerned) of the contrib record and its (valid) assessment and their (valid)
+    reviews. See `controllers.workflow.apply.WorkflowItem`.
+    There it is defined how workflow information is *applied*.
+
+    At startup time, the workflow information is computed from scratch and stored
+    in the database.
+
+    This class is about computing and managing the workflow information.
+    &#34;&#34;&#34;
+
+    def __init__(self, db):
+        &#34;&#34;&#34;Sets up workflow information.
+
+        Several pieces of data that will be used many times in workflow computations
+        are fetched and stored as attributes.
+
+        The previous workflow table is dropped and replaced by a freshly computed one.
+
+        Parameters
+        ----------
+        db: object
+            The database is needed to store computed workflow information, so we store
+            the Db singleton as attribute `db`.
+        &#34;&#34;&#34;
+
+        self.db = db
+        decisionRecords = db.getValueRecords(N.decision)
+        self.decisions = {
+            G(record, N._id): G(record, N.rep) for record in decisionRecords
+        }
+        self.decisionParticiple = {
+            G(record, N._id): G(record, N.participle) for record in decisionRecords
+        }
+
+        scoreData = db.getValueRecords(N.score)
+        self.scoreMapping = {
+            G(record, N._id): G(record, N.score)
+            for record in scoreData
+            if N.score in record
+        }
+
+        maxScoreByCrit = {}
+        for record in scoreData:
+            crit = G(record, N.criteria)
+            if crit is None:
+                continue
+            score = G(record, N.score, default=0)
+            prevMax = maxScoreByCrit.setdefault(crit, None)
+            if prevMax is None or score &gt; prevMax:
+                maxScoreByCrit[crit] = score
+
+        self.maxScoreByCrit = maxScoreByCrit
+
+        self.initWorkflow(drop=True)
+
+    def initWorkflow(self, drop=False):
+        &#34;&#34;&#34;(Re)fills the workflow table.
+
+        Parameters
+        ----------
+        drop: boolean
+            If True, the complete table will first be dropped and then
+            recreated.
+            Otherwise, the table will merely be cleared.
+
+        !!! caution
+            Clearing is not yet used in the applicatio, only dropping.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        if drop:
+            serverprint(&#34;WORKFLOW: Drop exisiting table&#34;)
+            db.dropWorkflow()
+        else:
+            serverprint(&#34;WORKFLOW: Clear exisiting table&#34;)
+            db.clearWorkflow()
+
+        entries = {}
+        serverprint(&#34;WORKFLOW: Read user (entry) tables&#34;)
+        for table in WORKFLOW_TABLES:
+            entries[table] = db.entries(table)
+
+        serverprint(&#34;WORKFLOW: Link masters and details&#34;)
+        self.aggregate(entries)
+
+        serverprint(&#34;WORKFLOW: Compute workflow info&#34;)
+        wfRecords = []
+        for mainRecord in G(entries, MAIN_TABLE, default={}).values():
+            info = self.computeWorkflow(record=mainRecord)
+            wfRecords.append(info)
+        serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+        db.insertWorkflowMany(wfRecords)
+        serverprint(&#34;WORKFLOW: Initialization done&#34;)
+
+    def insert(self, contribId):
+        &#34;&#34;&#34;Computes and stores workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to compute workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        info = self.computeWorkflow(contribId=contribId)
+        info[N._id] = contribId
+        serverprint(f&#34;WORKFLOW: New workflow info {contribId}&#34;)
+        db.insertWorkflow(info)
+
+    def recompute(self, contribId):
+        &#34;&#34;&#34;Recomputes and replaces workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to compute workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        info = self.computeWorkflow(contribId=contribId)
+        db.updateWorkflow(contribId, info)
+
+    def delete(self, contribId):
+        &#34;&#34;&#34;Deletes workflow for a single contribution.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib for which to delete workflow.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        serverprint(f&#34;WORKFLOW: Delete workflow info {contribId}&#34;)
+        db.deleteWorkflow(contribId)
+
+    def computeWorkflow(self, record=None, contribId=None):
+        &#34;&#34;&#34;Computes workflow for a single contribution.
+
+        Part of the work will be delegated to functions that
+        retrieve workflow info off assessment and review records.
+
+        Parameters
+        ----------
+        record: dict
+            The full contrib record for which to compute workflow.
+            If not given, the record will be retrieved on the basis
+            of `contribId` parameter.
+        contribId: ObjectId
+            The id of the contrib for which to compute workflow.
+
+        Returns
+        -------
+        dict
+            Workflow attributes.
+        &#34;&#34;&#34;
+
+        if record is None:
+            record = self.getFullItem(contribId)
+
+        contribId = G(record, N._id)
+        if contribId is None:
+            return {}
+
+        contribType = G(record, N.typeContribution)
+        selected = G(record, N.selected)
+        dateDecided = G(record, N.dateDecided)
+
+        stage = (
+            N.selectYes
+            if selected
+            else N.selectNone
+            if selected is None
+            else N.selectNo
+        )
+        frozen = stage != N.selectNone
+
+        assessmentValid = getLast(
+            [
+                aRecord
+                for aRecord in G(record, N.assessment, default=[])
+                if contribType is not None
+                and G(aRecord, N.assessmentType) == contribType
+            ]
+        )
+        if str(contribId) == DEBUG:
+            pass
+        (locked, assessmentWf) = (
+            self.computeWorkflowAssessment(assessmentValid, frozen)
+            if assessmentValid
+            else (False, {})
+        )
+
+        mayAdd = not locked and not frozen and not assessmentValid
+
+        return {
+            N._id: contribId,
+            N.creators: creators(record, N.creator, N.editors),
+            N.country: G(record, N.country),
+            N.type: contribType,
+            N.title: G(record, N.title),
+            N.assessment: assessmentWf,
+            N.stage: stage,
+            N.stageDate: dateDecided,
+            N.frozen: frozen,
+            N.locked: locked,
+            N.mayAdd: mayAdd,
+        }
+
+    def computeWorkflowAssessment(self, record, frozen):
+        &#34;&#34;&#34;Computes workflow info derived from an assessment record.
+
+        This includes workflow information associated with the reviews
+        of this assessment. However, that will be delegated to another function.
+
+        Parameters
+        ----------
+        record: dict
+            The assessment record that is the information source for the
+            workflow information.
+        frozen: boolean
+            This is an  attribute of the workflow, derived from the
+            contribution record.
+            It should be inherited by the associated assessment and review records.
+            Hence it is passed down.
+
+        Returns
+        -------
+        locked: boolean
+            Workflow attribute that derives from the assessment and/or
+            its reviews. It is also important for the contribution, hence it will
+            be passed upwards to it.
+        attributes: dict
+            Workflow attributes
+        &#34;&#34;&#34;
+
+        db = self.db
+        typeCriteria = db.typeCriteria
+
+        assessmentId = G(record, N._id)
+        assessmentType = G(record, N.assessmentType)
+        nCriteria = len(G(typeCriteria, assessmentType, default=[]))
+
+        centries = [
+            rec
+            for rec in G(record, N.criteriaEntry, default=[])
+            if (
+                assessmentId is not None
+                and G(rec, N.criteria) is not None
+                and G(rec, N.assessment) == assessmentId
+            )
+        ]
+        complete = len(centries) == nCriteria and all(
+            G(rec, N.score) and G(rec, N.evidence) for rec in centries
+        )
+        submitted = G(record, N.submitted)
+        dateSubmitted = G(record, N.dateSubmitted)
+        dateWithdrawn = G(record, N.dateWithdrawn)
+        withdrawn = not submitted and dateWithdrawn
+
+        score = self.computeScore(centries)
+
+        reviewer = {
+            N.expert: G(record, N.reviewerE),
+            N.final: G(record, N.reviewerF),
+        }
+        reviewers = sorted(set(reviewer.values()) - {None})
+
+        reviewsWf = {}
+
+        for (kind, theReviewer) in reviewer.items():
+            reviewValid = getLast(
+                [
+                    rec
+                    for rec in G(record, N.review, default=[])
+                    if G(rec, N.creator) == theReviewer
+                    and G(rec, N.reviewType) == assessmentType
+                ]
+            )
+            reviewWf = self.computeWorkflowReview(kind, reviewValid, frozen)
+            reviewsWf[kind] = reviewWf
+
+        finalReviewStage = None
+
+        expertReviewWf = G(reviewsWf, N.expert)
+        expertReviewStage = G(expertReviewWf, N.stage)
+        finalReviewWf = G(reviewsWf, N.final)
+        finalReviewStage = G(finalReviewWf, N.stage)
+
+        finalReviewDate = G(finalReviewWf, N.stageDate)
+        revisedProgress = (
+            submitted
+            and finalReviewStage == N.reviewRevise
+            and finalReviewDate &gt; dateSubmitted
+        )
+        revisedDone = (
+            submitted
+            and finalReviewStage == N.reviewRevise
+            and finalReviewDate &lt; dateSubmitted
+        )
+
+        stage = (
+            (N.completeWithdrawn if complete else N.incompleteWithdrawn)
+            if withdrawn
+            else (N.completeRevised if complete else N.incompleteRevised)
+            if revisedProgress
+            else N.submittedRevised
+            if revisedDone
+            else (
+                N.submitted if submitted else N.complete if complete else N.incomplete
+            )
+        )
+        stageDate = dateWithdrawn if withdrawn else dateSubmitted
+
+        aLocked = stage in {N.submitted, N.submittedRevised}
+
+        rLocked = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+
+        if rLocked:
+            finalReviewWf[N.locked] = True
+            if expertReviewWf:
+                expertReviewWf[N.locked] = True
+        else:
+            if finalReviewWf:
+                finalReviewWf[N.locked] = not expertReviewStage
+            if expertReviewWf:
+                expertReviewWf[N.locked] = False
+
+        locked = aLocked or rLocked
+
+        mayAdd = {
+            kind: not locked and not frozen and not G(reviewsWf, kind)
+            for kind in (N.expert, N.final)
+        }
+
+        return (
+            locked,
+            {
+                N._id: assessmentId,
+                N.creators: creators(record, N.creator, N.editors),
+                N.title: G(record, N.title),
+                N.reviewer: reviewer,
+                N.reviewers: reviewers,
+                N.reviews: reviewsWf,
+                N.score: score,
+                N.stage: stage,
+                N.stageDate: stageDate,
+                N.frozen: frozen,
+                N.locked: locked or aLocked,
+                N.mayAdd: mayAdd,
+            },
+        )
+
+    def computeWorkflowReview(self, kind, record, frozen):
+        &#34;&#34;&#34;Computes workflow info derived from a review record.
+
+        Parameters
+        ----------
+        kind: string {`expert`, `final`}
+            The kind of review.
+        record: dict
+            The review record that is the information source for the
+            workflow information.
+        frozen: boolean
+            This is an  attribute of the workflow, derived from the
+            contribution record.
+            It should be inherited by the associated assessment and review records.
+            Hence it is passed from there to here.
+
+        !!! note
+            Nothing in the review itself indicates what kind a review is.
+            But the associated assessment specifies an expert reviewer and a
+            final reviewer.
+            Hence the creator of a review will tell what kind of review it is.
+        &#34;&#34;&#34;
+
+        decisions = self.decisions
+
+        decision = G(decisions, G(record, N.decision))
+
+        stage = (
+            (N.reviewExpert if decision else None)
+            if kind == N.expert
+            else (
+                N.reviewAccept
+                if decision == N.Accept
+                else N.reviewReject
+                if decision == N.Reject
+                else N.reviewRevise
+                if decision == N.Revise
+                else None
+            )
+        )
+
+        return {
+            N._id: G(record, N._id),
+            N.creators: creators(record, N.creator, N.editors),
+            N.title: G(record, N.title),
+            N.kind: kind,
+            N.stage: stage,
+            N.stageDate: G(record, N.dateDecided),
+            N.frozen: frozen,
+        }
+
+    def computeScore(self, criteriaEntries):
+        &#34;&#34;&#34;Computes the score of an assessment.
+
+        The assessment an average of the score given by the assessor to his/her
+        criteriaEntries.
+
+        Parameters
+        ----------
+        criteriaEntries: iterable of dict
+            The records in which an assessor enters his/her evalutation.
+            Each record gets a score.
+            The overall score is a simple average of all scores.
+            However, some criteria are not required, and a zero score for them
+            does not add to the average.
+
+        Returns
+        -------
+        dict
+            Overall score plus other quantities that serve to present a
+            derivation of the overall score.
+        &#34;&#34;&#34;
+
+        scoreMapping = self.scoreMapping
+        maxScoreByCrit = self.maxScoreByCrit
+        theseScores = [
+            (
+                G(cEntry, N.criteria),
+                G(scoreMapping, G(cEntry, N.score)) or 0,
+                G(maxScoreByCrit, G(cEntry, N.criteria)) or 0,
+            )
+            for cEntry in criteriaEntries
+        ]
+
+        allMax = sum(x[2] for x in theseScores)
+        allN = len(theseScores)
+
+        relevantCriteriaEntries = [x for x in theseScores if x[1] &gt;= 0]
+        relevantMax = sum(x[2] for x in relevantCriteriaEntries)
+        relevantScore = sum(x[1] for x in relevantCriteriaEntries)
+        relevantN = len(relevantCriteriaEntries)
+        overall = 0 if relevantMax == 0 else (round(relevantScore * 100 / relevantMax))
+        return dict(
+            overall=overall,
+            relevantScore=relevantScore,
+            relevantMax=relevantMax,
+            allMax=allMax,
+            relevantN=relevantN,
+            allN=allN,
+        )
+
+    def getFullItem(self, contribId):
+        &#34;&#34;&#34;Collect a contribution with all relevant assessments and reviews.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The contrib whose information we want to gather.
+        &#34;&#34;&#34;
+
+        db = self.db
+
+        entries = {}
+        for table in WORKFLOW_TABLES_LIST:
+            crit = (
+                {N._id: contribId}
+                if table == MAIN_TABLE
+                else {N.contrib: contribId}
+                if table in CT.userTables
+                else {INTER_TABLE: db.inCrit(G(entries, INTER_TABLE, default={}))}
+            )
+            entries[table] = db.entries(table, crit)
+        self.aggregate(entries)
+
+        return G(G(entries, MAIN_TABLE), contribId)
+
+    @staticmethod
+    def aggregate(entries):
+        &#34;&#34;&#34;Aggregates details records in the record of their master.
+
+        Parameters
+        ----------
+        entries: dict
+            a dict keyed by table name and valued by lists of records of that table.
+
+        Returns
+        -------
+        void
+            This fuction works in place, in `entries`.
+            For every item `(detailTable, detailRecords)` in entries, where
+            detailTable is relevant to the workflow,
+            a possibly new key masterTable will be made in entries, and the
+            detailRecords will be put under that key as a dict keyed by id.
+        &#34;&#34;&#34;
+
+        for (masterTable, detailTables) in DETAILS.items():
+            if masterTable in WORKFLOW_TABLES:
+                detailTablesWf = [
+                    detailTable
+                    for detailTable in detailTables
+                    if detailTable in WORKFLOW_TABLES
+                ]
+                for detailTable in detailTablesWf:
+                    serverprint(
+                        f&#34;WORKFLOW: {masterTable}: lookup details from {detailTable}&#34;
+                    )
+                    for record in sorted(
+                        G(entries, detailTable, default={}).values(),
+                        key=lambda r: G(r, N.dateCreated, default=0),
+                    ):
+                        masterId = G(record, masterTable)
+                        if masterId:
+                            entries.setdefault(masterTable, {}).setdefault(
+                                masterId, {}
+                            ).setdefault(detailTable, []).append(record)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="controllers.workflow.compute.Workflow.aggregate"><code class="name flex">
+<span>def <span class="ident">aggregate</span></span>(<span>entries)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Aggregates details records in the record of their master.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>entries</code></strong> :&ensp;<code>dict</code></dt>
+<dd>a dict keyed by table name and valued by lists of records of that table.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>void</code></dt>
+<dd>This fuction works in place, in <code>entries</code>.
+For every item <code>(detailTable, detailRecords)</code> in entries, where
+detailTable is relevant to the workflow,
+a possibly new key masterTable will be made in entries, and the
+detailRecords will be put under that key as a dict keyed by id.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def aggregate(entries):
+    &#34;&#34;&#34;Aggregates details records in the record of their master.
+
+    Parameters
+    ----------
+    entries: dict
+        a dict keyed by table name and valued by lists of records of that table.
+
+    Returns
+    -------
+    void
+        This fuction works in place, in `entries`.
+        For every item `(detailTable, detailRecords)` in entries, where
+        detailTable is relevant to the workflow,
+        a possibly new key masterTable will be made in entries, and the
+        detailRecords will be put under that key as a dict keyed by id.
+    &#34;&#34;&#34;
+
+    for (masterTable, detailTables) in DETAILS.items():
+        if masterTable in WORKFLOW_TABLES:
+            detailTablesWf = [
+                detailTable
+                for detailTable in detailTables
+                if detailTable in WORKFLOW_TABLES
+            ]
+            for detailTable in detailTablesWf:
+                serverprint(
+                    f&#34;WORKFLOW: {masterTable}: lookup details from {detailTable}&#34;
+                )
+                for record in sorted(
+                    G(entries, detailTable, default={}).values(),
+                    key=lambda r: G(r, N.dateCreated, default=0),
+                ):
+                    masterId = G(record, masterTable)
+                    if masterId:
+                        entries.setdefault(masterTable, {}).setdefault(
+                            masterId, {}
+                        ).setdefault(detailTable, []).append(record)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="controllers.workflow.compute.Workflow.computeScore"><code class="name flex">
+<span>def <span class="ident">computeScore</span></span>(<span>self, criteriaEntries)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Computes the score of an assessment.</p>
+<p>The assessment an average of the score given by the assessor to his/her
+criteriaEntries.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>criteriaEntries</code></strong> :&ensp;<code>iterable</code> of <code>dict</code></dt>
+<dd>The records in which an assessor enters his/her evalutation.
+Each record gets a score.
+The overall score is a simple average of all scores.
+However, some criteria are not required, and a zero score for them
+does not add to the average.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Overall score plus other quantities that serve to present a
+derivation of the overall score.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def computeScore(self, criteriaEntries):
+    &#34;&#34;&#34;Computes the score of an assessment.
+
+    The assessment an average of the score given by the assessor to his/her
+    criteriaEntries.
+
+    Parameters
+    ----------
+    criteriaEntries: iterable of dict
+        The records in which an assessor enters his/her evalutation.
+        Each record gets a score.
+        The overall score is a simple average of all scores.
+        However, some criteria are not required, and a zero score for them
+        does not add to the average.
+
+    Returns
+    -------
+    dict
+        Overall score plus other quantities that serve to present a
+        derivation of the overall score.
+    &#34;&#34;&#34;
+
+    scoreMapping = self.scoreMapping
+    maxScoreByCrit = self.maxScoreByCrit
+    theseScores = [
+        (
+            G(cEntry, N.criteria),
+            G(scoreMapping, G(cEntry, N.score)) or 0,
+            G(maxScoreByCrit, G(cEntry, N.criteria)) or 0,
+        )
+        for cEntry in criteriaEntries
+    ]
+
+    allMax = sum(x[2] for x in theseScores)
+    allN = len(theseScores)
+
+    relevantCriteriaEntries = [x for x in theseScores if x[1] &gt;= 0]
+    relevantMax = sum(x[2] for x in relevantCriteriaEntries)
+    relevantScore = sum(x[1] for x in relevantCriteriaEntries)
+    relevantN = len(relevantCriteriaEntries)
+    overall = 0 if relevantMax == 0 else (round(relevantScore * 100 / relevantMax))
+    return dict(
+        overall=overall,
+        relevantScore=relevantScore,
+        relevantMax=relevantMax,
+        allMax=allMax,
+        relevantN=relevantN,
+        allN=allN,
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.computeWorkflow"><code class="name flex">
+<span>def <span class="ident">computeWorkflow</span></span>(<span>self, record=None, contribId=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Computes workflow for a single contribution.</p>
+<p>Part of the work will be delegated to functions that
+retrieve workflow info off assessment and review records.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The full contrib record for which to compute workflow.
+If not given, the record will be retrieved on the basis
+of <code>contribId</code> parameter.</dd>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The id of the contrib for which to compute workflow.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Workflow attributes.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def computeWorkflow(self, record=None, contribId=None):
+    &#34;&#34;&#34;Computes workflow for a single contribution.
+
+    Part of the work will be delegated to functions that
+    retrieve workflow info off assessment and review records.
+
+    Parameters
+    ----------
+    record: dict
+        The full contrib record for which to compute workflow.
+        If not given, the record will be retrieved on the basis
+        of `contribId` parameter.
+    contribId: ObjectId
+        The id of the contrib for which to compute workflow.
+
+    Returns
+    -------
+    dict
+        Workflow attributes.
+    &#34;&#34;&#34;
+
+    if record is None:
+        record = self.getFullItem(contribId)
+
+    contribId = G(record, N._id)
+    if contribId is None:
+        return {}
+
+    contribType = G(record, N.typeContribution)
+    selected = G(record, N.selected)
+    dateDecided = G(record, N.dateDecided)
+
+    stage = (
+        N.selectYes
+        if selected
+        else N.selectNone
+        if selected is None
+        else N.selectNo
+    )
+    frozen = stage != N.selectNone
+
+    assessmentValid = getLast(
+        [
+            aRecord
+            for aRecord in G(record, N.assessment, default=[])
+            if contribType is not None
+            and G(aRecord, N.assessmentType) == contribType
+        ]
+    )
+    if str(contribId) == DEBUG:
+        pass
+    (locked, assessmentWf) = (
+        self.computeWorkflowAssessment(assessmentValid, frozen)
+        if assessmentValid
+        else (False, {})
+    )
+
+    mayAdd = not locked and not frozen and not assessmentValid
+
+    return {
+        N._id: contribId,
+        N.creators: creators(record, N.creator, N.editors),
+        N.country: G(record, N.country),
+        N.type: contribType,
+        N.title: G(record, N.title),
+        N.assessment: assessmentWf,
+        N.stage: stage,
+        N.stageDate: dateDecided,
+        N.frozen: frozen,
+        N.locked: locked,
+        N.mayAdd: mayAdd,
+    }</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.computeWorkflowAssessment"><code class="name flex">
+<span>def <span class="ident">computeWorkflowAssessment</span></span>(<span>self, record, frozen)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Computes workflow info derived from an assessment record.</p>
+<p>This includes workflow information associated with the reviews
+of this assessment. However, that will be delegated to another function.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The assessment record that is the information source for the
+workflow information.</dd>
+<dt><strong><code>frozen</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>This is an
+attribute of the workflow, derived from the
+contribution record.
+It should be inherited by the associated assessment and review records.
+Hence it is passed down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>locked</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Workflow attribute that derives from the assessment and/or
+its reviews. It is also important for the contribution, hence it will
+be passed upwards to it.</dd>
+<dt><strong><code>attributes</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Workflow attributes</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def computeWorkflowAssessment(self, record, frozen):
+    &#34;&#34;&#34;Computes workflow info derived from an assessment record.
+
+    This includes workflow information associated with the reviews
+    of this assessment. However, that will be delegated to another function.
+
+    Parameters
+    ----------
+    record: dict
+        The assessment record that is the information source for the
+        workflow information.
+    frozen: boolean
+        This is an  attribute of the workflow, derived from the
+        contribution record.
+        It should be inherited by the associated assessment and review records.
+        Hence it is passed down.
+
+    Returns
+    -------
+    locked: boolean
+        Workflow attribute that derives from the assessment and/or
+        its reviews. It is also important for the contribution, hence it will
+        be passed upwards to it.
+    attributes: dict
+        Workflow attributes
+    &#34;&#34;&#34;
+
+    db = self.db
+    typeCriteria = db.typeCriteria
+
+    assessmentId = G(record, N._id)
+    assessmentType = G(record, N.assessmentType)
+    nCriteria = len(G(typeCriteria, assessmentType, default=[]))
+
+    centries = [
+        rec
+        for rec in G(record, N.criteriaEntry, default=[])
+        if (
+            assessmentId is not None
+            and G(rec, N.criteria) is not None
+            and G(rec, N.assessment) == assessmentId
+        )
+    ]
+    complete = len(centries) == nCriteria and all(
+        G(rec, N.score) and G(rec, N.evidence) for rec in centries
+    )
+    submitted = G(record, N.submitted)
+    dateSubmitted = G(record, N.dateSubmitted)
+    dateWithdrawn = G(record, N.dateWithdrawn)
+    withdrawn = not submitted and dateWithdrawn
+
+    score = self.computeScore(centries)
+
+    reviewer = {
+        N.expert: G(record, N.reviewerE),
+        N.final: G(record, N.reviewerF),
+    }
+    reviewers = sorted(set(reviewer.values()) - {None})
+
+    reviewsWf = {}
+
+    for (kind, theReviewer) in reviewer.items():
+        reviewValid = getLast(
+            [
+                rec
+                for rec in G(record, N.review, default=[])
+                if G(rec, N.creator) == theReviewer
+                and G(rec, N.reviewType) == assessmentType
+            ]
+        )
+        reviewWf = self.computeWorkflowReview(kind, reviewValid, frozen)
+        reviewsWf[kind] = reviewWf
+
+    finalReviewStage = None
+
+    expertReviewWf = G(reviewsWf, N.expert)
+    expertReviewStage = G(expertReviewWf, N.stage)
+    finalReviewWf = G(reviewsWf, N.final)
+    finalReviewStage = G(finalReviewWf, N.stage)
+
+    finalReviewDate = G(finalReviewWf, N.stageDate)
+    revisedProgress = (
+        submitted
+        and finalReviewStage == N.reviewRevise
+        and finalReviewDate &gt; dateSubmitted
+    )
+    revisedDone = (
+        submitted
+        and finalReviewStage == N.reviewRevise
+        and finalReviewDate &lt; dateSubmitted
+    )
+
+    stage = (
+        (N.completeWithdrawn if complete else N.incompleteWithdrawn)
+        if withdrawn
+        else (N.completeRevised if complete else N.incompleteRevised)
+        if revisedProgress
+        else N.submittedRevised
+        if revisedDone
+        else (
+            N.submitted if submitted else N.complete if complete else N.incomplete
+        )
+    )
+    stageDate = dateWithdrawn if withdrawn else dateSubmitted
+
+    aLocked = stage in {N.submitted, N.submittedRevised}
+
+    rLocked = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+
+    if rLocked:
+        finalReviewWf[N.locked] = True
+        if expertReviewWf:
+            expertReviewWf[N.locked] = True
+    else:
+        if finalReviewWf:
+            finalReviewWf[N.locked] = not expertReviewStage
+        if expertReviewWf:
+            expertReviewWf[N.locked] = False
+
+    locked = aLocked or rLocked
+
+    mayAdd = {
+        kind: not locked and not frozen and not G(reviewsWf, kind)
+        for kind in (N.expert, N.final)
+    }
+
+    return (
+        locked,
+        {
+            N._id: assessmentId,
+            N.creators: creators(record, N.creator, N.editors),
+            N.title: G(record, N.title),
+            N.reviewer: reviewer,
+            N.reviewers: reviewers,
+            N.reviews: reviewsWf,
+            N.score: score,
+            N.stage: stage,
+            N.stageDate: stageDate,
+            N.frozen: frozen,
+            N.locked: locked or aLocked,
+            N.mayAdd: mayAdd,
+        },
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.computeWorkflowReview"><code class="name flex">
+<span>def <span class="ident">computeWorkflowReview</span></span>(<span>self, kind, record, frozen)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Computes workflow info derived from a review record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}</dt>
+<dd>The kind of review.</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The review record that is the information source for the
+workflow information.</dd>
+<dt><strong><code>frozen</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>This is an
+attribute of the workflow, derived from the
+contribution record.
+It should be inherited by the associated assessment and review records.
+Hence it is passed from there to here.</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nothing in the review itself indicates what kind a review is.
+But the associated assessment specifies an expert reviewer and a
+final reviewer.
+Hence the creator of a review will tell what kind of review it is.</p>
+</div></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def computeWorkflowReview(self, kind, record, frozen):
+    &#34;&#34;&#34;Computes workflow info derived from a review record.
+
+    Parameters
+    ----------
+    kind: string {`expert`, `final`}
+        The kind of review.
+    record: dict
+        The review record that is the information source for the
+        workflow information.
+    frozen: boolean
+        This is an  attribute of the workflow, derived from the
+        contribution record.
+        It should be inherited by the associated assessment and review records.
+        Hence it is passed from there to here.
+
+    !!! note
+        Nothing in the review itself indicates what kind a review is.
+        But the associated assessment specifies an expert reviewer and a
+        final reviewer.
+        Hence the creator of a review will tell what kind of review it is.
+    &#34;&#34;&#34;
+
+    decisions = self.decisions
+
+    decision = G(decisions, G(record, N.decision))
+
+    stage = (
+        (N.reviewExpert if decision else None)
+        if kind == N.expert
+        else (
+            N.reviewAccept
+            if decision == N.Accept
+            else N.reviewReject
+            if decision == N.Reject
+            else N.reviewRevise
+            if decision == N.Revise
+            else None
+        )
+    )
+
+    return {
+        N._id: G(record, N._id),
+        N.creators: creators(record, N.creator, N.editors),
+        N.title: G(record, N.title),
+        N.kind: kind,
+        N.stage: stage,
+        N.stageDate: G(record, N.dateDecided),
+        N.frozen: frozen,
+    }</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, contribId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Deletes workflow for a single contribution.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The contrib for which to delete workflow.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete(self, contribId):
+    &#34;&#34;&#34;Deletes workflow for a single contribution.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The contrib for which to delete workflow.
+    &#34;&#34;&#34;
+
+    db = self.db
+
+    serverprint(f&#34;WORKFLOW: Delete workflow info {contribId}&#34;)
+    db.deleteWorkflow(contribId)</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.getFullItem"><code class="name flex">
+<span>def <span class="ident">getFullItem</span></span>(<span>self, contribId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Collect a contribution with all relevant assessments and reviews.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The contrib whose information we want to gather.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getFullItem(self, contribId):
+    &#34;&#34;&#34;Collect a contribution with all relevant assessments and reviews.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The contrib whose information we want to gather.
+    &#34;&#34;&#34;
+
+    db = self.db
+
+    entries = {}
+    for table in WORKFLOW_TABLES_LIST:
+        crit = (
+            {N._id: contribId}
+            if table == MAIN_TABLE
+            else {N.contrib: contribId}
+            if table in CT.userTables
+            else {INTER_TABLE: db.inCrit(G(entries, INTER_TABLE, default={}))}
+        )
+        entries[table] = db.entries(table, crit)
+    self.aggregate(entries)
+
+    return G(G(entries, MAIN_TABLE), contribId)</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.initWorkflow"><code class="name flex">
+<span>def <span class="ident">initWorkflow</span></span>(<span>self, drop=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>(Re)fills the workflow table.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>drop</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>If True, the complete table will first be dropped and then
+recreated.
+Otherwise, the table will merely be cleared.</dd>
+</dl>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Clearing is not yet used in the applicatio, only dropping.</p>
+</div></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initWorkflow(self, drop=False):
+    &#34;&#34;&#34;(Re)fills the workflow table.
+
+    Parameters
+    ----------
+    drop: boolean
+        If True, the complete table will first be dropped and then
+        recreated.
+        Otherwise, the table will merely be cleared.
+
+    !!! caution
+        Clearing is not yet used in the applicatio, only dropping.
+    &#34;&#34;&#34;
+
+    db = self.db
+
+    if drop:
+        serverprint(&#34;WORKFLOW: Drop exisiting table&#34;)
+        db.dropWorkflow()
+    else:
+        serverprint(&#34;WORKFLOW: Clear exisiting table&#34;)
+        db.clearWorkflow()
+
+    entries = {}
+    serverprint(&#34;WORKFLOW: Read user (entry) tables&#34;)
+    for table in WORKFLOW_TABLES:
+        entries[table] = db.entries(table)
+
+    serverprint(&#34;WORKFLOW: Link masters and details&#34;)
+    self.aggregate(entries)
+
+    serverprint(&#34;WORKFLOW: Compute workflow info&#34;)
+    wfRecords = []
+    for mainRecord in G(entries, MAIN_TABLE, default={}).values():
+        info = self.computeWorkflow(record=mainRecord)
+        wfRecords.append(info)
+    serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+    db.insertWorkflowMany(wfRecords)
+    serverprint(&#34;WORKFLOW: Initialization done&#34;)</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.insert"><code class="name flex">
+<span>def <span class="ident">insert</span></span>(<span>self, contribId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Computes and stores workflow for a single contribution.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The contrib for which to compute workflow.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def insert(self, contribId):
+    &#34;&#34;&#34;Computes and stores workflow for a single contribution.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The contrib for which to compute workflow.
+    &#34;&#34;&#34;
+
+    db = self.db
+
+    info = self.computeWorkflow(contribId=contribId)
+    info[N._id] = contribId
+    serverprint(f&#34;WORKFLOW: New workflow info {contribId}&#34;)
+    db.insertWorkflow(info)</code></pre>
+</details>
+</dd>
+<dt id="controllers.workflow.compute.Workflow.recompute"><code class="name flex">
+<span>def <span class="ident">recompute</span></span>(<span>self, contribId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Recomputes and replaces workflow for a single contribution.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The contrib for which to compute workflow.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def recompute(self, contribId):
+    &#34;&#34;&#34;Recomputes and replaces workflow for a single contribution.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The contrib for which to compute workflow.
+    &#34;&#34;&#34;
+
+    db = self.db
+
+    info = self.computeWorkflow(contribId=contribId)
+    db.updateWorkflow(contribId, info)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="controllers.workflow" href="index.html">controllers.workflow</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="controllers.workflow.compute.Workflow" href="#controllers.workflow.compute.Workflow">Workflow</a></code></h4>
+<ul class="">
+<li><code><a title="controllers.workflow.compute.Workflow.aggregate" href="#controllers.workflow.compute.Workflow.aggregate">aggregate</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.computeScore" href="#controllers.workflow.compute.Workflow.computeScore">computeScore</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.computeWorkflow" href="#controllers.workflow.compute.Workflow.computeWorkflow">computeWorkflow</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.computeWorkflowAssessment" href="#controllers.workflow.compute.Workflow.computeWorkflowAssessment">computeWorkflowAssessment</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.computeWorkflowReview" href="#controllers.workflow.compute.Workflow.computeWorkflowReview">computeWorkflowReview</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.delete" href="#controllers.workflow.compute.Workflow.delete">delete</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.getFullItem" href="#controllers.workflow.compute.Workflow.getFullItem">getFullItem</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.initWorkflow" href="#controllers.workflow.compute.Workflow.initWorkflow">initWorkflow</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.insert" href="#controllers.workflow.compute.Workflow.insert">insert</a></code></li>
+<li><code><a title="controllers.workflow.compute.Workflow.recompute" href="#controllers.workflow.compute.Workflow.recompute">recompute</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

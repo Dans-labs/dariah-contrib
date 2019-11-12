@@ -199,7 +199,7 @@ def toHexMongo(name, number):
     return "{:0>8x}{}{}".format(0, toHexName(name), toHexNumber(number))
 
 
-class IdIndex(object):
+class IdIndex:
     def __init__(self):
         self._idFromName = {}
         self._nameFromId = {}
@@ -226,7 +226,7 @@ class MongoId(IdIndex):
         return self.getId(toHexMongo(table, self.cur[table]))
 
 
-class FMConvert(object):
+class FMConvert:
     def __init__(self):
         with open("./config.yaml") as ch:
             config = yaml.load(ch)

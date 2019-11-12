@@ -16,9 +16,19 @@ Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
 class Value(Related):
+    """Type class for types with values in value tables."""
+
     widgetType = N.related
 
     def __init__(self, control):
+        """Store a handle to the Control singleton.
+
+        Parameters
+        ----------
+        control: object
+            The `controllers.control.Control` singleton.
+        """
+
         self.control = control
 
     def fromStr(self, editVal, uid=None, eppn=None, extensible=False):

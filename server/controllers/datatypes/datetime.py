@@ -51,11 +51,25 @@ DATETIME_PATTERN = genDatetimePattern()
 
 
 class Datetime(TypeBase):
+    """Type class for date-time values"""
     rawType = dt
     widgetType = N.text
     pattern = DATETIME_PATTERN
 
     def partition(self, strVal):
+        """Split a datetime string into 3 date components and 3 time components.
+
+        !!! note
+            The fraction part of seconds is ignored.
+
+        Parameters
+        ----------
+        strVal: string
+
+        !!! warning
+            If there are missing components, they will be taken from the default date,
+            which is `now`.
+        """
         normalVal = dtTrim.sub(E, strVal)
         if not normalVal:
             return None

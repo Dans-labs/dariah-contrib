@@ -13,10 +13,13 @@ Qc = H.icon(CW.unknown[N.country], asChar=True)
 
 
 class Decision(Value):
+    """Type class for decisions."""
+
     def __init__(self, control):
         super().__init__(control)
 
     def titleStr(self, record):
+        """The title string is a suitable icon plus the participle field."""
         decision = G(record, N.participle)
         if decision is None:
             return Qq
@@ -31,8 +34,24 @@ class Decision(Value):
         markup=False,
         clickable=False,
         active=None,
-        multiple=False,
+        **kwargs,
     ):
+        """Generate a custom title.
+
+        Parameters
+        ----------
+        record: dict, optional, `None`
+        eid: ObjectId, optional, `None`
+        markup: boolean, optional, `False`
+        clickable: boolean, optional, `False`
+            If `True`, the title will be represented as a workflow command,
+            otherwise as a workflow stage.
+        active: string, optional, `None`
+        **kwargs: dict
+            Possible remaining parameters that might have been passed but are not
+            relevant for this class.
+        """
+
         if record is None and eid is None:
             return (QQ, QQ) if markup else Qq
 

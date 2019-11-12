@@ -15,79 +15,60 @@ VALUE_TABLES = set(CT.valueTables)
 class Control:
     """Combines low-level classes and adds caching.
 
-    The classes Db, Wf, Auth, Types all deal with the database.
-    They might be needed all over the place, so we combine them in a
-    Control object for easy passing around.
+    Several classes deal with database data,  and they
+    might be needed all over the place, so we combine them in a
+    Control singleton for easy passing around.
 
-    The Control object is at the right place to realize some database caching.
+    The Control singleton is at the right place to realize some database caching.
     A few Db methods have a corresponding method here, which first checks a cache
     before actually calling the lower level Db method.
 
-    A few notes on the lifetimes of Db, Wf, Auth, Types and the cache.
+    A few notes on the lifetimes of those objects and the cache.
 
-    Db
-    --------
-    Contains db-access methods and the content of all value tables.
-    It is server wide, it exists before the webapp is created.
+    Class | lifetime | what is cached
+    --- | --- | ---
+    `controllers.db.Db` | application process | all data in all value tables
+    `controllers.workflow.compute.Workflow` | application process | workflow table
+    `controllers.auth.Auth` | per request | holds current user data
+    `controllers.datatypes.types.Types` | per request | NN/A
+    cache | per request | user tables as far as needed for the request
 
-    Wf
-    --------
-    Contains methods to initialize the workflow and access workflow items.
-    It is server wide, in conjunction with db.
+    !!! note "Why needed?"
+        During a request, several records may be shown, with their details.
+        They have to be fetched in order to get the permissions.
+        Details may require the permissions of the parents. Many records may share
+        the same workflow information.
+        Caching prevents an explosion of record fetches.
 
-    Auth
-    --------
-    Contains methods to set up authenticated sessions.
-    It will contain the logged-in user.
-    It is application-wide, lives inside the webapp, and is created
-    anew for each request.
+        However, we should not cache between requests, because the records that benefit
+        most from caching are exactly the ones that can be changed by users.
 
-    Types
-    --------
-    Contains methods to represent values of data types.
-    Some datatypes have values stored in other tables: these tables are also
-    types.  Some of these tables have sensitive titles for their records: the
-    user table.
-    How a user may view other users is dependent on who that user is: on auth.
-    Hence types has a dependency on auth, and created anew for each request.
+    !!! note "Individual items"
+        The cache stores individual record and workflow items (by table and id)
+        straight after fetching them from mongo, via Db.
 
-    cache
-    --------
-    Stores individual record and workflow items (by table and id)
-    straight after fetching them from mongo, via Db.
-    It is request wide: each request starts with an empty cache.
-    During a request, several records may be shown, with their details.
-    They have to be fetched in order to get the permissions.
-    Details may require the permissions of the parents. Many records may share
-    the same workflow information.
-    Caching prevents an explosion of record fetches and storage.
-
-    However, we should not cache between requests, because the records that benefit
-    most from caching are exactly the ones that can be changed by users.
-
-    Note that the value records are already cached in db itself.
-    If such a record changes, db will reread the whole table.
-    But this happens very rarely.
+    !!! note "versus Db caching"
+        The records in value tables are already cached in Db itself.
+        Such records will not go in this cache.
+        If such a record changes, Db will reread the whole table.
+        But this happens very rarely.
     """
 
     def __init__(self, db, wf, auth):
-        """Creates a control object and initializes its cache.
+        """Creates a control singleton and initializes its cache.
 
         This class has some methods that wrap a lower level Db data access method,
         to which it adds caching.
 
-        db
-        --------
-        The Db object is stored as an attribute of Control.
-
-        wf
-        --------
-        The Wf (workflow, see workflow.compute.py) object is stored as an
-        attribute of Control.
-
-        auth
-        --------
-        The Auth object is stored as an attribute of Control.
+        Parameters
+        ----------
+        db: object
+            The `controllers.db.Db` singleton is stored as an attribute of Control.
+        wf: object
+            The `controllers.workflow.compute.Workflow` singleton is stored as an
+            attribute of Control.
+        auth: object
+            The `cotrollers.auth.Auth` singleton is stored as an attribute of Control.
         """
 
         self.db = db
@@ -99,22 +80,20 @@ class Control:
     def getItem(self, table, eid, requireFresh=False):
         """Fetch an item from the database, possibly from cache.
 
-        table
-        --------
-        The table from which the record is fetched.
+        Parameters
+        ----------
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
 
-        eid
-        --------
-        (Entity) ID of the particular record.
-
-        requireFresh=False
-        --------
-        If True, bypass the cache and fetch the item straight from Db and put the
-        fetched value in the cache.
-
-        Result:
-        --------
-        The record as a dict.
+        Returns
+        -------
+        dict
+            The record as a dict.
         """
 
         if not eid:
@@ -125,25 +104,26 @@ class Control:
         if table in VALUE_TABLES:
             return db.getItem(table, eid)
 
-        return self._getCached(
+        return self.getCached(
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
 
     def getWorkflowItem(self, contribId, requireFresh=False):
         """Fetch a single workflow record from the database, possibly from cache.
 
-        contribId
-        --------
-        The id of the workflow item to be fetched.
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item to be fetched.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
 
-        requireFresh=False
-        --------
-        If True, bypass the cache and fetch the item straight from Db and put the
-        fetched value in the cache.
-
-        Result:
-        --------
-        The record wrapped in a WorkflowItem object (see workflow/apply.py).
+        Returns
+        -------
+        dict
+            the record wrapped in a
+            `controllers.workflow.apply.WorkflowItem` singleton
         """
 
         if not contribId:
@@ -151,7 +131,7 @@ class Control:
 
         db = self.db
 
-        info = self._getCached(
+        info = self.getCached(
             db.getWorkflowItem,
             N.getWorkflowItem,
             [contribId],
@@ -164,13 +144,12 @@ class Control:
     def deleteItem(self, table, eid):
         """Delete a record and also remove it from the cache.
 
-        table
-        --------
-        The table which holds the record to be deleted.
-
-        eid
-        --------
-        (Entity) id of the record to be deleted.
+        Parameters
+        ----------
+        table: string
+            The table which holds the record to be deleted.
+        eid: ObjectId
+            (Entity) id of the record to be deleted.
         """
 
         db = self.db
@@ -184,37 +163,27 @@ class Control:
                 if key in cachedTable:
                     del cachedTable[key]
 
-    def _getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
+    def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
         """Helper to wrap caching around a raw Db fetch method.
 
         Only for methods that fetch single records.
 
-        method
-        --------
-        The raw Db method.
-
-        methodName
-        --------
-        The name of the raw Db method. Only used to display if DEBUG is True.
-
-        methodNameArgs
-        --------
-        The arguments to pass to the Db method.
-
-        table
-        --------
-        The table from which the record is fetched.
-
-        eid
-        --------
-        (Entity) ID of the particular record.
-
-        requireFresh=False
-        --------
-        If True, bypass the cache and fetch the item straight from Db and put the
-        fetched value in the cache.
+        Parameters
+        ----------
+        method: function
+            The raw `controllers.db.Db` method.
+        methodName: string
+            The name of the raw Db method. Only used to display if DEBUG is True.
+        methodNameArgs: iterable
+            The arguments to pass to the Db method.
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
         """
-
         cache = self.cache
 
         key = eid if type(eid) is str else str(eid)

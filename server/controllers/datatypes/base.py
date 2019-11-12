@@ -22,29 +22,23 @@ class TypeBase:
 
     See the config file tables.yaml, under keys `scalarTypes` and `boolTypes`.
 
-    widgetType
-    ~~~~~~~~
-    The type of widget that this type needs to edit its value. E.g. `text`.
+    Attributes
+    ----------
+    widgetType: string
+        The type of widget that this type needs to edit its value. E.g. `text`.
+    rawType: type
+        The Python type that is used to represent values of this type.
+        If it is None, the rawType is not relevant.
+    pattern: string(re)
+        For text widgets, this is a regular expression that constrains what is legal
+        input in the text input field.
+    needsControl: boolean
+        Whether methods of this type need to be supplied with the Control singleton.
 
-    rawType
-    ~~~~~~~~
-    The Python type that is used to represent values of this type.
-    If it is None, the rawType is not relevant.
-
-    pattern
-    ~~~~~~~~
-    For text widgets, this is a regular expression that constrains what is legal
-    input in the text input field.
-
-    needsControl
-    ~~~~~~~~
-    Whether methods of this type need to be supplied with the Control object.
-
-    Example:
-    --------
-    In order to compute the representation of a user, the Auth object inside the
-    Control object is needed to detemine what parts of the user identifiaction
-    the current user is allowed to see.
+    !!! note
+        In order to compute the representation of a user, the Auth singleton inside the
+        Control singleton is needed to detemine what parts of the user identifiaction
+        the current user is allowed to see.
     """
 
     widgetType = None
@@ -56,13 +50,15 @@ class TypeBase:
     def validationMsg(tp):
         """A validation error message for a specific type.
 
-        tp
-        --------
-        The name under which a type is registered.
+        Parameters
+        ----------
+        tp: string
+            The name under which a type is registered.
 
-        Returns:
-        --------
-        An error message.  See web.yaml under key `wrongType`.
+        Returns
+        -------
+        string
+            An error message.  See web.yaml under key `wrongType`.
         """
 
         return G(WRONG_TYPE, tp)
@@ -70,13 +66,15 @@ class TypeBase:
     def normalize(self, strVal):
         """Normalizes a string representation of a value.
 
-        strVal
-        --------
-        The string rep that must be normalized.
+        Parameters
+        ----------
+        strVal: string
+            The string rep that must be normalized.
 
-        Returns:
-        --------
-        A string that is a normalized equivalent representation of the same value.
+        Returns
+        -------
+        string
+            A normalized equivalent representation of the same value.
         """
 
         return str(strVal).strip()
@@ -84,13 +82,15 @@ class TypeBase:
     def fromStr(self, editVal):
         """Turns the output from an edit widget into a real value that can be saved.
 
-        editVal
-        --------
-        The output of an edit widget.
+        Parameters
+        ----------
+        editVal: string
+            The output of an edit widget.
 
-        Returns:
-        --------
-        A value of the type in question, corresponding to `editVal`.
+        Returns
+        -------
+        mixed
+            A value of the type in question, corresponding to `editVal`.
         """
 
         if not editVal:
@@ -102,13 +102,15 @@ class TypeBase:
     def toDisplay(self, val):
         """Turns a real value into a HTML code for readonly display.
 
-        val:
-        --------
-        A value of this type.
+        Parameters
+        ----------
+        val: mixed
+            A value of this type.
 
-        Returns:
-        --------
-        HTML code, possibly with nice formatting depending on the nature of the value.
+        Returns
+        -------
+        string(html)
+            Possibly with nice formatting depending on the nature of the value.
         """
 
         return QQ if val is None else H.span(he(self.normalize(str(val))))
@@ -116,13 +118,14 @@ class TypeBase:
     def toEdit(self, val):
         """Turns a real value into a string for editable display.
 
-        val
-        --------
-        A value of this type.
+        Parameters
+        ----------
+        val: mixed
+            A value of this type.
 
-        Returns:
-        --------
-        A string.
+        Returns
+        -------
+        string
         """
 
         return E if val is None else self.normalize(str(val))
@@ -133,16 +136,14 @@ class TypeBase:
         The resulting value can be used for comparison with newly entered values
         in an edit widget at the client side.
 
-        val
-        --------
-        A value of this type.
+        Parameters
+        ----------
+        val: mixed
+            A value of this type.
 
-        Returns:
-        --------
-        The delivered value is either:
-        - None
-        - a Boolean value
-        - a string value
+        Returns
+        -------
+        boolean | string | None
         """
 
         if val is None:
@@ -152,14 +153,15 @@ class TypeBase:
     def widget(self, val):
         """Constructs and edit widget around for this type.
 
-        val
-        --------
-        The initial value for the widget.
+        Parameters
+        ----------
+        val: string
+            The initial value for the widget.
 
-        Returns:
-        --------
-        HTML code, dependent on a batch of Javascript in `index.js`, look for
-        `const widgets`.
+        Returns
+        -------
+        string(html)
+            Dependent on a batch of Javascript in `index.js`, look for `const widgets`.
         """
 
         atts = {}

@@ -17,10 +17,13 @@ urlTrim = re.compile(r"""^([htps:/]*)""")
 
 
 class Text(TypeBase):
+    """Base class for text types: String, Url, Email, Markdown."""
     widgetType = N.text
 
 
 class Url(Text):
+    """Type class for url strings."""
+
     pattern = (
         f"""^{N.http}s?://"""
         """[A-Za-z0-9%_-]+\\.[A-Za-z0-9%_.-]+"""
@@ -51,6 +54,8 @@ class Url(Text):
 
 
 class Email(Text):
+    """Type class for email strings."""
+
     pattern = """^[A-Za-z0-9][A-Za-z0-9_.-]*@[A-Za-z0-9_-]+\\.[A-Za-z0-9_.-]+$"""
 
     def normalize(self, strVal):
@@ -68,6 +73,11 @@ class Email(Text):
 
 
 class Markdown(TypeBase):
+    """Type class for markdown text.
+
+    The `toDisplay` method will convert the markdown to HTML.
+    """
+
     widgetType = N.markdown
 
     def normalize(self, strVal):

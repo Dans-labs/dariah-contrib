@@ -17,6 +17,11 @@ to _mundane_.
     reveal how many lines of code have been written in which languages. See also how we
     managed to keep the code in all those languages tidy. [More ...](About/Codebase.md)
 
+??? abstract "Tech doc"
+    The technical documentation of the Python code is largely in so-called
+    *docstrings* within the code. But you can see them nicely formatted
+    [here ...](Maintenance/Techdoc/)
+
 ??? abstract "Lessons learned"
     It has taken a lot of time to develop this app. Lots more
     than I expected from the start. [More ...](About/Lessons.md)

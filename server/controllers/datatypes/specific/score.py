@@ -9,10 +9,14 @@ Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
 class Score(Value):
+    """Type class for scores."""
+
     def __init__(self, control):
         super().__init__(control)
 
     def titleStr(self, record):
+        """Put the score and the level in the title."""
+
         score = G(record, N.score)
         if score is None:
             return Qq

@@ -26,15 +26,23 @@ datetime = Datetime()
 class WorkflowItem:
     """Supports the application of workflow information.
 
-    A WorkflowItem object has a bunchg of workflow attributes as dict in its
+    A WorkflowItem singleton has a bunch of workflow attributes as dict in its
     attribute `data` and offers methods to
-    - address selected pieces of that information;
-    - compute permissions for workflow actions and database actions;
-    - determine the workflow stage (see workflow.yaml) the contribution is in.
+
+    *   address selected pieces of that information;
+    *   compute permissions for workflow actions and database actions;
+    *   determine the workflow stage (see workflow.yaml) the contribution is in.
+
+    Attributes
+    ----------
+    data: dict
+        All workflow attributes.
+    mykind: string
+        The kind of reviewer the current user is, if any.
     """
 
     def __init__(self, control, data):
-        """Creates a workflow item record.
+        """Wraps a workflow item record around a workflow data record.
 
         Workflow item records are created per contribution,
         but they will be referenced by contribution, assessment and review records
@@ -43,17 +51,18 @@ class WorkflowItem:
         Workflow items also store details of the current user, which will be needed
         for the computation of permissions.
 
-        control
-        --------
-        The Control object, from which the Auth object can be picked up.
-        from which the details of the current user can be read off.
+        Parameters
+        ----------
+        control: object
+            The `controllers.control.Control singleton`, from which the
+            `controllers.auth.Auth` singleton can be picked up, from which the
+            details of the current user can be read off.
 
-        Result:
-        --------
-        The user attributes `uid` and `eppn` will be stored in the WorkflowItem
-        object.
-        At this point, it is also possible to what kind of reviewer the current
-        user is, if any, and store that in attribute `mykind`.
+        !!! note
+            The user attributes `uid` and `eppn` will be stored in this `WorkflowItem`
+            object.
+            At this point, it is also possible to what kind of reviewer the current
+            user is, if any, and store that in attribute `mykind`.
         """
 
         auth = control.auth
@@ -62,33 +71,34 @@ class WorkflowItem:
         self.uid = G(user, N._id)
         self.eppn = G(user, N.eppn)
         self.data = data
-        self.mykind = self._myReviewerKind()
+        self.mykind = self.myReviewerKind()
 
     def getKind(self, table, record):
         """Determine whether a review(Entry) is `expert` or `final`.
 
-        table
-        --------
-        Either `review` or `reviewEntry`.
+        Parameters
+        ----------
+        table: string
+            Either `review` or `reviewEntry`.
+        record: dict
+            Either a `review` record or a `reviewEntry` record.
 
-        record
-        --------
-        Either a `review` record or a `reviewEntry` record.
+        Returns
+        -------
+        string {`expert`, `final`}
+            Or `None`.
 
-        Result:
-        --------
-        Either `expert` or `final` or None.
-
-        NB:
-        The value None is returned for reviews that are no (longer) part of the
-        workflow. They could be reviews with a type that does not match the type
-        of the contribution, or reviews that have been superseded by newer
-        reviews.
+        !!! warning
+            The value `None` (not a string!) is returned for reviews that are
+            no (longer) part of the workflow.
+            They could be reviews with a type that does not match the type
+            of the contribution, or reviews that have been superseded by newer
+            reviews.
         """
 
         if table in {N.review, N.reviewEntry}:
             eid = G(record, N._id) if table == N.review else G(record, N.review)
-            data = self._getWf(N.assessment)
+            data = self.getWf(N.assessment)
             reviews = G(data, N.reviews, default={})
             kind = (
                 N.expert
@@ -106,29 +116,24 @@ class WorkflowItem:
 
         Valid parts are contributions, assessment and review detail records of
         contributions satisfying:
-        - they have the same type as their master contribution
-        - they are not superseded by other assessments or reviews
+
+        *   they have the same type as their master contribution
+        *   they are not superseded by other assessments or reviews
             with the correct type
 
-        table
-        --------
-        a table such as `review` or `assessment` or `criteriaEntry` or
-        `reviewEntry`.
+        Parameters
+        ----------
+        table: string {`review`, `assessment`, `criteriaEntry`, `reviewEntry`}.
+        eid: ObjectId
+            (Entity) id of the record to be validated.
+        record: dict
+            The full record to be validated.
+            Only needed for `reviewEntry` and `criteriaEntry` in order to look
+            up the master `review` or `assessment` record.
 
-        eid
-        --------
-        (Entity) id of the record to be validated.
-
-        record
-        --------
-        The full record to be validated.
-        Only needed for `reviewEntry` and `criteriaEntry` in order to look
-        up the master `review` or `assessment` record.
-
-        Result:
-        --------
-        True or False
-
+        Returns
+        -------
+        boolean
         """
         if eid is None:
             return False
@@ -144,10 +149,10 @@ class WorkflowItem:
             return False
 
         if table in {N.contrib, N.assessment, N.criteriaEntry}:
-            data = self._getWf(table)
+            data = self.getWf(table)
             return refId == G(data, N._id)
         elif table in {N.review, N.reviewEntry}:
-            data = self._getWf(N.assessment)
+            data = self.getWf(N.assessment)
             reviews = G(data, N.reviews, default={})
             return refId in {
                 G(reviewInfo, N._id) for (kind, reviewInfo) in reviews.items()
@@ -160,26 +165,23 @@ class WorkflowItem:
         but also within its enclosed assessment workflow record and
         the enclosed review workflow records.
 
-        table
-        --------
-        In order to read attributes, we must specify the source of those
-        attributes: `contrib` (outermost), `assessment` or `review`.
+        Parameters
+        ----------
+        table: string
+            In order to read attributes, we must specify the source of those
+            attributes: `contrib` (outermost), `assessment` or `review`.
+        *atts: iterable
+            The workflow attribute names to fetch.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        *atts
-        --------
-        An iterable of workflow attribute names to fetch.
-
-        kind
-        --------
-        If we want review attributes, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Result:
-        --------
-        An generator of attribute values, corresponding to the *atts parameter.
+        Returns
+        -------
+        generator
+            Yields attribute values, corresponding to `*atts`.
         """
 
-        thisData = self._getWf(table, kind=kind)
+        thisData = self.getWf(table, kind=kind)
         return (G(thisData, att) for att in atts)
 
     def checkFixed(self, recordObj, field=None):
@@ -192,22 +194,22 @@ class WorkflowItem:
         This method checks whether a record or field is currently fixed,
         i.e. whether editing is possible.
 
-        NB: It might also depend on the current user.
+        !!! note
+            It might also depend on the current user.
 
-        recordObj
-        --------
-        The record object in question (from which the table ann the kind
-        maybe inferred. It should be the record object that contains `self`
-        as its `wfitem` attribute.
+        Parameters
+        ----------
+        recordObj: object
+            The record in question (from which the table and the kind
+            maybe inferred. It should be the record that contains this
+            WorkflowItem object as its `wfitem` attribute.
+        field: string, optional `None`
+            If None, we check for the fixity of the record as a whole.
+            Otherwise, we check for the fixity of this field in the record.
 
-        field=None
-        --------
-        If None, we check for the fixity of the record as a whole.
-        Otherwise, we check for the fixity of this field in the record.
-
-        Result:
-        --------
-        True or False.
+        Returns
+        -------
+        boolean
         """
 
         auth = self.auth
@@ -243,27 +245,24 @@ class WorkflowItem:
         check whether the current user is allowed to execute this command
         on the records in question.
 
-        NB: if you try to run a command on a kind of record that it is not
-        designned for, it will be detected and no permission will be given.
+        !!! note
+            If you try to run a command on a kind of record that it is not
+            designed for, it will be detected and no permission will be given.
 
-        table
-        --------
-        In order to check permissions, we must specify the kind of record that
-        the command acts on: contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            In order to check permissions, we must specify the kind of record that
+            the command acts on: contrib, assessment, or review.
+        command: string
+            An string consisting of the name of a command as listed in
+            workflow.yaml under `commands`.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        command
-        --------
-        An string consisting of the name of a command as listed in
-        workflow.yaml under `commands`.
-
-        kind=None
-        --------
-        If we want to act on reviews, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Returns:
-        --------
-        True (permitted) or False (forbidden).
+        Returns
+        -------
+        boolean
         """
         auth = self.auth
         uid = self.uid
@@ -390,23 +389,22 @@ class WorkflowItem:
 
         Workflow stages are listed in workflow.yaml, under `stageAtts`.
 
-        The stage of a record is stored in the wokrflow attribute `stage`,
-        so the only thing needed is to ask for that attribute with `info()`.
+        The stage of a record is stored in the workflow attribute `stage`,
+        so the only thing needed is to ask for that attribute with
+        `controllers.workflow.apply.info`.
 
-        table
-        --------
-        We must specify the kind of record for which we want to see the stage:
-        contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to see the stage:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        kind=None
-        --------
-        If we want to act on reviews, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Result:
-        --------
-        A string with values such as `selectYes`, `submittedRevised`,
-        `reviewAccept`, etc. See workflow.yaml for the complete list.
+        Returns
+        -------
+        string {`selectYes`, `submittedRevised`, `reviewAccept`, ...}
+            See workflow.yaml for the complete list.
         """
 
         return list(self.info(table, N.stage, kind=kind))[0]
@@ -414,19 +412,17 @@ class WorkflowItem:
     def status(self, table, kind=None):
         """Present all workflow info and controls relevant to the record.
 
-        table
-        --------
-        We must specify the kind of record for which we want to see the status:
-        contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to see the status:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        kind=None
-        --------
-        If we want to act on reviews, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Returns:
-        --------
-        HTML code.
+        Returns
+        -------
+        string(html)
         """
 
         eid = list(self.info(table, N._id, kind=kind))[0]
@@ -436,35 +432,38 @@ class WorkflowItem:
         return H.div(
             [
                 rButton,
-                self._statusOverview(table, kind=kind),
-                self._commands(table, kind=kind),
+                self.statusOverview(table, kind=kind),
+                self.commands(table, kind=kind),
             ],
             cls=f"workflow",
         )
 
     @staticmethod
     def isCommand(table, field):
-        """Whether a field in a record is involved in a workflow cpmmand.
+        """Whether a field in a record is involved in a workflow command.
 
         Fields that are involved in workflow commands can not be read or edited
         directly:
-        - they are represented as workflow status, not as a value (see status());
-        - they only change as a result of a  workflow command (see doCommand()).
 
-        NB: if a record is not a valid part of a workflow, then all its fields
-        are represented and actionable in the normal way.
+        *   they are represented as workflow status, not as a value
+            (see `controllers.workflow.apply.WorkflowItem.status`);
+        *   they only change as a result of a  workflow command
+            (see `controllers.workflow.apply.WorkflowItem.doCommand`).
 
-        table
-        --------
-        The table in question.
+        !!! caution
+            If a record is not a valid part of a workflow, then all its fields
+            are represented and actionable in the normal way.
 
-        field
-        --------
-        The field in question.
+        Parameters
+        ----------
+        table: string
+            The table in question.
+        field: string
+            The field in question.
 
-        Returns:
-        --------
-        True or False.
+        Returns
+        -------
+        boolean
         """
 
         commandFields = G(COMMAND_FIELDS, table, default=set())
@@ -475,14 +474,16 @@ class WorkflowItem:
 
         The permission to execute the command will be checked first.
 
-        recordObj
-        --------
-        The record must be passed as a record object.
+        Parameters
+        ----------
+        recordObj: object
+            The record must be passed as a record object.
 
-        Result:
-        --------
-        The url to navigate to after the action has been performed.
-        It is always the url to the page of the contrib record.
+        Returns
+        -------
+        url
+            To navigate to after the action has been performed.
+            It is always the url to the page of the contrib record.
         """
 
         table = recordObj.table
@@ -509,22 +510,20 @@ class WorkflowItem:
 
         return f"""/{N.contrib}/{N.item}/{contribId}"""
 
-    def _statusOverview(self, table, kind=None):
+    def statusOverview(self, table, kind=None):
         """Present the current status of a record on the interface.
 
-        table
-        --------
-        We must specify the kind of record for which we want to present the stage:
-        contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to present the stage:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        kind=None
-        --------
-        If we want to act on reviews, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Returns:
-        --------
-        HTML code.
+        Returns
+        -------
+        string(html)
         """
 
         (stage, stageDate, locked, frozen, score, eid) = self.info(
@@ -566,22 +565,20 @@ class WorkflowItem:
 
         return H.div([statusRep, scorePart], cls="workflow-line")
 
-    def _commands(self, table, kind=None):
+    def commands(self, table, kind=None):
         """Present the currently available commands as buttons on the interface.
 
-        table
-        --------
-        We must specify the kind of record for which we want to present the commands:
-        contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to present the
+            commands: contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        kind=None
-        --------
-        If we want to act on reviews, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Returns:
-        --------
-        HTML code.
+        Returns
+        -------
+        string(html)
         """
 
         uid = self.uid
@@ -617,25 +614,20 @@ class WorkflowItem:
 
         return H.join(commandParts)
 
-    def _getWf(self, table, kind=None):
+    def getWf(self, table, kind=None):
         """Select a source of attributes within a workflow item.
 
-        table
-        --------
-        We must specify the kind of record for which we want the attributes:
-        contrib, assessment, or review.
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want the attributes:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
 
-        kind=None
-        --------
-        If we want to review attributes, we also have to specify the kind of review:
-        `expert` or `final`.
-
-        Returns:
-        --------
-        - the whole workflow item if you ask for the contrib attributes.
-        - the assessment sub-item if you ask for the assessment attributes.
-        - the review sub-item of kind kind if you ask for the review attributes
-            of that kind.
+        Returns
+        -------
+        dict
         """
 
         data = self.data
@@ -652,26 +644,28 @@ class WorkflowItem:
 
         return None
 
-    def _myReviewerKind(self, reviewer=None):
+    def myReviewerKind(self, reviewer=None):
         """Determine whether the current user is `expert` or `final`.
 
-        reviewer=None
-        --------
-        If absent, the assessment in the workflow info will be inspected
-        to get a dict of its reviewers by kind.
-        Otherwise, it should be a dict of user ids keyed by `expert` and
-        `final`.
+        Parameters
+        ----------
+        reviewer: dict, optional `None`
+            If absent, the assessment in the workflow info will be inspected
+            to get a dict of its reviewers by kind.
+            Otherwise, it should be a dict of user ids keyed by `expert` and
+            `final`.
 
-        Result:
-        --------
-        The string `expert` or `final`, depending on whether the current user
-        is such a reviewer of the assessment of this contribution.
-        Or None if (s)he is not a reviewer at all.
+        Returns
+        -------
+        string {`expert`, `final`}
+            Depending on whether the current user is such a reviewer of the
+            assessment of this contribution. Or `None` if (s)he is not a reviewer
+            at all.
         """
         uid = self.uid
 
         if reviewer is None:
-            reviewer = G(self._getWf(N.assessment), N.reviewer)
+            reviewer = G(self.getWf(N.assessment), N.reviewer)
 
         return (
             N.expert

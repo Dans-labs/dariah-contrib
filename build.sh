@@ -30,7 +30,13 @@ elif [[ "$1" == "stats" ]]; then
     codestats
 elif [[ "$1" == "docs" ]]; then
     codestats
+    pushd server
+    pdoc3 --force --html --output-dir ../docs/api/html controllers 
+    popd
     mkdocs serve
+elif [[ "$1" == "pdoc" ]]; then
+    cd server
+    pdoc3 --force --html --output-dir ../docs/api/html controllers 
 elif [[ "$1" == "ship" ]]; then
     shift
     codestats

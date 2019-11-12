@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>controllers.sidebar API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>controllers.sidebar</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from flask import request
+
+from config import Config as C, Names as N
+from controllers.html import HtmlElements as H
+from controllers.utils import pick as G, cap1, E, Q, AMP, ZERO
+from controllers.datatypes.types import Country
+
+from controllers.specific.factory_table import make as mkTable
+
+CT = C.tables
+CW = C.web
+
+
+SORTED_TABLES = CT.sorted
+
+HOME = CW.urls[N.home]
+OPTIONS = CW.options
+CAPTIONS = CW.captions
+USER_TABLES_LIST = CT.userTables
+USER_ENTRY_TABLES = set(CT.userEntryTables)
+VALUE_TABLES = CT.valueTables
+SYSTEM_TABLES = CT.systemTables
+OFFICE_TABLES = [t for t in VALUE_TABLES if t not in SYSTEM_TABLES]
+
+OVERVIEW = G(G(CW.urls, N.info), N.url)
+
+
+class Sidebar:
+    def __init__(self, control, path):
+        self.control = control
+        self.path = path
+        self.entries = []
+        self.mainEntries = []
+        self.Entries = []
+        self.userEntries = []
+        self.userPaths = []
+        self.userEntryEntries = []
+        self.userEntryPaths = []
+        self.valueEntries = []
+        self.valuePaths = []
+        self.options = {
+            option: G(request.args, option, default=ZERO) for option in OPTIONS.keys()
+        }
+
+    def makeCaption(self, label, entries, rule=False):
+        if not entries:
+            return E
+
+        refPath = self.path
+        paths = {path for (path, rep) in entries}
+        reps = [rep for (path, rep) in entries]
+        active = any(refPath.startswith(f&#34;&#34;&#34;/{p}/&#34;&#34;&#34;) for p in paths)
+        navClass = &#34; active&#34; if active else E
+        atts = dict(cls=f&#34;nav {navClass}&#34;)
+        if rule:
+            atts[N.addClass] = &#34; ruleabove&#34;
+
+        entriesRep = H.div(reps, cls=&#34;sidebarsec&#34;)
+        return H.details(label, entriesRep, label, **atts)
+
+    def makeOptions(self):
+        options = self.options
+
+        filterRep = [
+            H.input(E, type=N.text, id=&#34;cfilter&#34;, placeholder=&#34;match title&#34;),
+        ]
+        optionsRep = [
+            H.span(
+                [H.checkbox(name, trival=value), G(G(OPTIONS, name), N.label)],
+                cls=N.option,
+            )
+            for (name, value) in options.items()
+        ]
+
+        return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
+
+    def makeEntry(self, label, path, withOptions=False, command=False):
+        options = self.options
+        active = path == self.path
+
+        command = &#34;command info&#34; if command else &#34;button&#34;
+        navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+
+        optionsRep = (
+            AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
+            if withOptions
+            else E
+        )
+        if optionsRep:
+            optionSep = AMP if Q in path else Q
+            optionsRep = optionSep + optionsRep
+
+        atts = dict(cls=navClass,)
+        if withOptions:
+            atts[N.hrefbase] = path
+
+        return (
+            path,
+            H.a(label, path + optionsRep, **atts),
+        )
+
+    def tableEntry(
+        self,
+        table,
+        prefix=None,
+        item=None,
+        postfix=None,
+        action=None,
+        withOptions=False,
+        command=False,
+    ):
+        control = self.control
+
+        tableObj = mkTable(control, table)
+        item = tableObj.itemLabels[1] if item is None else item
+        actionRep = f&#34;?action={action}&#34; if action else E
+        prefixRep = f&#34;{prefix} &#34; if prefix else E
+        postfixRep = f&#34; {postfix}&#34; if postfix else E
+
+        return self.makeEntry(
+            f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
+            f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
+            withOptions=True,
+            command=command,
+        )
+
+    def wrap(self):
+        control = self.control
+        auth = control.auth
+        isAuth = auth.authenticated()
+        isOffice = auth.officeuser()
+        isSuperUser = auth.superuser()
+        isSysAdmin = auth.sysadmin()
+        isCoord = auth.coordinator()
+        country = auth.country()
+
+        entries = []
+
+        # home
+        entries.append(self.makeEntry(G(HOME, N.text), G(HOME, N.url))[1])
+
+        # options
+
+        entries.append(
+            self.makeCaption(G(CAPTIONS, N.options), self.makeOptions(), rule=True)
+        )
+
+        # DARIAH contributions
+
+        subEntries = []
+
+        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+
+        subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
+
+        if isAuth:
+
+            # my country
+
+            if country:
+                countryType = Country(control)
+
+                countryRep = countryType.titleStr(country)
+                iso = G(country, N.iso)
+                if iso:
+                    subEntries.append(
+                        self.tableEntry(
+                            N.contrib,
+                            action=N.our,
+                            prefix=f&#34;{countryRep}&#34;,
+                            withOptions=True,
+                        )
+                    )
+
+            # - my contributions and assessments
+
+            subEntries.extend(
+                [
+                    self.tableEntry(
+                        N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                    ),
+                    self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                    self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                ]
+            )
+
+        # - reviewed by me (all)
+
+        entries.append(self.makeCaption(G(CAPTIONS, N.contrib), subEntries))
+
+        # tasks
+
+        if not isAuth:
+            return H.join(entries)
+
+        subEntries = []
+
+        if isCoord:
+
+            # - select contributions
+
+            subEntries.append(
+                self.tableEntry(
+                    N.contrib,
+                    action=&#34;select&#34;,
+                    item=&#34;Contributions&#34;,
+                    postfix=&#34;to be selected&#34;,
+                    command=True,
+                )
+            )
+        # - my unfinished assessments
+
+        subEntries.append(
+            self.tableEntry(
+                N.contrib,
+                action=&#34;assess&#34;,
+                item=&#34;Contributions&#34;,
+                postfix=&#34;I am assessing&#34;,
+                command=True,
+            )
+        )
+
+        if isOffice:
+
+            # - assign reviewers
+
+            subEntries.append(
+                self.tableEntry(
+                    N.assessment,
+                    action=&#34;assign&#34;,
+                    item=&#34;Assessments&#34;,
+                    postfix=&#34;needing reviewers&#34;,
+                    command=True,
+                )
+            )
+
+        # - reviewed by me (unfinished)
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=&#34;review&#34;,
+                item=&#34;Assessments&#34;,
+                postfix=&#34;in review by me&#34;,
+                command=True,
+            )
+        )
+
+        entries.append(self.makeCaption(G(CAPTIONS, N.tasks), subEntries, rule=True))
+
+        # user content
+
+        subEntries = []
+        if isSuperUser:
+            for table in USER_TABLES_LIST[1:]:
+                if isSysAdmin or table not in USER_ENTRY_TABLES:
+                    subEntries.append(self.tableEntry(table, prefix=&#34;all&#34;))
+            entries.append(self.makeCaption(G(CAPTIONS, N.user), subEntries, rule=True))
+
+        # office content
+
+        subEntries = []
+        if isSuperUser:
+            for table in OFFICE_TABLES:
+                subEntries.append(self.tableEntry(table, command=table == N.user))
+            entries.append(
+                self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
+            )
+
+        # system content
+
+        subEntries = []
+        if isSysAdmin:
+            for table in SYSTEM_TABLES:
+                subEntries.append(self.tableEntry(table))
+            entries.append(
+                self.makeCaption(G(CAPTIONS, N.system), subEntries, rule=True)
+            )
+
+        return H.join(entries)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="controllers.sidebar.Sidebar"><code class="flex name class">
+<span>class <span class="ident">Sidebar</span></span>
+<span>(</span><span>control, path)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Sidebar:
+    def __init__(self, control, path):
+        self.control = control
+        self.path = path
+        self.entries = []
+        self.mainEntries = []
+        self.Entries = []
+        self.userEntries = []
+        self.userPaths = []
+        self.userEntryEntries = []
+        self.userEntryPaths = []
+        self.valueEntries = []
+        self.valuePaths = []
+        self.options = {
+            option: G(request.args, option, default=ZERO) for option in OPTIONS.keys()
+        }
+
+    def makeCaption(self, label, entries, rule=False):
+        if not entries:
+            return E
+
+        refPath = self.path
+        paths = {path for (path, rep) in entries}
+        reps = [rep for (path, rep) in entries]
+        active = any(refPath.startswith(f&#34;&#34;&#34;/{p}/&#34;&#34;&#34;) for p in paths)
+        navClass = &#34; active&#34; if active else E
+        atts = dict(cls=f&#34;nav {navClass}&#34;)
+        if rule:
+            atts[N.addClass] = &#34; ruleabove&#34;
+
+        entriesRep = H.div(reps, cls=&#34;sidebarsec&#34;)
+        return H.details(label, entriesRep, label, **atts)
+
+    def makeOptions(self):
+        options = self.options
+
+        filterRep = [
+            H.input(E, type=N.text, id=&#34;cfilter&#34;, placeholder=&#34;match title&#34;),
+        ]
+        optionsRep = [
+            H.span(
+                [H.checkbox(name, trival=value), G(G(OPTIONS, name), N.label)],
+                cls=N.option,
+            )
+            for (name, value) in options.items()
+        ]
+
+        return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
+
+    def makeEntry(self, label, path, withOptions=False, command=False):
+        options = self.options
+        active = path == self.path
+
+        command = &#34;command info&#34; if command else &#34;button&#34;
+        navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+
+        optionsRep = (
+            AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
+            if withOptions
+            else E
+        )
+        if optionsRep:
+            optionSep = AMP if Q in path else Q
+            optionsRep = optionSep + optionsRep
+
+        atts = dict(cls=navClass,)
+        if withOptions:
+            atts[N.hrefbase] = path
+
+        return (
+            path,
+            H.a(label, path + optionsRep, **atts),
+        )
+
+    def tableEntry(
+        self,
+        table,
+        prefix=None,
+        item=None,
+        postfix=None,
+        action=None,
+        withOptions=False,
+        command=False,
+    ):
+        control = self.control
+
+        tableObj = mkTable(control, table)
+        item = tableObj.itemLabels[1] if item is None else item
+        actionRep = f&#34;?action={action}&#34; if action else E
+        prefixRep = f&#34;{prefix} &#34; if prefix else E
+        postfixRep = f&#34; {postfix}&#34; if postfix else E
+
+        return self.makeEntry(
+            f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
+            f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
+            withOptions=True,
+            command=command,
+        )
+
+    def wrap(self):
+        control = self.control
+        auth = control.auth
+        isAuth = auth.authenticated()
+        isOffice = auth.officeuser()
+        isSuperUser = auth.superuser()
+        isSysAdmin = auth.sysadmin()
+        isCoord = auth.coordinator()
+        country = auth.country()
+
+        entries = []
+
+        # home
+        entries.append(self.makeEntry(G(HOME, N.text), G(HOME, N.url))[1])
+
+        # options
+
+        entries.append(
+            self.makeCaption(G(CAPTIONS, N.options), self.makeOptions(), rule=True)
+        )
+
+        # DARIAH contributions
+
+        subEntries = []
+
+        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+
+        subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
+
+        if isAuth:
+
+            # my country
+
+            if country:
+                countryType = Country(control)
+
+                countryRep = countryType.titleStr(country)
+                iso = G(country, N.iso)
+                if iso:
+                    subEntries.append(
+                        self.tableEntry(
+                            N.contrib,
+                            action=N.our,
+                            prefix=f&#34;{countryRep}&#34;,
+                            withOptions=True,
+                        )
+                    )
+
+            # - my contributions and assessments
+
+            subEntries.extend(
+                [
+                    self.tableEntry(
+                        N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                    ),
+                    self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                    self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                ]
+            )
+
+        # - reviewed by me (all)
+
+        entries.append(self.makeCaption(G(CAPTIONS, N.contrib), subEntries))
+
+        # tasks
+
+        if not isAuth:
+            return H.join(entries)
+
+        subEntries = []
+
+        if isCoord:
+
+            # - select contributions
+
+            subEntries.append(
+                self.tableEntry(
+                    N.contrib,
+                    action=&#34;select&#34;,
+                    item=&#34;Contributions&#34;,
+                    postfix=&#34;to be selected&#34;,
+                    command=True,
+                )
+            )
+        # - my unfinished assessments
+
+        subEntries.append(
+            self.tableEntry(
+                N.contrib,
+                action=&#34;assess&#34;,
+                item=&#34;Contributions&#34;,
+                postfix=&#34;I am assessing&#34;,
+                command=True,
+            )
+        )
+
+        if isOffice:
+
+            # - assign reviewers
+
+            subEntries.append(
+                self.tableEntry(
+                    N.assessment,
+                    action=&#34;assign&#34;,
+                    item=&#34;Assessments&#34;,
+                    postfix=&#34;needing reviewers&#34;,
+                    command=True,
+                )
+            )
+
+        # - reviewed by me (unfinished)
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=&#34;review&#34;,
+                item=&#34;Assessments&#34;,
+                postfix=&#34;in review by me&#34;,
+                command=True,
+            )
+        )
+
+        entries.append(self.makeCaption(G(CAPTIONS, N.tasks), subEntries, rule=True))
+
+        # user content
+
+        subEntries = []
+        if isSuperUser:
+            for table in USER_TABLES_LIST[1:]:
+                if isSysAdmin or table not in USER_ENTRY_TABLES:
+                    subEntries.append(self.tableEntry(table, prefix=&#34;all&#34;))
+            entries.append(self.makeCaption(G(CAPTIONS, N.user), subEntries, rule=True))
+
+        # office content
+
+        subEntries = []
+        if isSuperUser:
+            for table in OFFICE_TABLES:
+                subEntries.append(self.tableEntry(table, command=table == N.user))
+            entries.append(
+                self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
+            )
+
+        # system content
+
+        subEntries = []
+        if isSysAdmin:
+            for table in SYSTEM_TABLES:
+                subEntries.append(self.tableEntry(table))
+            entries.append(
+                self.makeCaption(G(CAPTIONS, N.system), subEntries, rule=True)
+            )
+
+        return H.join(entries)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="controllers.sidebar.Sidebar.makeCaption"><code class="name flex">
+<span>def <span class="ident">makeCaption</span></span>(<span>self, label, entries, rule=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def makeCaption(self, label, entries, rule=False):
+    if not entries:
+        return E
+
+    refPath = self.path
+    paths = {path for (path, rep) in entries}
+    reps = [rep for (path, rep) in entries]
+    active = any(refPath.startswith(f&#34;&#34;&#34;/{p}/&#34;&#34;&#34;) for p in paths)
+    navClass = &#34; active&#34; if active else E
+    atts = dict(cls=f&#34;nav {navClass}&#34;)
+    if rule:
+        atts[N.addClass] = &#34; ruleabove&#34;
+
+    entriesRep = H.div(reps, cls=&#34;sidebarsec&#34;)
+    return H.details(label, entriesRep, label, **atts)</code></pre>
+</details>
+</dd>
+<dt id="controllers.sidebar.Sidebar.makeEntry"><code class="name flex">
+<span>def <span class="ident">makeEntry</span></span>(<span>self, label, path, withOptions=False, command=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def makeEntry(self, label, path, withOptions=False, command=False):
+    options = self.options
+    active = path == self.path
+
+    command = &#34;command info&#34; if command else &#34;button&#34;
+    navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+
+    optionsRep = (
+        AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
+        if withOptions
+        else E
+    )
+    if optionsRep:
+        optionSep = AMP if Q in path else Q
+        optionsRep = optionSep + optionsRep
+
+    atts = dict(cls=navClass,)
+    if withOptions:
+        atts[N.hrefbase] = path
+
+    return (
+        path,
+        H.a(label, path + optionsRep, **atts),
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.sidebar.Sidebar.makeOptions"><code class="name flex">
+<span>def <span class="ident">makeOptions</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def makeOptions(self):
+    options = self.options
+
+    filterRep = [
+        H.input(E, type=N.text, id=&#34;cfilter&#34;, placeholder=&#34;match title&#34;),
+    ]
+    optionsRep = [
+        H.span(
+            [H.checkbox(name, trival=value), G(G(OPTIONS, name), N.label)],
+            cls=N.option,
+        )
+        for (name, value) in options.items()
+    ]
+
+    return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]</code></pre>
+</details>
+</dd>
+<dt id="controllers.sidebar.Sidebar.tableEntry"><code class="name flex">
+<span>def <span class="ident">tableEntry</span></span>(<span>self, table, prefix=None, item=None, postfix=None, action=None, withOptions=False, command=False)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tableEntry(
+    self,
+    table,
+    prefix=None,
+    item=None,
+    postfix=None,
+    action=None,
+    withOptions=False,
+    command=False,
+):
+    control = self.control
+
+    tableObj = mkTable(control, table)
+    item = tableObj.itemLabels[1] if item is None else item
+    actionRep = f&#34;?action={action}&#34; if action else E
+    prefixRep = f&#34;{prefix} &#34; if prefix else E
+    postfixRep = f&#34; {postfix}&#34; if postfix else E
+
+    return self.makeEntry(
+        f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
+        f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
+        withOptions=True,
+        command=command,
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.sidebar.Sidebar.wrap"><code class="name flex">
+<span>def <span class="ident">wrap</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wrap(self):
+    control = self.control
+    auth = control.auth
+    isAuth = auth.authenticated()
+    isOffice = auth.officeuser()
+    isSuperUser = auth.superuser()
+    isSysAdmin = auth.sysadmin()
+    isCoord = auth.coordinator()
+    country = auth.country()
+
+    entries = []
+
+    # home
+    entries.append(self.makeEntry(G(HOME, N.text), G(HOME, N.url))[1])
+
+    # options
+
+    entries.append(
+        self.makeCaption(G(CAPTIONS, N.options), self.makeOptions(), rule=True)
+    )
+
+    # DARIAH contributions
+
+    subEntries = []
+
+    subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+
+    subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
+
+    if isAuth:
+
+        # my country
+
+        if country:
+            countryType = Country(control)
+
+            countryRep = countryType.titleStr(country)
+            iso = G(country, N.iso)
+            if iso:
+                subEntries.append(
+                    self.tableEntry(
+                        N.contrib,
+                        action=N.our,
+                        prefix=f&#34;{countryRep}&#34;,
+                        withOptions=True,
+                    )
+                )
+
+        # - my contributions and assessments
+
+        subEntries.extend(
+            [
+                self.tableEntry(
+                    N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                ),
+                self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+            ]
+        )
+
+    # - reviewed by me (all)
+
+    entries.append(self.makeCaption(G(CAPTIONS, N.contrib), subEntries))
+
+    # tasks
+
+    if not isAuth:
+        return H.join(entries)
+
+    subEntries = []
+
+    if isCoord:
+
+        # - select contributions
+
+        subEntries.append(
+            self.tableEntry(
+                N.contrib,
+                action=&#34;select&#34;,
+                item=&#34;Contributions&#34;,
+                postfix=&#34;to be selected&#34;,
+                command=True,
+            )
+        )
+    # - my unfinished assessments
+
+    subEntries.append(
+        self.tableEntry(
+            N.contrib,
+            action=&#34;assess&#34;,
+            item=&#34;Contributions&#34;,
+            postfix=&#34;I am assessing&#34;,
+            command=True,
+        )
+    )
+
+    if isOffice:
+
+        # - assign reviewers
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=&#34;assign&#34;,
+                item=&#34;Assessments&#34;,
+                postfix=&#34;needing reviewers&#34;,
+                command=True,
+            )
+        )
+
+    # - reviewed by me (unfinished)
+
+    subEntries.append(
+        self.tableEntry(
+            N.assessment,
+            action=&#34;review&#34;,
+            item=&#34;Assessments&#34;,
+            postfix=&#34;in review by me&#34;,
+            command=True,
+        )
+    )
+
+    entries.append(self.makeCaption(G(CAPTIONS, N.tasks), subEntries, rule=True))
+
+    # user content
+
+    subEntries = []
+    if isSuperUser:
+        for table in USER_TABLES_LIST[1:]:
+            if isSysAdmin or table not in USER_ENTRY_TABLES:
+                subEntries.append(self.tableEntry(table, prefix=&#34;all&#34;))
+        entries.append(self.makeCaption(G(CAPTIONS, N.user), subEntries, rule=True))
+
+    # office content
+
+    subEntries = []
+    if isSuperUser:
+        for table in OFFICE_TABLES:
+            subEntries.append(self.tableEntry(table, command=table == N.user))
+        entries.append(
+            self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
+        )
+
+    # system content
+
+    subEntries = []
+    if isSysAdmin:
+        for table in SYSTEM_TABLES:
+            subEntries.append(self.tableEntry(table))
+        entries.append(
+            self.makeCaption(G(CAPTIONS, N.system), subEntries, rule=True)
+        )
+
+    return H.join(entries)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="controllers" href="index.html">controllers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="controllers.sidebar.Sidebar" href="#controllers.sidebar.Sidebar">Sidebar</a></code></h4>
+<ul class="">
+<li><code><a title="controllers.sidebar.Sidebar.makeCaption" href="#controllers.sidebar.Sidebar.makeCaption">makeCaption</a></code></li>
+<li><code><a title="controllers.sidebar.Sidebar.makeEntry" href="#controllers.sidebar.Sidebar.makeEntry">makeEntry</a></code></li>
+<li><code><a title="controllers.sidebar.Sidebar.makeOptions" href="#controllers.sidebar.Sidebar.makeOptions">makeOptions</a></code></li>
+<li><code><a title="controllers.sidebar.Sidebar.tableEntry" href="#controllers.sidebar.Sidebar.tableEntry">tableEntry</a></code></li>
+<li><code><a title="controllers.sidebar.Sidebar.wrap" href="#controllers.sidebar.Sidebar.wrap">wrap</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

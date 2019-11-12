@@ -14,6 +14,8 @@ ACTUAL_TABLES = set(CT.actualTables)
 
 
 class Related(TypeBase):
+    """Base class for types with values in other tables."""
+
     needsControl = True
 
     def __init__(self, control):
@@ -34,6 +36,25 @@ class Related(TypeBase):
     def title(
         self, record=None, eid=None, markup=False, active=None,
     ):
+        """Generate a title for a rlated record.
+
+        Parameters
+        ----------
+        record: dict, optional `None`
+            The record for which to generate a title.
+        eid: ObjectId, optional `None`
+            If `record` is not passed, use this to retrieve the full record.
+        markup: boolean
+            If true, generate the title in HTML markup, otherwise as a plain string.
+        active: ObjectId, optional `None`
+            If passed, is is the id of the currently *active* record, the one
+            that the current user is interacting with.
+
+        Returns
+        -------
+        string(html)
+        """
+
         if record is None and eid is None:
             return (QQ, QQ) if markup else Qq
 
@@ -62,6 +83,15 @@ class Related(TypeBase):
             return titleStr
 
     def actualCls(self, record):
+        """Get a CSS class name for a record based on whether it is *actual*.
+
+        Actual records belong to the current `package`, a record that specifies
+        which contribution types, and criteria are currently part of the workflow.
+
+        Parameters
+        ----------
+        record: dict
+        """
         table = self.name
 
         isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)

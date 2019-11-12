@@ -26,19 +26,21 @@ class Numeric(TypeBase):
     rawType = None
 
     def normalize(self, strVal):
-        return Numeric._cleanNumber(strVal, self.rawType is int)
+
+        return Numeric.cleanNumber(strVal, self.rawType is int)
 
     @staticmethod
-    def _cleanNumber(strVal, asInt):
+    def cleanNumber(strVal, asInt):
         """Normalizes the string representation of a number, both decimal and integer.
 
-        asInt
-        --------
-        Specifies whether the number is integer or decimal.
+        Parameters
+        ----------
+        asInt: boolean
+            Specifies whether the number is integer or decimal.
 
         Returns
-        --------
-        A normalized and clean string representation of the same number.
+        -------
+        string
         """
 
         normalVal = str(strVal).strip()

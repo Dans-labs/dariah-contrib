@@ -144,3 +144,4 @@ nav:
     - API: 'Integration/API.md'
   - Maintenance:
     - Deploy: 'Maintenance/Deploy.md'
+    - Techdoc: 'api/html/controllers/index.html'

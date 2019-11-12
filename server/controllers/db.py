@@ -61,22 +61,24 @@ class Db:
 
     It will read all content of all value tables and keep it cached.
 
-    The data in the user tables will be cached will be cached by Control, a
-    higher level class.
+    The data in the user tables will be cached by the higher level
+    `controllers.control/Control`.
     """
 
     def __init__(self, mongo):
         """Pick up the connection to MongoDb.
 
-        mongo
-        --------
-        The connection to the database exists before the one object of DB
-        is initialized and will be passed as `mongo` to it.
+        Parameters
+        ----------
+        mongo: object
+            The connection to the database exists before the Db singleton
+            is initialized and will be passed as `mongo` to it.
 
-        There is a userId, fixed by configuration, that represents the system.
-        It is only used when user records are created: those records will said
-        to be created by the system.
-        The id is stored in the attribute `creatorId`.
+        !!! note
+            There is a userId, fixed by configuration, that represents the system.
+            It is only used when user records are created: those records will said
+            to be created by the system.
+            The id is stored in the attribute `creatorId`.
         """
 
         self.mongo = mongo
@@ -95,25 +97,19 @@ class Db:
         All commands fired at the NongoDb go through this wrapper.
         It will spit out debug information if DEBUG is True.
 
-        label
-        --------
-        A string that will be mentioned in debug messages.
-        Very convenient to put here the name of the method that calls mongoCmd.
-
-        table
-        --------
-        The table in MongoDB that is targeted by the command.
-        If the table does not exists, no command will be fired.
-
-        command
-        --------
-        The Mongo command to execute.
-        The command must be listed in the mongo.yaml config file.
-
-        *args
-        --------
-        Additional arguments will be passed straight to the Mongo command.
-
+        Parameters
+        ----------
+        label: string
+            A key to be mentioned in debug messages.
+            Very convenient to put here the name of the method that calls mongoCmd.
+        table: string
+            The table in MongoDB that is targeted by the command.
+            If the table does not exists, no command will be fired.
+        command: string
+            The Mongo command to execute.
+            The command must be listed in the mongo.yaml config file.
+        *args: iterable
+            Additional arguments will be passed straight to the Mongo command.
         """
         mongo = self.mongo
 
@@ -135,16 +131,16 @@ class Db:
         This will be done in the rare cases when a value table gets modified by
         an office user.
 
-        table=None
-        --------
-        A collect() without arguments collects *all* value tables.
-        By passing a table name, you can collect a single table.
+        Parameters
+        ----------
+        table: string, optional `None`
+            A collect() without arguments collects *all* value tables.
+            By passing a table name, you can collect a single table.
 
-        NB:
-        --------
-        This is a complicated app.
-        Some tables have records that specify whether other records are "actual".
-        After collecting a value table, the "actual" items will be recomputed.
+        !!! warning
+            This is a complicated app.
+            Some tables have records that specify whether other records are "actual".
+            After collecting a value table, the "actual" items will be recomputed.
         """
         if table is not None and table not in VALUE_TABLES:
             return
@@ -182,10 +178,13 @@ class Db:
         A package record is actual if the current data is between its start
         and end days.
 
-        table=None
-        --------
-        If a single value table needs to be collected, and that table is not
-        involved in the concept of "actual", nothing has to be done.
+        Parameters
+        ----------
+        table: string, optional `None`
+
+        !!! caution
+            If a single value table needs to be collected, and that table is not
+            involved in the concept of "actual", nothing will be done.
         """
         if table is not None and table not in ACTUAL_TABLES:
             return
@@ -240,11 +239,13 @@ class Db:
         information from the workflow table, and to flatten the nested documents
         to simple key-value pair.
 
-        countryId
-        --------
-        If none, all workflow items will be fetched. Otherwise, this should be
-        the id of a countryId, and only the workflow
-        for items belonging to this country are fetched.
+        Parameters
+        ----------
+        countryId: ObjectId
+            If `None`, all workflow items will be fetched.
+            Otherwise, this should be
+            the id of a countryId, and only the workflow
+            for items belonging to this country are fetched.
         """
         crit = {} if countryId is None else {"country": countryId}
         project = {
@@ -275,30 +276,33 @@ class Db:
         )
         return records
 
-    def _makeCrit(self, mainTable, conditions):
+    def makeCrit(self, mainTable, conditions):
         """Translate conditons into a MongoDb criterion.
 
         The conditions come from the options on the interface:
         whether to constrain to items that have assessments and or reviews.
 
-        mainTable
-        --------
-        The name of the table that is being filtered.
+        Parameters
+        ----------
+        mainTable: string
+            The name of the table that is being filtered.
+        conditions: dict
+            keyed by a table name (such as assessment or review)
+            and valued by -1, 0 or 1 (as strings).
 
-        conditions
-        --------
-        a dictionary keyed by a table name (such as assessment or review)
-        and valued by -1, 0 or 1 (as strings).
+        !!! hint
+            `{'assessment': '1'}` means: only those things that have an assessment.
 
-        Example: {'assessment': '1'} means: only those things that have an assessment.
-        '-1': means: not having an assessment.
-        '0': means: don't care.
+            `'-1'`: means: not having an assessment.
+
+            `'0'`: means: don't care.
 
         Result
-        --------
-        A dictionary, keyed by the same table name and valued by a set of mongo ids
-        of items that satisfy the criterion.
-        Only for the criteria that do care!
+        ------
+        dict
+            keyed by the same table name as `conditions` and valued by a set of
+            mongo ids of items that satisfy the criterion.
+            Only for the criteria that do care!
 
         The result can be fed into an other Mongo query.
         It can also be used to filter a list of record that has already been fetched.
@@ -351,78 +355,66 @@ class Db:
         Some constraints need to fetch more from Mongo than will be returned:
         post-filtering may be needed.
 
-        table
-        --------
-        The table from which the record are fetched.
+        Parameters
+        ----------
+        table: string
+            The table from which the record are fetched.
+        titleSort: function
+            The sort key by which the resulting list of records will be sorted.
+            It must be a function that takes a record and returns a key, for example
+            the title string of that record.
+        my: ObjectId, optional `None`
+            **Task: produce a list of "my" records.**
+            If passed, it should be the id of a user (typically the one that is logged in).
+            Only records that are created/edited by this user will pass through.
+        our: ObjectId, optional `None`
+            **Task: produce a list of "our" records (coming from my country).**
+            If passed, it should be the id of a user (typically the one that is logged in).
+            Only records that have a country field containing this country id pass
+            through.
+        unfinished: boolean, optional `False`
+            **Task: produce a list of "my" assessments that are unfinished.**
+        assign: boolean, optional `False`
+            **Task: produce a list of assessments that need reviewers.**
+            Only meaningful if the table is `assessment`.
+            If `True`, only records that are submitted and who lack at least one
+            reviewer pass through.
+        reviewer: ObjectId, optional `None`
+            **Task: produce a list of assessments that "I" am reviewing.**
+            Only meaningful if the table is `assessment`.
+            If passed, it should be the id of a user (typically the one that is logged in).
+            Only records pass that have this user in either their `reviewerE` or in their
+            `reviewerF` field.
+        selectable: ObjectId, optional `None`
+            **Task: produce a list of contribs that the current user can select**
+            as a DARIAH contribution.
+            Only meaningful if the table is `contribution`.
+            Pick those contribs whose `selected` field is not yet filled in.
+            The value of `selectable` should be an id of a country.
+            Typically, this is the country of the currently logged in user,
+            and typically, that user is a National Coordinator.
+        select: boolean, optional `False`
+            **Task: trigger addtional filtering by custom `conditions`.**
+        **conditions: dict
+            **Task: produce a list of records filtered by custom conditions.**
+            If `select`, carry out filtering on the retrieved records, where **conditions
+            specify the filtering (through _makeCrit() and satisfies()).
 
-        titleSort
-        --------
-        The sortkey by which the resulting list of records will be sorted.
-        It must be a function that takes a record and returns a key, for example
-        the title string of that record.
+        !!! note
+            All records have a field `editors` which contains the ids of users
+            that are allowed to edit it besides the creator.
 
-        my=None
-        --------
-        Task: produce a list of "my" records.
+        !!! note
+            Assessment records have fields `reviewerE` and `reviewerF` that
+            point to the expert reviewer and the final reviewer.
 
-        If passed, it should be the id of a user (typically the one that is logged in).
-        Only records that are created/edited by this user will pass through.
-        NB: all records have a field `editors` which contains the ids of users
-        that are allowed to edit it besides the creator.
+        !!! caution
+            This capacity is currently not used.
 
-        our=None
-        --------
-        Task: produce a list of "our" records (coming from my country).
-
-        If passed, it should be the id of a user (typically the one that is logged in).
-        Only records that have a counntry field containing this country id pass
-        through.
-
-        unfinished=False
-        --------
-        Task: produce a list of "my" assessments that are unfinished.
-
-        assign=False
-        --------
-        Task: produce a list of assessments that need reviewers.
-
-        Only meaningful if the table is `assessment`.
-        If true, only records that are submitted and who lack at least one
-        reviewer pass through.
-        NB: assessment records have fields `reviewerE` and `reviewerF` that
-        point to the expert reviewer and the final reviewer.
-
-        reviewer=None
-        --------
-        Task: produce a list of assessments that "I" am reviewing.
-
-        Only meaningful if the table is `assessment`.
-        If passed, it should be the id of a user (typically the one that is logged in).
-        Only records pass that have this user in either their `reviewerE` or in their
-        `reviewerF` field.
-
-        selectable=None
-        --------
-        Task: produce a list of contribs that "I" can select as a DARIAH contribution.
-
-        Only meaningful if the table is `contribution`.
-        Pick those contribs whose `selected` field is not yet filled in.
-        The value of `selectable` should be an id of a country.
-        Typically, this is the country of the currently logged in user,
-        andd typically, that user is a National Coordinator.
-
-        select=False, **conditions
-        --------
-        Task: produce a list of records filtered by additional conditions.
-
-        If true, carry out filtering on the retrieved records, where **conditions
-        specify the filtering (through _makeCrit() and satisfies()).
-
-        NB: this capacity is currently not used.
-
-        Result:
-        --------
-        A sorted list.
+        Returns
+        -------
+        list
+            The result is a sorted list of records.
         """
         crit = {}
         if my:
@@ -454,24 +446,23 @@ class Db:
         else:
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
-            criterion = self._makeCrit(table, conditions)
-            records = (record for record in records if satisfies(record, criterion))
+            criterion = self.makeCrit(table, conditions)
+            records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
         """Fetch a single record from a table.
 
-        table
-        --------
-        The table from which the record is fetched.
+        Parameters
+        ----------
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
 
-        eid
-        --------
-        (Entity) ID of the particular record.
-
-        Result:
-        --------
-        The record as a dict.
+        Returns
+        -------
+        dict
         """
         if not eid:
             return {}
@@ -488,13 +479,15 @@ class Db:
     def getWorkflowItem(self, contribId):
         """Fetch a single workflow record.
 
-        contribId
-        --------
-        The id of the workflow item to be fetched.
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item to be fetched.
 
-        Result:
-        --------
-        The record wrapped in a WorkflowItem object (see workflow/apply.py).
+        Returns
+        -------
+        dict
+            The record wrapped in a `controllers.workflow.apply.WorkflowItem` object.
         """
 
         if contribId is None:
@@ -507,21 +500,16 @@ class Db:
     def getDetails(self, table, masterField, eids, sortKey=None):
         """Fetch the detail records connected to one or more master records.
 
-        table
-        --------
-        The table from which to fetch the detail records.
-
-        masterField
-        --------
-        The field in the detail records that points to the master record.
-
-        eids
-        --------
-        The ids of the master records. Either a single id, or an iterable of ids.
-
-        sortKey=None
-        --------
-        A function to sort the resulting records.
+        Parameters
+        ----------
+        table: string
+            The table from which to fetch the detail records.
+        masterField: string
+            The field in the detail records that points to the master record.
+        eids: ObjectId | iterable of ObjectId
+            The id(s) of the master record(s).
+        sortKey: function, optional `None`
+            A function to sort the resulting records.
         """
         if table in VALUE_TABLES:
             crit = eids if isIterable(eids) else [eids]
@@ -542,34 +530,32 @@ class Db:
         It will apply some standard and custom constraints.
 
         The standard constraints are: if the valueTable is
-        * country: only the DARIAH member countries will be delivered
-        * user: only the non-legacy users will be returned.
 
-        valueTable
-        --------
-        The table from which fetch the records.
+        *   `country`: only the DARIAH member countries will be delivered
+        *   `user`: only the non-legacy users will be returned.
 
-        constrain=None
-        --------
-        A custom constraint. If present, it should be a tuple (fieldName, value).
-        Only records with that value in that field will be delivered.
+        Parameters
+        ----------
+        valueTable: string
+            The table from which fetch the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
 
-        Explanation
-        --------
-        See the tables config has a key, `constrained`, which is generated by
-        config.py from the field specs of the value tables.
-        This collects the cases where the valid choices for a value are not all
-        available values in the table, but only those that are linked to a certain
-        master record.
+        !!! note
+            See the tables.yaml configuration has a key, `constrained`,
+            which is generated by `config.py` from the field specs of the value tables.
+            This collects the cases where the valid choices for a value are not all
+            available values in the table, but only those that are linked to a certain
+            master record.
 
-        Example:
-        --------
-        If you want to pick a score for an assessment criterion, only those scores
-        that are linked to that criterion record are eligible.
+        !!! hint
+            If you want to pick a score for an assessment criterion, only those scores
+            that are linked to that criterion record are eligible.
 
-        Result:
-        --------
-        A list of records.
+        Returns
+        -------
+        list
         """
 
         records = getattr(self, valueTable, {}).values()
@@ -592,32 +578,26 @@ class Db:
         The provenance fields are the creation date, the creator,
         and the start of the trail of modifiers.
 
-        table
-        --------
-        The table in which the record will be inserted.
+        Parameters
+        ----------
+        table: string
+            The table in which the record will be inserted.
+        uid: ObjectId
+            The user that creates the record, typically the logged in user.
+        onlyIfNew: boolean
+            If `True`, it will be checked whether a record with the specified fields
+            already exists. If so, no record will be inserted.
+        eppn: string
+            The eppn of that same user. This is the unique identifier that comes from
+            the DARIAH authentication service.
+        **fields: dict
+            The field names and their contents to populate the new record with.
 
-        uid
-        --------
-        The id of the user that creates the record, typically the logged in user.
-
-        onlyIfNew
-        --------
-        If true, it will be checked whether a record with the specified fields
-        already exists. If so, no record will be inserted.
-
-        eppn
-        --------
-        The eppn of that same user. This is the unique identifier that comes from
-        the DARIAH authentication service.
-
-        **fields
-        --------
-        The field names and their contents to populate the new record with.
-
-        Result:
-        --------
-        The id of the newly inserted record, or the id of the first existing
-        record found, if `onlyIfNew` is true.
+        Returns
+        -------
+        ObjectId
+            The id of the newly inserted record, or the id of the first existing
+            record found, if `onlyIfNew` is true.
         """
 
         if onlyIfNew:
@@ -646,23 +626,17 @@ class Db:
 
         Typically used for inserting criteriaEntry en reviewEntry records.
 
-        table
-        --------
-        The table in which the record will be inserted.
-
-        uid
-        --------
-        The id of the user that creates the record, typically the logged in user.
-
-        eppn
-        --------
-        The eppn of that same user. This is the unique identifier that comes from
-        the DARIAH authentication service.
-
-        records
-        --------
-        The records (as dicts) to insert.
-
+        Parameters
+        ----------
+        table: string
+            The table in which the record will be inserted.
+        uid: ObjectId
+            The user that creates the record, typically the logged in user.
+        eppn: string
+            The `eppn` of that same user. This is the unique identifier that comes from
+            the DARIAH authentication service.
+        records: iterable of dict
+            The records (as dicts) to insert.
         """
 
         justNow = now()
@@ -683,9 +657,10 @@ class Db:
         NB: the creator of this record is the system, by name of the
         `creatorId` attribute.
 
-        record
-        --------
-        The user information to be stored, as a dictionary.
+        Parameters
+        ----------
+        record: dict
+            The user information to be stored, as a dictionary.
         """
 
         creatorId = self.creatorId
@@ -708,13 +683,12 @@ class Db:
     def deleteItem(self, table, eid):
         """Delete a record.
 
-        table
-        --------
-        The table which holds the record to be deleted.
-
-        eid
-        --------
-        (Entity) id of the record to be deleted.
+        Parameters
+        ----------
+        table: string
+            The table which holds the record to be deleted.
+        eid: ObjectId
+            (Entity) id of the record to be deleted.
         """
 
         self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
@@ -726,14 +700,13 @@ class Db:
 
         Typically used to delete all detail records of another record.
 
-        table
-        --------
-        The table which holds the records to be deleted.
-
-        crit
-        --------
-        A criterion that specfifies which records must be deleted.
-        Given as a dict.
+        Parameters
+        ----------
+        table: string
+            The table which holds the records to be deleted.
+        crit: dict
+            A criterion that specfifies which records must be deleted.
+            Given as a dict.
         """
 
         self.mongoCmd(N.deleteMany, table, N.delete_many, crit)
@@ -743,41 +716,33 @@ class Db:
     ):
         """Update a single field in a single record.
 
-        table
-        --------
-        The table which holds the record to be updated.
+        Parameters
+        ----------
+        table: string
+            The table which holds the record to be updated.
+        eid: ObjectId
+            (Entity) id of the record to be updated.
+        data: mixed
+            The new value of for the updated field.
+        actor: ObjectId
+            The user that has triggered the update action.
+        modified: list of string
+            The current provenance trail of the record, which is a list of
+            strings of the form "person on date".
+            Here "person" is not an ID but a consolidated string representing
+            the name of that person.
+            The provenance trail will be trimmed in order to prevent excessively long
+            trails. On each day, only the last action by each person will be recorded.
+        nowFields: iterable of string, optional `[]`
+            The names of additional fields in which the current datetime will be stored.
+            For exampe, if `submitted` is modified, the current datetime will be saved in
+            `dateSubmitted`.
 
-        eid
-        --------
-        (Entity) id of the record to be updated.
-
-        data
-        --------
-        The new value of for the updated field.
-
-        actor
-        --------
-        The user that has triggered the update action.
-
-        modified
-        --------
-        The current provenance trail of the record, which is a list of
-        strings of the form "person on date".
-        Here "person" is not an ID but a consolidated string representing
-        the name of that person.
-        The provenance trail will be trimmed in order to prevent excessively long
-        trails. On each day, only the last action by each person will be recorded.
-
-        nowFields=[]
-        --------
-        The names of additional fields in which the current datetime will be stored.
-        For exampe, if `submitted` is modified, the current datetime will be saved in
-        `dateSubmitted`.
-
-        NB: whenever a field is updated in a record which has the field `isPristine`,
-        this field will be deleted from the record.
-        The rule is that pristine records are the ones that originate from the
-        legacy data and have not changed since then.
+        !!! hint
+            Whenever a field is updated in a record which has the field `isPristine`,
+            this field will be deleted from the record.
+            The rule is that pristine records are the ones that originate from the
+            legacy data and have not changed since then.
         """
 
         justNow = now()
@@ -809,9 +774,10 @@ class Db:
         When users log in, or when they are assigned an other status,
         some of their attributes will change.
 
-        record
-        --------
-        The new user information as a dict.
+        Parameters
+        ----------
+        record: dict
+            The new user information as a dict.
         """
 
         if N.isPristine in record:
@@ -823,7 +789,7 @@ class Db:
         self.collect(table=N.user)
 
     def dependencies(self, table, record):
-        """Computes the number of depenedent records of a record.
+        """Computes the number of dependent records of a record.
 
         A record is dependent on another record if one of the fields of the
         dependent record contains an id of that other record.
@@ -832,18 +798,17 @@ class Db:
         Also, records that specify a choice in a value table, are dependent on
         the chosen value record.
 
-        table
-        --------
-        The table in which the record resides of which we want to know the
-        dependencies.
+        Parameters
+        ----------
+        table: string
+            The table in which the record resides of which we want to know the
+            dependencies.
+        record: dict
+            The record, given as dict, of which we want to know the dependencies.
 
-        record
-        --------
-        The record, given as dict, of which we want to know the dependencies.
-
-        Result:
-        --------
-        The number of all dependent records in all tables.
+        Returns
+        -------
+        int
         """
 
         eid = G(record, N._id)
@@ -896,27 +861,25 @@ class Db:
     def entries(self, table, crit={}):
         """Get relevant records from a table as a dictionary of entries.
 
-        table
-        --------
-        Table from which the entries are taken.
+        Parameters
+        ----------
+        table: string
+            Table from which the entries are taken.
+        crit: dict, optional `{}`
+            Criteria to select which records should be used.
 
-        crit={}
-        --------
-        Criteria to select which records should be used.
+        Returns
+        -------
+        dict
+            Keyed by the ids of the selected records. The records themselves
+            are the values.
 
-        Result:
-        --------
-        A dictionary keyed by the ids of the selected records. The records themselves
-        are the values.
+        !!! hint
+            This function is used to collect the records that carry user
+            content in order to compute workflow information.
 
-        Example:
-        --------
-        This function is used to collect the records that carry user content in order
-        to compute workflow information.
-
-        Its more targeted use is to fetch the records that are relevant to a single
-        contribution from the assessment and review tables.
-        review
+            Its more targeted use is to fetch assessment and review records
+            that are relevant to a single contribution.
         """
 
         entries = {}
@@ -928,9 +891,10 @@ class Db:
     def insertWorkflowMany(self, records):
         """Bulk insert records into the workflow table.
 
-        records
-        --------
-        The records to be inserted, as an iterable of dicts.
+        Parameters
+        ----------
+        records: iterable of dict
+            The records to be inserted.
         """
 
         self.mongoCmd(N.insertWorkflowMany, N.workflow, N.insert_many, records)
@@ -938,9 +902,10 @@ class Db:
     def insertWorkflow(self, record):
         """Insert a single workflow record.
 
-        record
-        --------
-        The record to be inserted, as a dict.
+        Parameters
+        ----------
+        record: dict
+            The record to be inserted, as a dict.
         """
 
         self.mongoCmd(N.insertWorkflow, N.workflow, N.insert_one, record)
@@ -948,16 +913,16 @@ class Db:
     def updateWorkflow(self, contribId, record):
         """Replace a workflow record by an other one.
 
-        contribId
-        --------
-        The id of the workflow record that has to be replaced with new information.
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow record that has to be replaced with new information.
+        record: dict
+            The new record which acts as replacement.
 
-        record
-        --------
-        The new record which acts as replacement.
-
-        NB: Workflow records have an id that is identical to the id of the contribution
-        they are about.
+        !!! note
+            Workflow records have an id that is identical to the id of the contribution
+            they are about.
         """
 
         crit = {N._id: contribId}
@@ -966,53 +931,58 @@ class Db:
     def deleteWorkflow(self, contribId):
         """Delete a workflow record.
 
-        contribId
-        --------
-        The id of the workflow item to be deleted.
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item to be deleted.
         """
 
         crit = {N._id: contribId}
         self.mongoCmd(N.deleteWorkflow, N.workflow, N.delete_one, crit)
 
+    @staticmethod
+    def satisfies(record, criterion):
+        """Test whether a record satifies a criterion.
 
-def satisfies(record, criterion):
-    """Test whether a record satifies a criterion.
+        Parameters
+        ----------
+        record: dict
+            A dict of fields.
+        criterion: dict
+            A dict keyed by a boolean and valued by sets of ids.
+            The ids under `True` are the ones that must contain the id of the
+            record in question.
+            The ids under `False` are the onse that may not contain the id of
+            that record.
 
-    record
-    --------
-    A dict of fields.
+        !!! caution
+            The program does not currently use it in cases that happen.
 
-    criterion
-    --------
-    A dict keyed by a boolean and valued by sets of ids.
-    The ids under True are the ones that must contain the id of the record in question.
-    The ids under False are the onse that may not contain the id of that record.
+        Returns
+        -------
+        boolean
+        """
 
-    NB: the program does not currently use it in cases that happen.
+        eid = G(record, N._id)
+        for (crit, eids) in criterion.items():
+            if crit and eid not in eids or not crit and eid in eids:
+                return False
+        return True
 
-    returns
-    --------
-    True if the conditions are satisfied, False otherwise.
-    """
+    @staticmethod
+    def inCrit(items):
+        """Compiles a list of items into a Monngo DB `$in` criterion.
 
-    eid = G(record, N._id)
-    for (crit, eids) in criterion.items():
-        if crit and eid not in eids or not crit and eid in eids:
-            return False
-    return True
+        Parameters
+        ----------
+        items: iterable of mixed
+            Typically ObjectIds.
 
+        Returns
+        -------
+        dict
+            A MongoDB criterion that tests whether the thing in question is one
+            of the items given.
+        """
 
-def inCrit(items):
-    """Compiles a list of items into a Monngo DB `$in` criterion.
-
-    items
-    --------
-    A list of things, typically ids.
-
-    Result:
-    --------
-    A MongoDB criterion that tests whether the thing in question is one of the items
-    given.
-    """
-
-    return {M_IN: list(items)}
+        return {M_IN: list(items)}

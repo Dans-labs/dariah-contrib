@@ -148,33 +148,33 @@ def creators(record, creatorField, editorsField):
 
 
 def filterModified(modified):
-    logicM = _decomposeM(modified)
-    chunks = _perDay(logicM)
-    thinned = _thinM(chunks)
-    return _composeM(thinned)
+    logicM = decomposeM(modified)
+    chunks = perDay(logicM)
+    thinned = thinM(chunks)
+    return composeM(thinned)
 
 
-def _decomposeM(modified):
+def decomposeM(modified):
     splits = [m.rsplit(ON, 1) for m in modified]
     return [(m[0], dtm(m[1].replace(BLANK, T))[1]) for m in splits]
 
 
-def _trimM(mdt, trim):
+def trimM(mdt, trim):
     return str(mdt).split(BLANK)[0] if trim == 1 else str(mdt).split(DOT)[0]
 
 
-def _composeM(modified):
-    return [f"""{m[0]}{ON}{_trimM(m[1], trim)}""" for (m, trim) in reversed(modified)]
+def composeM(modified):
+    return [f"""{m[0]}{ON}{trimM(m[1], trim)}""" for (m, trim) in reversed(modified)]
 
 
-def _perDay(modified):
+def perDay(modified):
     chunks = {}
     for m in modified:
         chunks.setdefault(dt.date(m[1]), []).append(m)
     return [chunks[date] for date in sorted(chunks)]
 
 
-def _thinM(chunks):
+def thinM(chunks):
     modified = []
     nChunks = len(chunks)
     for (i, chunk) in enumerate(chunks):

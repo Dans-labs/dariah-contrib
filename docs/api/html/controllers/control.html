@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>controllers.control API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>controllers.control</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from config import Config as C, Names as N
+from controllers.datatypes.types import Types
+from controllers.utils import serverprint
+from controllers.workflow.apply import WorkflowItem
+
+
+CB = C.base
+CT = C.tables
+
+DEBUG = CB.debug
+
+VALUE_TABLES = set(CT.valueTables)
+
+
+class Control:
+    &#34;&#34;&#34;Combines low-level classes and adds caching.
+
+    Several classes deal with database data,  and they
+    might be needed all over the place, so we combine them in a
+    Control singleton for easy passing around.
+
+    The Control singleton is at the right place to realize some database caching.
+    A few Db methods have a corresponding method here, which first checks a cache
+    before actually calling the lower level Db method.
+
+    A few notes on the lifetimes of those objects and the cache.
+
+    Class | lifetime | what is cached
+    --- | --- | ---
+    `controllers.db.Db` | application process | all data in all value tables
+    `controllers.workflow.compute.Workflow` | application process | workflow table
+    `controllers.auth.Auth` | per request | holds current user data
+    `controllers.datatypes.types.Types` | per request | NN/A
+    cache | per request | user tables as far as needed for the request
+
+    !!! note &#34;Why needed?&#34;
+        During a request, several records may be shown, with their details.
+        They have to be fetched in order to get the permissions.
+        Details may require the permissions of the parents. Many records may share
+        the same workflow information.
+        Caching prevents an explosion of record fetches.
+
+        However, we should not cache between requests, because the records that benefit
+        most from caching are exactly the ones that can be changed by users.
+
+    !!! note &#34;Individual items&#34;
+        The cache stores individual record and workflow items (by table and id)
+        straight after fetching them from mongo, via Db.
+
+    !!! note &#34;versus Db caching&#34;
+        The records in value tables are already cached in Db itself.
+        Such records will not go in this cache.
+        If such a record changes, Db will reread the whole table.
+        But this happens very rarely.
+    &#34;&#34;&#34;
+
+    def __init__(self, db, wf, auth):
+        &#34;&#34;&#34;Creates a control singleton and initializes its cache.
+
+        This class has some methods that wrap a lower level Db data access method,
+        to which it adds caching.
+
+        Parameters
+        ----------
+        db: object
+            The `controllers.db.Db` singleton is stored as an attribute of Control.
+        wf: object
+            The `controllers.workflow.compute.Workflow` singleton is stored as an
+            attribute of Control.
+        auth: object
+            The `cotrollers.auth.Auth` singleton is stored as an attribute of Control.
+        &#34;&#34;&#34;
+
+        self.db = db
+        self.wf = wf
+        self.auth = auth
+        self.types = Types(self)
+        self.cache = {}
+
+    def getItem(self, table, eid, requireFresh=False):
+        &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
+
+        Parameters
+        ----------
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+
+        Returns
+        -------
+        dict
+            The record as a dict.
+        &#34;&#34;&#34;
+
+        if not eid:
+            return {}
+
+        db = self.db
+
+        if table in VALUE_TABLES:
+            return db.getItem(table, eid)
+
+        return self.getCached(
+            db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
+        )
+
+    def getWorkflowItem(self, contribId, requireFresh=False):
+        &#34;&#34;&#34;Fetch a single workflow record from the database, possibly from cache.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item to be fetched.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+
+        Returns
+        -------
+        dict
+            the record wrapped in a
+            `controllers.workflow.apply.WorkflowItem` singleton
+        &#34;&#34;&#34;
+
+        if not contribId:
+            return None
+
+        db = self.db
+
+        info = self.getCached(
+            db.getWorkflowItem,
+            N.getWorkflowItem,
+            [contribId],
+            N.workflow,
+            contribId,
+            requireFresh,
+        )
+        return WorkflowItem(self, info)
+
+    def deleteItem(self, table, eid):
+        &#34;&#34;&#34;Delete a record and also remove it from the cache.
+
+        Parameters
+        ----------
+        table: string
+            The table which holds the record to be deleted.
+        eid: ObjectId
+            (Entity) id of the record to be deleted.
+        &#34;&#34;&#34;
+
+        db = self.db
+        cache = self.cache
+
+        db.deleteItem(table, eid)
+        if table not in VALUE_TABLES:
+            key = eid if type(eid) is str else str(eid)
+            if table in cache:
+                cachedTable = cache[table]
+                if key in cachedTable:
+                    del cachedTable[key]
+
+    def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
+        &#34;&#34;&#34;Helper to wrap caching around a raw Db fetch method.
+
+        Only for methods that fetch single records.
+
+        Parameters
+        ----------
+        method: function
+            The raw `controllers.db.Db` method.
+        methodName: string
+            The name of the raw Db method. Only used to display if DEBUG is True.
+        methodNameArgs: iterable
+            The arguments to pass to the Db method.
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+        &#34;&#34;&#34;
+        cache = self.cache
+
+        key = eid if type(eid) is str else str(eid)
+
+        if not requireFresh:
+            if table in cache:
+                if key in cache[table]:
+                    if DEBUG:
+                        serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
+                    return cache[table][key]
+
+        result = method(*methodArgs)
+        cache.setdefault(table, {})[key] = result
+        return result</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="controllers.control.Control"><code class="flex name class">
+<span>class <span class="ident">Control</span></span>
+<span>(</span><span>db, wf, auth)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Combines low-level classes and adds caching.</p>
+<p>Several classes deal with database data,
+and they
+might be needed all over the place, so we combine them in a
+Control singleton for easy passing around.</p>
+<p>The Control singleton is at the right place to realize some database caching.
+A few Db methods have a corresponding method here, which first checks a cache
+before actually calling the lower level Db method.</p>
+<p>A few notes on the lifetimes of those objects and the cache.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>lifetime</th>
+<th>what is cached</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a title="controllers.db.Db" href="db.html#controllers.db.Db"><code>Db</code></a></td>
+<td>application process</td>
+<td>all data in all value tables</td>
+</tr>
+<tr>
+<td><a title="controllers.workflow.compute.Workflow" href="workflow/compute.html#controllers.workflow.compute.Workflow"><code>Workflow</code></a></td>
+<td>application process</td>
+<td>workflow table</td>
+</tr>
+<tr>
+<td><a title="controllers.auth.Auth" href="auth.html#controllers.auth.Auth"><code>Auth</code></a></td>
+<td>per request</td>
+<td>holds current user data</td>
+</tr>
+<tr>
+<td><a title="controllers.datatypes.types.Types" href="datatypes/types.html#controllers.datatypes.types.Types"><code>Types</code></a></td>
+<td>per request</td>
+<td>NN/A</td>
+</tr>
+<tr>
+<td>cache</td>
+<td>per request</td>
+<td>user tables as far as needed for the request</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Why needed?</p>
+<p>During a request, several records may be shown, with their details.
+They have to be fetched in order to get the permissions.
+Details may require the permissions of the parents. Many records may share
+the same workflow information.
+Caching prevents an explosion of record fetches.</p>
+<p>However, we should not cache between requests, because the records that benefit
+most from caching are exactly the ones that can be changed by users.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Individual items</p>
+<p>The cache stores individual record and workflow items (by table and id)
+straight after fetching them from mongo, via Db.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">versus Db caching</p>
+<p>The records in value tables are already cached in Db itself.
+Such records will not go in this cache.
+If such a record changes, Db will reread the whole table.
+But this happens very rarely.</p>
+</div>
+<p>Creates a control singleton and initializes its cache.</p>
+<p>This class has some methods that wrap a lower level Db data access method,
+to which it adds caching.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
+<dd>The <a title="controllers.db.Db" href="db.html#controllers.db.Db"><code>Db</code></a> singleton is stored as an attribute of Control.</dd>
+<dt><strong><code>wf</code></strong> :&ensp;<code>object</code></dt>
+<dd>The <a title="controllers.workflow.compute.Workflow" href="workflow/compute.html#controllers.workflow.compute.Workflow"><code>Workflow</code></a> singleton is stored as an
+attribute of Control.</dd>
+<dt><strong><code>auth</code></strong> :&ensp;<code>object</code></dt>
+<dd>The <code>cotrollers.auth.Auth</code> singleton is stored as an attribute of Control.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Control:
+    &#34;&#34;&#34;Combines low-level classes and adds caching.
+
+    Several classes deal with database data,  and they
+    might be needed all over the place, so we combine them in a
+    Control singleton for easy passing around.
+
+    The Control singleton is at the right place to realize some database caching.
+    A few Db methods have a corresponding method here, which first checks a cache
+    before actually calling the lower level Db method.
+
+    A few notes on the lifetimes of those objects and the cache.
+
+    Class | lifetime | what is cached
+    --- | --- | ---
+    `controllers.db.Db` | application process | all data in all value tables
+    `controllers.workflow.compute.Workflow` | application process | workflow table
+    `controllers.auth.Auth` | per request | holds current user data
+    `controllers.datatypes.types.Types` | per request | NN/A
+    cache | per request | user tables as far as needed for the request
+
+    !!! note &#34;Why needed?&#34;
+        During a request, several records may be shown, with their details.
+        They have to be fetched in order to get the permissions.
+        Details may require the permissions of the parents. Many records may share
+        the same workflow information.
+        Caching prevents an explosion of record fetches.
+
+        However, we should not cache between requests, because the records that benefit
+        most from caching are exactly the ones that can be changed by users.
+
+    !!! note &#34;Individual items&#34;
+        The cache stores individual record and workflow items (by table and id)
+        straight after fetching them from mongo, via Db.
+
+    !!! note &#34;versus Db caching&#34;
+        The records in value tables are already cached in Db itself.
+        Such records will not go in this cache.
+        If such a record changes, Db will reread the whole table.
+        But this happens very rarely.
+    &#34;&#34;&#34;
+
+    def __init__(self, db, wf, auth):
+        &#34;&#34;&#34;Creates a control singleton and initializes its cache.
+
+        This class has some methods that wrap a lower level Db data access method,
+        to which it adds caching.
+
+        Parameters
+        ----------
+        db: object
+            The `controllers.db.Db` singleton is stored as an attribute of Control.
+        wf: object
+            The `controllers.workflow.compute.Workflow` singleton is stored as an
+            attribute of Control.
+        auth: object
+            The `cotrollers.auth.Auth` singleton is stored as an attribute of Control.
+        &#34;&#34;&#34;
+
+        self.db = db
+        self.wf = wf
+        self.auth = auth
+        self.types = Types(self)
+        self.cache = {}
+
+    def getItem(self, table, eid, requireFresh=False):
+        &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
+
+        Parameters
+        ----------
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+
+        Returns
+        -------
+        dict
+            The record as a dict.
+        &#34;&#34;&#34;
+
+        if not eid:
+            return {}
+
+        db = self.db
+
+        if table in VALUE_TABLES:
+            return db.getItem(table, eid)
+
+        return self.getCached(
+            db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
+        )
+
+    def getWorkflowItem(self, contribId, requireFresh=False):
+        &#34;&#34;&#34;Fetch a single workflow record from the database, possibly from cache.
+
+        Parameters
+        ----------
+        contribId: ObjectId
+            The id of the workflow item to be fetched.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+
+        Returns
+        -------
+        dict
+            the record wrapped in a
+            `controllers.workflow.apply.WorkflowItem` singleton
+        &#34;&#34;&#34;
+
+        if not contribId:
+            return None
+
+        db = self.db
+
+        info = self.getCached(
+            db.getWorkflowItem,
+            N.getWorkflowItem,
+            [contribId],
+            N.workflow,
+            contribId,
+            requireFresh,
+        )
+        return WorkflowItem(self, info)
+
+    def deleteItem(self, table, eid):
+        &#34;&#34;&#34;Delete a record and also remove it from the cache.
+
+        Parameters
+        ----------
+        table: string
+            The table which holds the record to be deleted.
+        eid: ObjectId
+            (Entity) id of the record to be deleted.
+        &#34;&#34;&#34;
+
+        db = self.db
+        cache = self.cache
+
+        db.deleteItem(table, eid)
+        if table not in VALUE_TABLES:
+            key = eid if type(eid) is str else str(eid)
+            if table in cache:
+                cachedTable = cache[table]
+                if key in cachedTable:
+                    del cachedTable[key]
+
+    def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
+        &#34;&#34;&#34;Helper to wrap caching around a raw Db fetch method.
+
+        Only for methods that fetch single records.
+
+        Parameters
+        ----------
+        method: function
+            The raw `controllers.db.Db` method.
+        methodName: string
+            The name of the raw Db method. Only used to display if DEBUG is True.
+        methodNameArgs: iterable
+            The arguments to pass to the Db method.
+        table: string
+            The table from which the record is fetched.
+        eid: ObjectId
+            (Entity) ID of the particular record.
+        requireFresh: boolean, optional `False`
+            If True, bypass the cache and fetch the item straight from Db and put the
+            fetched value in the cache.
+        &#34;&#34;&#34;
+        cache = self.cache
+
+        key = eid if type(eid) is str else str(eid)
+
+        if not requireFresh:
+            if table in cache:
+                if key in cache[table]:
+                    if DEBUG:
+                        serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
+                    return cache[table][key]
+
+        result = method(*methodArgs)
+        cache.setdefault(table, {})[key] = result
+        return result</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="controllers.control.Control.deleteItem"><code class="name flex">
+<span>def <span class="ident">deleteItem</span></span>(<span>self, table, eid)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Delete a record and also remove it from the cache.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table which holds the record to be deleted.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>(Entity) id of the record to be deleted.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deleteItem(self, table, eid):
+    &#34;&#34;&#34;Delete a record and also remove it from the cache.
+
+    Parameters
+    ----------
+    table: string
+        The table which holds the record to be deleted.
+    eid: ObjectId
+        (Entity) id of the record to be deleted.
+    &#34;&#34;&#34;
+
+    db = self.db
+    cache = self.cache
+
+    db.deleteItem(table, eid)
+    if table not in VALUE_TABLES:
+        key = eid if type(eid) is str else str(eid)
+        if table in cache:
+            cachedTable = cache[table]
+            if key in cachedTable:
+                del cachedTable[key]</code></pre>
+</details>
+</dd>
+<dt id="controllers.control.Control.getCached"><code class="name flex">
+<span>def <span class="ident">getCached</span></span>(<span>self, method, methodName, methodArgs, table, eid, requireFresh)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Helper to wrap caching around a raw Db fetch method.</p>
+<p>Only for methods that fetch single records.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>method</code></strong> :&ensp;<code>function</code></dt>
+<dd>The raw <a title="controllers.db.Db" href="db.html#controllers.db.Db"><code>Db</code></a> method.</dd>
+<dt><strong><code>methodName</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of the raw Db method. Only used to display if DEBUG is True.</dd>
+<dt><strong><code>methodNameArgs</code></strong> :&ensp;<code>iterable</code></dt>
+<dd>The arguments to pass to the Db method.</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table from which the record is fetched.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>(Entity) ID of the particular record.</dd>
+<dt><strong><code>requireFresh</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>If True, bypass the cache and fetch the item straight from Db and put the
+fetched value in the cache.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
+    &#34;&#34;&#34;Helper to wrap caching around a raw Db fetch method.
+
+    Only for methods that fetch single records.
+
+    Parameters
+    ----------
+    method: function
+        The raw `controllers.db.Db` method.
+    methodName: string
+        The name of the raw Db method. Only used to display if DEBUG is True.
+    methodNameArgs: iterable
+        The arguments to pass to the Db method.
+    table: string
+        The table from which the record is fetched.
+    eid: ObjectId
+        (Entity) ID of the particular record.
+    requireFresh: boolean, optional `False`
+        If True, bypass the cache and fetch the item straight from Db and put the
+        fetched value in the cache.
+    &#34;&#34;&#34;
+    cache = self.cache
+
+    key = eid if type(eid) is str else str(eid)
+
+    if not requireFresh:
+        if table in cache:
+            if key in cache[table]:
+                if DEBUG:
+                    serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
+                return cache[table][key]
+
+    result = method(*methodArgs)
+    cache.setdefault(table, {})[key] = result
+    return result</code></pre>
+</details>
+</dd>
+<dt id="controllers.control.Control.getItem"><code class="name flex">
+<span>def <span class="ident">getItem</span></span>(<span>self, table, eid, requireFresh=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Fetch an item from the database, possibly from cache.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table from which the record is fetched.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>(Entity) ID of the particular record.</dd>
+<dt><strong><code>requireFresh</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>If True, bypass the cache and fetch the item straight from Db and put the
+fetched value in the cache.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The record as a dict.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getItem(self, table, eid, requireFresh=False):
+    &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
+
+    Parameters
+    ----------
+    table: string
+        The table from which the record is fetched.
+    eid: ObjectId
+        (Entity) ID of the particular record.
+    requireFresh: boolean, optional `False`
+        If True, bypass the cache and fetch the item straight from Db and put the
+        fetched value in the cache.
+
+    Returns
+    -------
+    dict
+        The record as a dict.
+    &#34;&#34;&#34;
+
+    if not eid:
+        return {}
+
+    db = self.db
+
+    if table in VALUE_TABLES:
+        return db.getItem(table, eid)
+
+    return self.getCached(
+        db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
+    )</code></pre>
+</details>
+</dd>
+<dt id="controllers.control.Control.getWorkflowItem"><code class="name flex">
+<span>def <span class="ident">getWorkflowItem</span></span>(<span>self, contribId, requireFresh=False)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Fetch a single workflow record from the database, possibly from cache.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The id of the workflow item to be fetched.</dd>
+<dt><strong><code>requireFresh</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>If True, bypass the cache and fetch the item straight from Db and put the
+fetched value in the cache.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>the record wrapped in a
+<code>controllers.workflow.apply.WorkflowItem</code> singleton</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getWorkflowItem(self, contribId, requireFresh=False):
+    &#34;&#34;&#34;Fetch a single workflow record from the database, possibly from cache.
+
+    Parameters
+    ----------
+    contribId: ObjectId
+        The id of the workflow item to be fetched.
+    requireFresh: boolean, optional `False`
+        If True, bypass the cache and fetch the item straight from Db and put the
+        fetched value in the cache.
+
+    Returns
+    -------
+    dict
+        the record wrapped in a
+        `controllers.workflow.apply.WorkflowItem` singleton
+    &#34;&#34;&#34;
+
+    if not contribId:
+        return None
+
+    db = self.db
+
+    info = self.getCached(
+        db.getWorkflowItem,
+        N.getWorkflowItem,
+        [contribId],
+        N.workflow,
+        contribId,
+        requireFresh,
+    )
+    return WorkflowItem(self, info)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="controllers" href="index.html">controllers</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="controllers.control.Control" href="#controllers.control.Control">Control</a></code></h4>
+<ul class="">
+<li><code><a title="controllers.control.Control.deleteItem" href="#controllers.control.Control.deleteItem">deleteItem</a></code></li>
+<li><code><a title="controllers.control.Control.getCached" href="#controllers.control.Control.getCached">getCached</a></code></li>
+<li><code><a title="controllers.control.Control.getItem" href="#controllers.control.Control.getItem">getItem</a></code></li>
+<li><code><a title="controllers.control.Control.getWorkflowItem" href="#controllers.control.Control.getWorkflowItem">getWorkflowItem</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

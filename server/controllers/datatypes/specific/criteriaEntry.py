@@ -10,10 +10,14 @@ Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
 class CriteriaEntry(Master):
+    """Type class for criteria entries."""
+
     def __init__(self, control):
         super().__init__(control)
 
     def titleStr(self, record):
+        """The title is a sequence number plus the short criterion text."""
+
         control = self.control
         types = control.types
 

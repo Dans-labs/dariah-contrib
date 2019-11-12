@@ -53,35 +53,42 @@ class Types:
 
     There are kinds of data types:
 
-    - scalar types:
-        int, money, datetime, bool (see the tables.yaml configuration file)
-    - master types:
-        values are ids of master records (e.g. criteria, assessment)
-    - value types
-        values are ids in value tables (see tables.yaml)
+    *   scalar types, such as
+        `controllers.datatypes.numeric.Int`,
+        `controllers.datatypes.datetime.Datetime`, ...
+    *   master types:
+        values are ids of master records (e.g. criteria, assessment),
+        see `controllers.datatypes.master.Master`
+    *   value types
+        values are ids in value tables,
+        see `controllers.datatypes.master.Value`
+
+    (see the tables.yaml configuration file).
 
     For each type a class is defined and for each type class a singleton
-    object is created and registered as attribute in Types.
+    is created and registered as attribute in Types.
 
     By means of these type objects, all operations on data types can be performed
     throughout the application.
     """
 
     def __init__(self, control):
-        """Creates type objects for all data types.
+        """Creates type singletons for all data types.
 
-        Some types define operations that need access to Db, or Auth.
-        The objects for these types will be passed the Control object,
+        Some types define operations that need access to
+        `controllers.db.Db`, or `controllers.auth.Auth`.
+        The objects for these types will be passed the type singletons that need it,
         so that they can in turn pass that to their methods.
 
-        The created type objects will be stored under an attribute with named
+        The type singletons will be stored under an attribute named
         after the type, but starting with a lowercase letter.
 
-        control
-        --------
-        The Control object of the application. See control.py.
+        Parameters
+        ----------
+        control: object
+            The `controllers.control.Control` singleton of the application.
 
-        It holds the Db and Auth objects.
+        It holds the `controllers.db.Db`, or `controllers.auth.Auth` singletons.
         """
 
         self.control = control
@@ -101,18 +108,16 @@ class Types:
             self.make(tp, TypeClass)
 
     def make(self, tp, TypeClass):
-        """Create a type object and register it.
+        """Create a type singleton and register it.
 
-        An object of the given TypeClass is created with the right attributes.
-        That object will be registered as an attribute in the Types class.
+        An singleton of the given TypeClass is created with the right attributes.
+        That singleton will be registered as an attribute in the Types class.
 
-        tp
-        --------
-        The name under which the type object will be registered.
-
-        TypeClass
-        --------
-        The type class.
+        Parameters
+        ----------
+        tp: string
+            The name under which the type singleton will be registered.
+        TypeClass: class
         """
 
         control = self.control
@@ -125,17 +130,16 @@ class Types:
         self.register(typeObj, tp)
 
     def register(self, typeObj, tp):
-        """Register a type object.
+        """Register a type singleton.
 
-        The type object itself will also receive its name in a `name` attribute.
+        The type singleton itself will also receive its name in a `name` attribute.
 
-        typeObj
-        --------
-        The type object.
-
-        tp
-        --------
-        The name under which the type object must be registered.
+        Parameters
+        ----------
+        typeObj: object
+            The type singleton.
+        tp: string
+            The name under which the type singleton must be registered.
         """
 
         setattr(typeObj, N.name, tp)

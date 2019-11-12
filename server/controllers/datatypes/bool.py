@@ -60,6 +60,7 @@ class Bool(TypeBase):
 
 
 class Bool2(Bool):
+    """Type class for two-valued booleans: True and False"""
     def fromStr(self, editVal):
         return (
             False
@@ -69,6 +70,7 @@ class Bool2(Bool):
 
 
 class Bool3(Bool):
+    """Type class for three-valued booleans: True and False and None"""
     def fromStr(self, editVal):
         return (
             None
