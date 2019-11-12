@@ -20,7 +20,7 @@ to _mundane_.
 ??? abstract "Tech doc"
     The technical documentation of the Python code is largely in so-called
     *docstrings* within the code. But you can see them nicely formatted
-    [here ...](Maintenance/Techdoc/)
+    [here ...]({{docSite}}/api/html/controllers/)
 
 ??? abstract "Lessons learned"
     It has taken a lot of time to develop this app. Lots more
