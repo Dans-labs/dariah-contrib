@@ -94,7 +94,7 @@ extra:
   html: https://developer.mozilla.org/en-US/docs/Web/HTML
   ide: https://en.wikipedia.org/wiki/Integrated_development_environment 
   iso8601: https://en.wikipedia.org/wiki/ISO_8601
-  javascript: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference
+  javascript: https://developer.mozilla.org/en-US/docs/Web/JavaScript
   jquery: https://api.jquery.com
   markdownDoc: https://guides.github.com/features/mastering-markdown/
   mkdocs: https://github.com/mkdocs/mkdocs
@@ -102,13 +102,12 @@ extra:
   mkdocsdans: https://dans-labs.github.io/mkdocs-dans
   mongodb: https://docs.mongodb.com
   prettier: https://prettier.io
+  pdoc3: https://pdoc3.github.io/pdoc/
   python: https://www.python.org
   pythondl: https://www.python.org/downloads
   pythondocs: https://docs.python.org/3/
   sha: https://www.softwareheritage.org
   shebanq: https://github.com/etcbc/shebanq
-  socket: https://socket.io
-  socketPython: http://python-socketio.readthedocs.io/en/latest/
   spa: https://en.wikipedia.org/wiki/Single-page_application
   sublimeText: https://www.sublimetext.com
   vim: http://www.vim.org

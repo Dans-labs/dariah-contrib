@@ -5,8 +5,8 @@
 | what                          | where        |
 | ----------------------------- | ------------ |
 | source code GitHub repository | {{repo}}     |
-| tech doc GitHub Pages         | {{docSite}}  |
-| tech doc source               | {{repBase}}/docs |
+| docs at GitHub Pages          | {{docSite}}  |
+| doc source                    | {{repBase}}/docs |
 | app live                      | {{liveBase}} |
 
 ## Python
@@ -106,6 +106,8 @@ development web server.
 mapping between routes (URL patterns) and functions (request => response transformers).
 The app source code for the server resides in [serve.py]({{repBase}}/server/serve.py) and
 other `.py` files in [controllers]({{repBase}}/server/control) imported by it.
+See also the 
+[API docs of the controllers](../{{docstrings}}).
 
     The module
     [index.py]({{repe}}/server/server/index.py)
@@ -149,21 +151,8 @@ repo clone:
 
     which starts a small web server that listens to localhost on port 8001.
 
-    In this case a production build of the app is served locally.
-
-    For real development, it is better to work with a development server for the
-    client as well that can hot-load modified css and javascript.
-
+    In this case the app is served locally.
     Whenever you save a modified python source file, the server reloads itself.
-
-    In order to follow that scenario, you should start the server as
-
-    ```sh
-    ./build.sh servehot
-    ```
-
-    ??? caution
-        This does not yet start the client site development server!
 
 ## User authentication
 
@@ -173,21 +162,17 @@ We make use of the DARIAH infrastructure for _user authentication_ [AAI]({{daria
 
 ## Documentation
 
-The app itself gives access to documentation:
-
-| what   | where        |
-| ------ | ------------ |
-| live   | {{docSite}}  |
-| source | {{repBase}}/docs |
-
-not only for end users, but also for developers and app-designers.
-
 The docs are generated as static GitHub pages by [mkdocs]({{mkdocs}}) with a
 [DANS theme]({{mkdocsdans}}) which has been customized from
 [mkdocs-material]({{mkdocsmaterial}}).
 
 To get the DANS theme, follow the instructions in
 [mkdocs-dans]({{mkdocsdans}}/#quick-start) .
+
+The API docs are generated from docstrings in the Python source code
+by means of 
+[pdoc3]({{pdoc3}})
+which can be pip-installed.
 
 ## File structure
 

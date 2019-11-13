@@ -12,13 +12,14 @@ To see how all the controllers are specified, consult the
 ## Client
 
 We use
-[ECMAScript 6, also known as ES6, also known as ES2015, also known as JavaScript]({{babel}}/learn-es2015/)
+[ES6, also known as JavaScript]({{javascript}})
 for the client side of the app.
 
-The Javascript in this app is quite lean, only a few functions to add interaction
+The Javascript written for this app is quite lean, only a few functions to add interaction
 to edit widgets and open/collapse buttons. And a few data fetchers from the server.
 
-All code is hand-written, except for the JQuery library.
+All code is hand-written, except for the
+[JQuery]({{jquery}}) library.
 
 We do not employ any form of transpiling, bundling, uglifying.
 The code you see is run in the browser as is.

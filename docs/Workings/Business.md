@@ -338,32 +338,3 @@ public and authenticated users.
 
     One way of mitigation is already in the app: whenever a user leaves a field
     (s)he has been editing, it will be saved to the database.
-
-    However, in those cases the whole record will be saved, which may lead to
-    more data loss than is strictly necessary.
-
-    ??? example "A data loss scenario"
-        A user opens a browser tab to edit a contribution record, with the
-        aim to add a keyword. The contribution has no description yet.
-
-        Before assigning the label, the same user opens the same contribution in another
-        tab and starts writing a lengthy description, and saves it.
-
-        Then (s)he returns to the first tab and assigns a keyword.
-        Upon saving, the whole record will be saved, including the description,
-        which is still empty. This will overwrite the description saved
-        in the second tab, a moment before.
-
-    ??? example "Push notifications"
-        An other problem is that important actions such as submission or selection
-        maybe triggered from one tab, without other tabs being aware of that.
-
-        In such cases, it would be desirable to send push notifications to all browsers
-        that have that record open so that the user can refresh the page.
-
-        I know it can be done (
-        [socket]({{socket}})
-        ,
-        [python-socket]({{socketPython}})
-        ) but it requires a bit of research to
-        find the best way to do it.

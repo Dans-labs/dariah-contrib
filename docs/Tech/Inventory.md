@@ -6,10 +6,6 @@ with an ✗.
 
 ## References
 
-???+ abstract "Generic"
-    *   [bash]({{bash}}) shell scripting
-    *   [cloc]({{cloc}}) counting lines of code
-    *   [iso8601]({{iso8601}}) date and time format
 
 ???+ abstract "Web design"
     *   [webApi]({{webApi}}) interacting with the loaded document in a browser
@@ -25,6 +21,29 @@ with an ✗.
         *   [markdown]({{markdownDoc}}) rich text from plain text
         *   [yaml]({{yaml}}) configuration language, as simple as markdown.
 
+???+ abstract "Client side"
+    ???+ abstract "language"
+        *   [javascript]({{javascript}}) scripting language for the web
+        *   [eslint]({{eslint}}) checks ES6 code against style requirements
+        *   [prettier]({{prettier}}) code formatter for javascript
+
+???+ abstract "Server side"
+    *   [python]({{python}}) data-oriented scripting language
+    *   [flask]({{flask}}) micro web framework
+    *   [wsgi]({{wsgi}}) bridge between the python language and webservers
+
+???+ abstract "Database"
+    *   [mongodb]({{mongodb}}) NO-SQL database, JSON/Javascript based
+
+???+ abstract "Generic"
+    *   [bash]({{bash}}) shell scripting
+    *   [iso8601]({{iso8601}}) date and time format
+
+???+ abstract "Documentation"
+    *   [mkdocs]({{mkdocs}}) Static page generator in Python
+    *   [pdoc3]({{pdoc3}}) API-doc generator from Python docstrings
+    *   [cloc]({{cloc}}) counting lines of code
+
 ???+ abstract "Editing"
     *   [✗ IDE]({{ide}}) Integrated Developer's Environment
     *   [✗ Atom]({{atom}}) IDE by GitHub
@@ -37,24 +56,4 @@ with an ✗.
     ???+ abstract "Linters and formatters
         *   [flake8]({{flake8}}) code linter for Python
         *   [black]({{black}}) code formatter for Python
-
-???+ abstract "Client side"
-    ???+ abstract "language"
-        *   [javascript]({{javascript}}) scripting language for the web
-        *   [eslint]({{eslint}}) checks ES6 code against style requirements
-        *   [prettier]({{prettier}}) code formatter for javascript
-
-???+ abstract "Server side"
-    *   [python]({{python}}) data-oriented scripting language
-    *   [flask]({{flask}}) micro web framework
-    *   [wsgi]({{wsgi}}) bridge between the python language and webservers
-    *   [✗ socket]({{socket}}) push messages from server to all connected clients
-        *   [✗ python-socket]({{socketPython}}) python wrapper for *socket.io*
-
-???+ abstract "Database"
-    *   [mongodb]({{mongodb}}) NO-SQL database, JSON/Javascript based
-
-???+ abstract "Other"
-    *   [✗ shebanq]({{shebanq}}) web interface for Hebrew text and linguistic
-        annotations
 
