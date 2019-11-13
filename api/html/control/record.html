@@ -286,6 +286,7 @@ class Record:
 
     def command(self, command):
         &#34;&#34;&#34;Perform a workflow command.
+
         See `control.workflow.apply.WorkflowItem.doCommand`.
         &#34;&#34;&#34;
 
@@ -300,6 +301,30 @@ class Record:
         return f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
 
     def field(self, fieldName, **kwargs):
+        &#34;&#34;&#34;Factory function to wrap a field object around the data of a field.
+
+        !!! note
+            Workflow information will be checked whether this record is fixated.
+            If so, the new field object will be initialized with parameters
+            to make it uneditable.
+
+        !!! note
+            It will also be checked whether the field is a workflow field.
+            Such fields are not shown and edited in the normal way,
+            hence they will be set to unreadable and uneditable.
+            The manipulation of such fields is under control of workflow.
+            See `control.workflow.apply.WorkflowItem.isCommand`.
+
+        Parameters
+        ----------
+        fieldName: string
+
+        Returns
+        -------
+        object
+            A `control.field.Field` object.
+        &#34;&#34;&#34;
+
         table = self.table
         wfitem = self.wfitem
 
@@ -313,6 +338,16 @@ class Record:
         return Field(self, fieldName, **kwargs)
 
     def delete(self):
+        &#34;&#34;&#34;Delete a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        If deletion happens, workflow information will be adapted afterwards.
+        See `Record.adjustWorkflow`.
+        &#34;&#34;&#34;
+
         mayDelete = self.mayDelete
         if not mayDelete:
             return
@@ -340,6 +375,18 @@ class Record:
             self.adjustWorkflow(update=False)
 
     def deleteDetails(self):
+        &#34;&#34;&#34;Delete the details of a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        Returns
+        -------
+        bool
+            Whether there are still dependencies after deleting the details.
+        &#34;&#34;&#34;
+
         context = self.context
         db = context.db
         table = self.table
@@ -352,6 +399,25 @@ class Record:
         return nRef == 0
 
     def body(self, myMasters=None, hideMasters=False):
+        &#34;&#34;&#34;Wrap the body of the record in HTML.
+
+        This is the part without the provenance information and without
+        the detail records.
+
+        This method can be overridden by `body` methods in derived classes.
+
+        Parameters
+        ----------
+        myMasters: iterable of string, optional `None`
+            A declaration of which fields must be treated as master fields.
+        hideMaster: boolean, optional `False`
+            If `True`, all master fields as declared in `myMasters` will be left out.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         fieldSpecs = self.fields
         provSpecs = self.prov
 
@@ -368,8 +434,80 @@ class Record:
         expanded=1,
         withProv=True,
         hideMasters=False,
-        addCls=E,
+        extraCls=E,
     ):
+        &#34;&#34;&#34;Wrap the record into HTML.
+
+        A record can be displayed in several states:
+
+        expanded | effect
+        --- | ---
+        `-1` | only a title with a control to get the full details
+        `False` | full details, no control to collapse/expand
+        `1` | full details, with a control to collapse to the title
+
+        !!! note
+            When a record in state `1` or `-1` is sent to the client,
+            only the material that is displayed is sent. When the user clicks on the
+            expand/collapse control, the other part is fetched from the server
+            *at that very moment*.
+            So collapsing/expanding can be used to refresh the view on a record
+            if things have happened.
+
+        !!! caution
+            The triggering of the fetch actions for expanded/collapsed material
+            is done by the Javascript in `index.js`.
+            A single function does it all, and it is sensitive to the exact attributes
+            of the summary and the detail.
+            If you tamper with this code, you might end up with an infinite loop of
+            expanding and collapsing.
+
+        !!! hint
+            Pay extra attension to the attribute `fat`!
+            When it is present, it is an indication that the expanded material
+            is already on the client, and that it does not have to be fetched.
+
+        !!! note
+            There are several ways to customise the effect of `wrap` for specific
+            tables. Start with writing a derived class for that table with
+            `Record` as base class.
+
+            *   write an alternative for `Record.body`,
+                e.g. `control.cust.review_record.ReviewR.bodyCompact`, and
+                initialize the `Record` with `(bodyMethod=&#39;compact&#39;)`.
+                Just specify the part of the name after `body` as string starting
+                with a lower case.
+            *   override `Record.body`. This app does not do this currently.
+            *   use a custom `wrap` function, by defining it in your derived class,
+                e.g. `control.cust.score_record.ScoreR.wrapHelp`.
+                Use it by calling `Record.wrap(wrapMethod=scoreObj.wrapHelp)`.
+
+        Parameters
+        ----------
+        inner: boolean, optional `True`
+            Whether to add the CSS class `inner` to the outer `&lt;div&gt;` of the result.
+        wrapMethod: function, optional `None`
+            The method to compose the result out of all its components.
+            Typically defined in a derived class.
+            If passed, this function will be called to deliver the result.
+            Otherwise, `wrap` does the composition itself.
+        expanded: {-1, 0, 1}
+            Whether to expand the record.
+            See the table above.
+        withProv: boolean, optional `True`
+            Include a display of the provenance fields.
+        hideMasters: boolean, optional `False`
+            Whether to hide the master fields.
+            If they are not hidden, they will be presented as hyperlinks to the
+            master record.
+        extraCls: string, optional `&#39;&#39;`
+            An extra class to add to the outer `&lt;div&gt;`.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         table = self.table
         eid = self.eid
         record = self.record
@@ -442,7 +580,7 @@ class Record:
                 ),
                 *provenance,
             ],
-            cls=f&#34;record{innerCls} {addCls} {warningCls}&#34;,
+            cls=f&#34;record{innerCls} {extraCls} {warningCls}&#34;,
         )
 
         rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E
@@ -465,6 +603,16 @@ class Record:
         )
 
     def deleteButton(self):
+        &#34;&#34;&#34;Show the delete button and/or the number of dependencies.
+
+        Check the permissions in order to not show a delete button if the user
+        cannot delete the record.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         mayDelete = self.mayDelete
 
         if not mayDelete:
@@ -531,6 +679,7 @@ class Record:
         )
 
     def title(self):
+        &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
         record = self.record
         valid = self.valid
 
@@ -540,6 +689,21 @@ class Record:
 
     @staticmethod
     def titleRaw(obj, record, cls=E):
+        &#34;&#34;&#34;Generate a title for a different record.
+
+        This is fast title generation.
+        No record object will be created.
+
+        The title will be based on the fields in the record,
+        and its formatting is assisted by the appropriate
+        type class in `control.typ.types`.
+
+        !!! hint
+            If the record is  not &#34;actual&#34;, its title will get a warning
+            background color.
+            See `control.db.Db.collect`.
+        &#34;&#34;&#34;
+
         table = obj.table
         context = obj.context
 
@@ -814,6 +978,7 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
 
     def command(self, command):
         &#34;&#34;&#34;Perform a workflow command.
+
         See `control.workflow.apply.WorkflowItem.doCommand`.
         &#34;&#34;&#34;
 
@@ -828,6 +993,30 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         return f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
 
     def field(self, fieldName, **kwargs):
+        &#34;&#34;&#34;Factory function to wrap a field object around the data of a field.
+
+        !!! note
+            Workflow information will be checked whether this record is fixated.
+            If so, the new field object will be initialized with parameters
+            to make it uneditable.
+
+        !!! note
+            It will also be checked whether the field is a workflow field.
+            Such fields are not shown and edited in the normal way,
+            hence they will be set to unreadable and uneditable.
+            The manipulation of such fields is under control of workflow.
+            See `control.workflow.apply.WorkflowItem.isCommand`.
+
+        Parameters
+        ----------
+        fieldName: string
+
+        Returns
+        -------
+        object
+            A `control.field.Field` object.
+        &#34;&#34;&#34;
+
         table = self.table
         wfitem = self.wfitem
 
@@ -841,6 +1030,16 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         return Field(self, fieldName, **kwargs)
 
     def delete(self):
+        &#34;&#34;&#34;Delete a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        If deletion happens, workflow information will be adapted afterwards.
+        See `Record.adjustWorkflow`.
+        &#34;&#34;&#34;
+
         mayDelete = self.mayDelete
         if not mayDelete:
             return
@@ -868,6 +1067,18 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
             self.adjustWorkflow(update=False)
 
     def deleteDetails(self):
+        &#34;&#34;&#34;Delete the details of a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        Returns
+        -------
+        bool
+            Whether there are still dependencies after deleting the details.
+        &#34;&#34;&#34;
+
         context = self.context
         db = context.db
         table = self.table
@@ -880,6 +1091,25 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         return nRef == 0
 
     def body(self, myMasters=None, hideMasters=False):
+        &#34;&#34;&#34;Wrap the body of the record in HTML.
+
+        This is the part without the provenance information and without
+        the detail records.
+
+        This method can be overridden by `body` methods in derived classes.
+
+        Parameters
+        ----------
+        myMasters: iterable of string, optional `None`
+            A declaration of which fields must be treated as master fields.
+        hideMaster: boolean, optional `False`
+            If `True`, all master fields as declared in `myMasters` will be left out.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         fieldSpecs = self.fields
         provSpecs = self.prov
 
@@ -896,8 +1126,80 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         expanded=1,
         withProv=True,
         hideMasters=False,
-        addCls=E,
+        extraCls=E,
     ):
+        &#34;&#34;&#34;Wrap the record into HTML.
+
+        A record can be displayed in several states:
+
+        expanded | effect
+        --- | ---
+        `-1` | only a title with a control to get the full details
+        `False` | full details, no control to collapse/expand
+        `1` | full details, with a control to collapse to the title
+
+        !!! note
+            When a record in state `1` or `-1` is sent to the client,
+            only the material that is displayed is sent. When the user clicks on the
+            expand/collapse control, the other part is fetched from the server
+            *at that very moment*.
+            So collapsing/expanding can be used to refresh the view on a record
+            if things have happened.
+
+        !!! caution
+            The triggering of the fetch actions for expanded/collapsed material
+            is done by the Javascript in `index.js`.
+            A single function does it all, and it is sensitive to the exact attributes
+            of the summary and the detail.
+            If you tamper with this code, you might end up with an infinite loop of
+            expanding and collapsing.
+
+        !!! hint
+            Pay extra attension to the attribute `fat`!
+            When it is present, it is an indication that the expanded material
+            is already on the client, and that it does not have to be fetched.
+
+        !!! note
+            There are several ways to customise the effect of `wrap` for specific
+            tables. Start with writing a derived class for that table with
+            `Record` as base class.
+
+            *   write an alternative for `Record.body`,
+                e.g. `control.cust.review_record.ReviewR.bodyCompact`, and
+                initialize the `Record` with `(bodyMethod=&#39;compact&#39;)`.
+                Just specify the part of the name after `body` as string starting
+                with a lower case.
+            *   override `Record.body`. This app does not do this currently.
+            *   use a custom `wrap` function, by defining it in your derived class,
+                e.g. `control.cust.score_record.ScoreR.wrapHelp`.
+                Use it by calling `Record.wrap(wrapMethod=scoreObj.wrapHelp)`.
+
+        Parameters
+        ----------
+        inner: boolean, optional `True`
+            Whether to add the CSS class `inner` to the outer `&lt;div&gt;` of the result.
+        wrapMethod: function, optional `None`
+            The method to compose the result out of all its components.
+            Typically defined in a derived class.
+            If passed, this function will be called to deliver the result.
+            Otherwise, `wrap` does the composition itself.
+        expanded: {-1, 0, 1}
+            Whether to expand the record.
+            See the table above.
+        withProv: boolean, optional `True`
+            Include a display of the provenance fields.
+        hideMasters: boolean, optional `False`
+            Whether to hide the master fields.
+            If they are not hidden, they will be presented as hyperlinks to the
+            master record.
+        extraCls: string, optional `&#39;&#39;`
+            An extra class to add to the outer `&lt;div&gt;`.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         table = self.table
         eid = self.eid
         record = self.record
@@ -970,7 +1272,7 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
                 ),
                 *provenance,
             ],
-            cls=f&#34;record{innerCls} {addCls} {warningCls}&#34;,
+            cls=f&#34;record{innerCls} {extraCls} {warningCls}&#34;,
         )
 
         rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E
@@ -993,6 +1295,16 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         )
 
     def deleteButton(self):
+        &#34;&#34;&#34;Show the delete button and/or the number of dependencies.
+
+        Check the permissions in order to not show a delete button if the user
+        cannot delete the record.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
         mayDelete = self.mayDelete
 
         if not mayDelete:
@@ -1059,6 +1371,7 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         )
 
     def title(self):
+        &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
         record = self.record
         valid = self.valid
 
@@ -1068,6 +1381,21 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
 
     @staticmethod
     def titleRaw(obj, record, cls=E):
+        &#34;&#34;&#34;Generate a title for a different record.
+
+        This is fast title generation.
+        No record object will be created.
+
+        The title will be based on the fields in the record,
+        and its formatting is assisted by the appropriate
+        type class in `control.typ.types`.
+
+        !!! hint
+            If the record is  not &#34;actual&#34;, its title will get a warning
+            background color.
+            See `control.db.Db.collect`.
+        &#34;&#34;&#34;
+
         table = obj.table
         context = obj.context
 
@@ -1104,13 +1432,40 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">titleRaw</span></span>(<span>obj, record, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Generate a title for a different record.</p>
+<p>This is fast title generation.
+No record object will be created.</p>
+<p>The title will be based on the fields in the record,
+and its formatting is assisted by the appropriate
+type class in <a title="control.typ.types" href="typ/types.html"><code>control.typ.types</code></a>.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If the record is
+not "actual", its title will get a warning
+background color.
+See <a title="control.db.Db.collect" href="db.html#control.db.Db.collect"><code>Db.collect()</code></a>.</p>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def titleRaw(obj, record, cls=E):
+    &#34;&#34;&#34;Generate a title for a different record.
+
+    This is fast title generation.
+    No record object will be created.
+
+    The title will be based on the fields in the record,
+    and its formatting is assisted by the appropriate
+    type class in `control.typ.types`.
+
+    !!! hint
+        If the record is  not &#34;actual&#34;, its title will get a warning
+        background color.
+        See `control.db.Db.collect`.
+    &#34;&#34;&#34;
+
     table = obj.table
     context = obj.context
 
@@ -1209,12 +1564,46 @@ to <code>None</code></dd>
 <span>def <span class="ident">body</span></span>(<span>self, myMasters=None, hideMasters=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap the body of the record in HTML.</p>
+<p>This is the part without the provenance information and without
+the detail records.</p>
+<p>This method can be overridden by <code>body</code> methods in derived classes.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>myMasters</code></strong> :&ensp;<code>iterable</code> of <code>string</code>, optional <code>None</code></dt>
+<dd>A declaration of which fields must be treated as master fields.</dd>
+<dt><strong><code>hideMaster</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>If <code>True</code>, all master fields as declared in <code>myMasters</code> will be left out.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def body(self, myMasters=None, hideMasters=False):
+    &#34;&#34;&#34;Wrap the body of the record in HTML.
+
+    This is the part without the provenance information and without
+    the detail records.
+
+    This method can be overridden by `body` methods in derived classes.
+
+    Parameters
+    ----------
+    myMasters: iterable of string, optional `None`
+        A declaration of which fields must be treated as master fields.
+    hideMaster: boolean, optional `False`
+        If `True`, all master fields as declared in `myMasters` will be left out.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     fieldSpecs = self.fields
     provSpecs = self.prov
 
@@ -1229,14 +1618,15 @@ to <code>None</code></dd>
 <span>def <span class="ident">command</span></span>(<span>self, command)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Perform a workflow command.
-See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doCommand"><code>WorkflowItem.doCommand()</code></a>.</p></section>
+<section class="desc"><p>Perform a workflow command.</p>
+<p>See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doCommand"><code>WorkflowItem.doCommand()</code></a>.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def command(self, command):
     &#34;&#34;&#34;Perform a workflow command.
+
     See `control.workflow.apply.WorkflowItem.doCommand`.
     &#34;&#34;&#34;
 
@@ -1255,12 +1645,27 @@ See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/appl
 <span>def <span class="ident">delete</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Delete a record.</p>
+<p>Permissions and dependencies will be checked, as a result,
+the deletion may be prevented.
+See <a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies"><code>Record.getDependencies()</code></a> and <a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm"><code>Record.getDelPerm()</code></a>.</p>
+<p>If deletion happens, workflow information will be adapted afterwards.
+See <a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow"><code>Record.adjustWorkflow()</code></a>.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete(self):
+    &#34;&#34;&#34;Delete a record.
+
+    Permissions and dependencies will be checked, as a result,
+    the deletion may be prevented.
+    See `Record.getDependencies` and `Record.getDelPerm`.
+
+    If deletion happens, workflow information will be adapted afterwards.
+    See `Record.adjustWorkflow`.
+    &#34;&#34;&#34;
+
     mayDelete = self.mayDelete
     if not mayDelete:
         return
@@ -1292,12 +1697,29 @@ See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/appl
 <span>def <span class="ident">deleteButton</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Show the delete button and/or the number of dependencies.</p>
+<p>Check the permissions in order to not show a delete button if the user
+cannot delete the record.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def deleteButton(self):
+    &#34;&#34;&#34;Show the delete button and/or the number of dependencies.
+
+    Check the permissions in order to not show a delete button if the user
+    cannot delete the record.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     mayDelete = self.mayDelete
 
     if not mayDelete:
@@ -1368,12 +1790,32 @@ See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/appl
 <span>def <span class="ident">deleteDetails</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Delete the details of a record.</p>
+<p>Permissions and dependencies will be checked, as a result,
+the deletion may be prevented.
+See <a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies"><code>Record.getDependencies()</code></a> and <a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm"><code>Record.getDelPerm()</code></a>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether there are still dependencies after deleting the details.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def deleteDetails(self):
+    &#34;&#34;&#34;Delete the details of a record.
+
+    Permissions and dependencies will be checked, as a result,
+    the deletion may be prevented.
+    See `Record.getDependencies` and `Record.getDelPerm`.
+
+    Returns
+    -------
+    bool
+        Whether there are still dependencies after deleting the details.
+    &#34;&#34;&#34;
+
     context = self.context
     db = context.db
     table = self.table
@@ -1390,12 +1832,60 @@ See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/appl
 <span>def <span class="ident">field</span></span>(<span>self, fieldName, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Factory function to wrap a field object around the data of a field.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Workflow information will be checked whether this record is fixated.
+If so, the new field object will be initialized with parameters
+to make it uneditable.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It will also be checked whether the field is a workflow field.
+Such fields are not shown and edited in the normal way,
+hence they will be set to unreadable and uneditable.
+The manipulation of such fields is under control of workflow.
+See <a title="control.workflow.apply.WorkflowItem.isCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isCommand"><code>WorkflowItem.isCommand()</code></a>.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>fieldName</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>object</code></dt>
+<dd>A <a title="control.field.Field" href="field.html#control.field.Field"><code>Field</code></a> object.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def field(self, fieldName, **kwargs):
+    &#34;&#34;&#34;Factory function to wrap a field object around the data of a field.
+
+    !!! note
+        Workflow information will be checked whether this record is fixated.
+        If so, the new field object will be initialized with parameters
+        to make it uneditable.
+
+    !!! note
+        It will also be checked whether the field is a workflow field.
+        Such fields are not shown and edited in the normal way,
+        hence they will be set to unreadable and uneditable.
+        The manipulation of such fields is under control of workflow.
+        See `control.workflow.apply.WorkflowItem.isCommand`.
+
+    Parameters
+    ----------
+    fieldName: string
+
+    Returns
+    -------
+    object
+        A `control.field.Field` object.
+    &#34;&#34;&#34;
+
     table = self.table
     wfitem = self.wfitem
 
@@ -1622,12 +2112,13 @@ or if there is no workflow item found,
 <span>def <span class="ident">title</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Generate a title for the record.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def title(self):
+    &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
     record = self.record
     valid = self.valid
 
@@ -1637,10 +2128,100 @@ or if there is no workflow item found,
 </details>
 </dd>
 <dt id="control.record.Record.wrap"><code class="name flex">
-<span>def <span class="ident">wrap</span></span>(<span>self, inner=True, wrapMethod=None, expanded=1, withProv=True, hideMasters=False, addCls='')</span>
+<span>def <span class="ident">wrap</span></span>(<span>self, inner=True, wrapMethod=None, expanded=1, withProv=True, hideMasters=False, extraCls='')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap the record into HTML.</p>
+<p>A record can be displayed in several states:</p>
+<table>
+<thead>
+<tr>
+<th>expanded</th>
+<th>effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-1</code></td>
+<td>only a title with a control to get the full details</td>
+</tr>
+<tr>
+<td><code>False</code></td>
+<td>full details, no control to collapse/expand</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>full details, with a control to collapse to the title</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When a record in state <code>1</code> or <code>-1</code> is sent to the client,
+only the material that is displayed is sent. When the user clicks on the
+expand/collapse control, the other part is fetched from the server
+<em>at that very moment</em>.
+So collapsing/expanding can be used to refresh the view on a record
+if things have happened.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The triggering of the fetch actions for expanded/collapsed material
+is done by the Javascript in <code>index.js</code>.
+A single function does it all, and it is sensitive to the exact attributes
+of the summary and the detail.
+If you tamper with this code, you might end up with an infinite loop of
+expanding and collapsing.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Pay extra attension to the attribute <code>fat</code>!
+When it is present, it is an indication that the expanded material
+is already on the client, and that it does not have to be fetched.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There are several ways to customise the effect of <code>wrap</code> for specific
+tables. Start with writing a derived class for that table with
+<a title="control.record.Record" href="#control.record.Record"><code>Record</code></a> as base class.</p>
+<ul>
+<li>write an alternative for <a title="control.record.Record.body" href="#control.record.Record.body"><code>Record.body()</code></a>,
+e.g. <a title="control.cust.review_record.ReviewR.bodyCompact" href="cust/review_record.html#control.cust.review_record.ReviewR.bodyCompact"><code>ReviewR.bodyCompact()</code></a>, and
+initialize the <a title="control.record.Record" href="#control.record.Record"><code>Record</code></a> with <code>(bodyMethod='compact')</code>.
+Just specify the part of the name after <code>body</code> as string starting
+with a lower case.</li>
+<li>override <a title="control.record.Record.body" href="#control.record.Record.body"><code>Record.body()</code></a>. This app does not do this currently.</li>
+<li>use a custom <code>wrap</code> function, by defining it in your derived class,
+e.g. <a title="control.cust.score_record.ScoreR.wrapHelp" href="cust/score_record.html#control.cust.score_record.ScoreR.wrapHelp"><code>ScoreR.wrapHelp()</code></a>.
+Use it by calling <code>Record.wrap(wrapMethod=scoreObj.wrapHelp)</code>.</li>
+</ul>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>inner</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>Whether to add the CSS class <code>inner</code> to the outer <code>&lt;div&gt;</code> of the result.</dd>
+<dt><strong><code>wrapMethod</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
+<dd>The method to compose the result out of all its components.
+Typically defined in a derived class.
+If passed, this function will be called to deliver the result.
+Otherwise, <code>wrap</code> does the composition itself.</dd>
+<dt><strong><code>expanded</code></strong> :&ensp;{-<code>1</code>, <code>0</code>, <code>1</code>}</dt>
+<dd>Whether to expand the record.
+See the table above.</dd>
+<dt><strong><code>withProv</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>Include a display of the provenance fields.</dd>
+<dt><strong><code>hideMasters</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to hide the master fields.
+If they are not hidden, they will be presented as hyperlinks to the
+master record.</dd>
+<dt><strong><code>extraCls</code></strong> :&ensp;<code>string</code>, optional <code>''</code></dt>
+<dd>An extra class to add to the outer <code>&lt;div&gt;</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1652,8 +2233,80 @@ or if there is no workflow item found,
     expanded=1,
     withProv=True,
     hideMasters=False,
-    addCls=E,
+    extraCls=E,
 ):
+    &#34;&#34;&#34;Wrap the record into HTML.
+
+    A record can be displayed in several states:
+
+    expanded | effect
+    --- | ---
+    `-1` | only a title with a control to get the full details
+    `False` | full details, no control to collapse/expand
+    `1` | full details, with a control to collapse to the title
+
+    !!! note
+        When a record in state `1` or `-1` is sent to the client,
+        only the material that is displayed is sent. When the user clicks on the
+        expand/collapse control, the other part is fetched from the server
+        *at that very moment*.
+        So collapsing/expanding can be used to refresh the view on a record
+        if things have happened.
+
+    !!! caution
+        The triggering of the fetch actions for expanded/collapsed material
+        is done by the Javascript in `index.js`.
+        A single function does it all, and it is sensitive to the exact attributes
+        of the summary and the detail.
+        If you tamper with this code, you might end up with an infinite loop of
+        expanding and collapsing.
+
+    !!! hint
+        Pay extra attension to the attribute `fat`!
+        When it is present, it is an indication that the expanded material
+        is already on the client, and that it does not have to be fetched.
+
+    !!! note
+        There are several ways to customise the effect of `wrap` for specific
+        tables. Start with writing a derived class for that table with
+        `Record` as base class.
+
+        *   write an alternative for `Record.body`,
+            e.g. `control.cust.review_record.ReviewR.bodyCompact`, and
+            initialize the `Record` with `(bodyMethod=&#39;compact&#39;)`.
+            Just specify the part of the name after `body` as string starting
+            with a lower case.
+        *   override `Record.body`. This app does not do this currently.
+        *   use a custom `wrap` function, by defining it in your derived class,
+            e.g. `control.cust.score_record.ScoreR.wrapHelp`.
+            Use it by calling `Record.wrap(wrapMethod=scoreObj.wrapHelp)`.
+
+    Parameters
+    ----------
+    inner: boolean, optional `True`
+        Whether to add the CSS class `inner` to the outer `&lt;div&gt;` of the result.
+    wrapMethod: function, optional `None`
+        The method to compose the result out of all its components.
+        Typically defined in a derived class.
+        If passed, this function will be called to deliver the result.
+        Otherwise, `wrap` does the composition itself.
+    expanded: {-1, 0, 1}
+        Whether to expand the record.
+        See the table above.
+    withProv: boolean, optional `True`
+        Include a display of the provenance fields.
+    hideMasters: boolean, optional `False`
+        Whether to hide the master fields.
+        If they are not hidden, they will be presented as hyperlinks to the
+        master record.
+    extraCls: string, optional `&#39;&#39;`
+        An extra class to add to the outer `&lt;div&gt;`.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     table = self.table
     eid = self.eid
     record = self.record
@@ -1726,7 +2379,7 @@ or if there is no workflow item found,
             ),
             *provenance,
         ],
-        cls=f&#34;record{innerCls} {addCls} {warningCls}&#34;,
+        cls=f&#34;record{innerCls} {extraCls} {warningCls}&#34;,
     )
 
     rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E

@@ -32,6 +32,12 @@ from control.table import Table
 
 
 class AssessmentT(Table):
+    &#34;&#34;&#34;Logic for the assessment table.
+
+    Inserting an assessment means also to insert the right
+    set of criteriaEntry records and prefill some of their fields.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -91,7 +97,9 @@ class AssessmentT(Table):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with tables.</p>
+<section class="desc"><p>Logic for the assessment table.</p>
+<p>Inserting an assessment means also to insert the right
+set of criteriaEntry records and prefill some of their fields.</p>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
 otherwise to the base class <a title="control.record.Record" href="../record.html#control.record.Record"><code>Record</code></a> itself.</p>
@@ -107,6 +115,12 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AssessmentT(Table):
+    &#34;&#34;&#34;Logic for the assessment table.
+
+    Inserting an assessment means also to insert the right
+    set of criteriaEntry records and prefill some of their fields.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
