@@ -13,7 +13,7 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="The technical documentation of the DARIAH Contribution Tool. Design, specs, rationales, patterns, diagrams.
+        <meta name="description" content="Documentation of the DARIAH Contribution Tool.
 ">
       
       
@@ -44,7 +44,7 @@
     
     
       
-        <title>Tech Doc DARIAH contribution tool</title>
+        <title>DARIAH contribution tool</title>
       
     
     
@@ -87,7 +87,7 @@
     
       
 
-<header class="md-header md-dev" data-md-component="header">
+<header class="md-header" data-md-component="header">
 
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
@@ -97,7 +97,7 @@
         </a>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://dans-labs.github.io/dariah-contrib/" title="Tech Doc DARIAH contribution tool" class="md-header-nav__button md-logo">
+        <a href="https://dans-labs.github.io/dariah-contrib/" title="DARIAH contribution tool" class="md-header-nav__button md-logo">
           
             <img src="/dariah-contrib/images/inkind_logo.png" height="50">
           
@@ -110,24 +110,14 @@
         <div class="md-flex__ellipsis md-header-nav__title head-type" data-md-component="title">
           
             <span class="md-header-nav__topic">
-              Tech Doc DARIAH contribution tool
+              DARIAH contribution tool
               
-    <span class="md-dev-inline head-type">
-      still in beta
-    
-    </span>
-  
             </span>
             <span class="md-header-nav__topic">
               
                 
               
               
-    <span class="md-dev-inline head-type">
-      still in beta
-    
-    </span>
-  
             </span>
           
         </div>
@@ -209,12 +199,14 @@
 
       
         
+      
+        
   
   
     <li class="md-tabs__item">
       
-        <a href="/dariah-contrib/About/Codebase/" title="About" class="md-tabs__link head-type">
-          About
+        <a href="/dariah-contrib/Workings/Business/" title="What does it do" class="md-tabs__link head-type">
+          What does it do
         </a>
       
     </li>
@@ -226,8 +218,8 @@
   
     <li class="md-tabs__item">
       
-        <a href="/dariah-contrib/Functionality/Business/" title="Functionality" class="md-tabs__link head-type">
-          Functionality
+        <a href="/dariah-contrib/Tech/Deploy/" title="Technical" class="md-tabs__link head-type">
+          Technical
         </a>
       
     </li>
@@ -235,81 +227,13 @@
 
       
         
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Legacy/Content/" title="Legacy" class="md-tabs__link head-type">
-          Legacy
-        </a>
-      
-    </li>
-  
-
-      
-        
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Concepts/Model/" title="Concepts" class="md-tabs__link head-type">
-          Concepts
-        </a>
-      
-    </li>
-  
-
-      
-        
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Server/Authentication/" title="Server" class="md-tabs__link head-type">
-          Server
-        </a>
-      
-    </li>
-  
-
-      
-        
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Technology/Tech/" title="Technology" class="md-tabs__link head-type">
-          Technology
-        </a>
-      
-    </li>
-  
-
-      
-        
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Integration/API/" title="Integration" class="md-tabs__link head-type">
-          Integration
-        </a>
-      
-    </li>
-  
-
-      
-        
-  
-  
-    <li class="md-tabs__item">
-      
-        <a href="/dariah-contrib/Maintenance/Deploy/" title="Maintenance" class="md-tabs__link head-type">
-          Maintenance
-        </a>
-      
-    </li>
-  
+  <li class="md-tabs__item">
+    
+      <a href="/dariah-contrib/api/html/control/" title="Docstrings" class="md-tabs__link md-tabs__link--active head-type">
+        Docstrings
+      </a>
+    
+  </li>
 
       
     </ul>
@@ -325,12 +249,12 @@
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
   <label class="md-nav__title head-type md-nav__title--site" for="__drawer">
-    <a href="https://dans-labs.github.io/dariah-contrib/" title="Tech Doc DARIAH contribution tool" class="md-nav__button md-logo">
+    <a href="https://dans-labs.github.io/dariah-contrib/" title="DARIAH contribution tool" class="md-nav__button md-logo">
       
         <img src="/dariah-contrib/images/inkind_logo.png" width="48" height="48">
       
     </a>
-    Tech Doc DARIAH contribution tool
+    DARIAH contribution tool
   </label>
   
     <div class="md-nav__source">
@@ -372,70 +296,10 @@
       
 
 
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
-    
-    <label class="md-nav__link head-type" for="nav-2">
-      About
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-2">
-        About
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
   <li class="md-nav__item">
-    <a href="/dariah-contrib/About/Codebase/" title="Codebase" class="md-nav__link head-type">
-      Codebase
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/About/Stats/" title="Stats" class="md-nav__link head-type">
-      Stats
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/About/News/" title="News" class="md-nav__link head-type">
+    <a href="/dariah-contrib/News/" title="News" class="md-nav__link head-type">
       News
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/About/Lessons/" title="Lessons" class="md-nav__link head-type">
-      Lessons
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
   </li>
 
     
@@ -449,11 +313,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
     
     <label class="md-nav__link head-type" for="nav-3">
-      Functionality
+      What does it do
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title head-type" for="nav-3">
-        Functionality
+        What does it do
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -464,7 +328,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/dariah-contrib/Functionality/Business/" title="Business" class="md-nav__link head-type">
+    <a href="/dariah-contrib/Workings/Business/" title="Business" class="md-nav__link head-type">
       Business
     </a>
   </li>
@@ -476,8 +340,8 @@
 
 
   <li class="md-nav__item">
-    <a href="/dariah-contrib/Functionality/Tables/" title="Tables" class="md-nav__link head-type">
-      Tables
+    <a href="/dariah-contrib/Workings/API/" title="API" class="md-nav__link head-type">
+      API
     </a>
   </li>
 
@@ -488,8 +352,8 @@
 
 
   <li class="md-nav__item">
-    <a href="/dariah-contrib/Functionality/Workflow/" title="Workflow" class="md-nav__link head-type">
-      Workflow
+    <a href="/dariah-contrib/Workings/Content/" title="Content" class="md-nav__link head-type">
+      Content
     </a>
   </li>
 
@@ -509,11 +373,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
     
     <label class="md-nav__link head-type" for="nav-4">
-      Legacy
+      Technical
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title head-type" for="nav-4">
-        Legacy
+        Technical
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -524,211 +388,7 @@
 
 
   <li class="md-nav__item">
-    <a href="/dariah-contrib/Legacy/Content/" title="Content" class="md-nav__link head-type">
-      Content
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
-    
-    <label class="md-nav__link head-type" for="nav-5">
-      Concepts
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-5">
-        Concepts
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Concepts/Model/" title="Model" class="md-nav__link head-type">
-      Model
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
-    
-    <label class="md-nav__link head-type" for="nav-6">
-      Server
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-6">
-        Server
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Server/Authentication/" title="Authentication" class="md-nav__link head-type">
-      Authentication
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Server/Server/" title="Server" class="md-nav__link head-type">
-      Server
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
-    
-    <label class="md-nav__link head-type" for="nav-7">
-      Technology
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-7">
-        Technology
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Technology/Tech/" title="Tech" class="md-nav__link head-type">
-      Tech
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Technology/ES6/" title="ES6" class="md-nav__link head-type">
-      ES6
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
-    
-    <label class="md-nav__link head-type" for="nav-8">
-      Integration
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-8">
-        Integration
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Integration/API/" title="API" class="md-nav__link head-type">
-      API
-    </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
-    
-    <label class="md-nav__link head-type" for="nav-9">
-      Maintenance
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title head-type" for="nav-9">
-        Maintenance
-      </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="/dariah-contrib/Maintenance/Deploy/" title="Deploy" class="md-nav__link head-type">
+    <a href="/dariah-contrib/Tech/Deploy/" title="Deploy" class="md-nav__link head-type">
       Deploy
     </a>
   </li>
@@ -740,14 +400,122 @@
 
 
   <li class="md-nav__item">
-    <a href="/dariah-contrib/api/html/control/" title="Techdoc" class="md-nav__link head-type">
-      Techdoc
+    <a href="/dariah-contrib/Tech/Model/" title="Model" class="md-nav__link head-type">
+      Model
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Workflow/" title="Workflow" class="md-nav__link head-type">
+      Workflow
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Tables/" title="Tables" class="md-nav__link head-type">
+      Tables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Web/" title="Web" class="md-nav__link head-type">
+      Web
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Authentication/" title="Authentication" class="md-nav__link head-type">
+      Authentication
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Codebase/" title="Codebase" class="md-nav__link head-type">
+      Codebase
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Stats/" title="Stats" class="md-nav__link head-type">
+      Stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Inventory/" title="Inventory" class="md-nav__link head-type">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/Tech/Lessons/" title="Lessons" class="md-nav__link head-type">
+      Lessons
     </a>
   </li>
 
         
       </ul>
     </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="/dariah-contrib/api/html/control/" title="Docstrings" class="md-nav__link head-type">
+      Docstrings
+    </a>
   </li>
 
     

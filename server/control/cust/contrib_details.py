@@ -5,6 +5,23 @@ from control.utils import pick as G
 
 
 class ContribD(Details):
+    """Logic for detail records of contribs.
+
+    The main point of departure from the standard behaviour is that
+    we *only* want the `assessment` detail records, not the `review` detail
+    records.
+
+    The reason is that we show assessments in a special way and that reviews are
+    shown inside the assessments.
+
+    That way, we can present the assessment entries side by side with the reviewer
+    entries.
+
+    !!! hint
+        If the `contrib` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    """
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 

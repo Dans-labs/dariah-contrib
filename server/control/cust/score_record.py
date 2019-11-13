@@ -5,6 +5,13 @@ from control.record import Record
 
 
 class ScoreR(Record):
+    """Logic for score records.
+
+    A `wrapHelp` method is added which presents the score
+    as a term-definition pair, where the title of the record is the term,
+    and the description is the definition.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

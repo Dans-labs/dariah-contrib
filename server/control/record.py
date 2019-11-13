@@ -260,6 +260,7 @@ class Record:
 
     def command(self, command):
         """Perform a workflow command.
+
         See `control.workflow.apply.WorkflowItem.doCommand`.
         """
 
@@ -274,6 +275,30 @@ class Record:
         return f"""/{table}/{N.item}/{eid}"""
 
     def field(self, fieldName, **kwargs):
+        """Factory function to wrap a field object around the data of a field.
+
+        !!! note
+            Workflow information will be checked whether this record is fixated.
+            If so, the new field object will be initialized with parameters
+            to make it uneditable.
+
+        !!! note
+            It will also be checked whether the field is a workflow field.
+            Such fields are not shown and edited in the normal way,
+            hence they will be set to unreadable and uneditable.
+            The manipulation of such fields is under control of workflow.
+            See `control.workflow.apply.WorkflowItem.isCommand`.
+
+        Parameters
+        ----------
+        fieldName: string
+
+        Returns
+        -------
+        object
+            A `control.field.Field` object.
+        """
+
         table = self.table
         wfitem = self.wfitem
 
@@ -287,6 +312,16 @@ class Record:
         return Field(self, fieldName, **kwargs)
 
     def delete(self):
+        """Delete a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        If deletion happens, workflow information will be adapted afterwards.
+        See `Record.adjustWorkflow`.
+        """
+
         mayDelete = self.mayDelete
         if not mayDelete:
             return
@@ -314,6 +349,18 @@ class Record:
             self.adjustWorkflow(update=False)
 
     def deleteDetails(self):
+        """Delete the details of a record.
+
+        Permissions and dependencies will be checked, as a result,
+        the deletion may be prevented.
+        See `Record.getDependencies` and `Record.getDelPerm`.
+
+        Returns
+        -------
+        bool
+            Whether there are still dependencies after deleting the details.
+        """
+
         context = self.context
         db = context.db
         table = self.table
@@ -326,6 +373,25 @@ class Record:
         return nRef == 0
 
     def body(self, myMasters=None, hideMasters=False):
+        """Wrap the body of the record in HTML.
+
+        This is the part without the provenance information and without
+        the detail records.
+
+        This method can be overridden by `body` methods in derived classes.
+
+        Parameters
+        ----------
+        myMasters: iterable of string, optional `None`
+            A declaration of which fields must be treated as master fields.
+        hideMaster: boolean, optional `False`
+            If `True`, all master fields as declared in `myMasters` will be left out.
+
+        Returns
+        -------
+        string(html)
+        """
+
         fieldSpecs = self.fields
         provSpecs = self.prov
 
@@ -342,8 +408,80 @@ class Record:
         expanded=1,
         withProv=True,
         hideMasters=False,
-        addCls=E,
+        extraCls=E,
     ):
+        """Wrap the record into HTML.
+
+        A record can be displayed in several states:
+
+        expanded | effect
+        --- | ---
+        `-1` | only a title with a control to get the full details
+        `False` | full details, no control to collapse/expand
+        `1` | full details, with a control to collapse to the title
+
+        !!! note
+            When a record in state `1` or `-1` is sent to the client,
+            only the material that is displayed is sent. When the user clicks on the
+            expand/collapse control, the other part is fetched from the server
+            *at that very moment*.
+            So collapsing/expanding can be used to refresh the view on a record
+            if things have happened.
+
+        !!! caution
+            The triggering of the fetch actions for expanded/collapsed material
+            is done by the Javascript in `index.js`.
+            A single function does it all, and it is sensitive to the exact attributes
+            of the summary and the detail.
+            If you tamper with this code, you might end up with an infinite loop of
+            expanding and collapsing.
+
+        !!! hint
+            Pay extra attension to the attribute `fat`!
+            When it is present, it is an indication that the expanded material
+            is already on the client, and that it does not have to be fetched.
+
+        !!! note
+            There are several ways to customise the effect of `wrap` for specific
+            tables. Start with writing a derived class for that table with
+            `Record` as base class.
+
+            *   write an alternative for `Record.body`,
+                e.g. `control.cust.review_record.ReviewR.bodyCompact`, and
+                initialize the `Record` with `(bodyMethod='compact')`.
+                Just specify the part of the name after `body` as string starting
+                with a lower case.
+            *   override `Record.body`. This app does not do this currently.
+            *   use a custom `wrap` function, by defining it in your derived class,
+                e.g. `control.cust.score_record.ScoreR.wrapHelp`.
+                Use it by calling `Record.wrap(wrapMethod=scoreObj.wrapHelp)`.
+
+        Parameters
+        ----------
+        inner: boolean, optional `True`
+            Whether to add the CSS class `inner` to the outer `<div>` of the result.
+        wrapMethod: function, optional `None`
+            The method to compose the result out of all its components.
+            Typically defined in a derived class.
+            If passed, this function will be called to deliver the result.
+            Otherwise, `wrap` does the composition itself.
+        expanded: {-1, 0, 1}
+            Whether to expand the record.
+            See the table above.
+        withProv: boolean, optional `True`
+            Include a display of the provenance fields.
+        hideMasters: boolean, optional `False`
+            Whether to hide the master fields.
+            If they are not hidden, they will be presented as hyperlinks to the
+            master record.
+        extraCls: string, optional `''`
+            An extra class to add to the outer `<div>`.
+
+        Returns
+        -------
+        string(html)
+        """
+
         table = self.table
         eid = self.eid
         record = self.record
@@ -416,7 +554,7 @@ class Record:
                 ),
                 *provenance,
             ],
-            cls=f"record{innerCls} {addCls} {warningCls}",
+            cls=f"record{innerCls} {extraCls} {warningCls}",
         )
 
         rButton = H.iconr(itemKey, "#main", msg=table) if withRefresh else E
@@ -439,6 +577,16 @@ class Record:
         )
 
     def deleteButton(self):
+        """Show the delete button and/or the number of dependencies.
+
+        Check the permissions in order to not show a delete button if the user
+        cannot delete the record.
+
+        Returns
+        -------
+        string(html)
+        """
+
         mayDelete = self.mayDelete
 
         if not mayDelete:
@@ -505,6 +653,7 @@ class Record:
         )
 
     def title(self):
+        """Generate a title for the record."""
         record = self.record
         valid = self.valid
 
@@ -514,6 +663,21 @@ class Record:
 
     @staticmethod
     def titleRaw(obj, record, cls=E):
+        """Generate a title for a different record.
+
+        This is fast title generation.
+        No record object will be created.
+
+        The title will be based on the fields in the record,
+        and its formatting is assisted by the appropriate
+        type class in `control.typ.types`.
+
+        !!! hint
+            If the record is  not "actual", its title will get a warning
+            background color.
+            See `control.db.Db.collect`.
+        """
+
         table = obj.table
         context = obj.context
 

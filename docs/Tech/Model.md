@@ -1,8 +1,5 @@
 # Model
 
-This application contains a generic engine to display MongoDB data according to
-any specified data model, respecting access privileges.
-
 ## MongoDB
 
 We store the data in a
@@ -39,18 +36,19 @@ We store the data in a
 
 ## Data model
 
-The data model has a generic part and a table specific part.
-
-The generic part is specified in
+This application uses configuration files in
 [tables.yaml]({{repBase}}/server/yaml/tables.yaml)
-.
+and those in
+[tables]({{repBase}}/server/tables)
+to model tables and fields, with their permissions.
+It has base classes to deal with most situations, but special tables may use their own derived classes.
 
 ??? abstract "classification of tables"
     ??? details "user tables"
         The main tables that receive user content: *contrib*, *assessment*, *review*.
 
     ??? details "user entry tables"
-        Also tables that receive user content, namely the entries users make in
+        Tables that receive user content too, namely the entries users make in
         assessments and reviews: *criteriaEntry* and *reviewEntry*.
 
     ??? details "valueTables"
@@ -63,15 +61,16 @@ The generic part is specified in
         Essential for the integrity of the business logic.
 
 ??? abstract "details"
-    Specification of detail records: which tables act as details for which masters?
+    Details are records, usually in another table,
+    having a field that points to their master record
+    by means of an `_id` value.
+
+    Which tables act as details for which masters is specified in
+    [tables.yaml]({{repBase}}/server/yaml/tables.yaml).
 
     ??? explanation "master-detail"
         A record may have *detail records* associated with it.
         We call such a record a *master record* with respect to its details.
-
-        Details are records, usually in another table,
-        having a field that points to their master record
-        by means of an `_id` value.
 
     ???+ hint "Convention"
         Whenever possible, the field in a detail table that points to a master
@@ -135,11 +134,7 @@ The generic part is specified in
             This requires a direct interaction with the machine on which the database
             resides. Webaccess is not sufficient.
 
-The table specific models are in the yaml files in
-[tables]({{repBase}}/server/tables)
-.
-
-The table models consist of the specifications of the fields in that table.
+The individual table models consist of the specifications of the fields in that table.
 For each field there is a key under which some specs are written.
 
 ??? details "fieldSpecs"

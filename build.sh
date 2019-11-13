@@ -6,7 +6,7 @@ function codestats {
     cd $root
     xd=".git,images,fonts,favicons"
     xf="cloc_exclude.lst"
-    rf="docs/About/Stats.md"
+    rf="docs/Tech/Stats.md"
     cloc --counted ~/Downloads/dariah-contrib.lst --no-autogen --exclude_dir=$xd --exclude-list-file=$xf --report-file=$rf --md .
     cat $rf
 }

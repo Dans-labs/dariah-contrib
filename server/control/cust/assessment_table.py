@@ -6,6 +6,12 @@ from control.table import Table
 
 
 class AssessmentT(Table):
+    """Logic for the assessment table.
+
+    Inserting an assessment means also to insert the right
+    set of criteriaEntry records and prefill some of their fields.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

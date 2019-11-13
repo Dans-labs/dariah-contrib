@@ -10,6 +10,21 @@ MESSAGES = CW.messages
 
 
 class CriteriaEntryR(Record):
+    """Logic for criteriaEntry records.
+
+    Criteria entry records have a customised title, with the sequence number
+    of the criteria in it, plus the score the assessor has entered and an icon
+    to show whether there is evidence or not.
+
+    There is also a `compact` method to present these records, with a collapsible
+    legend, fitting on one line, so that a series of criteriaEntry records shows
+    up as a tidy list on the page.
+
+    !!! hint
+        If the `criteriaEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.record.Record`.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

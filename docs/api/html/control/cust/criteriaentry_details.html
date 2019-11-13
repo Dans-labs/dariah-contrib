@@ -31,6 +31,17 @@ from control.utils import pick as G, cap1, E
 
 
 class CriteriaEntryD(Details):
+    &#34;&#34;&#34;Logic for detail records of criteria entries.
+
+    The main point of departure from the standard behaviour is that
+    we sort and present the `reviewEntry` detail records into two columns:
+    those of the `expert` reviewer and those of the `final` reviewer.
+
+    !!! hint
+        If the `criteriaEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -89,7 +100,15 @@ class CriteriaEntryD(Details):
 <span>(</span><span>recordObj)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with detail records.</p>
+<section class="desc"><p>Logic for detail records of criteria entries.</p>
+<p>The main point of departure from the standard behaviour is that
+we sort and present the <code>reviewEntry</code> detail records into two columns:
+those of the <code>expert</code> reviewer and those of the <code>final</code> reviewer.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If the <code>criteriaEntry</code> record is not part of the workflow, the behaviour
+of this class falls back to the base class <a title="control.details.Details" href="../details.html#control.details.Details"><code>Details</code></a>.</p>
+</div>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the master record object
 that spawns a detail record object.</p>
@@ -103,6 +122,17 @@ that spawns a detail record object.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CriteriaEntryD(Details):
+    &#34;&#34;&#34;Logic for detail records of criteria entries.
+
+    The main point of departure from the standard behaviour is that
+    we sort and present the `reviewEntry` detail records into two columns:
+    those of the `expert` reviewer and those of the `final` reviewer.
+
+    !!! hint
+        If the `criteriaEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -150,64 +180,14 @@ that spawns a detail record object.</p>
 <ul class="hlist">
 <li><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="control.cust.criteriaentry_details.CriteriaEntryD.wrap"><code class="name flex">
-<span>def <span class="ident">wrap</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def wrap(self, *args, **kwargs):
-    wfitem = self.wfitem
-    if not wfitem:
-        return super().wrap(*args, **kwargs)
-
-    details = self.details
-
-    (reviewer,) = wfitem.info(N.assessment, N.reviewer)
-
-    self.fetchDetails(
-        N.reviewEntry, sortKey=lambda r: G(r, N.dateCreated, default=0),
-    )
-    (tableObj, records) = G(details, N.reviewEntry, default=(None, []))
-    if not tableObj:
-        return E
-
-    byReviewer = {N.expert: [], N.final: []}
-
-    for dest in (N.expert, N.final):
-        byReviewer[dest] = self.wrapDetail(
-            N.reviewEntry,
-            filterFunc=lambda r: G(r, N.creator) == G(reviewer, dest),
-            bodyMethod=N.compact,
-            expanded=True,
-            withProv=False,
-            withN=False,
-            inner=False,
-        )
-
-    return H.div(
-        [
-            H.div(
-                [H.div(cap1(dest), cls=&#34;head&#34;), G(byReviewer, dest)],
-                cls=f&#34;reviewentries {dest}&#34;,
-            )
-            for dest in reviewer
-        ],
-        cls=&#34;reviewers&#34;,
-    )</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></b></code>:
 <ul class="hlist">
+<li><code><a title="control.details.Details.fetchDetails" href="../details.html#control.details.Details.fetchDetails">fetchDetails</a></code></li>
 <li><code><a title="control.details.Details.inheritProps" href="../details.html#control.details.Details.inheritProps">inheritProps</a></code></li>
+<li><code><a title="control.details.Details.wrap" href="../details.html#control.details.Details.wrap">wrap</a></code></li>
+<li><code><a title="control.details.Details.wrapDetail" href="../details.html#control.details.Details.wrapDetail">wrapDetail</a></code></li>
 </ul>
 </li>
 </ul>
@@ -230,9 +210,6 @@ that spawns a detail record object.</p>
 <ul>
 <li>
 <h4><code><a title="control.cust.criteriaentry_details.CriteriaEntryD" href="#control.cust.criteriaentry_details.CriteriaEntryD">CriteriaEntryD</a></code></h4>
-<ul class="">
-<li><code><a title="control.cust.criteriaentry_details.CriteriaEntryD.wrap" href="#control.cust.criteriaentry_details.CriteriaEntryD.wrap">wrap</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

@@ -50,7 +50,7 @@ The legacy content for this application consists of a FileMaker database.
 
 ??? details "Importing and reimporting"
     The source data model is complex, the
-    [target data model](../Concepts/Model.md)
+    [target data model](../Tech/Model.md)
     is complex,
     and the app as a whole must support a complex workflow.
 

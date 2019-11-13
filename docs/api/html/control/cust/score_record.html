@@ -31,6 +31,13 @@ from control.record import Record
 
 
 class ScoreR(Record):
+    &#34;&#34;&#34;Logic for score records.
+
+    A `wrapHelp` method is added which presents the score
+    as a term-definition pair, where the title of the record is the term,
+    and the description is the definition.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -63,7 +70,10 @@ class ScoreR(Record):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with records.</p>
+<section class="desc"><p>Logic for score records.</p>
+<p>A <code>wrapHelp</code> method is added which presents the score
+as a term-definition pair, where the title of the record is the term,
+and the description is the definition.</p>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the table object
 that spawns a record object.</p>
@@ -81,6 +91,13 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ScoreR(Record):
+    &#34;&#34;&#34;Logic for score records.
+
+    A `wrapHelp` method is added which presents the score
+    as a term-definition pair, where the title of the record is the term,
+    and the description is the definition.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -134,13 +151,21 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <li><code><b><a title="control.record.Record" href="../record.html#control.record.Record">Record</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.record.Record.adjustWorkflow" href="../record.html#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="control.record.Record.body" href="../record.html#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.command" href="../record.html#control.record.Record.command">command</a></code></li>
+<li><code><a title="control.record.Record.delete" href="../record.html#control.record.Record.delete">delete</a></code></li>
+<li><code><a title="control.record.Record.deleteButton" href="../record.html#control.record.Record.deleteButton">deleteButton</a></code></li>
+<li><code><a title="control.record.Record.deleteDetails" href="../record.html#control.record.Record.deleteDetails">deleteDetails</a></code></li>
+<li><code><a title="control.record.Record.field" href="../record.html#control.record.Record.field">field</a></code></li>
 <li><code><a title="control.record.Record.getDelPerm" href="../record.html#control.record.Record.getDelPerm">getDelPerm</a></code></li>
 <li><code><a title="control.record.Record.getDependencies" href="../record.html#control.record.Record.getDependencies">getDependencies</a></code></li>
 <li><code><a title="control.record.Record.inheritProps" href="../record.html#control.record.Record.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.record.Record.reload" href="../record.html#control.record.Record.reload">reload</a></code></li>
 <li><code><a title="control.record.Record.setPerm" href="../record.html#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="../record.html#control.record.Record.setWorkflow">setWorkflow</a></code></li>
+<li><code><a title="control.record.Record.title" href="../record.html#control.record.Record.title">title</a></code></li>
+<li><code><a title="control.record.Record.titleRaw" href="../record.html#control.record.Record.titleRaw">titleRaw</a></code></li>
+<li><code><a title="control.record.Record.wrap" href="../record.html#control.record.Record.wrap">wrap</a></code></li>
 </ul>
 </li>
 </ul>

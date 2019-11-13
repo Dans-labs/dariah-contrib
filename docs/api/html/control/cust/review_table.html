@@ -32,6 +32,12 @@ from control.table import Table
 
 
 class ReviewT(Table):
+    &#34;&#34;&#34;Logic for the review table.
+
+    Inserting a review means also to insert the right
+    set of reviewEntry records and prefill some of their fields.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -107,7 +113,9 @@ class ReviewT(Table):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with tables.</p>
+<section class="desc"><p>Logic for the review table.</p>
+<p>Inserting a review means also to insert the right
+set of reviewEntry records and prefill some of their fields.</p>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
 otherwise to the base class <a title="control.record.Record" href="../record.html#control.record.Record"><code>Record</code></a> itself.</p>
@@ -123,6 +131,12 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ReviewT(Table):
+    &#34;&#34;&#34;Logic for the review table.
+
+    Inserting a review means also to insert the right
+    set of reviewEntry records and prefill some of their fields.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

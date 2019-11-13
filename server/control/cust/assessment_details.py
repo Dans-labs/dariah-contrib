@@ -11,6 +11,17 @@ REVIEW_DECISION = CW.messages[N.reviewDecision]
 
 
 class AssessmentD(Details):
+    """Logic for detail records of assessments.
+
+    An assessment is filled out by entering data in a fixed set of `criteriaEntry` records.
+    Each `criteriaEntry` corresponds to a specific `criteria` record.
+    The type of the assessment determines wich set of `criteria` is linked to it.
+
+    !!! hint
+        If the `assessment` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    """
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -21,7 +32,7 @@ class AssessmentD(Details):
 
         (reviewer, reviewers) = wfitem.info(N.assessment, N.reviewer, N.reviewers)
 
-        self.fetchDetails(N.criteriaEntry, sortKey=cEntrySort)
+        self.fetchDetails(N.criteriaEntry, sortKey=self.cEntrySort)
 
         criteriaPart = self.wrapDetail(N.criteriaEntry, bodyMethod=N.compact)
 
@@ -75,6 +86,6 @@ class AssessmentD(Details):
             [criteriaPart, statusRep, H.div(REVIEW_DECISION, cls="head"), reviewPart],
         )
 
-
-def cEntrySort(r):
-    return (G(r, N.assessment), G(r, N.seq) or 0)
+    @staticmethod
+    def cEntrySort(r):
+        return (G(r, N.assessment), G(r, N.seq) or 0)

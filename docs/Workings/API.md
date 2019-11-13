@@ -40,7 +40,7 @@ Below there is a partial specification of the verbs and their parameters.
 
     The result is a `json` object,
     containing sub objects for the specification of the
-    [data model](../Concepts/Model.md)
+    [data model](../Tech/Model.md)
     of this table.
 
     The actual records are under `entities`, keyed by their MongoDB `_id`.

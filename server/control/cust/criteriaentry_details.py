@@ -5,6 +5,17 @@ from control.utils import pick as G, cap1, E
 
 
 class CriteriaEntryD(Details):
+    """Logic for detail records of criteria entries.
+
+    The main point of departure from the standard behaviour is that
+    we sort and present the `reviewEntry` detail records into two columns:
+    those of the `expert` reviewer and those of the `final` reviewer.
+
+    !!! hint
+        If the `criteriaEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    """
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 

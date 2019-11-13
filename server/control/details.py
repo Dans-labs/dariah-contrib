@@ -43,7 +43,23 @@ class Details:
 
         self.details = {}
 
-    def fetchDetails(self, dtable, masterTable=None, eids=None, sortKey=None):
+    def fetchDetails(self, dtable, sortKey=None):
+        """Fetch detail records from the database.
+
+        Parameters
+        ----------
+        dtable: string
+            The name of the table in which the detail records are stored.
+        sortKey: function
+            A function to sort the detail records.
+
+        Returns
+        -------
+        void
+            The detail records are stored in the `details` attribute, which is a
+            dict keyed by the names of the detail tables.
+        """
+
         context = self.context
         db = context.db
         mkTable = self.mkTable
@@ -52,7 +68,7 @@ class Details:
 
         dtableObj = mkTable(context, dtable)
         drecords = db.getDetails(
-            dtable, masterTable or table, eids or eid, sortKey=sortKey,
+            dtable, table, eid, sortKey=sortKey,
         )
         self.details[dtable] = (
             dtableObj,
@@ -60,29 +76,68 @@ class Details:
         )
 
     def wrap(self, readonly=False):
+        """Wrap the details of all tables for this record into HTML.
+
+        Parameters
+        ----------
+        readonly: boolean, optional `False`
+            Whether the records should be presented in readonly form.
+
+        Returns
+        -------
+        string(html)
+        """
+
         table = self.table
 
         for dtable in G(DETAILS, table, default=[]):
             self.fetchDetails(dtable)
 
-        return self.wrapAll(readonly=readonly)
+        details = self.details
+
+        return H.join(self.wrapDetail(dtable, readonly=readonly) for dtable in details)
 
     def wrapDetail(
         self,
         dtable,
-        inner=True,
-        filterFunc=None,
-        wrapMethod=None,
-        bodyMethod=None,
-        combineMethod=None,
-        expanded=False,
-        readonly=False,
-        withProv=True,
-        withN=True,
         withDetails=False,
-        extraMsg=None,
+        readonly=False,
+        bodyMethod=None,
+        inner=True,
+        wrapMethod=None,
+        expanded=False,
+        withProv=True,
         extraCls=None,
+        filterFunc=None,
+        combineMethod=None,
+        withN=True,
     ):
+        """Wrap the details of a specific table for this record into HTML.
+
+        Some of the parameters above will be passed to the initializers
+        of the detail record objects, others to their `wrap` method.
+
+        Parameters
+        ----------
+        dtable: string
+            The name of the detail table
+        withDetails, readonly, bodyMethod: mixed
+            See `control.record.Record`
+        inner, wrapMethod, expanded, withProv, extraCls: mixed
+            See `control.record.Record.wrap`.
+        filterFunc: function, optional `None`
+            You can optionally filter the detail records.
+        combineMethod: function, optional `None`
+            After getting the HTML for individual records, you can
+            instruct to reorder/restructure those representations.
+        withN: boolean, optional `True`
+            Whether to present the number of detail records
+
+        Returns
+        -------
+        string(html)
+        """
+
         details = self.details
 
         (dtableObj, drecordsAll) = G(details, dtable, default=(None, []))
@@ -123,12 +178,7 @@ class Details:
 
         innerCls = " inner" if inner else E
         return H.div(
-            [H.div(extraMsg, cls=extraCls) if extraMsg else E, nRep if withN else E]
+            [nRep if withN else E]
             + drecordReps,
-            cls=f"record-details{innerCls}",
+            cls=f"record-details{innerCls} {extraCls}",
         )
-
-    def wrapAll(self, readonly=False):
-        details = self.details
-
-        return H.join(self.wrapDetail(dtable, readonly=readonly) for dtable in details)

@@ -480,9 +480,7 @@ class WorkflowItem:
         The permission to execute the command will be checked first.
 
         !!! hint
-            Workflow commands are listed in
-            [workflow.yaml]({{repBase}}/server/yaml/workflow.yaml),
-            under `commands`.
+            Workflow commands are listed in workflow.yaml, under `commands`.
 
         Parameters
         ----------

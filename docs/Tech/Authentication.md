@@ -66,15 +66,9 @@ The systems maintains user-associated attributes from two sources:
     `dateLastLogin` | when the user has logged in most recently
     `statusLastLogin` | whether the last login attempt was successful
 
-    And, like almost all records in the system, some standard fields are added. You
-    will not find these fields on the interface in most cases, but it is good to
-    know that they will be recorded in the database.
-
-    field | comments
-    ----- | --------
-    `creator` | the user that created this user record. The legacy user have `HaSProject` as creator, which is itself a user that cannot login. Other user records do not have a creator. So authenticated users cannot change their user records.
-    `dateCreated` | when the record was created
-    `modified` | a list of modification events, having the date of modification and the user who did it for each event.
+    Like almost all records in the system, the
+    [provenance fields](../Tech/Model.md)
+    are added as well.
 
 ??? explanation "Display of user attributes"
     When a user is presented on the interface, we choose between the following
@@ -102,7 +96,7 @@ The attributes `authority` and `group`  contain the necessary information.
 
 ??? explanation "`group` values"
     See the
-    [permission model](../Concepts/Model.md#permission-model)
+    [permission model](../Tech/Model.md#permission-model)
     .
 
 ??? explanation "`statusLastLogin` values"

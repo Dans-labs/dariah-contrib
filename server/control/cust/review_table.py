@@ -6,6 +6,12 @@ from control.table import Table
 
 
 class ReviewT(Table):
+    """Logic for the review table.
+
+    Inserting a review means also to insert the right
+    set of reviewEntry records and prefill some of their fields.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

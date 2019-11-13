@@ -23,6 +23,6 @@ class Country(Value):
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):
-        """Provide the full country name as a tooltip on the interface."""
+        """Provides the full country name as a tooltip on the interface."""
 
         return G(record, N.name) or Qc

@@ -74,6 +74,9 @@ class Field:
         A number of properties will be inherited from the record object
         that spawns a field object.
 
+        The value of the field will be looked up from the record and saved into the attribute
+        `value`.
+
         Set the attribute `fieldTypeObj` to a suitable derived class of
         `control.typ.base.TypeBase`.
 
@@ -173,6 +176,20 @@ class Field:
         self.atts = dict(table=table, eid=eid, field=field)
 
     def save(self, data):
+        &#34;&#34;&#34;Save a new value for this field to MongoDb.
+
+        Before saving, permissions and workflow conditions will be checked.
+
+        After saving, workflow information will be adjusted.
+
+        Parameters
+        ----------
+        data: mixed
+            The new value(s) for this field.
+            It comes straight from the client, and will be converted to proper
+            Python/MongoDb values
+        &#34;&#34;&#34;
+
         context = self.context
         db = context.db
         uid = self.uid
@@ -225,11 +242,34 @@ class Field:
             recordObj.adjustWorkflow()
 
     def isEmpty(self):
+        &#34;&#34;&#34;Whether the value(s) is/are empty.
+
+        A single value is empty if it is `None`.
+
+        A mutliple value is empty if it is `None` or `[]`.
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
         value = self.value
         multiple = self.multiple
         return value is None or multiple and value == []
 
     def isBlank(self):
+        &#34;&#34;&#34;Whether the value(s) is/are blank.
+
+        A single value is empty if it is `None` or `&#39;&#39;`.
+
+        A mutliple value is empty if it is `None` or `[]`, or all its
+        component values are blank.
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
         value = self.value
         multiple = self.multiple
         return (
@@ -239,7 +279,78 @@ class Field:
             and (value == [] or all(v is None or v == E for v in value))
         )
 
+    def wrapBare(self):
+        &#34;&#34;&#34;Produce the bare field value.
+
+        This is the result of calling the
+        `control.typ.base.TypeBase.toDisplay` method on the derived
+        type class that matches the type of the field.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
+        context = self.context
+        types = context.types
+        tp = self.tp
+        value = self.value
+        multiple = self.multiple
+
+        fieldTypeObj = getattr(types, tp, None)
+        method = fieldTypeObj.toDisplay
+
+        return (
+            BLANK.join(method(val) for val in (value or []))
+            if multiple
+            else method(value)
+        )
+
     def wrap(self, action=None, asEdit=False, empty=False, withLabel=True, cls=E):
+        &#34;&#34;&#34;Wrap the field into HTML.
+
+        If there is an `action`, data from the request is picked up and
+        `Field.save` is called to save that data to the MongoDB.
+        Depending on the `action`, the field is then rendered as follows:
+
+        action | effect
+        --- | ---
+        `save` | no rendering
+        `view`| a read only rendering
+        `edit` | an edit widget
+
+        Whether a field is presented as an editable field depends on a number of factors:
+
+        factor | story
+        --- | ---
+        is master | a field pointing to a master will not be edited
+        attribute `mayEdit` | does the current user have permission to edit the field?
+        action `edit` or parameter `asEdit` | do we want to present an editable widget?
+
+        Parameters
+        ----------
+        action: {save, edit, view}, optional `None`
+            If present, data will be saved to the database first.
+        asEdit: boolean, optional `False`
+            No data will be saved.
+            The field will rendered editable, if permitted.
+        empty: boolean, optional `False`
+            Only relevant for readonly views: if the value is empty, just present the
+            empty string and nothing else.
+        withLabel: boolean, optional `True`
+            Whether to precede the value with a field label.
+            The label is specified in the field specs which are in the table&#39;s .yaml
+            file in `control/tables`.
+        cls: string, optional `&#39;&#39;`
+            A CSS class to append to the outer `&lt;div&gt;` of the result.
+
+        Returns
+        -------
+        string(html)
+            If there was an `action`, the bare representation of the field value is returned.
+            Otherwise, and if `withLabel`, a label is added.
+        &#34;&#34;&#34;
+
         mayRead = self.mayRead
 
         if not mayRead:
@@ -281,6 +392,40 @@ class Field:
         )
 
     def wrapWidget(self, editable, cls=E):
+        &#34;&#34;&#34;Wrap the field value.
+
+        A widget shows the value and may have additional controls to
+
+        *   edit the value
+        *   refresh the value
+
+        Refresh fields are those fields that change if other fields are updated,
+        typically fields that record the moment on which something happened.
+        These fields will get a refresh button automatically.
+
+        Fields may have three conditions relevant for rendering:
+
+        condition | rendering
+        --- | ---
+        not editable | readonly
+        editable in readonly view | readonly with button for editable view
+        editable in edit view | editable with button for readonly view
+
+        Parameters
+        ----------
+        editable: boolean
+            Whether the field should be presented in editable form
+        cls
+            See `Field.wrap()`
+
+        Returns
+        -------
+        button: string(html)
+        representation: string(html)
+
+        They are packaged as a tuple.
+        &#34;&#34;&#34;
+
         atts = self.atts
         mayEdit = self.mayEdit
         withRefresh = self.withRefresh
@@ -299,25 +444,22 @@ class Field:
             )
         )
 
-        return [button, self.wrapValue(editable, cls=cls)]
-
-    def wrapBare(self):
-        context = self.context
-        types = context.types
-        tp = self.tp
-        value = self.value
-        multiple = self.multiple
-
-        fieldTypeObj = getattr(types, tp, None)
-        method = fieldTypeObj.toDisplay
-
-        return (
-            BLANK.join(method(val) for val in (value or []))
-            if multiple
-            else method(value)
-        )
+        return (button, self.wrapValue(editable, cls=cls))
 
     def wrapValue(self, editable, cls=E):
+        &#34;&#34;&#34;Wraps the value of a field.
+
+        Parameters
+        ----------
+        editable: boolean
+            Whether the field should be presented in editable form
+        cls
+            See `Field.wrap()`
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
         context = self.context
         types = context.types
         fieldTypeObj = self.fieldTypeObj
@@ -389,6 +531,8 @@ class Field:
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the record object
 that spawns a field object.</p>
+<p>The value of the field will be looked up from the record and saved into the attribute
+<code>value</code>.</p>
 <p>Set the attribute <code>fieldTypeObj</code> to a suitable derived class of
 <a title="control.typ.base.TypeBase" href="typ/base.html#control.typ.base.TypeBase"><code>TypeBase</code></a>.</p>
 <div class="admonition caution">
@@ -455,6 +599,9 @@ passing values for them here.</p>
 
         A number of properties will be inherited from the record object
         that spawns a field object.
+
+        The value of the field will be looked up from the record and saved into the attribute
+        `value`.
 
         Set the attribute `fieldTypeObj` to a suitable derived class of
         `control.typ.base.TypeBase`.
@@ -555,6 +702,20 @@ passing values for them here.</p>
         self.atts = dict(table=table, eid=eid, field=field)
 
     def save(self, data):
+        &#34;&#34;&#34;Save a new value for this field to MongoDb.
+
+        Before saving, permissions and workflow conditions will be checked.
+
+        After saving, workflow information will be adjusted.
+
+        Parameters
+        ----------
+        data: mixed
+            The new value(s) for this field.
+            It comes straight from the client, and will be converted to proper
+            Python/MongoDb values
+        &#34;&#34;&#34;
+
         context = self.context
         db = context.db
         uid = self.uid
@@ -607,11 +768,34 @@ passing values for them here.</p>
             recordObj.adjustWorkflow()
 
     def isEmpty(self):
+        &#34;&#34;&#34;Whether the value(s) is/are empty.
+
+        A single value is empty if it is `None`.
+
+        A mutliple value is empty if it is `None` or `[]`.
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
         value = self.value
         multiple = self.multiple
         return value is None or multiple and value == []
 
     def isBlank(self):
+        &#34;&#34;&#34;Whether the value(s) is/are blank.
+
+        A single value is empty if it is `None` or `&#39;&#39;`.
+
+        A mutliple value is empty if it is `None` or `[]`, or all its
+        component values are blank.
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
         value = self.value
         multiple = self.multiple
         return (
@@ -621,7 +805,78 @@ passing values for them here.</p>
             and (value == [] or all(v is None or v == E for v in value))
         )
 
+    def wrapBare(self):
+        &#34;&#34;&#34;Produce the bare field value.
+
+        This is the result of calling the
+        `control.typ.base.TypeBase.toDisplay` method on the derived
+        type class that matches the type of the field.
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
+
+        context = self.context
+        types = context.types
+        tp = self.tp
+        value = self.value
+        multiple = self.multiple
+
+        fieldTypeObj = getattr(types, tp, None)
+        method = fieldTypeObj.toDisplay
+
+        return (
+            BLANK.join(method(val) for val in (value or []))
+            if multiple
+            else method(value)
+        )
+
     def wrap(self, action=None, asEdit=False, empty=False, withLabel=True, cls=E):
+        &#34;&#34;&#34;Wrap the field into HTML.
+
+        If there is an `action`, data from the request is picked up and
+        `Field.save` is called to save that data to the MongoDB.
+        Depending on the `action`, the field is then rendered as follows:
+
+        action | effect
+        --- | ---
+        `save` | no rendering
+        `view`| a read only rendering
+        `edit` | an edit widget
+
+        Whether a field is presented as an editable field depends on a number of factors:
+
+        factor | story
+        --- | ---
+        is master | a field pointing to a master will not be edited
+        attribute `mayEdit` | does the current user have permission to edit the field?
+        action `edit` or parameter `asEdit` | do we want to present an editable widget?
+
+        Parameters
+        ----------
+        action: {save, edit, view}, optional `None`
+            If present, data will be saved to the database first.
+        asEdit: boolean, optional `False`
+            No data will be saved.
+            The field will rendered editable, if permitted.
+        empty: boolean, optional `False`
+            Only relevant for readonly views: if the value is empty, just present the
+            empty string and nothing else.
+        withLabel: boolean, optional `True`
+            Whether to precede the value with a field label.
+            The label is specified in the field specs which are in the table&#39;s .yaml
+            file in `control/tables`.
+        cls: string, optional `&#39;&#39;`
+            A CSS class to append to the outer `&lt;div&gt;` of the result.
+
+        Returns
+        -------
+        string(html)
+            If there was an `action`, the bare representation of the field value is returned.
+            Otherwise, and if `withLabel`, a label is added.
+        &#34;&#34;&#34;
+
         mayRead = self.mayRead
 
         if not mayRead:
@@ -663,6 +918,40 @@ passing values for them here.</p>
         )
 
     def wrapWidget(self, editable, cls=E):
+        &#34;&#34;&#34;Wrap the field value.
+
+        A widget shows the value and may have additional controls to
+
+        *   edit the value
+        *   refresh the value
+
+        Refresh fields are those fields that change if other fields are updated,
+        typically fields that record the moment on which something happened.
+        These fields will get a refresh button automatically.
+
+        Fields may have three conditions relevant for rendering:
+
+        condition | rendering
+        --- | ---
+        not editable | readonly
+        editable in readonly view | readonly with button for editable view
+        editable in edit view | editable with button for readonly view
+
+        Parameters
+        ----------
+        editable: boolean
+            Whether the field should be presented in editable form
+        cls
+            See `Field.wrap()`
+
+        Returns
+        -------
+        button: string(html)
+        representation: string(html)
+
+        They are packaged as a tuple.
+        &#34;&#34;&#34;
+
         atts = self.atts
         mayEdit = self.mayEdit
         withRefresh = self.withRefresh
@@ -681,25 +970,22 @@ passing values for them here.</p>
             )
         )
 
-        return [button, self.wrapValue(editable, cls=cls)]
-
-    def wrapBare(self):
-        context = self.context
-        types = context.types
-        tp = self.tp
-        value = self.value
-        multiple = self.multiple
-
-        fieldTypeObj = getattr(types, tp, None)
-        method = fieldTypeObj.toDisplay
-
-        return (
-            BLANK.join(method(val) for val in (value or []))
-            if multiple
-            else method(value)
-        )
+        return (button, self.wrapValue(editable, cls=cls))
 
     def wrapValue(self, editable, cls=E):
+        &#34;&#34;&#34;Wraps the value of a field.
+
+        Parameters
+        ----------
+        editable: boolean
+            Whether the field should be presented in editable form
+        cls
+            See `Field.wrap()`
+
+        Returns
+        -------
+        string(html)
+        &#34;&#34;&#34;
         context = self.context
         types = context.types
         fieldTypeObj = self.fieldTypeObj
@@ -768,12 +1054,32 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">isBlank</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Whether the value(s) is/are blank.</p>
+<p>A single value is empty if it is <code>None</code> or <code>''</code>.</p>
+<p>A mutliple value is empty if it is <code>None</code> or <code>[]</code>, or all its
+component values are blank.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>boolean</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isBlank(self):
+    &#34;&#34;&#34;Whether the value(s) is/are blank.
+
+    A single value is empty if it is `None` or `&#39;&#39;`.
+
+    A mutliple value is empty if it is `None` or `[]`, or all its
+    component values are blank.
+
+    Returns
+    -------
+    boolean
+    &#34;&#34;&#34;
+
     value = self.value
     multiple = self.multiple
     return (
@@ -788,12 +1094,30 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">isEmpty</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Whether the value(s) is/are empty.</p>
+<p>A single value is empty if it is <code>None</code>.</p>
+<p>A mutliple value is empty if it is <code>None</code> or <code>[]</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>boolean</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def isEmpty(self):
+    &#34;&#34;&#34;Whether the value(s) is/are empty.
+
+    A single value is empty if it is `None`.
+
+    A mutliple value is empty if it is `None` or `[]`.
+
+    Returns
+    -------
+    boolean
+    &#34;&#34;&#34;
+
     value = self.value
     multiple = self.multiple
     return value is None or multiple and value == []</code></pre>
@@ -803,12 +1127,35 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">save</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Save a new value for this field to MongoDb.</p>
+<p>Before saving, permissions and workflow conditions will be checked.</p>
+<p>After saving, workflow information will be adjusted.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>mixed</code></dt>
+<dd>The new value(s) for this field.
+It comes straight from the client, and will be converted to proper
+Python/MongoDb values</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save(self, data):
+    &#34;&#34;&#34;Save a new value for this field to MongoDb.
+
+    Before saving, permissions and workflow conditions will be checked.
+
+    After saving, workflow information will be adjusted.
+
+    Parameters
+    ----------
+    data: mixed
+        The new value(s) for this field.
+        It comes straight from the client, and will be converted to proper
+        Python/MongoDb values
+    &#34;&#34;&#34;
+
     context = self.context
     db = context.db
     uid = self.uid
@@ -865,12 +1212,127 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">wrap</span></span>(<span>self, action=None, asEdit=False, empty=False, withLabel=True, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap the field into HTML.</p>
+<p>If there is an <code>action</code>, data from the request is picked up and
+<a title="control.field.Field.save" href="#control.field.Field.save"><code>Field.save()</code></a> is called to save that data to the MongoDB.
+Depending on the <code>action</code>, the field is then rendered as follows:</p>
+<table>
+<thead>
+<tr>
+<th>action</th>
+<th>effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>save</code></td>
+<td>no rendering</td>
+</tr>
+<tr>
+<td><code>view</code></td>
+<td>a read only rendering</td>
+</tr>
+<tr>
+<td><code>edit</code></td>
+<td>an edit widget</td>
+</tr>
+</tbody>
+</table>
+<p>Whether a field is presented as an editable field depends on a number of factors:</p>
+<table>
+<thead>
+<tr>
+<th>factor</th>
+<th>story</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>is master</td>
+<td>a field pointing to a master will not be edited</td>
+</tr>
+<tr>
+<td>attribute <code>mayEdit</code></td>
+<td>does the current user have permission to edit the field?</td>
+</tr>
+<tr>
+<td>action <code>edit</code> or parameter <code>asEdit</code></td>
+<td>do we want to present an editable widget?</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;{<code>save</code>, <code>edit</code>, <code>view</code>}, optional <code>None</code></dt>
+<dd>If present, data will be saved to the database first.</dd>
+<dt><strong><code>asEdit</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>No data will be saved.
+The field will rendered editable, if permitted.</dd>
+<dt><strong><code>empty</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Only relevant for readonly views: if the value is empty, just present the
+empty string and nothing else.</dd>
+<dt><strong><code>withLabel</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>Whether to precede the value with a field label.
+The label is specified in the field specs which are in the table's .yaml
+file in <code>control/tables</code>.</dd>
+<dt><strong><code>cls</code></strong> :&ensp;<code>string</code>, optional <code>''</code></dt>
+<dd>A CSS class to append to the outer <code>&lt;div&gt;</code> of the result.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>If there was an <code>action</code>, the bare representation of the field value is returned.
+Otherwise, and if <code>withLabel</code>, a label is added.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrap(self, action=None, asEdit=False, empty=False, withLabel=True, cls=E):
+    &#34;&#34;&#34;Wrap the field into HTML.
+
+    If there is an `action`, data from the request is picked up and
+    `Field.save` is called to save that data to the MongoDB.
+    Depending on the `action`, the field is then rendered as follows:
+
+    action | effect
+    --- | ---
+    `save` | no rendering
+    `view`| a read only rendering
+    `edit` | an edit widget
+
+    Whether a field is presented as an editable field depends on a number of factors:
+
+    factor | story
+    --- | ---
+    is master | a field pointing to a master will not be edited
+    attribute `mayEdit` | does the current user have permission to edit the field?
+    action `edit` or parameter `asEdit` | do we want to present an editable widget?
+
+    Parameters
+    ----------
+    action: {save, edit, view}, optional `None`
+        If present, data will be saved to the database first.
+    asEdit: boolean, optional `False`
+        No data will be saved.
+        The field will rendered editable, if permitted.
+    empty: boolean, optional `False`
+        Only relevant for readonly views: if the value is empty, just present the
+        empty string and nothing else.
+    withLabel: boolean, optional `True`
+        Whether to precede the value with a field label.
+        The label is specified in the field specs which are in the table&#39;s .yaml
+        file in `control/tables`.
+    cls: string, optional `&#39;&#39;`
+        A CSS class to append to the outer `&lt;div&gt;` of the result.
+
+    Returns
+    -------
+    string(html)
+        If there was an `action`, the bare representation of the field value is returned.
+        Otherwise, and if `withLabel`, a label is added.
+    &#34;&#34;&#34;
+
     mayRead = self.mayRead
 
     if not mayRead:
@@ -916,12 +1378,31 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">wrapBare</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Produce the bare field value.</p>
+<p>This is the result of calling the
+<a title="control.typ.base.TypeBase.toDisplay" href="typ/base.html#control.typ.base.TypeBase.toDisplay"><code>TypeBase.toDisplay()</code></a> method on the derived
+type class that matches the type of the field.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrapBare(self):
+    &#34;&#34;&#34;Produce the bare field value.
+
+    This is the result of calling the
+    `control.typ.base.TypeBase.toDisplay` method on the derived
+    type class that matches the type of the field.
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
+
     context = self.context
     types = context.types
     tp = self.tp
@@ -942,12 +1423,37 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">wrapValue</span></span>(<span>self, editable, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wraps the value of a field.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>editable</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether the field should be presented in editable form</dd>
+<dt><strong><code>cls</code></strong></dt>
+<dd>See <a title="control.field.Field.wrap" href="#control.field.Field.wrap"><code>Field.wrap()</code></a></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrapValue(self, editable, cls=E):
+    &#34;&#34;&#34;Wraps the value of a field.
+
+    Parameters
+    ----------
+    editable: boolean
+        Whether the field should be presented in editable form
+    cls
+        See `Field.wrap()`
+
+    Returns
+    -------
+    string(html)
+    &#34;&#34;&#34;
     context = self.context
     types = context.types
     fieldTypeObj = self.fieldTypeObj
@@ -1005,12 +1511,92 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
 <span>def <span class="ident">wrapWidget</span></span>(<span>self, editable, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Wrap the field value.</p>
+<p>A widget shows the value and may have additional controls to</p>
+<ul>
+<li>edit the value</li>
+<li>refresh the value</li>
+</ul>
+<p>Refresh fields are those fields that change if other fields are updated,
+typically fields that record the moment on which something happened.
+These fields will get a refresh button automatically.</p>
+<p>Fields may have three conditions relevant for rendering:</p>
+<table>
+<thead>
+<tr>
+<th>condition</th>
+<th>rendering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>not editable</td>
+<td>readonly</td>
+</tr>
+<tr>
+<td>editable in readonly view</td>
+<td>readonly with button for editable view</td>
+</tr>
+<tr>
+<td>editable in edit view</td>
+<td>editable with button for readonly view</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>editable</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether the field should be presented in editable form</dd>
+<dt><strong><code>cls</code></strong></dt>
+<dd>See <a title="control.field.Field.wrap" href="#control.field.Field.wrap"><code>Field.wrap()</code></a></dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>button</code></strong> :&ensp;<code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>representation</code></strong> :&ensp;<code>string</code>(<code>html</code>)</dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>They are packaged as a tuple.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def wrapWidget(self, editable, cls=E):
+    &#34;&#34;&#34;Wrap the field value.
+
+    A widget shows the value and may have additional controls to
+
+    *   edit the value
+    *   refresh the value
+
+    Refresh fields are those fields that change if other fields are updated,
+    typically fields that record the moment on which something happened.
+    These fields will get a refresh button automatically.
+
+    Fields may have three conditions relevant for rendering:
+
+    condition | rendering
+    --- | ---
+    not editable | readonly
+    editable in readonly view | readonly with button for editable view
+    editable in edit view | editable with button for readonly view
+
+    Parameters
+    ----------
+    editable: boolean
+        Whether the field should be presented in editable form
+    cls
+        See `Field.wrap()`
+
+    Returns
+    -------
+    button: string(html)
+    representation: string(html)
+
+    They are packaged as a tuple.
+    &#34;&#34;&#34;
+
     atts = self.atts
     mayEdit = self.mayEdit
     withRefresh = self.withRefresh
@@ -1029,7 +1615,7 @@ If iterable is specified the tuple is initialized from iterable's items.</p>
         )
     )
 
-    return [button, self.wrapValue(editable, cls=cls)]</code></pre>
+    return (button, self.wrapValue(editable, cls=cls))</code></pre>
 </details>
 </dd>
 </dl>

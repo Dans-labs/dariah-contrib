@@ -49,7 +49,7 @@ class Country(Value):
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):
-        &#34;&#34;&#34;Provide the full country name as a tooltip on the interface.&#34;&#34;&#34;
+        &#34;&#34;&#34;Provides the full country name as a tooltip on the interface.&#34;&#34;&#34;
 
         return G(record, N.name) or Qc</code></pre>
 </details>
@@ -92,7 +92,7 @@ class Country(Value):
         return iso + shiftRegional(iso) if iso else Qc
 
     def titleHint(self, record):
-        &#34;&#34;&#34;Provide the full country name as a tooltip on the interface.&#34;&#34;&#34;
+        &#34;&#34;&#34;Provides the full country name as a tooltip on the interface.&#34;&#34;&#34;
 
         return G(record, N.name) or Qc</code></pre>
 </details>
@@ -108,13 +108,13 @@ class Country(Value):
 <span>def <span class="ident">titleHint</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide the full country name as a tooltip on the interface.</p></section>
+<section class="desc"><p>Provides the full country name as a tooltip on the interface.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def titleHint(self, record):
-    &#34;&#34;&#34;Provide the full country name as a tooltip on the interface.&#34;&#34;&#34;
+    &#34;&#34;&#34;Provides the full country name as a tooltip on the interface.&#34;&#34;&#34;
 
     return G(record, N.name) or Qc</code></pre>
 </details>

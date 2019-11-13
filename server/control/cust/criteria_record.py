@@ -12,6 +12,12 @@ MESSAGES = CW.messages
 
 
 class CriteriaR(Record):
+    """Logic for criteria records.
+
+    A `wrapHelp` method is added which presents the criteria
+    in *legend* form, to be displayed as help info on a `criteriaEntry` record.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

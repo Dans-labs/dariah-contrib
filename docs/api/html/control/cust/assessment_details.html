@@ -37,6 +37,17 @@ REVIEW_DECISION = CW.messages[N.reviewDecision]
 
 
 class AssessmentD(Details):
+    &#34;&#34;&#34;Logic for detail records of assessments.
+
+    An assessment is filled out by entering data in a fixed set of `criteriaEntry` records.
+    Each `criteriaEntry` corresponds to a specific `criteria` record.
+    The type of the assessment determines wich set of `criteria` is linked to it.
+
+    !!! hint
+        If the `assessment` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -47,7 +58,7 @@ class AssessmentD(Details):
 
         (reviewer, reviewers) = wfitem.info(N.assessment, N.reviewer, N.reviewers)
 
-        self.fetchDetails(N.criteriaEntry, sortKey=cEntrySort)
+        self.fetchDetails(N.criteriaEntry, sortKey=self.cEntrySort)
 
         criteriaPart = self.wrapDetail(N.criteriaEntry, bodyMethod=N.compact)
 
@@ -101,9 +112,9 @@ class AssessmentD(Details):
             [criteriaPart, statusRep, H.div(REVIEW_DECISION, cls=&#34;head&#34;), reviewPart],
         )
 
-
-def cEntrySort(r):
-    return (G(r, N.assessment), G(r, N.seq) or 0)</code></pre>
+    @staticmethod
+    def cEntrySort(r):
+        return (G(r, N.assessment), G(r, N.seq) or 0)</code></pre>
 </details>
 </section>
 <section>
@@ -111,22 +122,6 @@ def cEntrySort(r):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="control.cust.assessment_details.cEntrySort"><code class="name flex">
-<span>def <span class="ident">cEntrySort</span></span>(<span>r)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def cEntrySort(r):
-    return (G(r, N.assessment), G(r, N.seq) or 0)</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -136,7 +131,15 @@ def cEntrySort(r):
 <span>(</span><span>recordObj)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with detail records.</p>
+<section class="desc"><p>Logic for detail records of assessments.</p>
+<p>An assessment is filled out by entering data in a fixed set of <code>criteriaEntry</code> records.
+Each <code>criteriaEntry</code> corresponds to a specific <code>criteria</code> record.
+The type of the assessment determines wich set of <code>criteria</code> is linked to it.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If the <code>assessment</code> record is not part of the workflow, the behaviour
+of this class falls back to the base class <a title="control.details.Details" href="../details.html#control.details.Details"><code>Details</code></a>.</p>
+</div>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the master record object
 that spawns a detail record object.</p>
@@ -150,6 +153,17 @@ that spawns a detail record object.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AssessmentD(Details):
+    &#34;&#34;&#34;Logic for detail records of assessments.
+
+    An assessment is filled out by entering data in a fixed set of `criteriaEntry` records.
+    Each `criteriaEntry` corresponds to a specific `criteria` record.
+    The type of the assessment determines wich set of `criteria` is linked to it.
+
+    !!! hint
+        If the `assessment` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -160,7 +174,7 @@ that spawns a detail record object.</p>
 
         (reviewer, reviewers) = wfitem.info(N.assessment, N.reviewer, N.reviewers)
 
-        self.fetchDetails(N.criteriaEntry, sortKey=cEntrySort)
+        self.fetchDetails(N.criteriaEntry, sortKey=self.cEntrySort)
 
         criteriaPart = self.wrapDetail(N.criteriaEntry, bodyMethod=N.compact)
 
@@ -212,16 +226,20 @@ that spawns a detail record object.</p>
 
         return H.div(
             [criteriaPart, statusRep, H.div(REVIEW_DECISION, cls=&#34;head&#34;), reviewPart],
-        )</code></pre>
+        )
+
+    @staticmethod
+    def cEntrySort(r):
+        return (G(r, N.assessment), G(r, N.seq) or 0)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></li>
 </ul>
-<h3>Methods</h3>
+<h3>Static methods</h3>
 <dl>
-<dt id="control.cust.assessment_details.AssessmentD.wrap"><code class="name flex">
-<span>def <span class="ident">wrap</span></span>(<span>self, *args, **kwargs)</span>
+<dt id="control.cust.assessment_details.AssessmentD.cEntrySort"><code class="name flex">
+<span>def <span class="ident">cEntrySort</span></span>(<span>r)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -229,66 +247,9 @@ that spawns a detail record object.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def wrap(self, *args, **kwargs):
-    wfitem = self.wfitem
-    if not wfitem:
-        return super().wrap(*args, **kwargs)
-
-    (reviewer, reviewers) = wfitem.info(N.assessment, N.reviewer, N.reviewers)
-
-    self.fetchDetails(N.criteriaEntry, sortKey=cEntrySort)
-
-    criteriaPart = self.wrapDetail(N.criteriaEntry, bodyMethod=N.compact)
-
-    self.fetchDetails(
-        N.review, sortKey=lambda r: G(r, N.dateCreated, default=0),
-    )
-
-    byReviewer = {N.expert: [], N.final: []}
-
-    for dest in (N.expert, N.final):
-        byReviewer[dest] = self.wrapDetail(
-            N.review,
-            filterFunc=lambda r: G(r, N.creator) == G(reviewer, dest),
-            bodyMethod=N.compact,
-            withDetails=True,
-            expanded=True,
-            withProv=True,
-            withN=False,
-            inner=False,
-        )
-
-    orphanedReviews = self.wrapDetail(
-        N.review,
-        filterFunc=lambda r: G(r, N.creator) not in reviewers,
-        withProv=True,
-    )
-
-    reviewPart = H.div(
-        [
-            H.div(
-                [H.div(cap1(dest), cls=&#34;head&#34;), G(byReviewer, dest)],
-                cls=f&#34;reviews {dest}&#34;,
-            )
-            for dest in reviewer
-        ],
-        cls=&#34;reviewers&#34;,
-    ) + (
-        H.div(
-            [
-                H.div(cap1(N.orphaned) + &#34; &#34; + N.reviews, cls=&#34;head&#34;),
-                orphanedReviews,
-            ],
-        )
-        if orphanedReviews
-        else E
-    )
-
-    statusRep = wfitem.status(N.assessment)
-
-    return H.div(
-        [criteriaPart, statusRep, H.div(REVIEW_DECISION, cls=&#34;head&#34;), reviewPart],
-    )</code></pre>
+<pre><code class="python">@staticmethod
+def cEntrySort(r):
+    return (G(r, N.assessment), G(r, N.seq) or 0)</code></pre>
 </details>
 </dd>
 </dl>
@@ -296,7 +257,10 @@ that spawns a detail record object.</p>
 <ul class="hlist">
 <li><code><b><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></b></code>:
 <ul class="hlist">
+<li><code><a title="control.details.Details.fetchDetails" href="../details.html#control.details.Details.fetchDetails">fetchDetails</a></code></li>
 <li><code><a title="control.details.Details.inheritProps" href="../details.html#control.details.Details.inheritProps">inheritProps</a></code></li>
+<li><code><a title="control.details.Details.wrap" href="../details.html#control.details.Details.wrap">wrap</a></code></li>
+<li><code><a title="control.details.Details.wrapDetail" href="../details.html#control.details.Details.wrapDetail">wrapDetail</a></code></li>
 </ul>
 </li>
 </ul>
@@ -315,17 +279,12 @@ that spawns a detail record object.</p>
 <li><code><a title="control.cust" href="index.html">control.cust</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="control.cust.assessment_details.cEntrySort" href="#control.cust.assessment_details.cEntrySort">cEntrySort</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="control.cust.assessment_details.AssessmentD" href="#control.cust.assessment_details.AssessmentD">AssessmentD</a></code></h4>
 <ul class="">
-<li><code><a title="control.cust.assessment_details.AssessmentD.wrap" href="#control.cust.assessment_details.AssessmentD.wrap">wrap</a></code></li>
+<li><code><a title="control.cust.assessment_details.AssessmentD.cEntrySort" href="#control.cust.assessment_details.AssessmentD.cEntrySort">cEntrySort</a></code></li>
 </ul>
 </li>
 </ul>

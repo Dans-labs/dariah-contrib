@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.cust.factory_details API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Factory to make derived Details classes." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,14 @@
 <h1 class="title">Module <code>control.cust.factory_details</code></h1>
 </header>
 <section id="section-intro">
+<p>Factory to make derived Details classes.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Names as N
+<pre><code class="python">&#34;&#34;&#34;Factory to make derived Details classes.&#34;&#34;&#34;
+
+from config import Names as N
 from control.utils import factory as baseFactory
 
 from control.details import Details
@@ -40,15 +43,38 @@ DERIVEDS = (
     (N.criteriaEntry, CriteriaEntryD),
     (N.review, ReviewD),
 )
+&#34;&#34;&#34;Search space for classes derived from `control.details.Details`.&#34;&#34;&#34;
 
 
 def factory(name):
+    &#34;&#34;&#34;Look up a derived class by registered name.
+
+    See `DERIVEDS`.
+
+    Parameters
+    ----------
+    name: string
+        The name under which the derived class is registered.
+
+    Returns
+    -------
+    class
+        The derived class if it can be found, otherwise the base class.
+    &#34;&#34;&#34;
+
     return baseFactory(name, Details, DERIVEDS)</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="control.cust.factory_details.DERIVEDS"><code class="name">var <span class="ident">DERIVEDS</span></code></dt>
+<dd>
+<section class="desc"><p>Search space for classes derived from <a title="control.details.Details" href="../details.html#control.details.Details"><code>Details</code></a>.</p></section>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
@@ -57,12 +83,38 @@ def factory(name):
 <span>def <span class="ident">factory</span></span>(<span>name)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Look up a derived class by registered name.</p>
+<p>See <a title="control.cust.factory_details.DERIVEDS" href="#control.cust.factory_details.DERIVEDS"><code>DERIVEDS</code></a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name under which the derived class is registered.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>class</code></dt>
+<dd>The derived class if it can be found, otherwise the base class.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def factory(name):
+    &#34;&#34;&#34;Look up a derived class by registered name.
+
+    See `DERIVEDS`.
+
+    Parameters
+    ----------
+    name: string
+        The name under which the derived class is registered.
+
+    Returns
+    -------
+    class
+        The derived class if it can be found, otherwise the base class.
+    &#34;&#34;&#34;
+
     return baseFactory(name, Details, DERIVEDS)</code></pre>
 </details>
 </dd>
@@ -80,6 +132,11 @@ def factory(name):
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="control.cust" href="index.html">control.cust</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="control.cust.factory_details.DERIVEDS" href="#control.cust.factory_details.DERIVEDS">DERIVEDS</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>

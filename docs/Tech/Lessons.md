@@ -51,7 +51,7 @@ Before redesigning I considered these options:
 
 ??? abstract "Generic app/framework"
     We could have used an app like Trello or Basecamp, or even
-    [GitHub](../Functionality/Business.md#alternatives)
+    [GitHub](../Workings/Business.md#alternatives)
     itself, or a content management
     system that has not been designed to support a specific workflow like this. We
     would have had several disadvantages:

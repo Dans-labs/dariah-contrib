@@ -31,6 +31,23 @@ from control.utils import pick as G
 
 
 class ContribD(Details):
+    &#34;&#34;&#34;Logic for detail records of contribs.
+
+    The main point of departure from the standard behaviour is that
+    we *only* want the `assessment` detail records, not the `review` detail
+    records.
+
+    The reason is that we show assessments in a special way and that reviews are
+    shown inside the assessments.
+
+    That way, we can present the assessment entries side by side with the reviewer
+    entries.
+
+    !!! hint
+        If the `contrib` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -62,7 +79,19 @@ class ContribD(Details):
 <span>(</span><span>recordObj)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with detail records.</p>
+<section class="desc"><p>Logic for detail records of contribs.</p>
+<p>The main point of departure from the standard behaviour is that
+we <em>only</em> want the <code>assessment</code> detail records, not the <code>review</code> detail
+records.</p>
+<p>The reason is that we show assessments in a special way and that reviews are
+shown inside the assessments.</p>
+<p>That way, we can present the assessment entries side by side with the reviewer
+entries.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If the <code>contrib</code> record is not part of the workflow, the behaviour
+of this class falls back to the base class <a title="control.details.Details" href="../details.html#control.details.Details"><code>Details</code></a>.</p>
+</div>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the master record object
 that spawns a detail record object.</p>
@@ -76,6 +105,23 @@ that spawns a detail record object.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ContribD(Details):
+    &#34;&#34;&#34;Logic for detail records of contribs.
+
+    The main point of departure from the standard behaviour is that
+    we *only* want the `assessment` detail records, not the `review` detail
+    records.
+
+    The reason is that we show assessments in a special way and that reviews are
+    shown inside the assessments.
+
+    That way, we can present the assessment entries side by side with the reviewer
+    entries.
+
+    !!! hint
+        If the `contrib` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    &#34;&#34;&#34;
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 
@@ -96,37 +142,14 @@ that spawns a detail record object.</p>
 <ul class="hlist">
 <li><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="control.cust.contrib_details.ContribD.wrap"><code class="name flex">
-<span>def <span class="ident">wrap</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def wrap(self, *args, **kwargs):
-    wfitem = self.wfitem
-    if not wfitem:
-        return super().wrap(*args, **kwargs)
-
-    self.fetchDetails(
-        N.assessment, sortKey=lambda r: G(r, N.dateCreated, default=0),
-    )
-
-    statusRep = wfitem.status(N.contrib)
-
-    return H.div([statusRep, self.wrapDetail(N.assessment)])</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="control.details.Details" href="../details.html#control.details.Details">Details</a></b></code>:
 <ul class="hlist">
+<li><code><a title="control.details.Details.fetchDetails" href="../details.html#control.details.Details.fetchDetails">fetchDetails</a></code></li>
 <li><code><a title="control.details.Details.inheritProps" href="../details.html#control.details.Details.inheritProps">inheritProps</a></code></li>
+<li><code><a title="control.details.Details.wrap" href="../details.html#control.details.Details.wrap">wrap</a></code></li>
+<li><code><a title="control.details.Details.wrapDetail" href="../details.html#control.details.Details.wrapDetail">wrapDetail</a></code></li>
 </ul>
 </li>
 </ul>
@@ -149,9 +172,6 @@ that spawns a detail record object.</p>
 <ul>
 <li>
 <h4><code><a title="control.cust.contrib_details.ContribD" href="#control.cust.contrib_details.ContribD">ContribD</a></code></h4>
-<ul class="">
-<li><code><a title="control.cust.contrib_details.ContribD.wrap" href="#control.cust.contrib_details.ContribD.wrap">wrap</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

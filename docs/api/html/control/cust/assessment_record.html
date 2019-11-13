@@ -30,6 +30,16 @@ from control.html import HtmlElements as H
 
 
 class AssessmentR(Record):
+    &#34;&#34;&#34;Logic for assessment records.
+
+    Assessment records that are part of a workflow have customised titles,
+    showing the creator and create data of the assessment.
+
+    !!! hint
+        If the `assessment` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.record.Record`.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -58,7 +68,14 @@ class AssessmentR(Record):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with records.</p>
+<section class="desc"><p>Logic for assessment records.</p>
+<p>Assessment records that are part of a workflow have customised titles,
+showing the creator and create data of the assessment.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>If the <code>assessment</code> record is not part of the workflow, the behaviour
+of this class falls back to the base class <a title="control.record.Record" href="../record.html#control.record.Record"><code>Record</code></a>.</p>
+</div>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the table object
 that spawns a record object.</p>
@@ -76,6 +93,16 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AssessmentR(Record):
+    &#34;&#34;&#34;Logic for assessment records.
+
+    Assessment records that are part of a workflow have customised titles,
+    showing the creator and create data of the assessment.
+
+    !!! hint
+        If the `assessment` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.record.Record`.
+    &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -93,41 +120,26 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <ul class="hlist">
 <li><a title="control.record.Record" href="../record.html#control.record.Record">Record</a></li>
 </ul>
-<h3>Methods</h3>
-<dl>
-<dt id="control.cust.assessment_record.AssessmentR.title"><code class="name flex">
-<span>def <span class="ident">title</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def title(self, *args, **kwargs):
-    wfitem = self.wfitem
-    if not wfitem:
-        return super().title(*args, **kwargs)
-
-    datetime = self.field(N.dateCreated).wrapBare()
-    date = datetime.split(maxsplit=1)[0]
-    creator = self.field(N.creator).wrapBare()
-    return H.span(f&#34;&#34;&#34;on {date} by {creator}&#34;&#34;&#34;, cls=f&#34;small&#34;)</code></pre>
-</details>
-</dd>
-</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="control.record.Record" href="../record.html#control.record.Record">Record</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.record.Record.adjustWorkflow" href="../record.html#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="control.record.Record.body" href="../record.html#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.command" href="../record.html#control.record.Record.command">command</a></code></li>
+<li><code><a title="control.record.Record.delete" href="../record.html#control.record.Record.delete">delete</a></code></li>
+<li><code><a title="control.record.Record.deleteButton" href="../record.html#control.record.Record.deleteButton">deleteButton</a></code></li>
+<li><code><a title="control.record.Record.deleteDetails" href="../record.html#control.record.Record.deleteDetails">deleteDetails</a></code></li>
+<li><code><a title="control.record.Record.field" href="../record.html#control.record.Record.field">field</a></code></li>
 <li><code><a title="control.record.Record.getDelPerm" href="../record.html#control.record.Record.getDelPerm">getDelPerm</a></code></li>
 <li><code><a title="control.record.Record.getDependencies" href="../record.html#control.record.Record.getDependencies">getDependencies</a></code></li>
 <li><code><a title="control.record.Record.inheritProps" href="../record.html#control.record.Record.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.record.Record.reload" href="../record.html#control.record.Record.reload">reload</a></code></li>
 <li><code><a title="control.record.Record.setPerm" href="../record.html#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="../record.html#control.record.Record.setWorkflow">setWorkflow</a></code></li>
+<li><code><a title="control.record.Record.title" href="../record.html#control.record.Record.title">title</a></code></li>
+<li><code><a title="control.record.Record.titleRaw" href="../record.html#control.record.Record.titleRaw">titleRaw</a></code></li>
+<li><code><a title="control.record.Record.wrap" href="../record.html#control.record.Record.wrap">wrap</a></code></li>
 </ul>
 </li>
 </ul>
@@ -150,9 +162,6 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <ul>
 <li>
 <h4><code><a title="control.cust.assessment_record.AssessmentR" href="#control.cust.assessment_record.AssessmentR">AssessmentR</a></code></h4>
-<ul class="">
-<li><code><a title="control.cust.assessment_record.AssessmentR.title" href="#control.cust.assessment_record.AssessmentR.title">title</a></code></li>
-</ul>
 </li>
 </ul>
 </li>

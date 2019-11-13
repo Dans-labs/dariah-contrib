@@ -81,7 +81,7 @@ class Table:
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
     ):
-        """Factory function to wrap a record object around the data of arecord.
+        """Factory function to wrap a record object around the data of a record.
 
         !!! note
             Only  one of `eid` or `record` needs to be passed.

@@ -23,13 +23,8 @@ is
 to text, YAML is to XML-JSON. In this app we use YAML for configuration details.
 
 ??? details "Usage in this app"
-    *   the
-        [data model](../Concepts/Model.md)
-        lists all the tables and fields, including how they
-        hang together and how we want to represent them on screen. It also defines
-        access control. If you, as developer, need to add new tables and fields, you
-        can do so by modifying the [table definition files]({{repBase}}/server/tables)
-    *   general configuration: see the [config files]({{repBase}}/server/yaml).
+    *   [table definition files]({{repBase}}/server/tables)
+    *   [other configuration files]({{repBase}}/server/yaml).
 
 ### Markdown
 
@@ -37,8 +32,7 @@ See [Markdown]({{markdownDoc}}).
 
 A simple plain-text way to write formatted text. See it as a shortcut to writing
 HTML. It is handy for writing documentation without being distracted by too many
-formatting options and issues, as you experience when writing in Word or plain
-HTML.
+formatting options and issues.
 
 ??? details "General usage"
     Markdown is usually converted to HTML, but even when it is not converted, it is
@@ -54,9 +48,9 @@ HTML.
     which is used for structured data.
 
 ??? details "Usage in this app"
-    *   all documentation here is written in markdown
-    *   all big editable text fields
-        in this app support markdown.
+    *   all documentation here is written in Markdown
+    *   the docstrings insode the Python code use Markdown
+    *   all big editable text fields in this app support Markdown.
 
 ### JavaScript
 
@@ -86,17 +80,11 @@ A general purpose scripting language with excellent data processing facilities.
     is
     [Flask]({{flask}})
     ,
-    a light-weight framework for handling http(s)
-    requests.
+    a light-weight framework for handling http(s) requests.
 
     We have added a set of
-    [controllers](../Server/Server.md)
+    [controllers](../{{docstrings}})
     .
-    The actual
-    [code there]({{repBase}}/server/control)
-    is structured into generic functions for data access and
-    specific tweaks to handle the business workflow of the
-    contribution tool.
 
 ### CSS
 
@@ -177,18 +165,10 @@ The core language of the web.
 ??? details "Usage in this app"
     Surprisingly, our code contains very little HTML.
 
-    Our server only sends snippets of HTML to the browser i response to focused request,
-    such as the
-    first
-    [short page]({{repBase}}/server/templates/index.html)
-    ,
-    that serves to load a
-    the style sheets and the
-    [JavaScript](#JavaScript)
-    into the browser.
-    This
-    JavaScript code triggers the fetching of new HTML for portions
-    that the user is interacting with.
+    Our server only sends a simple
+    [template page]({{repBase}}/server/templates/index.html)
+    to the browser followed by one or more snippets to replace pieces of
+    content by updated material.
 
 ### JSON
 

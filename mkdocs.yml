@@ -1,7 +1,6 @@
-site_name: Tech Doc DARIAH contribution tool
+site_name: DARIAH contribution tool
 site_description: > 
-  The technical documentation of the DARIAH Contribution Tool.
-  Design, specs, rationales, patterns, diagrams.
+  Documentation of the DARIAH Contribution Tool.
 
 site_url: "https://dans-labs.github.io/dariah-contrib/" 
 site_author: Dirk Roorda
@@ -13,7 +12,7 @@ theme:
   name: dans
   logo: 'images/inkind_logo.png'
   favicon: 'icons/favicon.ico'
-  development: true
+  development: false
   development_label: still in beta
   production_link: ''
   client:
@@ -71,6 +70,7 @@ extra:
   repo: https://github.com/Dans-labs/dariah-contrib
   docSite: https://dans-labs.github.io/dariah-contrib
   docSiteOrig: https://dans-labs.github.io/dariah
+  docstrings: api/html/control
 
   # DARIAH
   dans: https://dans.knaw.nl
@@ -121,27 +121,20 @@ extra:
 
 nav:
   - Home: 'index.md'
-  - About:
-    - Codebase: 'About/Codebase.md'
-    - Stats: 'About/Stats.md'
-    - News: 'About/News.md'
-    - Lessons: 'About/Lessons.md'
-  - Functionality:
-    - Business: 'Functionality/Business.md'
-    - Tables: 'Functionality/Tables.md'
-    - Workflow: 'Functionality/Workflow.md'
-  - Legacy:
-    - Content: 'Legacy/Content.md'
-  - Concepts:
-    - Model: 'Concepts/Model.md'
-  - Server:
-    - Authentication: 'Server/Authentication.md'
-    - Server: 'Server/Server.md'
-  - Technology:
-    - Tech: 'Technology/Tech.md'
-    - ES6: 'Technology/ES6.md'
-  - Integration:
-    - API: 'Integration/API.md'
-  - Maintenance:
-    - Deploy: 'Maintenance/Deploy.md'
-    - Techdoc: 'api/html/control/index.html'
+  - News: 'News.md'
+  - "What does it do":
+    - Business: 'Workings/Business.md'
+    - API: 'Workings/API.md'
+    - Content: 'Workings/Content.md'
+  - Technical:
+    - Deploy: 'Tech/Deploy.md'
+    - Model: 'Tech/Model.md'
+    - Workflow: 'Tech/Workflow.md'
+    - Tables: 'Tech/Tables.md'
+    - Web: 'Tech/Web.md'
+    - Authentication: 'Tech/Authentication.md'
+    - Codebase: 'Tech/Codebase.md'
+    - Stats: 'Tech/Stats.md'
+    - Inventory: 'Tech/Inventory.md'
+    - Lessons: 'Tech/Lessons.md'
+  - Docstrings: 'api/html/control/index.html'

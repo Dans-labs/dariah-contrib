@@ -9,6 +9,21 @@ ORPHAN_MSG = CW.messages[N.orphanedReviewer]
 
 
 class ReviewD(Details):
+    """Logic for detail records of reviews.
+
+    The main point of departure from the standard behaviour is that
+    we do not present the reviewEntry detail records here at all.
+
+    They will be presented as details of the criteriaEntry records.
+
+    On the other hand, we do want to show the review decision as a workflow
+    status field here.
+
+    !!! hint
+        If the `reviewEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.details.Details`.
+    """
+
     def __init__(self, recordObj):
         super().__init__(recordObj)
 

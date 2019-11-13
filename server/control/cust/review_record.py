@@ -10,6 +10,19 @@ ORPHAN = H.icon(CW.unknown[N.reviewKind])
 
 
 class ReviewR(Record):
+    """Logic for review records.
+
+    Review records have a customised title,
+    showing when the ereview was made and by whom.
+
+    There is also a `compact` method to present these records,
+    just the title, remarks and decision.
+
+    !!! hint
+        If the `reviewEntry` record is not part of the workflow, the behaviour
+        of this class falls back to the base class `control.record.Record`.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
