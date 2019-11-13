@@ -4,7 +4,7 @@ import re
 
 from itertools import chain
 
-from controllers.utils import pick as G, serverprint, cap1, E, LOW, HYPHEN
+from control.utils import pick as G, serverprint, cap1, E, LOW, HYPHEN
 
 CONFIG_EXT = ".yaml"
 CONFIG_DIR = "yaml"

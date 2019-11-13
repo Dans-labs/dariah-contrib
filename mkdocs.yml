@@ -69,8 +69,8 @@ extra:
   repBase: https://github.com/Dans-labs/dariah-contrib/blob/master
   liveBase: https://dariah-beta.dans.knaw.nl
   repo: https://github.com/Dans-labs/dariah-contrib
-  docSite: https://dans-labs.github.io/dariah-contrib/
-  docSiteOrig: https://dans-labs.github.io/dariah/
+  docSite: https://dans-labs.github.io/dariah-contrib
+  docSiteOrig: https://dans-labs.github.io/dariah
 
   # DARIAH
   dans: https://dans.knaw.nl
@@ -144,4 +144,4 @@ nav:
     - API: 'Integration/API.md'
   - Maintenance:
     - Deploy: 'Maintenance/Deploy.md'
-    - Techdoc: 'api/html/controllers/index.html'
+    - Techdoc: 'api/html/control/index.html'

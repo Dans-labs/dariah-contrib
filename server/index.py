@@ -12,15 +12,15 @@ from flask import (
 from pymongo import MongoClient
 
 from config import Config as C, Names as N
-from controllers.utils import pick as G, E
-from controllers.db import Db
-from controllers.workflow.compute import Workflow
-from controllers.auth import Auth
-from controllers.control import Control
-from controllers.sidebar import Sidebar
-from controllers.topbar import Topbar
-from controllers.overview import Overview
-from controllers.specific.factory_table import make as mkTable
+from control.utils import pick as G, E
+from control.db import Db
+from control.workflow.compute import Workflow
+from control.auth import Auth
+from control.context import Context
+from control.sidebar import Sidebar
+from control.topbar import Topbar
+from control.overview import Overview
+from control.cust.factory_table import make as mkTable
 
 
 CT = C.tables
@@ -68,8 +68,8 @@ def factory():
     app = Flask(__name__, static_url_path=DUMMY)
     auth = Auth(app, db)
 
-    def getControl():
-        return Control(db, wf, auth)
+    def getContext():
+        return Context(db, wf, auth)
 
     if DEBUG and auth.isDevel:
         CT.showReferences()
@@ -90,10 +90,10 @@ def factory():
     @app.route(f"""/{INDEX}""")
     def serveIndex():
         path = START
-        control = getControl()
+        context = getContext()
         auth.authenticate()
-        topbar = Topbar(control).wrap()
-        sidebar = Sidebar(control, path).wrap()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
         return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=LANDING)
 
     # OVERVIEW PAGE
@@ -101,28 +101,28 @@ def factory():
     @app.route(f"""{OVERVIEW}""")
     def serveOverview():
         path = START
-        control = getControl()
+        context = getContext()
         auth.authenticate()
-        topbar = Topbar(control).wrap()
-        sidebar = Sidebar(control, path).wrap()
-        overview = Overview(control).wrap()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        overview = Overview(context).wrap()
         return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=overview)
 
     @app.route(f"""{OVERVIEW}.tsv""")
     def serveOverviewTsv():
-        control = getControl()
+        context = getContext()
         auth.authenticate()
-        return Overview(control).wrap(asTsv=True)
+        return Overview(context).wrap(asTsv=True)
 
     # INSERT RECORD IN TABLE
 
     @app.route(f"""/api/<string:table>/{N.insert}""")
     def serveTableInsert(table):
         path = f"""/api/{table}/{N.insert}"""
-        control = getControl()
+        context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
             auth.authenticate()
-            eid = mkTable(control, table).insert()
+            eid = mkTable(context, table).insert()
             newPath = (
                 f"""/{table}/{N.item}/{eid}""" if eid else f"""/{table}/{N.list}"""
             )
@@ -134,7 +134,7 @@ def factory():
     @app.route(f"""/api/<string:table>/<string:eid>/<string:dtable>/{N.insert}""")
     def serveTableInsertDetail(table, eid, dtable):
         path = f"""/api/{table}/{eid}/{dtable}/{N.insert}"""
-        control = getControl()
+        context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -142,7 +142,7 @@ def factory():
         ):
             auth.authenticate()
             contribId = (
-                mkTable(control, dtable).insert(masterTable=table, masterId=eid) or E
+                mkTable(context, dtable).insert(masterTable=table, masterId=eid) or E
             )
             newPath = f"""/{N.contrib}/{N.item}/{contribId}"""
             return redirect(newPath)
@@ -164,12 +164,12 @@ def factory():
         eidRep = f"""/{eid}""" if eid else E
         path = f"""/{table}/{N.list}{eidRep}{actionRep}"""
         if not action or action in LIST_ACTIONS:
-            control = getControl()
+            context = getContext()
             if table in ALL_TABLES:
                 auth.authenticate()
-                topbar = Topbar(control).wrap()
-                sidebar = Sidebar(control, path).wrap()
-                tableList = mkTable(control, table).wrap(eid, action=action)
+                topbar = Topbar(context).wrap()
+                sidebar = Sidebar(context, path).wrap()
+                tableList = mkTable(context, table).wrap(eid, action=action)
                 return render_template(
                     INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
                 )
@@ -180,10 +180,10 @@ def factory():
     @app.route(f"""/api/<string:table>/{N.delete}/<string:eid>""")
     def serveRecordDelete(table, eid):
         path = f"""/api/{table}/{N.delete}/{eid}"""
-        control = getControl()
+        context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
-            mkTable(control, table).record(eid=eid).delete()
+            mkTable(context, table).record(eid=eid).delete()
             newUrlPart = "?{N.action}={N.my}" if table in USER_TABLES else E
             newPath = f"""/{table}/{N.list}{newUrlPart}"""
             return redirect(newPath)
@@ -197,14 +197,14 @@ def factory():
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
         path = f"""/api/{table}/{masterId}/{dtable}/{N.delete}/{eid}"""
-        control = getControl()
+        context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
             auth.authenticate()
-            recordObj = mkTable(control, dtable).record(eid=eid)
+            recordObj = mkTable(context, dtable).record(eid=eid)
             backId = masterId
 
             wfitem = recordObj.wfitem
@@ -223,11 +223,11 @@ def factory():
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>""")
     def serveRecord(table, eid):
         path = f"""/api/{table}/{N.item}/{eid}"""
-        control = getControl()
+        context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
             return (
-                mkTable(control, table)
+                mkTable(context, table)
                 .record(eid=eid, withDetails=True, **method())
                 .wrap()
             )
@@ -236,11 +236,11 @@ def factory():
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>/{N.title}""")
     def serveRecordTitle(table, eid):
         path = f"""/api/{table}/{N.item}/{eid}/{N.title}"""
-        control = getControl()
+        context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
             return (
-                mkTable(control, table)
+                mkTable(context, table)
                 .record(eid=eid, withDetails=False, **method())
                 .wrap(expanded=-1)
             )
@@ -249,13 +249,13 @@ def factory():
     @app.route(f"""/<string:table>/{N.item}/<string:eid>""")
     def serveRecordPage(table, eid):
         path = f"""/{table}/{N.item}/{eid}"""
-        control = getControl()
+        context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
-            topbar = Topbar(control).wrap()
-            sidebar = Sidebar(control, path).wrap()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
             record = (
-                mkTable(control, table)
+                mkTable(context, table)
                 .record(eid=eid, withDetails=True, **method())
                 .wrap()
             )
@@ -278,11 +278,11 @@ def factory():
     def serveField(table, eid, field):
         action = G(request.args, N.action)
         if action in FIELD_ACTIONS:
-            control = getControl()
+            context = getContext()
             auth.authenticate()
             if table in ALL_TABLES:
                 return (
-                    mkTable(control, table)
+                    mkTable(context, table)
                     .record(eid=eid)
                     .field(field)
                     .wrap(action=action)
@@ -293,10 +293,10 @@ def factory():
 
     @app.route(f"""/api/command/<string:command>/<string:table>/<string:eid>""")
     def serveCommand(command, table, eid):
-        control = getControl()
+        context = getContext()
         auth.authenticate()
         if table in ALL_TABLES:
-            newPath = mkTable(control, table).record(eid=eid).command(command)
+            newPath = mkTable(context, table).record(eid=eid).command(command)
             if newPath:
                 return redirect(newPath)
         return noTable(table)
@@ -328,10 +328,10 @@ def factory():
         return notFound(anything)
 
     def notFound(path):
-        control = getControl()
+        context = getContext()
         auth.authenticate()
-        topbar = Topbar(control).wrap()
-        sidebar = Sidebar(control, path).wrap()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
         return render_template(
             INDEX, topbar=topbar, sidebar=sidebar, material=f"""{NO_PAGE} {path}""",
         )

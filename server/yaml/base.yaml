@@ -14,7 +14,7 @@ attributes:
   affiliation: rel
 
 objects:
-  - control
+  - context
   - db
   - wf
   - auth

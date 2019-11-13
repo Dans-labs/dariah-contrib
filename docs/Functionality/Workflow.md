@@ -20,15 +20,15 @@ the following happens with the workflow attributes:
 
 Workflow is realized at the server. Its
 rules are specified in the code that is
-[specific]({{repBase}}/server/controllers/specific}})
+[specific]({{repBase}}/server/control/cust}})
 for the concepts of contribution, assessment, and review.
 
 The engine itself is in
-[workflow]({{repBase}}/server/controllers/workflow).
+[workflow]({{repBase}}/server/control/workflow).
 
-[compute.py]({{repBase}}/server/controllers/workflow/compute.py)
+[compute.py]({{repBase}}/server/control/workflow/compute.py)
 is responsible for computiong the workflow attributes for each contribution, and updating
 them after changes.
 
-[apply.py]({{repBase}}/server/controllers/workflow/apply.py)
+[apply.py]({{repBase}}/server/control/workflow/apply.py)
 is used to apply and enforce the workflow rules. 

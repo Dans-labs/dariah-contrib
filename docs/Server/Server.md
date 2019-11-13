@@ -25,7 +25,7 @@ server side.
 
 ## perm
 
-See [perm]({{repBase}}/server/controllers/perm.py).
+See [perm]({{repBase}}/server/control/perm.py).
 
 Contains the methods to compute permissions for controllers, tables and fields.
 Here are the main methods.
@@ -33,7 +33,7 @@ Here are the main methods.
 
 ## db
 
-See [db]({{repBase}}/server/controllers/db.py).
+See [db]({{repBase}}/server/control/db.py).
 
 This is the data access module. It uses the
 [data model](../Concepts/Model.md)
@@ -44,7 +44,7 @@ the current user is not entitled to see.
 
 ## auth
 
-See [auth]({{repBase}}/server/controllers/auth.py).
+See [auth]({{repBase}}/server/control/auth.py).
 
 Contains the methods to authenticate users. Here all the logic about user
 sessions and session cookies is written down. It builds on the Flask web
@@ -82,7 +82,7 @@ framework.
 
 ## workflow
 
-See [workflow]({{repBase}}/controllers/workflow).
+See [workflow]({{repBase}}/control/workflow).
 
 Implements the [workflow engine](../Functionality/Workflow.md) which
 takes care of various aspects of the business logic, just above the level
@@ -90,7 +90,7 @@ of data fetching and permissions.
 
 ## overview
 
-See [overview]({{repBase}}/controllers/overview.py).
+See [overview]({{repBase}}/control/overview.py).
 
 This module is reponsible for an overview of the statistics
 of the contributions.
@@ -100,6 +100,6 @@ can (de)select contributions from this page.
 
 ## utils
 
-See [utils]({{repBase}}/server/controllers/utils.py).
+See [utils]({{repBase}}/server/control/utils.py).
 
 Low level stuff.

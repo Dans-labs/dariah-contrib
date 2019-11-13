@@ -8,9 +8,9 @@ Here are the particulars of our tables.
 
 In particular the current score of the assessment is presented here. The score
 is computed workflow function
-[computeScore]({{repBase}}/server/controllers/workflow/compute.py)
+[computeScore]({{repBase}}/server/control/workflow/compute.py)
 and presented by 
-[presentScore]({{repBase}}/server/controllers/specific/score.py)
+[presentScore]({{repBase}}/server/control/cust/score.py)
 .
 Not only the score is presented, but also its derivation.
 

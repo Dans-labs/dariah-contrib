@@ -105,7 +105,7 @@ development web server.
 ??? details "What the server code does" The code for the server is at its heart a
 mapping between routes (URL patterns) and functions (request => response transformers).
 The app source code for the server resides in [serve.py]({{repBase}}/server/serve.py) and
-other `.py` files in [controllers]({{repBase}}/server/controllers) imported by it.
+other `.py` files in [controllers]({{repBase}}/server/control) imported by it.
 
     The module
     [index.py]({{repe}}/server/server/index.py)

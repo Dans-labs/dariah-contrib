@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>control.typing.types API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>control.typing.types</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from config import Config as C, Names as N
+from control.utils import cap1
+from control.typing.master import Master
+from control.typing.value import Value
+from control.typing.text import Text, Url, Email, Markdown
+from control.typing.numeric import Int, Decimal, Money
+from control.typing.bool import Bool2, Bool3
+from control.typing.datetime import Datetime
+from control.typing.specific.country import Country
+from control.typing.specific.criteria import Criteria
+from control.typing.specific.criteriaEntry import CriteriaEntry
+from control.typing.specific.decision import Decision
+from control.typing.specific.reviewEntry import ReviewEntry
+from control.typing.specific.score import Score
+from control.typing.specific.typeContribution import TypeContribution
+from control.typing.specific.user import User
+
+
+ALL_TYPES = dict(
+    text=Text,
+    url=Url,
+    email=Email,
+    markdown=Markdown,
+    int=Int,
+    decimal=Decimal,
+    money=Money,
+    bool2=Bool2,
+    bool3=Bool3,
+    datetime=Datetime,
+    country=Country,
+    criteria=Criteria,
+    creiteriaEntry=CriteriaEntry,
+    decision=Decision,
+    reviewEntry=ReviewEntry,
+    score=Score,
+    typeContributio=TypeContribution,
+    user=User,
+)
+ALL_TYPE_SET = set(ALL_TYPES)
+
+
+CT = C.tables
+CW = C.web
+
+SCALAR_TYPES = set(CT.scalarTypes)
+VALUE_TABLES = CT.valueTables
+USER_TABLES = CT.userTables
+USER_ENTRY_TABLES = CT.userEntryTables
+
+
+class Types:
+    &#34;&#34;&#34;Provides access to all data types.
+
+    There are kinds of data types:
+
+    *   scalar types, such as
+        `control.typing.numeric.Int`,
+        `control.typing.datetime.Datetime`, ...
+    *   master types:
+        values are ids of master records (e.g. criteria, assessment),
+        see `control.typing.master.Master`
+    *   value types
+        values are ids in value tables,
+        see `control.typing.master.Master`
+
+    (see the tables.yaml configuration file).
+
+    For each type a class is defined and for each type class a singleton
+    is created and registered as attribute in Types.
+
+    By means of these type objects, all operations on data types can be performed
+    throughout the application.
+    &#34;&#34;&#34;
+
+    def __init__(self, context):
+        &#34;&#34;&#34;Creates type singletons for all data types.
+
+        Some types define operations that need access to
+        `control.db.Db`, or `control.auth.Auth`.
+        The objects for these types will be passed the type singletons that need it,
+        so that they can in turn pass that to their methods.
+
+        The type singletons will be stored under an attribute named
+        after the type, but starting with a lowercase letter.
+
+        Parameters
+        ----------
+        context: object
+            The `control.context.Context` singleton of the application.
+
+        It holds the `control.db.Db`, or `control.auth.Auth` singletons.
+        &#34;&#34;&#34;
+
+        self.context = context
+
+        done = set()
+
+        for (tp, TypeClass) in ALL_TYPES.items():
+            self.make(tp, TypeClass)
+            done.add(tp)
+
+        for tp in VALUE_TABLES + USER_TABLES + USER_ENTRY_TABLES:
+            if tp in done:
+                continue
+            TypeName = cap1(tp)
+            Base = Value if tp in VALUE_TABLES else Master
+            TypeClass = type(TypeName, (Base,), {})
+            self.make(tp, TypeClass)
+
+    def make(self, tp, TypeClass):
+        &#34;&#34;&#34;Create a type singleton and register it.
+
+        An singleton of the given TypeClass is created with the right attributes.
+        That singleton will be registered as an attribute in the Types class.
+
+        Parameters
+        ----------
+        tp: string
+            The name under which the type singleton will be registered.
+        TypeClass: class
+        &#34;&#34;&#34;
+
+        context = self.context
+
+        atts = []
+        if TypeClass.needsContext:
+            atts.append(context)
+
+        typeObj = TypeClass(*atts)
+        self.register(typeObj, tp)
+
+    def register(self, typeObj, tp):
+        &#34;&#34;&#34;Register a type singleton.
+
+        The type singleton itself will also receive its name in a `name` attribute.
+
+        Parameters
+        ----------
+        typeObj: object
+            The type singleton.
+        tp: string
+            The name under which the type singleton must be registered.
+        &#34;&#34;&#34;
+
+        setattr(typeObj, N.name, tp)
+        setattr(typeObj, N.types, self)
+        setattr(self, tp, typeObj)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="control.typing.types.Types"><code class="flex name class">
+<span>class <span class="ident">Types</span></span>
+<span>(</span><span>context)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Provides access to all data types.</p>
+<p>There are kinds of data types:</p>
+<ul>
+<li>scalar types, such as
+<a title="control.typing.numeric.Int" href="numeric.html#control.typing.numeric.Int"><code>Int</code></a>,
+<a title="control.typing.datetime.Datetime" href="datetime.html#control.typing.datetime.Datetime"><code>Datetime</code></a>, &hellip;</li>
+<li>master types:
+values are ids of master records (e.g. criteria, assessment),
+see <a title="control.typing.master.Master" href="master.html#control.typing.master.Master"><code>Master</code></a></li>
+<li>value types
+values are ids in value tables,
+see <a title="control.typing.master.Master" href="master.html#control.typing.master.Master"><code>Master</code></a></li>
+</ul>
+<p>(see the tables.yaml configuration file).</p>
+<p>For each type a class is defined and for each type class a singleton
+is created and registered as attribute in Types.</p>
+<p>By means of these type objects, all operations on data types can be performed
+throughout the application.</p>
+<p>Creates type singletons for all data types.</p>
+<p>Some types define operations that need access to
+<a title="control.db.Db" href="../db.html#control.db.Db"><code>Db</code></a>, or <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a>.
+The objects for these types will be passed the type singletons that need it,
+so that they can in turn pass that to their methods.</p>
+<p>The type singletons will be stored under an attribute named
+after the type, but starting with a lowercase letter.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
+<dd>The <a title="control.context.Context" href="../context.html#control.context.Context"><code>Context</code></a> singleton of the application.</dd>
+</dl>
+<p>It holds the <a title="control.db.Db" href="../db.html#control.db.Db"><code>Db</code></a>, or <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a> singletons.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Types:
+    &#34;&#34;&#34;Provides access to all data types.
+
+    There are kinds of data types:
+
+    *   scalar types, such as
+        `control.typing.numeric.Int`,
+        `control.typing.datetime.Datetime`, ...
+    *   master types:
+        values are ids of master records (e.g. criteria, assessment),
+        see `control.typing.master.Master`
+    *   value types
+        values are ids in value tables,
+        see `control.typing.master.Master`
+
+    (see the tables.yaml configuration file).
+
+    For each type a class is defined and for each type class a singleton
+    is created and registered as attribute in Types.
+
+    By means of these type objects, all operations on data types can be performed
+    throughout the application.
+    &#34;&#34;&#34;
+
+    def __init__(self, context):
+        &#34;&#34;&#34;Creates type singletons for all data types.
+
+        Some types define operations that need access to
+        `control.db.Db`, or `control.auth.Auth`.
+        The objects for these types will be passed the type singletons that need it,
+        so that they can in turn pass that to their methods.
+
+        The type singletons will be stored under an attribute named
+        after the type, but starting with a lowercase letter.
+
+        Parameters
+        ----------
+        context: object
+            The `control.context.Context` singleton of the application.
+
+        It holds the `control.db.Db`, or `control.auth.Auth` singletons.
+        &#34;&#34;&#34;
+
+        self.context = context
+
+        done = set()
+
+        for (tp, TypeClass) in ALL_TYPES.items():
+            self.make(tp, TypeClass)
+            done.add(tp)
+
+        for tp in VALUE_TABLES + USER_TABLES + USER_ENTRY_TABLES:
+            if tp in done:
+                continue
+            TypeName = cap1(tp)
+            Base = Value if tp in VALUE_TABLES else Master
+            TypeClass = type(TypeName, (Base,), {})
+            self.make(tp, TypeClass)
+
+    def make(self, tp, TypeClass):
+        &#34;&#34;&#34;Create a type singleton and register it.
+
+        An singleton of the given TypeClass is created with the right attributes.
+        That singleton will be registered as an attribute in the Types class.
+
+        Parameters
+        ----------
+        tp: string
+            The name under which the type singleton will be registered.
+        TypeClass: class
+        &#34;&#34;&#34;
+
+        context = self.context
+
+        atts = []
+        if TypeClass.needsContext:
+            atts.append(context)
+
+        typeObj = TypeClass(*atts)
+        self.register(typeObj, tp)
+
+    def register(self, typeObj, tp):
+        &#34;&#34;&#34;Register a type singleton.
+
+        The type singleton itself will also receive its name in a `name` attribute.
+
+        Parameters
+        ----------
+        typeObj: object
+            The type singleton.
+        tp: string
+            The name under which the type singleton must be registered.
+        &#34;&#34;&#34;
+
+        setattr(typeObj, N.name, tp)
+        setattr(typeObj, N.types, self)
+        setattr(self, tp, typeObj)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="control.typing.types.Types.make"><code class="name flex">
+<span>def <span class="ident">make</span></span>(<span>self, tp, TypeClass)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Create a type singleton and register it.</p>
+<p>An singleton of the given TypeClass is created with the right attributes.
+That singleton will be registered as an attribute in the Types class.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>tp</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name under which the type singleton will be registered.</dd>
+<dt><strong><code>TypeClass</code></strong> :&ensp;<code>class</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make(self, tp, TypeClass):
+    &#34;&#34;&#34;Create a type singleton and register it.
+
+    An singleton of the given TypeClass is created with the right attributes.
+    That singleton will be registered as an attribute in the Types class.
+
+    Parameters
+    ----------
+    tp: string
+        The name under which the type singleton will be registered.
+    TypeClass: class
+    &#34;&#34;&#34;
+
+    context = self.context
+
+    atts = []
+    if TypeClass.needsContext:
+        atts.append(context)
+
+    typeObj = TypeClass(*atts)
+    self.register(typeObj, tp)</code></pre>
+</details>
+</dd>
+<dt id="control.typing.types.Types.register"><code class="name flex">
+<span>def <span class="ident">register</span></span>(<span>self, typeObj, tp)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Register a type singleton.</p>
+<p>The type singleton itself will also receive its name in a <code>name</code> attribute.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>typeObj</code></strong> :&ensp;<code>object</code></dt>
+<dd>The type singleton.</dd>
+<dt><strong><code>tp</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name under which the type singleton must be registered.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register(self, typeObj, tp):
+    &#34;&#34;&#34;Register a type singleton.
+
+    The type singleton itself will also receive its name in a `name` attribute.
+
+    Parameters
+    ----------
+    typeObj: object
+        The type singleton.
+    tp: string
+        The name under which the type singleton must be registered.
+    &#34;&#34;&#34;
+
+    setattr(typeObj, N.name, tp)
+    setattr(typeObj, N.types, self)
+    setattr(self, tp, typeObj)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="control.typing" href="index.html">control.typing</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="control.typing.types.Types" href="#control.typing.types.Types">Types</a></code></h4>
+<ul class="">
+<li><code><a title="control.typing.types.Types.make" href="#control.typing.types.Types.make">make</a></code></li>
+<li><code><a title="control.typing.types.Types.register" href="#control.typing.types.Types.register">register</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

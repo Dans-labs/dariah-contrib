@@ -93,7 +93,7 @@ A general purpose scripting language with excellent data processing facilities.
     [controllers](../Server/Server.md)
     .
     The actual
-    [code there]({{repBase}}/server/controllers)
+    [code there]({{repBase}}/server/control)
     is structured into generic functions for data access and
     specific tweaks to handle the business workflow of the
     contribution tool.
