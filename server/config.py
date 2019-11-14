@@ -1,3 +1,4 @@
+import sys
 import os
 import yaml
 import re
@@ -98,20 +99,22 @@ class Names:
     def addNames(cls, source, settings):
         (pureNames, names) = cls.getNames(source, settings)
         for name in pureNames | names:
-            N.setName(name)
+            Names.setName(name)
         return (pureNames, names)
 
     @classmethod
     def showNames(cls):
         serverprint("""\nNAMES""")
         for (k, v) in sorted(cls.__dict__.items()):
-            serverprint(f"""\t{k:<20} = {v}""")
+            if callable(getattr(cls, k)):
+                serverprint(f"""\t{k:<20} = {v}""")
+
+    @classmethod
+    def getMethods(cls):
+        return {method for method in cls.__dict__ if callable(getattr(cls, method))}
 
 
-N = Names
-C = Config
-
-
+methodNames = Names.getMethods()
 allPureNames = set()
 allNames = set()
 
@@ -130,7 +133,27 @@ for configFile in files:
         if subsection != NAMES:
             setattr(classObj, subsection, subsettings)
 
-    (pureNames, names) = N.addNames(configFile, settings)
+    (pureNames, names) = Names.addNames(configFile, settings)
+    allPureNames |= pureNames
+    allNames |= names
+
+
+N = Names
+C = Config
+CT = C.tables
+
+masters = {}
+for (master, details) in CT.details.items():
+    for detail in details:
+        masters.setdefault(detail, set()).add(master)
+setattr(CT, "masters", masters)
+
+with os.scandir(TABLE_DIR) as sd:
+    files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
+for tableFile in files:
+    with open(f"""{TABLE_DIR}/{tableFile}""") as fh:
+        settings = yaml.load(fh, Loader=yaml.FullLoader)
+    (pureNames, names) = Names.addNames(configFile, settings)
     allPureNames |= pureNames
     allNames |= names
 
@@ -161,20 +184,19 @@ if unusedNames:
 else:
     serverprint(f"NAMES: No unused names")
 
+undefNames = usedNames - allPureNames - allNames - methodNames
+if undefNames:
+    serverprint(f"NAMES: {len(undefNames)} undefined names")
+    serverprint(", ".join(sorted(undefNames)))
+else:
+    serverprint(f"NAMES: No undefined names")
+
 serverprint(f"NAMES: {len(allPureNames | allNames):>4} defined in yaml files")
 serverprint(f"NAMES: {len(usedNames):>4} used in python code")
 
-
-CT = C.tables
-
-masters = {}
-for (master, details) in CT.details.items():
-    for detail in details:
-        masters.setdefault(detail, set()).add(master)
-setattr(CT, "masters", masters)
-
-with os.scandir(TABLE_DIR) as sd:
-    files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
+if undefNames:
+    serverprint("EXIT because of a fatal error!")
+    sys.exit()
 
 tables = set()
 
@@ -219,7 +241,7 @@ for table in tables:
     setattr(Tables, table, specs)
     tables.add(table)
 
-    N.addNames(table, specs)
+    Names.addNames(table, specs)
 
 constrainedPre = {}
 for table in VALUE_TABLES:

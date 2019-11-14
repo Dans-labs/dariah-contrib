@@ -14,6 +14,7 @@ from control.utils import pick as G, E, now
 from control.html import HtmlElements as H
 from control.typ.datetime import Datetime
 from control.cust.score import presentScore
+from control.cust.factory_table import make as mkTable
 
 
 CT = C.tables
@@ -50,7 +51,9 @@ class WorkflowItem:
     """
 
     def __init__(self, context, data):
-        """Wraps a workflow item record around a workflow data record.
+        """## Initialization
+
+        Wraps a workflow item record around a workflow data record.
 
         Workflow item records are created per contribution,
         but they will be referenced by contribution, assessment and review records
@@ -71,15 +74,39 @@ class WorkflowItem:
             The `control.context.Context singleton`, from which the
             `control.auth.Auth` singleton can be picked up, from which the
             details of the current user can be read off.
+        data: dict
+            See below.
         """
 
         auth = context.auth
         user = auth.user
+
         self.auth = auth
+        """*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        """
+
         self.uid = G(user, N._id)
+        """*ObjectId* The id of the current user.
+        """
+
         self.eppn = G(user, N.eppn)
+        """*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        """
+
         self.data = data
+        """*dict* The  workflow attributes.
+        """
+
         self.mykind = self.myReviewerKind()
+        """*dict* The kind of reviewer that the current user is.
+
+        A user is `expert` reviewer or `final` reviewer, or `None`.
+        """
 
     def getKind(self, table, record):
         """Determine whether a review(Entry) is `expert` or `final`.
@@ -274,6 +301,7 @@ class WorkflowItem:
         -------
         boolean
         """
+        print('PERM', table, command)
         auth = self.auth
         uid = self.uid
 
@@ -297,6 +325,9 @@ class WorkflowItem:
             N.country,
             kind=kind,
         )
+
+        (contribId,) = self.info(N.contrib, N._id)
+        print(contribId)
 
         isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
@@ -342,17 +373,19 @@ class WorkflowItem:
         if frozen:
             return False
 
-        if locked and not remaining:
-            return False
-
         answer = not locked or remaining
 
         if table == N.assessment:
+            if command == N.startReview:
+                print('startReview perm', mayAdd)
+                return G(mayAdd, myKind)
+                # return G(mayAdd, myKind) and not locked
+
             if uid not in creators:
                 return False
 
-            if command == N.startReview:
-                return G(mayAdd, myKind) and not locked
+            if locked and not remaining:
+                return False
 
             if command == N.submitAssessment:
                 return stage == N.complete and answer
@@ -502,6 +535,7 @@ class WorkflowItem:
             It is always the url to the page of the contrib record.
         """
 
+        context = recordObj.context
         table = recordObj.table
         eid = recordObj.eid
         kind = recordObj.kind
@@ -510,12 +544,15 @@ class WorkflowItem:
         commandInfo = commands[command]
         acro = G(commandInfo, N.acro)
 
+        urlExtra = E
+
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
             if operator == N.add:
-                tableObj = recordObj.tableObj
-
-                tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                oTable = G(commandInfo, N.table)
+                tableObj = mkTable(context, oTable)
+                oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                urlExtra = f"""/{N.open}/{oTable}/{oeid}"""
             elif operator == N.set:
                 field = G(commandInfo, N.field)
                 value = G(commandInfo, N.value)
@@ -524,7 +561,7 @@ class WorkflowItem:
         else:
             flash(f"""<{acro}> not permitted""", "error")
 
-        return f"""/{N.contrib}/{N.item}/{contribId}"""
+        return f"""/{N.contrib}/{N.item}/{contribId}{urlExtra}"""
 
     def statusOverview(self, table, kind=None):
         """Present the current status of a record on the interface.
@@ -610,6 +647,7 @@ class WorkflowItem:
 
         for (command, commandInfo) in sorted(allowedCommands.items()):
             permitted = self.permission(table, command, kind=kind)
+            print('COMMAND', command, permitted)
             if not permitted:
                 continue
 

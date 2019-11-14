@@ -50,7 +50,9 @@ class Field:
         mayRead=None,
         mayEdit=None,
     ):
-        """Store the incoming information.
+        """## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the record object
         that spawns a field object.
@@ -79,11 +81,11 @@ class Field:
         Parameters
         ----------
         recordObj: object
-            A `control.record.Record` object (or one of a derived class)
+            See below.
         field: string
-            The name of the field
+            See below.
         asMaster: boolean, optional `False`
-            Whether this field points to a master record.
+            See below.
         readonly: boolean | `None`, optional `None`
             Whether the field must be presented readonly.
         mayRead: boolean | `None`, optional `None`
@@ -96,9 +98,16 @@ class Field:
             setattr(self, prop, getattr(recordObj, prop, None))
 
         self.recordObj = recordObj
+        """*object* A `control.record.Record` object (or one of a derived class)
+        """
 
         self.field = field
+        """*string* The name of the field
+        """
+
         self.asMaster = asMaster
+        """*boolean* Whether this field points to a master record.
+        """
 
         table = self.table
 
@@ -115,21 +124,56 @@ class Field:
             nowFields = set()
 
         self.withRefresh = field == N.modified or field in nowFields
+        """*boolean* Whether the field needs a refresh button.
+        """
+
         self.withNow = G(withNow, field)
+        """*dict* Which field updates need a timestamp?
+
+        The info comes from tables.yaml, under key `withNow`.
+        It is keyed by table name, then by  field name, and the value
+        is a single field or lists of two fields with the names of
+        corresponding timestamp fields.
+
+        When a (boolean) field has two timestamp fields, the first one is used  if
+        he value is a list, the first one will be used if the modification
+        sets the field to `True` and the second one when the field becomes `False`.
+
+        !!! hint
+            In assessments, when `submitted` becomes `True`, `dateSubmitted` receives
+            a  timestamp. When `submitted` becomes `False`, it is `dateWithdrawn` that
+            receives the timestamp.
+        """
 
         fieldSpecs = recordObj.fields
         fieldSpec = G(fieldSpecs, field)
 
         record = self.record
         self.value = G(record, field)
+        """*mixed* The value of the field.
+        """
 
         require = G(fieldSpec, N.perm, default={})
         self.require = require
+        """*dict* The required permissions for this field.
+
+        Keys are `read` and `edit`, the values are `True` or `False`.
+        """
 
         self.label = G(fieldSpec, N.label, default=cap1(field))
+        """*string* A label to display in front of the field.
+        """
+
         self.tp = G(fieldSpec, N.type, default=DEFAULT_TYPE)
+        """*string* The data type of the field."""
+
         self.multiple = G(fieldSpec, N.multiple, default=False)
+        """*boolean* Whether the field value consists of multiple values or a single one.
+        """
+
         self.extensible = G(fieldSpec, N.extensible, default=False)
+        """*boolean* Whether the user may add new values to the value table of this field.
+        """
 
         context = self.context
 
@@ -141,7 +185,12 @@ class Field:
 
         fieldTypeObj = getattr(types, tp, None)
         self.fieldTypeObj = fieldTypeObj
+        """*object* The type object by which the value of this field can be interpreted.
+        """
+
         self.widgetType = fieldTypeObj.widgetType
+        """*string* The type of widget for presenting an edit view on this field.
+        """
 
         readonly = self.readonly if readonly is None else readonly
 
@@ -155,6 +204,11 @@ class Field:
             self.mayEdit = False
 
         self.atts = dict(table=table, eid=eid, field=field)
+        """*dict* Identification of this field value:  table, id of record, name of field.
+
+        !!! hint
+            To be used to pass to buttons in widgets for this field.
+        """
 
     def save(self, data):
         """Save a new value for this field to MongoDb.
@@ -466,8 +520,6 @@ class Field:
             args.append(multiple)
             args.append(extensible)
             args.append(constrain)
-        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
-        extraCls = E if editable else cls
         atts = dict(wtype=widgetType)
 
         if editable:
@@ -479,6 +531,9 @@ class Field:
             atts[N.multiple] = ONE
         if extensible:
             atts[N.extensible] = ONE
+
+        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
+        extraCls = E if editable else cls
 
         return (
             H.div(

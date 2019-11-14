@@ -15,8 +15,8 @@ class AssessmentT(Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, masterTable=None, masterId=None):
-        mayInsert = self.mayInsert
+    def insert(self, force=False, masterTable=None, masterId=None):
+        mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 
@@ -54,4 +54,4 @@ class AssessmentT(Table):
         db.insertMany(N.criteriaEntry, uid, eppn, records)
         self.adjustWorkflow(masterOid, new=False)
 
-        return masterId
+        return assessmentId

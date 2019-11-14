@@ -58,15 +58,19 @@ class Topbar:
     &#34;&#34;&#34;
 
     def __init__(self, context):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
     def wrap(self):
         &#34;&#34;&#34;Wrap it all up.&#34;&#34;&#34;
@@ -128,11 +132,12 @@ class Topbar:
 <dd>
 <section class="desc"><p>Present the topbar on the interface.</p>
 <p>It shows the current user, buttons to log in/out and a logo.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -145,15 +150,19 @@ class Topbar:
     &#34;&#34;&#34;
 
     def __init__(self, context):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
     def wrap(self):
         &#34;&#34;&#34;Wrap it all up.&#34;&#34;&#34;
@@ -198,6 +207,13 @@ class Topbar:
             cls=&#34;headline&#34;,
         )</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.topbar.Topbar.context"><code class="name">var <span class="ident">context</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.topbar.Topbar.wrap"><code class="name flex">
@@ -274,6 +290,7 @@ class Topbar:
 <li>
 <h4><code><a title="control.topbar.Topbar" href="#control.topbar.Topbar">Topbar</a></code></h4>
 <ul class="">
+<li><code><a title="control.topbar.Topbar.context" href="#control.topbar.Topbar.context">context</a></code></li>
 <li><code><a title="control.topbar.Topbar.wrap" href="#control.topbar.Topbar.wrap">wrap</a></code></li>
 </ul>
 </li>

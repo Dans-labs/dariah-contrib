@@ -54,10 +54,13 @@ class AssessmentD(Details):
                 inner=False,
             )
 
+        showEid = self.mustShow(N.review, kwargs)
+
         orphanedReviews = self.wrapDetail(
             N.review,
             filterFunc=lambda r: G(r, N.creator) not in reviewers,
             withProv=True,
+            showEid=showEid,
         )
 
         reviewPart = H.div(

@@ -14,8 +14,6 @@ roles:
   - root
 
 names:
-  - authority
-  - eppn
   - groupRep
   - Guest
   - isCoordinated
@@ -23,7 +21,6 @@ names:
   - isOwn
   - isOur
   - local
-  - mayLogin
   - mayEdit
   - mayRead
   - readonly

@@ -23,15 +23,19 @@ class Value(Related):
     widgetType = N.related
 
     def __init__(self, context):
-        """Store a handle to the Context singleton.
+        """## Initialization
+
+        Store a handle to the Context singleton.
 
         Parameters
         ----------
         context: object
-            The `control.context.Context` singleton.
+            See below.
         """
 
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
 
     def fromStr(self, editVal, uid=None, eppn=None, extensible=False):
         if not editVal:
@@ -45,7 +49,7 @@ class Value(Related):
                 table = self.name
                 fieldName = N.rep if extensible is True else extensible
                 field = {fieldName: editVal[0]}
-                return db.insertIfNew(table, uid, eppn, True, **field)
+                return db.insertItem(table, uid, eppn, True, **field)
             else:
                 return None
 

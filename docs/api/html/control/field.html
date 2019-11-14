@@ -82,7 +82,9 @@ class Field:
         mayRead=None,
         mayEdit=None,
     ):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the record object
         that spawns a field object.
@@ -111,11 +113,11 @@ class Field:
         Parameters
         ----------
         recordObj: object
-            A `control.record.Record` object (or one of a derived class)
+            See below.
         field: string
-            The name of the field
+            See below.
         asMaster: boolean, optional `False`
-            Whether this field points to a master record.
+            See below.
         readonly: boolean | `None`, optional `None`
             Whether the field must be presented readonly.
         mayRead: boolean | `None`, optional `None`
@@ -128,9 +130,16 @@ class Field:
             setattr(self, prop, getattr(recordObj, prop, None))
 
         self.recordObj = recordObj
+        &#34;&#34;&#34;*object* A `control.record.Record` object (or one of a derived class)
+        &#34;&#34;&#34;
 
         self.field = field
+        &#34;&#34;&#34;*string* The name of the field
+        &#34;&#34;&#34;
+
         self.asMaster = asMaster
+        &#34;&#34;&#34;*boolean* Whether this field points to a master record.
+        &#34;&#34;&#34;
 
         table = self.table
 
@@ -147,21 +156,56 @@ class Field:
             nowFields = set()
 
         self.withRefresh = field == N.modified or field in nowFields
+        &#34;&#34;&#34;*boolean* Whether the field needs a refresh button.
+        &#34;&#34;&#34;
+
         self.withNow = G(withNow, field)
+        &#34;&#34;&#34;*dict* Which field updates need a timestamp?
+
+        The info comes from tables.yaml, under key `withNow`.
+        It is keyed by table name, then by  field name, and the value
+        is a single field or lists of two fields with the names of
+        corresponding timestamp fields.
+
+        When a (boolean) field has two timestamp fields, the first one is used  if
+        he value is a list, the first one will be used if the modification
+        sets the field to `True` and the second one when the field becomes `False`.
+
+        !!! hint
+            In assessments, when `submitted` becomes `True`, `dateSubmitted` receives
+            a  timestamp. When `submitted` becomes `False`, it is `dateWithdrawn` that
+            receives the timestamp.
+        &#34;&#34;&#34;
 
         fieldSpecs = recordObj.fields
         fieldSpec = G(fieldSpecs, field)
 
         record = self.record
         self.value = G(record, field)
+        &#34;&#34;&#34;*mixed* The value of the field.
+        &#34;&#34;&#34;
 
         require = G(fieldSpec, N.perm, default={})
         self.require = require
+        &#34;&#34;&#34;*dict* The required permissions for this field.
+
+        Keys are `read` and `edit`, the values are `True` or `False`.
+        &#34;&#34;&#34;
 
         self.label = G(fieldSpec, N.label, default=cap1(field))
+        &#34;&#34;&#34;*string* A label to display in front of the field.
+        &#34;&#34;&#34;
+
         self.tp = G(fieldSpec, N.type, default=DEFAULT_TYPE)
+        &#34;&#34;&#34;*string* The data type of the field.&#34;&#34;&#34;
+
         self.multiple = G(fieldSpec, N.multiple, default=False)
+        &#34;&#34;&#34;*boolean* Whether the field value consists of multiple values or a single one.
+        &#34;&#34;&#34;
+
         self.extensible = G(fieldSpec, N.extensible, default=False)
+        &#34;&#34;&#34;*boolean* Whether the user may add new values to the value table of this field.
+        &#34;&#34;&#34;
 
         context = self.context
 
@@ -173,7 +217,12 @@ class Field:
 
         fieldTypeObj = getattr(types, tp, None)
         self.fieldTypeObj = fieldTypeObj
+        &#34;&#34;&#34;*object* The type object by which the value of this field can be interpreted.
+        &#34;&#34;&#34;
+
         self.widgetType = fieldTypeObj.widgetType
+        &#34;&#34;&#34;*string* The type of widget for presenting an edit view on this field.
+        &#34;&#34;&#34;
 
         readonly = self.readonly if readonly is None else readonly
 
@@ -187,6 +236,11 @@ class Field:
             self.mayEdit = False
 
         self.atts = dict(table=table, eid=eid, field=field)
+        &#34;&#34;&#34;*dict* Identification of this field value:  table, id of record, name of field.
+
+        !!! hint
+            To be used to pass to buttons in widgets for this field.
+        &#34;&#34;&#34;
 
     def save(self, data):
         &#34;&#34;&#34;Save a new value for this field to MongoDb.
@@ -498,8 +552,6 @@ class Field:
             args.append(multiple)
             args.append(extensible)
             args.append(constrain)
-        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
-        extraCls = E if editable else cls
         atts = dict(wtype=widgetType)
 
         if editable:
@@ -511,6 +563,9 @@ class Field:
             atts[N.multiple] = ONE
         if extensible:
             atts[N.extensible] = ONE
+
+        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
+        extraCls = E if editable else cls
 
         return (
             H.div(
@@ -541,6 +596,7 @@ class Field:
 </code></dt>
 <dd>
 <section class="desc"><p>Deals with fields.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the record object
 that spawns a field object.</p>
@@ -569,11 +625,11 @@ passing values for them here.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>recordObj</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> object (or one of a derived class)</dd>
+<dd>See below.</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of the field</dd>
+<dd>See below.</dd>
 <dt><strong><code>asMaster</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
-<dd>Whether this field points to a master record.</dd>
+<dd>See below.</dd>
 <dt><strong><code>readonly</code></strong> :&ensp;<code>boolean</code> | <code>None</code>, optional <code>None</code></dt>
 <dd>Whether the field must be presented readonly.</dd>
 <dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean</code> | <code>None</code>, optional <code>None</code></dt>
@@ -608,7 +664,9 @@ passing values for them here.</p>
         mayRead=None,
         mayEdit=None,
     ):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the record object
         that spawns a field object.
@@ -637,11 +695,11 @@ passing values for them here.</p>
         Parameters
         ----------
         recordObj: object
-            A `control.record.Record` object (or one of a derived class)
+            See below.
         field: string
-            The name of the field
+            See below.
         asMaster: boolean, optional `False`
-            Whether this field points to a master record.
+            See below.
         readonly: boolean | `None`, optional `None`
             Whether the field must be presented readonly.
         mayRead: boolean | `None`, optional `None`
@@ -654,9 +712,16 @@ passing values for them here.</p>
             setattr(self, prop, getattr(recordObj, prop, None))
 
         self.recordObj = recordObj
+        &#34;&#34;&#34;*object* A `control.record.Record` object (or one of a derived class)
+        &#34;&#34;&#34;
 
         self.field = field
+        &#34;&#34;&#34;*string* The name of the field
+        &#34;&#34;&#34;
+
         self.asMaster = asMaster
+        &#34;&#34;&#34;*boolean* Whether this field points to a master record.
+        &#34;&#34;&#34;
 
         table = self.table
 
@@ -673,21 +738,56 @@ passing values for them here.</p>
             nowFields = set()
 
         self.withRefresh = field == N.modified or field in nowFields
+        &#34;&#34;&#34;*boolean* Whether the field needs a refresh button.
+        &#34;&#34;&#34;
+
         self.withNow = G(withNow, field)
+        &#34;&#34;&#34;*dict* Which field updates need a timestamp?
+
+        The info comes from tables.yaml, under key `withNow`.
+        It is keyed by table name, then by  field name, and the value
+        is a single field or lists of two fields with the names of
+        corresponding timestamp fields.
+
+        When a (boolean) field has two timestamp fields, the first one is used  if
+        he value is a list, the first one will be used if the modification
+        sets the field to `True` and the second one when the field becomes `False`.
+
+        !!! hint
+            In assessments, when `submitted` becomes `True`, `dateSubmitted` receives
+            a  timestamp. When `submitted` becomes `False`, it is `dateWithdrawn` that
+            receives the timestamp.
+        &#34;&#34;&#34;
 
         fieldSpecs = recordObj.fields
         fieldSpec = G(fieldSpecs, field)
 
         record = self.record
         self.value = G(record, field)
+        &#34;&#34;&#34;*mixed* The value of the field.
+        &#34;&#34;&#34;
 
         require = G(fieldSpec, N.perm, default={})
         self.require = require
+        &#34;&#34;&#34;*dict* The required permissions for this field.
+
+        Keys are `read` and `edit`, the values are `True` or `False`.
+        &#34;&#34;&#34;
 
         self.label = G(fieldSpec, N.label, default=cap1(field))
+        &#34;&#34;&#34;*string* A label to display in front of the field.
+        &#34;&#34;&#34;
+
         self.tp = G(fieldSpec, N.type, default=DEFAULT_TYPE)
+        &#34;&#34;&#34;*string* The data type of the field.&#34;&#34;&#34;
+
         self.multiple = G(fieldSpec, N.multiple, default=False)
+        &#34;&#34;&#34;*boolean* Whether the field value consists of multiple values or a single one.
+        &#34;&#34;&#34;
+
         self.extensible = G(fieldSpec, N.extensible, default=False)
+        &#34;&#34;&#34;*boolean* Whether the user may add new values to the value table of this field.
+        &#34;&#34;&#34;
 
         context = self.context
 
@@ -699,7 +799,12 @@ passing values for them here.</p>
 
         fieldTypeObj = getattr(types, tp, None)
         self.fieldTypeObj = fieldTypeObj
+        &#34;&#34;&#34;*object* The type object by which the value of this field can be interpreted.
+        &#34;&#34;&#34;
+
         self.widgetType = fieldTypeObj.widgetType
+        &#34;&#34;&#34;*string* The type of widget for presenting an edit view on this field.
+        &#34;&#34;&#34;
 
         readonly = self.readonly if readonly is None else readonly
 
@@ -713,6 +818,11 @@ passing values for them here.</p>
             self.mayEdit = False
 
         self.atts = dict(table=table, eid=eid, field=field)
+        &#34;&#34;&#34;*dict* Identification of this field value:  table, id of record, name of field.
+
+        !!! hint
+            To be used to pass to buttons in widgets for this field.
+        &#34;&#34;&#34;
 
     def save(self, data):
         &#34;&#34;&#34;Save a new value for this field to MongoDb.
@@ -1024,8 +1134,6 @@ passing values for them here.</p>
             args.append(multiple)
             args.append(extensible)
             args.append(constrain)
-        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
-        extraCls = E if editable else cls
         atts = dict(wtype=widgetType)
 
         if editable:
@@ -1037,6 +1145,9 @@ passing values for them here.</p>
             atts[N.multiple] = ONE
         if extensible:
             atts[N.extensible] = ONE
+
+        method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
+        extraCls = E if editable else cls
 
         return (
             H.div(
@@ -1059,6 +1170,87 @@ passing values for them here.</p>
 <p>If no argument is given, the constructor returns an empty tuple.
 If iterable is specified the tuple is initialized from iterable's items.</p>
 <p>If the argument is a tuple, the return value is the same object.</p></section>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.field.Field.asMaster"><code class="name">var <span class="ident">asMaster</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether this field points to a master record.</p></section>
+</dd>
+<dt id="control.field.Field.atts"><code class="name">var <span class="ident">atts</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Identification of this field value:
+table, id of record, name of field.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>To be used to pass to buttons in widgets for this field.</p>
+</div></section>
+</dd>
+<dt id="control.field.Field.extensible"><code class="name">var <span class="ident">extensible</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the user may add new values to the value table of this field.</p></section>
+</dd>
+<dt id="control.field.Field.field"><code class="name">var <span class="ident">field</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The name of the field</p></section>
+</dd>
+<dt id="control.field.Field.fieldTypeObj"><code class="name">var <span class="ident">fieldTypeObj</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The type object by which the value of this field can be interpreted.</p></section>
+</dd>
+<dt id="control.field.Field.label"><code class="name">var <span class="ident">label</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> A label to display in front of the field.</p></section>
+</dd>
+<dt id="control.field.Field.multiple"><code class="name">var <span class="ident">multiple</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the field value consists of multiple values or a single one.</p></section>
+</dd>
+<dt id="control.field.Field.recordObj"><code class="name">var <span class="ident">recordObj</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> object (or one of a derived class)</p></section>
+</dd>
+<dt id="control.field.Field.require"><code class="name">var <span class="ident">require</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The required permissions for this field.</p>
+<p>Keys are <code>read</code> and <code>edit</code>, the values are <code>True</code> or <code>False</code>.</p></section>
+</dd>
+<dt id="control.field.Field.tp"><code class="name">var <span class="ident">tp</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The data type of the field.</p></section>
+</dd>
+<dt id="control.field.Field.value"><code class="name">var <span class="ident">value</span></code></dt>
+<dd>
+<section class="desc"><p><em>mixed</em> The value of the field.</p></section>
+</dd>
+<dt id="control.field.Field.widgetType"><code class="name">var <span class="ident">widgetType</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The type of widget for presenting an edit view on this field.</p></section>
+</dd>
+<dt id="control.field.Field.withNow"><code class="name">var <span class="ident">withNow</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Which field updates need a timestamp?</p>
+<p>The info comes from tables.yaml, under key <code>withNow</code>.
+It is keyed by table name, then by
+field name, and the value
+is a single field or lists of two fields with the names of
+corresponding timestamp fields.</p>
+<p>When a (boolean) field has two timestamp fields, the first one is used
+if
+he value is a list, the first one will be used if the modification
+sets the field to <code>True</code> and the second one when the field becomes <code>False</code>.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>In assessments, when <code>submitted</code> becomes <code>True</code>, <code>dateSubmitted</code> receives
+a
+timestamp. When <code>submitted</code> becomes <code>False</code>, it is <code>dateWithdrawn</code> that
+receives the timestamp.</p>
+</div></section>
+</dd>
+<dt id="control.field.Field.withRefresh"><code class="name">var <span class="ident">withRefresh</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the field needs a refresh button.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1492,8 +1684,6 @@ type class that matches the type of the field.</p>
         args.append(multiple)
         args.append(extensible)
         args.append(constrain)
-    method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
-    extraCls = E if editable else cls
     atts = dict(wtype=widgetType)
 
     if editable:
@@ -1505,6 +1695,9 @@ type class that matches the type of the field.</p>
         atts[N.multiple] = ONE
     if extensible:
         atts[N.extensible] = ONE
+
+    method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
+    extraCls = E if editable else cls
 
     return (
         H.div(
@@ -1652,10 +1845,24 @@ These fields will get a refresh button automatically.</p>
 <li>
 <h4><code><a title="control.field.Field" href="#control.field.Field">Field</a></code></h4>
 <ul class="two-column">
+<li><code><a title="control.field.Field.asMaster" href="#control.field.Field.asMaster">asMaster</a></code></li>
+<li><code><a title="control.field.Field.atts" href="#control.field.Field.atts">atts</a></code></li>
+<li><code><a title="control.field.Field.extensible" href="#control.field.Field.extensible">extensible</a></code></li>
+<li><code><a title="control.field.Field.field" href="#control.field.Field.field">field</a></code></li>
+<li><code><a title="control.field.Field.fieldTypeObj" href="#control.field.Field.fieldTypeObj">fieldTypeObj</a></code></li>
 <li><code><a title="control.field.Field.inheritProps" href="#control.field.Field.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.field.Field.isBlank" href="#control.field.Field.isBlank">isBlank</a></code></li>
 <li><code><a title="control.field.Field.isEmpty" href="#control.field.Field.isEmpty">isEmpty</a></code></li>
+<li><code><a title="control.field.Field.label" href="#control.field.Field.label">label</a></code></li>
+<li><code><a title="control.field.Field.multiple" href="#control.field.Field.multiple">multiple</a></code></li>
+<li><code><a title="control.field.Field.recordObj" href="#control.field.Field.recordObj">recordObj</a></code></li>
+<li><code><a title="control.field.Field.require" href="#control.field.Field.require">require</a></code></li>
 <li><code><a title="control.field.Field.save" href="#control.field.Field.save">save</a></code></li>
+<li><code><a title="control.field.Field.tp" href="#control.field.Field.tp">tp</a></code></li>
+<li><code><a title="control.field.Field.value" href="#control.field.Field.value">value</a></code></li>
+<li><code><a title="control.field.Field.widgetType" href="#control.field.Field.widgetType">widgetType</a></code></li>
+<li><code><a title="control.field.Field.withNow" href="#control.field.Field.withNow">withNow</a></code></li>
+<li><code><a title="control.field.Field.withRefresh" href="#control.field.Field.withRefresh">withRefresh</a></code></li>
 <li><code><a title="control.field.Field.wrap" href="#control.field.Field.wrap">wrap</a></code></li>
 <li><code><a title="control.field.Field.wrapBare" href="#control.field.Field.wrapBare">wrapBare</a></code></li>
 <li><code><a title="control.field.Field.wrapValue" href="#control.field.Field.wrapValue">wrapValue</a></code></li>

@@ -26,15 +26,19 @@ class Topbar:
     """
 
     def __init__(self, context):
-        """Store the incoming information.
+        """## Initialization
+
+        Store the incoming information.
 
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         """
 
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
 
     def wrap(self):
         """Wrap it all up."""

@@ -34,7 +34,9 @@ class Table:
     """Deals with tables."""
 
     def __init__(self, context, table):
-        """Store the incoming information.
+        """## Initialization
+
+        Store the incoming information.
 
         Set the RecordClass to a suitable derived class of Record,
         otherwise to the base class `control.record.Record` itself.
@@ -42,31 +44,92 @@ class Table:
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         table: string
-            Name of the table in question.
+            See below.
         """
 
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
 
         auth = context.auth
         user = auth.user
 
         self.table = table
+        """*string* Name of the table.
+        """
+
         self.isMainTable = table == MAIN_TABLE
+        """*boolean* Whether the table is the main table, i.e. `contrib`.
+        """
+
         self.isInterTable = table == INTER_TABLE
+        """*boolean* Whether the table is the inter table, i.e. `assessment`.
+        """
+
         self.isUserTable = table in USER_TABLES
+        """*boolean* Whether the table is one that collects user content.
+
+        !!! hint
+            As opposed to value tables.
+        """
+
         self.isUserEntryTable = table in USER_ENTRY_TABLES
+        """*boolean* Whether the table is one that collects user entries.
+
+        !!! hint
+            `criteriaEntry` and `reviewEntry`.
+        """
+
         self.isValueTable = table in VALUE_TABLES
+        """*boolean* Whether the table is a value table.
+
+        Value tables have records that contain representations of fixed  values,
+        e.g. disciplines, decisions, scores, and also users and criteria.
+        """
+
         self.isSystemTable = table in SYSTEM_TABLES
+        """*boolean* Whether the table is a system table.
+
+        Some value tables are deemed system tables, e.g. `decision`, `permissionGroup`.
+        """
+
         self.itemLabels = G(ITEMS, table, default=[table, f"""{table}s"""])
+        """*(string, string)* How to call an item in the table, singular and plural.
+        """
+
         self.prov = PROV_SPECS
+        """*dict* Field specifications for the provenance fields.
+
+        As in tables.yaml under key `prov`.
+        """
+
         self.fields = getattr(CT, table, {})
+        """*dict*  Field specifications for the fields in this table.
+
+        As in the xxx.yaml file in the `server/tables`, where `xxx` is the name of
+        the table.
+        """
 
         self.uid = G(user, N._id)
+        """*ObjectId* The id of the current user.
+        """
+
         self.eppn = G(user, N.eppn)
+        """*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        """
+
         self.group = auth.groupRep()
+        """*ObjectId* The permission group of the current user.
+        """
+
         self.countryId = G(user, N.country)
+        """*ObjectId* The country of the current user.
+        """
 
         isUserTable = self.isUserTable
         isValueTable = self.isValueTable
@@ -77,13 +140,22 @@ class Table:
         self.mayInsert = auth.authenticated() and (
             isUserTable or isValueTable and isSuperuser or isSystemTable and isSysadmin
         )
+        """*boolean* Whether the user may insert a  new record into this table.
+        """
 
         def titleSortkey(r):
             return self.title(r).lower()
 
         self.titleSortkey = titleSortkey
+        """*function* Given a record delivers a key for sorting the records.
+        """
 
         self.RecordClass = recordFactory(table)
+        """*class* The class used for manipulating records of this table.
+
+        It might be the base class `control.record.Record`  or one of its
+        derived classes.
+        """
 
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
@@ -100,11 +172,11 @@ class Table:
         record: dict
             The full record
         withDetails: boolean, optional `False`
-            Whther to present a list of detail records below the record
+            Whether to present a list of detail records below the record
         readonly: boolean, optional `False`
             Whether to present the complete record in readonly mode
         bodyMethod: function, optional `None`
-            How to compose the HTML for the record.
+            How to compose the HTML for the body of the record.
             If `None` is passed, the default will be chosen:
             `control.record.Record.body`.
             Some particular tables have their own implementation of `body()`

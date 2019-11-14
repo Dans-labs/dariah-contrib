@@ -72,7 +72,7 @@ ALL_TYPES = dict(
     decision=Decision,
     reviewEntry=ReviewEntry,
     score=Score,
-    typeContributio=TypeContribution,
+    typeContribution=TypeContribution,
     user=User,
 )
 ALL_TYPE_SET = set(ALL_TYPES)
@@ -112,7 +112,9 @@ class Types:
     &#34;&#34;&#34;
 
     def __init__(self, context):
-        &#34;&#34;&#34;Creates type singletons for all data types.
+        &#34;&#34;&#34;## Initialization
+
+        Creates type singletons for all data types.
 
         Some types define operations that need access to
         `control.db.Db`, or `control.auth.Auth`.
@@ -125,12 +127,14 @@ class Types:
         Parameters
         ----------
         context: object
-            The `control.context.Context` singleton of the application.
+            See below.
 
         It holds the `control.db.Db`, or `control.auth.Auth` singletons.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
         done = set()
 
@@ -218,6 +222,7 @@ see <a title="control.typ.master.Master" href="master.html#control.typ.master.Ma
 is created and registered as attribute in Types.</p>
 <p>By means of these type objects, all operations on data types can be performed
 throughout the application.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Creates type singletons for all data types.</p>
 <p>Some types define operations that need access to
 <a title="control.db.Db" href="../db.html#control.db.Db"><code>Db</code></a>, or <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a>.
@@ -228,7 +233,7 @@ after the type, but starting with a lowercase letter.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
-<dd>The <a title="control.context.Context" href="../context.html#control.context.Context"><code>Context</code></a> singleton of the application.</dd>
+<dd>See below.</dd>
 </dl>
 <p>It holds the <a title="control.db.Db" href="../db.html#control.db.Db"><code>Db</code></a>, or <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a> singletons.</p></section>
 <details class="source">
@@ -260,7 +265,9 @@ after the type, but starting with a lowercase letter.</p>
     &#34;&#34;&#34;
 
     def __init__(self, context):
-        &#34;&#34;&#34;Creates type singletons for all data types.
+        &#34;&#34;&#34;## Initialization
+
+        Creates type singletons for all data types.
 
         Some types define operations that need access to
         `control.db.Db`, or `control.auth.Auth`.
@@ -273,12 +280,14 @@ after the type, but starting with a lowercase letter.</p>
         Parameters
         ----------
         context: object
-            The `control.context.Context` singleton of the application.
+            See below.
 
         It holds the `control.db.Db`, or `control.auth.Auth` singletons.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
         done = set()
 
@@ -333,6 +342,13 @@ after the type, but starting with a lowercase letter.</p>
         setattr(typeObj, N.types, self)
         setattr(self, tp, typeObj)</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.typ.types.Types.context"><code class="name">var <span class="ident">context</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.context.Context" href="../context.html#control.context.Context"><code>Context</code></a> singleton.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.typ.types.Types.make"><code class="name flex">
@@ -432,6 +448,7 @@ That singleton will be registered as an attribute in the Types class.</p>
 <li>
 <h4><code><a title="control.typ.types.Types" href="#control.typ.types.Types">Types</a></code></h4>
 <ul class="">
+<li><code><a title="control.typ.types.Types.context" href="#control.typ.types.Types.context">context</a></code></li>
 <li><code><a title="control.typ.types.Types.make" href="#control.typ.types.Types.make">make</a></code></li>
 <li><code><a title="control.typ.types.Types.register" href="#control.typ.types.Types.register">register</a></code></li>
 </ul>

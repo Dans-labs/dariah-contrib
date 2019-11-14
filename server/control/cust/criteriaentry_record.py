@@ -36,7 +36,12 @@ class CriteriaEntryR(Record):
         critId = G(record, N.criteria)
         critRecord = critObj.record(eid=critId)
         self.critId = critId
+        """*ObjectId* The id of the `criteria` record to which this entry refers.
+        """
+
         self.critRecord = critRecord
+        """*dict* The `criteria` record to which this entry refers.
+        """
 
     def title(self, *args, **kwargs):
         wfitem = self.wfitem

@@ -63,7 +63,9 @@ class Context:
     """
 
     def __init__(self, db, wf, auth):
-        """Creates a context singleton and initializes its cache.
+        """## Initialization
+
+        Creates a context singleton and initializes its cache.
 
         This class has some methods that wrap a lower level Db data access method,
         to which it adds caching.
@@ -71,19 +73,43 @@ class Context:
         Parameters
         ----------
         db: object
-            The `control.db.Db` singleton is stored as an attribute of Context.
+            See below.
         wf: object
-            The `control.workflow.compute.Workflow` singleton is stored as an
-            attribute of Context.
+            See below.
         auth: object
-            The `control.auth.Auth` singleton is stored as an attribute of Context.
+            See below.
         """
 
         self.db = db
+        """*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        """
+
         self.wf = wf
+        """*object* The `control.workflow.compute.Workflow` singleton
+
+        Provides methods to handle workflow.
+        """
+
         self.auth = auth
+        """*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        """
+
         self.types = Types(self)
+        """*object* The `control.typ.types.Types` singleton
+
+        Provides methods to deal with values and their types.
+        """
+
         self.cache = {}
+        """*dict* The cache to store items from the database.
+
+        The cache lives as long as the request.
+        """
 
     def getItem(self, table, eid, requireFresh=False):
         """Fetch an item from the database, possibly from cache.

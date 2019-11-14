@@ -53,36 +53,12 @@ class Auth:
 
     Facilitates the login/logout process of users.
     Maintains the attributes that the DARIAH Identity Provider supplies about users.
-
-    Attributes
-    ----------
-    isDevel: boolean
-        We also detect whether we run in production or in development,
-        because in production we use the DARIAH Identity provider,
-        while in development we use a simple, console-based way of
-        logging a few test users in.
-    authority: string
-        The name of the authority that identifies users.
-        In production it is "DARIAH", which stands for the DARIAH Identity Provider.
-        In development it is "local".
-    secret: string
-        The secret that is defined outside the app and stored in a file.
-        This information is needed to encrypt sessions.
-    user: dict
-        The attributes of the currently logged in user.
-    authUser, unauthUser: string
-        We store the permission group of the currently logged in user as a plain
-        string, like "auth", "office", not by their Mongo ids.
-        The translation is made on the base of the value table `permissionGroup`,
-        to which Db gives access.
-    authId, unauthId: ObjectId
-        The ids of the groups corresponding to `authenticated` users and
-        `unauthenticated` users.  So the values of these attributes are
-        constants, that do not depend on the currently logged in user.
     """
 
     def __init__(self, app, db):
-        """Include the web app and a handle to `control.db.Db` into the
+        """## Initialization
+
+        Include the web app and a handle to `control.db.Db` into the
         attributes.
 
         Parameters
@@ -92,29 +68,65 @@ class Auth:
             This app has the secret key for sessions, and that is the only thing
             we need from the app.
         db: object
-            The `control.db.Db` singleton, which gives us methods to retrieve user
-            info from the database and store user info there.
+            See below.
         """
 
         self.db = db
+        """*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        """
+
         environ = os.environ
         permissionGroupInv = db.permissionGroupInv
 
         # determine production or devel
         regime = G(environ, N.REGIME)
+
         self.isDevel = regime == N.devel
+        """*boolean* Whether the server runs in production or in development.
+
+        In production we use the DARIAH Identity provider,
+        while in development we use a simple, console-based way of
+        logging a few test users in.
+        """
+
         self.authority = N.local if self.isDevel else N.DARIAH
+        """*string* The name of the authority that identifies users.
+
+        In production it is "DARIAH", which stands for the DARIAH Identity Provider.
+        In development it is "local".
+        """
 
         # read secret from the system
         self.secret = E
+        """*string* The secret that is defined outside the app and stored in a file.
+
+        This information is needed to encrypt sessions.
+        """
+
         with open(SECRET_FILE) as fh:
             app.secret_key = fh.read()
 
         self.authId = G(permissionGroupInv, AUTH)
+        """*string* The groupId of the `auth` permission group.
+        """
+
         self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        """*string* Info of the `auth` permission group.
+        """
+
         self.unauthId = G(permissionGroupInv, UNAUTH)
+        """*string* The groupId of the `public` permission group.
+        """
+
         self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        """*string* Info of the `public` permission group.
+        """
+
         self.user = {}
+        """*dict* The attributes of the currently logged in user."""
 
     def clearUser(self):
         """Forgets the currently logged in user.

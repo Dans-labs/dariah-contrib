@@ -61,8 +61,6 @@ DEBUG = False
 
 GP = dict(methods=[N.GET, N.POST])
 
-# N.showNames()
-
 
 def factory():
     app = Flask(__name__, static_url_path=DUMMY)
@@ -246,8 +244,31 @@ def factory():
             )
         return notFound(path)
 
+    # with specific detail opened
+
+    @app.route(
+        f"""/<string:table>/{N.item}/<string:eid>/"""
+        f"""{N.open}/<string:dtable>/<string:deid>"""
+    )
+    def serveRecordPageDetail(table, eid, dtable, deid):
+        path = f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}"""
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
+            record = (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap(showTable=dtable, showEid=deid)
+            )
+            return render_template(
+                INDEX, topbar=topbar, sidebar=sidebar, material=record,
+            )
+        return notFound(path)
+
     @app.route(f"""/<string:table>/{N.item}/<string:eid>""")
-    def serveRecordPage(table, eid):
+    def serveRecordPageDet(table, eid):
         path = f"""/{table}/{N.item}/{eid}"""
         context = getContext()
         if table in ALL_TABLES:

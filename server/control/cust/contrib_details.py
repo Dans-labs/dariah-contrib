@@ -35,5 +35,6 @@ class ContribD(Details):
         )
 
         statusRep = wfitem.status(N.contrib)
+        showEid = self.mustShow(N.assessment, kwargs)
 
-        return H.div([statusRep, self.wrapDetail(N.assessment)])
+        return H.div([statusRep, self.wrapDetail(N.assessment, showEid=showEid)])

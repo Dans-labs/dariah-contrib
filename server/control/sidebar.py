@@ -34,7 +34,9 @@ class Sidebar:
     """Show a sidebar with navigation links and buttons on the interface."""
 
     def __init__(self, context, path):
-        """Store the incoming information and set up attributes for collecting items.
+        """## Initialization
+
+        Store the incoming information and set up attributes for collecting items.
 
         !!! hint
             The `path` is needed to determine which items in the sidebar are the active
@@ -43,25 +45,24 @@ class Sidebar:
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         path: url
-            The current url.
+            See below.
         """
 
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
+
         self.path = path
-        self.entries = []
-        self.mainEntries = []
-        self.Entries = []
-        self.userEntries = []
-        self.userPaths = []
-        self.userEntryEntries = []
-        self.userEntryPaths = []
-        self.valueEntries = []
-        self.valuePaths = []
+        """*url* The current url.
+        """
+
         self.options = {
             option: G(request.args, option, default=ZERO) for option in OPTIONS.keys()
         }
+        """*dict*  The current setting of the options.
+        """
 
     def makeCaption(self, label, entries, rule=False):
         """Produce the caption for a section of navigation items.

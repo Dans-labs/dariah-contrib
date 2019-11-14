@@ -211,8 +211,11 @@ names:
   - body
   - icon
   - method
+  - open
   - option
   - overview
+  - showEid
+  - showTable
   - symbol
   - wrapHelp
   - you

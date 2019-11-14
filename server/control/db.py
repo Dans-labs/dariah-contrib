@@ -73,22 +73,23 @@ class Db:
     """
 
     def __init__(self, mongo):
-        """Pick up the connection to MongoDb.
+        """## Initialization
+
+        Pick up the connection to MongoDb.
 
         !!! note
-            There is a userId, fixed by configuration, that represents the system.
-            It is only used when user records are created: those records will said
-            to be created by the system.
-            The id is stored in the attribute `creatorId`.
 
         Parameters
         ----------
         mongo: object
-            The connection to the database exists before the Db singleton
-            is initialized and will be passed as `mongo` to it.
+            See below.
         """
 
         self.mongo = mongo
+        """*object* The connection to MongoDb.
+
+        The connnection exists before the Db singleton is initialized.
+        """
 
         self.collect()
 
@@ -97,6 +98,12 @@ class Db:
             for record in self.user.values()
             if G(record, N.eppn) == CREATOR
         ][0]
+        """*ObjectId* System user.
+
+        There is a userId, fixed by configuration, that represents the system.
+        It is only used when user records are created: those records will said
+        to be created by the system.
+        """
 
     def mongoCmd(self, label, table, command, *args):
         """Wrapper around calls to MongoDb.

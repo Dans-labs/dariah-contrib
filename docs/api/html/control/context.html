@@ -96,7 +96,9 @@ class Context:
     &#34;&#34;&#34;
 
     def __init__(self, db, wf, auth):
-        &#34;&#34;&#34;Creates a context singleton and initializes its cache.
+        &#34;&#34;&#34;## Initialization
+
+        Creates a context singleton and initializes its cache.
 
         This class has some methods that wrap a lower level Db data access method,
         to which it adds caching.
@@ -104,19 +106,43 @@ class Context:
         Parameters
         ----------
         db: object
-            The `control.db.Db` singleton is stored as an attribute of Context.
+            See below.
         wf: object
-            The `control.workflow.compute.Workflow` singleton is stored as an
-            attribute of Context.
+            See below.
         auth: object
-            The `control.auth.Auth` singleton is stored as an attribute of Context.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        &#34;&#34;&#34;
+
         self.wf = wf
+        &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton
+
+        Provides methods to handle workflow.
+        &#34;&#34;&#34;
+
         self.auth = auth
+        &#34;&#34;&#34;*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        &#34;&#34;&#34;
+
         self.types = Types(self)
+        &#34;&#34;&#34;*object* The `control.typ.types.Types` singleton
+
+        Provides methods to deal with values and their types.
+        &#34;&#34;&#34;
+
         self.cache = {}
+        &#34;&#34;&#34;*dict* The cache to store items from the database.
+
+        The cache lives as long as the request.
+        &#34;&#34;&#34;
 
     def getItem(self, table, eid, requireFresh=False):
         &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
@@ -327,18 +353,18 @@ Such records will not go in this cache.
 If such a record changes, Db will reread the whole table.
 But this happens very rarely.</p>
 </div>
+<h2 id="initialization">Initialization</h2>
 <p>Creates a context singleton and initializes its cache.</p>
 <p>This class has some methods that wrap a lower level Db data access method,
 to which it adds caching.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
-<dd>The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton is stored as an attribute of Context.</dd>
+<dd>See below.</dd>
 <dt><strong><code>wf</code></strong> :&ensp;<code>object</code></dt>
-<dd>The <a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a> singleton is stored as an
-attribute of Context.</dd>
+<dd>See below.</dd>
 <dt><strong><code>auth</code></strong> :&ensp;<code>object</code></dt>
-<dd>The <a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a> singleton is stored as an attribute of Context.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -387,7 +413,9 @@ attribute of Context.</dd>
     &#34;&#34;&#34;
 
     def __init__(self, db, wf, auth):
-        &#34;&#34;&#34;Creates a context singleton and initializes its cache.
+        &#34;&#34;&#34;## Initialization
+
+        Creates a context singleton and initializes its cache.
 
         This class has some methods that wrap a lower level Db data access method,
         to which it adds caching.
@@ -395,19 +423,43 @@ attribute of Context.</dd>
         Parameters
         ----------
         db: object
-            The `control.db.Db` singleton is stored as an attribute of Context.
+            See below.
         wf: object
-            The `control.workflow.compute.Workflow` singleton is stored as an
-            attribute of Context.
+            See below.
         auth: object
-            The `control.auth.Auth` singleton is stored as an attribute of Context.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        &#34;&#34;&#34;
+
         self.wf = wf
+        &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton
+
+        Provides methods to handle workflow.
+        &#34;&#34;&#34;
+
         self.auth = auth
+        &#34;&#34;&#34;*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        &#34;&#34;&#34;
+
         self.types = Types(self)
+        &#34;&#34;&#34;*object* The `control.typ.types.Types` singleton
+
+        Provides methods to deal with values and their types.
+        &#34;&#34;&#34;
+
         self.cache = {}
+        &#34;&#34;&#34;*dict* The cache to store items from the database.
+
+        The cache lives as long as the request.
+        &#34;&#34;&#34;
 
     def getItem(self, table, eid, requireFresh=False):
         &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
@@ -536,6 +588,35 @@ attribute of Context.</dd>
         cache.setdefault(table, {})[key] = result
         return result</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.context.Context.auth"><code class="name">var <span class="ident">auth</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a> singleton</p>
+<p>Provides methods to access the attributes of the current user.</p></section>
+</dd>
+<dt id="control.context.Context.cache"><code class="name">var <span class="ident">cache</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The cache to store items from the database.</p>
+<p>The cache lives as long as the request.</p></section>
+</dd>
+<dt id="control.context.Context.db"><code class="name">var <span class="ident">db</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton</p>
+<p>Provides methods to retrieve user
+info from the database and store user info there.</p></section>
+</dd>
+<dt id="control.context.Context.types"><code class="name">var <span class="ident">types</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.typ.types.Types" href="typ/types.html#control.typ.types.Types"><code>Types</code></a> singleton</p>
+<p>Provides methods to deal with values and their types.</p></section>
+</dd>
+<dt id="control.context.Context.wf"><code class="name">var <span class="ident">wf</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a> singleton</p>
+<p>Provides methods to handle workflow.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.context.Context.deleteItem"><code class="name flex">
@@ -783,11 +864,16 @@ fetched value in the cache.</dd>
 <ul>
 <li>
 <h4><code><a title="control.context.Context" href="#control.context.Context">Context</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="control.context.Context.auth" href="#control.context.Context.auth">auth</a></code></li>
+<li><code><a title="control.context.Context.cache" href="#control.context.Context.cache">cache</a></code></li>
+<li><code><a title="control.context.Context.db" href="#control.context.Context.db">db</a></code></li>
 <li><code><a title="control.context.Context.deleteItem" href="#control.context.Context.deleteItem">deleteItem</a></code></li>
 <li><code><a title="control.context.Context.getCached" href="#control.context.Context.getCached">getCached</a></code></li>
 <li><code><a title="control.context.Context.getItem" href="#control.context.Context.getItem">getItem</a></code></li>
 <li><code><a title="control.context.Context.getWorkflowItem" href="#control.context.Context.getWorkflowItem">getWorkflowItem</a></code></li>
+<li><code><a title="control.context.Context.types" href="#control.context.Context.types">types</a></code></li>
+<li><code><a title="control.context.Context.wf" href="#control.context.Context.wf">wf</a></code></li>
 </ul>
 </li>
 </ul>

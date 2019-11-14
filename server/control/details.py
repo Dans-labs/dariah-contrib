@@ -33,7 +33,9 @@ class Details:
     )
 
     def __init__(self, recordObj):
-        """Store the incoming information.
+        """## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the master record object
         that spawns a detail record object.
@@ -48,6 +50,11 @@ class Details:
             setattr(self, prop, getattr(recordObj, prop, None))
 
         self.details = {}
+        """*dict* Stores the details of this record.
+
+        Keyed by the name of the detail table, values  are lists of detail
+        records in that detail table.
+        """
 
     def fetchDetails(self, dtable, sortKey=None):
         """Fetch detail records from the database.
@@ -73,21 +80,23 @@ class Details:
         eid = self.eid
 
         dtableObj = mkTable(context, dtable)
-        drecords = db.getDetails(
-            dtable, table, eid, sortKey=sortKey,
-        )
+        drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
         self.details[dtable] = (
             dtableObj,
             tuple(drecords),
         )
 
-    def wrap(self, readonly=False):
+    def wrap(self, readonly=False, showTable=None, showEid=None):
         """Wrap the details of all tables for this record into HTML.
 
         Parameters
         ----------
         readonly: boolean, optional `False`
             Whether the records should be presented in readonly form.
+        showTable: string
+            Name of the detail table of which record `showEid` should be opened.
+        showEid: ObjectId
+            Id of the detail record that should be initially opened.
 
         Returns
         -------
@@ -96,12 +105,19 @@ class Details:
 
         table = self.table
 
-        for dtable in G(DETAILS, table, default=[]):
-            self.fetchDetails(dtable)
+        for detailTable in G(DETAILS, table, default=[]):
+            self.fetchDetails(detailTable)
 
         details = self.details
 
-        return H.join(self.wrapDetail(dtable, readonly=readonly) for dtable in details)
+        return H.join(
+            self.wrapDetail(
+                detailTable,
+                readonly=readonly,
+                showEid=showEid if detailTable == showTable else None,
+            )
+            for detailTable in details
+        )
 
     def wrapDetail(
         self,
@@ -117,6 +133,7 @@ class Details:
         filterFunc=None,
         combineMethod=None,
         withN=True,
+        showEid=None,
     ):
         """Wrap the details of a specific table for this record into HTML.
 
@@ -129,8 +146,11 @@ class Details:
             The name of the detail table
         withDetails, readonly, bodyMethod: mixed
             See `control.record.Record`
-        inner, wrapMethod, expanded, withProv, extraCls: mixed
+        inner, wrapMethod, withProv, extraCls: mixed
             See `control.record.Record.wrap`.
+        expanded: boolean
+            Whether to expand all details in this detail table.
+            If True, the expanded details will not get a collapse control.
         filterFunc: function, optional `None`
             You can optionally filter the detail records.
         combineMethod: function, optional `None`
@@ -138,6 +158,8 @@ class Details:
             instruct to reorder/restructure those representations.
         withN: boolean, optional `True`
             Whether to present the number of detail records
+        showEid: ObjectId
+            Id of the detail record that should be initially opened.
 
         Returns
         -------
@@ -165,26 +187,45 @@ class Details:
 
         nRep = H.div(f"""{nRecords} {itemLabel}""", cls="stats")
 
-        drecordReps = [
-            dtableObj.record(
-                record=drecord,
-                readonly=readonly,
-                bodyMethod=bodyMethod,
-                withDetails=withDetails,
-            ).wrap(
-                inner=inner,
-                wrapMethod=wrapMethod,
-                withProv=withProv,
-                expanded=0 if expanded else -1,
+        drecordReps = []
+        for drecord in drecords:
+            show = showEid == str(G(drecord, N._id))
+            drecordReps.append(
+                dtableObj.record(
+                    record=drecord,
+                    readonly=readonly,
+                    bodyMethod=bodyMethod,
+                    withDetails=withDetails or show,
+                ).wrap(
+                    inner=inner,
+                    wrapMethod=wrapMethod,
+                    withProv=withProv,
+                    expanded=0 if expanded else 1 if show else -1,
+                )
             )
-            for drecord in drecords
-        ]
         if combineMethod:
             drecordReps = combineMethod(drecordReps)
 
         innerCls = " inner" if inner else E
         return H.div(
-            [nRep if withN else E]
-            + drecordReps,
+            [nRep if withN else E] + drecordReps,
             cls=f"record-details{innerCls} {extraCls}",
+        )
+
+    @staticmethod
+    def mustShow(table, kwargs):
+        """Determines the record id specified by `showTable` and `showEid` in `kwargs`.
+
+        "kwargs" may contain the keys `showTable` and `showEid`.
+        We want the value of `showEid`, but only if the value of `showTable` matches
+        `table`.
+
+        !!! hint
+            We need this when we have just inserted a detail record and want to
+            navigate to the master record with the new detail record in an
+            expanded state.
+        """
+
+        return (
+            G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None
         )

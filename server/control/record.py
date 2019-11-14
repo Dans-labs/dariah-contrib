@@ -61,18 +61,17 @@ class Record:
         readonly=False,
         bodyMethod=None,
     ):
-        """Store the incoming information.
+        """## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the table object
         that spawns a record object.
 
-        Set the DetailsClass to a suitable derived class of Details,
-        otherwise to the base class `control.details.Details` itself.
-
         Parameters
         ----------
         tableObj: object
-            A `control.table.Table` object (or one of a derived class)
+            See below.
         eid, record, withDetails, readonly, bodyMethod
             See `control.table.Table.record`
         """
@@ -81,23 +80,46 @@ class Record:
             setattr(self, prop, getattr(tableObj, prop, None))
 
         self.tableObj = tableObj
+        """*object* A `control.table.Table` object (or one of a derived class)
+        """
+
         self.withDetails = withDetails
+        """*boolean* Whether to present a list of detail records below the record.
+        """
+
         self.readonly = readonly
+        """*boolean* Whether to present the complete record in readonly mode.
+        """
+
         self.bodyMethod = bodyMethod
+        """*function* How to compose the HTML for the body of the record.
+        """
 
         context = self.context
         table = self.table
 
         self.DetailsClass = detailsFactory(table)
+        """*class* The class used for presenting details of this record.
+
+        It might be the base class `control.details.Details`  or one of its
+        derived classes.
+        """
 
         if record is None:
             record = context.getItem(table, eid)
         self.record = record
+        """*dict* The data of the record, keyed by field names.
+        """
+
         self.eid = G(record, N._id)
+        """*ObjectId* The id of the record.
+        """
 
         self.setPerm()
         self.setWorkflow()
         self.mayDelete = self.getDelPerm()
+        """*boolean* Whether the user may delete the record.
+        """
 
     def getDelPerm(self):
         """Compute the delete permission for this record.
@@ -415,6 +437,8 @@ class Record:
         expanded=1,
         withProv=True,
         hideMasters=False,
+        showTable=None,
+        showEid=None,
         extraCls=E,
     ):
         """Wrap the record into HTML.
@@ -424,7 +448,7 @@ class Record:
         expanded | effect
         --- | ---
         `-1` | only a title with a control to get the full details
-        `False` | full details, no control to collapse/expand
+        `0` | full details, no control to collapse/expand
         `1` | full details, with a control to collapse to the title
 
         !!! note
@@ -565,7 +589,11 @@ class Record:
         )
 
         rButton = H.iconr(itemKey, "#main", msg=table) if withRefresh else E
-        details = self.DetailsClass(self).wrap() if withDetails else E
+        details = (
+            self.DetailsClass(self).wrap(showTable=showTable, showEid=showEid)
+            if withDetails
+            else E
+        )
 
         return (
             H.details(

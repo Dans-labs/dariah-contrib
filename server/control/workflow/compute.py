@@ -42,10 +42,37 @@ class Workflow:
     in the database.
 
     This class is about computing and managing the workflow information.
+
+    ## Fixity
+
+    Due to workflow, records may become fixed, temporarily or permanently.
+    The following workflow attributes will be computed:
+
+    frozen
+    :   permananently fixed due to a selection decision on the contrib.
+
+        *   extends from contribs to assessments and reviews.
+        *   workflow commands: all forbidden
+
+    done
+    :   permanently fixed due to a final review decision.
+
+        *   extends from review to assessment to contrib
+        *   workflow commands: only selection decisions allowed
+
+    locked
+    :   temporarily fixed due to review in progress.
+
+        *   extends from assessment to contrib.
+        *   workflow commands: all allowed as far as they make sense
+
+    Any record that carries one of these fixity attributes cannot be edited
+    or deleted, except for the fields that get modified when an allowed
+    workflow command is executed.
     """
 
     def __init__(self, db):
-        """Sets up workflow information.
+        """## Initialization
 
         Several pieces of data that will be used many times in workflow computations
         are fetched and stored as attributes.
@@ -55,18 +82,34 @@ class Workflow:
         Parameters
         ----------
         db: object
-            The database is needed to store computed workflow information, so we store
-            the Db singleton as attribute `db`.
+            See below.
         """
 
         self.db = db
+        """*object* The `control.db.Db` singleton
+
+        The database is needed to store computed workflow information, so we store
+        the Db singleton as attribute `db`.
+        """
+
         decisionRecords = db.getValueRecords(N.decision)
         self.decisions = {
             G(record, N._id): G(record, N.rep) for record in decisionRecords
         }
+        """*dict* Mapping of decision ids to decision verbs.
+
+        !!! hint
+            Think of `Accept`, `Reject`
+        """
+
         self.decisionParticiple = {
             G(record, N._id): G(record, N.participle) for record in decisionRecords
         }
+        """*dict* Mapping of decision ids to decision participles.
+
+        !!! hint
+            Think of `Accepted`, `Rejected`
+        """
 
         scoreData = db.getValueRecords(N.score)
         self.scoreMapping = {
@@ -74,18 +117,28 @@ class Workflow:
             for record in scoreData
             if N.score in record
         }
+        """*dict* Mapping of score ids to numeric scores.
+        """
 
         maxScoreByCrit = {}
         for record in scoreData:
-            crit = G(record, N.criteria)
-            if crit is None:
+            criteriaId = G(record, N.criteria)
+            if criteriaId is None:
                 continue
             score = G(record, N.score, default=0)
-            prevMax = maxScoreByCrit.setdefault(crit, None)
+            prevMax = maxScoreByCrit.setdefault(criteriaId, None)
             if prevMax is None or score > prevMax:
-                maxScoreByCrit[crit] = score
+                maxScoreByCrit[criteriaId] = score
 
         self.maxScoreByCrit = maxScoreByCrit
+        """*dict* Mapping of criteria ids to the maximum score for that criterion.
+
+        !!! note
+            We collect the maximum score that can be given for a criteria,
+            irrespective of any concrete assessment.
+
+            We need the maximum to present a given score as a percentage.
+        """
 
         self.initWorkflow(drop=True)
 
@@ -368,7 +421,8 @@ class Workflow:
         locked = aLocked or rLocked
 
         mayAdd = {
-            kind: not locked and not frozen and not G(reviewsWf, kind)
+            kind: not frozen and not G(reviewsWf, kind)
+            # kind: not locked and not frozen and not G(reviewsWf, kind)
             for kind in (N.expert, N.final)
         }
 
@@ -412,6 +466,9 @@ class Workflow:
             It should be inherited by the associated assessment and review records.
             Hence it is passed from there to here.
         """
+
+        if record is None:
+            return {}
 
         decisions = self.decisions
 

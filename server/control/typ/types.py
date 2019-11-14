@@ -40,7 +40,7 @@ ALL_TYPES = dict(
     decision=Decision,
     reviewEntry=ReviewEntry,
     score=Score,
-    typeContributio=TypeContribution,
+    typeContribution=TypeContribution,
     user=User,
 )
 ALL_TYPE_SET = set(ALL_TYPES)
@@ -80,7 +80,9 @@ class Types:
     """
 
     def __init__(self, context):
-        """Creates type singletons for all data types.
+        """## Initialization
+
+        Creates type singletons for all data types.
 
         Some types define operations that need access to
         `control.db.Db`, or `control.auth.Auth`.
@@ -93,12 +95,14 @@ class Types:
         Parameters
         ----------
         context: object
-            The `control.context.Context` singleton of the application.
+            See below.
 
         It holds the `control.db.Db`, or `control.auth.Auth` singletons.
         """
 
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
 
         done = set()
 

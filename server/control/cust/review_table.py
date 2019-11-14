@@ -15,8 +15,8 @@ class ReviewT(Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, masterTable=None, masterId=None):
-        mayInsert = self.mayInsert
+    def insert(self, force=False, masterTable=None, masterId=None):
+        mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 

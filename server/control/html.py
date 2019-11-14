@@ -33,15 +33,19 @@ class HtmlElement:
     """Wrapping of attributes and content into an HTML element."""
 
     def __init__(self, name):
-        """An HtmlElement object.
+        """## Initialization
+
+        An HtmlElement object.
 
         Parameters
         ----------
         name: string
-            The element name.
+            See below.
         """
 
         self.name = name
+        """*string* The element name.
+        """
 
     @staticmethod
     def atNormal(k):

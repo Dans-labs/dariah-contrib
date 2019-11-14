@@ -21,7 +21,17 @@ class Related(TypeBase):
     needsContext = True
 
     def __init__(self, context):
+        """## Initialization
+
+        Parameters
+        ----------
+        context: object
+            See below.
+        """
+
         self.context = context
+        """*object* A `control.context.Context` singleton.
+        """
 
     def normalize(self, strVal):
         return strVal

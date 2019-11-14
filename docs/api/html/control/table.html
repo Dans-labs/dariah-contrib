@@ -66,7 +66,9 @@ class Table:
     &#34;&#34;&#34;Deals with tables.&#34;&#34;&#34;
 
     def __init__(self, context, table):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         Set the RecordClass to a suitable derived class of Record,
         otherwise to the base class `control.record.Record` itself.
@@ -74,31 +76,92 @@ class Table:
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         table: string
-            Name of the table in question.
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
         auth = context.auth
         user = auth.user
 
         self.table = table
+        &#34;&#34;&#34;*string* Name of the table.
+        &#34;&#34;&#34;
+
         self.isMainTable = table == MAIN_TABLE
+        &#34;&#34;&#34;*boolean* Whether the table is the main table, i.e. `contrib`.
+        &#34;&#34;&#34;
+
         self.isInterTable = table == INTER_TABLE
+        &#34;&#34;&#34;*boolean* Whether the table is the inter table, i.e. `assessment`.
+        &#34;&#34;&#34;
+
         self.isUserTable = table in USER_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is one that collects user content.
+
+        !!! hint
+            As opposed to value tables.
+        &#34;&#34;&#34;
+
         self.isUserEntryTable = table in USER_ENTRY_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is one that collects user entries.
+
+        !!! hint
+            `criteriaEntry` and `reviewEntry`.
+        &#34;&#34;&#34;
+
         self.isValueTable = table in VALUE_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is a value table.
+
+        Value tables have records that contain representations of fixed  values,
+        e.g. disciplines, decisions, scores, and also users and criteria.
+        &#34;&#34;&#34;
+
         self.isSystemTable = table in SYSTEM_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is a system table.
+
+        Some value tables are deemed system tables, e.g. `decision`, `permissionGroup`.
+        &#34;&#34;&#34;
+
         self.itemLabels = G(ITEMS, table, default=[table, f&#34;&#34;&#34;{table}s&#34;&#34;&#34;])
+        &#34;&#34;&#34;*(string, string)* How to call an item in the table, singular and plural.
+        &#34;&#34;&#34;
+
         self.prov = PROV_SPECS
+        &#34;&#34;&#34;*dict* Field specifications for the provenance fields.
+
+        As in tables.yaml under key `prov`.
+        &#34;&#34;&#34;
+
         self.fields = getattr(CT, table, {})
+        &#34;&#34;&#34;*dict*  Field specifications for the fields in this table.
+
+        As in the xxx.yaml file in the `server/tables`, where `xxx` is the name of
+        the table.
+        &#34;&#34;&#34;
 
         self.uid = G(user, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the current user.
+        &#34;&#34;&#34;
+
         self.eppn = G(user, N.eppn)
+        &#34;&#34;&#34;*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        &#34;&#34;&#34;
+
         self.group = auth.groupRep()
+        &#34;&#34;&#34;*ObjectId* The permission group of the current user.
+        &#34;&#34;&#34;
+
         self.countryId = G(user, N.country)
+        &#34;&#34;&#34;*ObjectId* The country of the current user.
+        &#34;&#34;&#34;
 
         isUserTable = self.isUserTable
         isValueTable = self.isValueTable
@@ -109,13 +172,22 @@ class Table:
         self.mayInsert = auth.authenticated() and (
             isUserTable or isValueTable and isSuperuser or isSystemTable and isSysadmin
         )
+        &#34;&#34;&#34;*boolean* Whether the user may insert a  new record into this table.
+        &#34;&#34;&#34;
 
         def titleSortkey(r):
             return self.title(r).lower()
 
         self.titleSortkey = titleSortkey
+        &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+        &#34;&#34;&#34;
 
         self.RecordClass = recordFactory(table)
+        &#34;&#34;&#34;*class* The class used for manipulating records of this table.
+
+        It might be the base class `control.record.Record`  or one of its
+        derived classes.
+        &#34;&#34;&#34;
 
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
@@ -132,11 +204,11 @@ class Table:
         record: dict
             The full record
         withDetails: boolean, optional `False`
-            Whther to present a list of detail records below the record
+            Whether to present a list of detail records below the record
         readonly: boolean, optional `False`
             Whether to present the complete record in readonly mode
         bodyMethod: function, optional `None`
-            How to compose the HTML for the record.
+            How to compose the HTML for the body of the record.
             If `None` is passed, the default will be chosen:
             `control.record.Record.body`.
             Some particular tables have their own implementation of `body()`
@@ -482,15 +554,16 @@ class Table:
 </code></dt>
 <dd>
 <section class="desc"><p>Deals with tables.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
 otherwise to the base class <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> itself.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton</dd>
+<dd>See below.</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>Name of the table in question.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -500,7 +573,9 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
     &#34;&#34;&#34;Deals with tables.&#34;&#34;&#34;
 
     def __init__(self, context, table):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         Set the RecordClass to a suitable derived class of Record,
         otherwise to the base class `control.record.Record` itself.
@@ -508,31 +583,92 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         table: string
-            Name of the table in question.
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
 
         auth = context.auth
         user = auth.user
 
         self.table = table
+        &#34;&#34;&#34;*string* Name of the table.
+        &#34;&#34;&#34;
+
         self.isMainTable = table == MAIN_TABLE
+        &#34;&#34;&#34;*boolean* Whether the table is the main table, i.e. `contrib`.
+        &#34;&#34;&#34;
+
         self.isInterTable = table == INTER_TABLE
+        &#34;&#34;&#34;*boolean* Whether the table is the inter table, i.e. `assessment`.
+        &#34;&#34;&#34;
+
         self.isUserTable = table in USER_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is one that collects user content.
+
+        !!! hint
+            As opposed to value tables.
+        &#34;&#34;&#34;
+
         self.isUserEntryTable = table in USER_ENTRY_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is one that collects user entries.
+
+        !!! hint
+            `criteriaEntry` and `reviewEntry`.
+        &#34;&#34;&#34;
+
         self.isValueTable = table in VALUE_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is a value table.
+
+        Value tables have records that contain representations of fixed  values,
+        e.g. disciplines, decisions, scores, and also users and criteria.
+        &#34;&#34;&#34;
+
         self.isSystemTable = table in SYSTEM_TABLES
+        &#34;&#34;&#34;*boolean* Whether the table is a system table.
+
+        Some value tables are deemed system tables, e.g. `decision`, `permissionGroup`.
+        &#34;&#34;&#34;
+
         self.itemLabels = G(ITEMS, table, default=[table, f&#34;&#34;&#34;{table}s&#34;&#34;&#34;])
+        &#34;&#34;&#34;*(string, string)* How to call an item in the table, singular and plural.
+        &#34;&#34;&#34;
+
         self.prov = PROV_SPECS
+        &#34;&#34;&#34;*dict* Field specifications for the provenance fields.
+
+        As in tables.yaml under key `prov`.
+        &#34;&#34;&#34;
+
         self.fields = getattr(CT, table, {})
+        &#34;&#34;&#34;*dict*  Field specifications for the fields in this table.
+
+        As in the xxx.yaml file in the `server/tables`, where `xxx` is the name of
+        the table.
+        &#34;&#34;&#34;
 
         self.uid = G(user, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the current user.
+        &#34;&#34;&#34;
+
         self.eppn = G(user, N.eppn)
+        &#34;&#34;&#34;*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        &#34;&#34;&#34;
+
         self.group = auth.groupRep()
+        &#34;&#34;&#34;*ObjectId* The permission group of the current user.
+        &#34;&#34;&#34;
+
         self.countryId = G(user, N.country)
+        &#34;&#34;&#34;*ObjectId* The country of the current user.
+        &#34;&#34;&#34;
 
         isUserTable = self.isUserTable
         isValueTable = self.isValueTable
@@ -543,13 +679,22 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         self.mayInsert = auth.authenticated() and (
             isUserTable or isValueTable and isSuperuser or isSystemTable and isSysadmin
         )
+        &#34;&#34;&#34;*boolean* Whether the user may insert a  new record into this table.
+        &#34;&#34;&#34;
 
         def titleSortkey(r):
             return self.title(r).lower()
 
         self.titleSortkey = titleSortkey
+        &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+        &#34;&#34;&#34;
 
         self.RecordClass = recordFactory(table)
+        &#34;&#34;&#34;*class* The class used for manipulating records of this table.
+
+        It might be the base class `control.record.Record`  or one of its
+        derived classes.
+        &#34;&#34;&#34;
 
     def record(
         self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None,
@@ -566,11 +711,11 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         record: dict
             The full record
         withDetails: boolean, optional `False`
-            Whther to present a list of detail records below the record
+            Whether to present a list of detail records below the record
         readonly: boolean, optional `False`
             Whether to present the complete record in readonly mode
         bodyMethod: function, optional `None`
-            How to compose the HTML for the record.
+            How to compose the HTML for the body of the record.
             If `None` is passed, the default will be chosen:
             `control.record.Record.body`.
             Some particular tables have their own implementation of `body()`
@@ -964,6 +1109,105 @@ def forceOpen(theEid, openEid):
 </details>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.table.Table.RecordClass"><code class="name">var <span class="ident">RecordClass</span></code></dt>
+<dd>
+<section class="desc"><p><em>class</em> The class used for manipulating records of this table.</p>
+<p>It might be the base class <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a>
+or one of its
+derived classes.</p></section>
+</dd>
+<dt id="control.table.Table.context"><code class="name">var <span class="ident">context</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton.</p></section>
+</dd>
+<dt id="control.table.Table.countryId"><code class="name">var <span class="ident">countryId</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The country of the current user.</p></section>
+</dd>
+<dt id="control.table.Table.eppn"><code class="name">var <span class="ident">eppn</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The eppn of the current user.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The eppn is the user identifying attribute from the identity provider.</p>
+</div></section>
+</dd>
+<dt id="control.table.Table.fields"><code class="name">var <span class="ident">fields</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em>
+Field specifications for the fields in this table.</p>
+<p>As in the xxx.yaml file in the <code>server/tables</code>, where <code>xxx</code> is the name of
+the table.</p></section>
+</dd>
+<dt id="control.table.Table.group"><code class="name">var <span class="ident">group</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The permission group of the current user.</p></section>
+</dd>
+<dt id="control.table.Table.isInterTable"><code class="name">var <span class="ident">isInterTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is the inter table, i.e. <code>assessment</code>.</p></section>
+</dd>
+<dt id="control.table.Table.isMainTable"><code class="name">var <span class="ident">isMainTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is the main table, i.e. <code>contrib</code>.</p></section>
+</dd>
+<dt id="control.table.Table.isSystemTable"><code class="name">var <span class="ident">isSystemTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is a system table.</p>
+<p>Some value tables are deemed system tables, e.g. <code>decision</code>, <code>permissionGroup</code>.</p></section>
+</dd>
+<dt id="control.table.Table.isUserEntryTable"><code class="name">var <span class="ident">isUserEntryTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is one that collects user entries.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p><code>criteriaEntry</code> and <code>reviewEntry</code>.</p>
+</div></section>
+</dd>
+<dt id="control.table.Table.isUserTable"><code class="name">var <span class="ident">isUserTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is one that collects user content.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>As opposed to value tables.</p>
+</div></section>
+</dd>
+<dt id="control.table.Table.isValueTable"><code class="name">var <span class="ident">isValueTable</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the table is a value table.</p>
+<p>Value tables have records that contain representations of fixed
+values,
+e.g. disciplines, decisions, scores, and also users and criteria.</p></section>
+</dd>
+<dt id="control.table.Table.itemLabels"><code class="name">var <span class="ident">itemLabels</span></code></dt>
+<dd>
+<section class="desc"><p><em>(string, string)</em> How to call an item in the table, singular and plural.</p></section>
+</dd>
+<dt id="control.table.Table.mayInsert"><code class="name">var <span class="ident">mayInsert</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the user may insert a
+new record into this table.</p></section>
+</dd>
+<dt id="control.table.Table.prov"><code class="name">var <span class="ident">prov</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Field specifications for the provenance fields.</p>
+<p>As in tables.yaml under key <code>prov</code>.</p></section>
+</dd>
+<dt id="control.table.Table.table"><code class="name">var <span class="ident">table</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> Name of the table.</p></section>
+</dd>
+<dt id="control.table.Table.titleSortkey"><code class="name">var <span class="ident">titleSortkey</span></code></dt>
+<dd>
+<section class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p></section>
+</dd>
+<dt id="control.table.Table.uid"><code class="name">var <span class="ident">uid</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The id of the current user.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.table.Table.adjustWorkflow"><code class="name flex">
@@ -1203,11 +1447,11 @@ one of <code>eid</code> or <code>record</code> needs to be passed.</p>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The full record</dd>
 <dt><strong><code>withDetails</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
-<dd>Whther to present a list of detail records below the record</dd>
+<dd>Whether to present a list of detail records below the record</dd>
 <dt><strong><code>readonly</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>Whether to present the complete record in readonly mode</dd>
 <dt><strong><code>bodyMethod</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
-<dd>How to compose the HTML for the record.
+<dd>How to compose the HTML for the body of the record.
 If <code>None</code> is passed, the default will be chosen:
 <code>control.record.Record.body</code>.
 Some particular tables have their own implementation of <code>body()</code>
@@ -1237,11 +1481,11 @@ and they may supply alternative body methods as well.</dd>
     record: dict
         The full record
     withDetails: boolean, optional `False`
-        Whther to present a list of detail records below the record
+        Whether to present a list of detail records below the record
     readonly: boolean, optional `False`
         Whether to present the complete record in readonly mode
     bodyMethod: function, optional `None`
-        How to compose the HTML for the record.
+        How to compose the HTML for the body of the record.
         If `None` is passed, the default will be chosen:
         `control.record.Record.body`.
         Some particular tables have their own implementation of `body()`
@@ -1564,14 +1808,32 @@ otherwise all records go to the interface.</dd>
 <li>
 <h4><code><a title="control.table.Table" href="#control.table.Table">Table</a></code></h4>
 <ul class="two-column">
+<li><code><a title="control.table.Table.RecordClass" href="#control.table.Table.RecordClass">RecordClass</a></code></li>
 <li><code><a title="control.table.Table.adjustWorkflow" href="#control.table.Table.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="control.table.Table.context" href="#control.table.Table.context">context</a></code></li>
+<li><code><a title="control.table.Table.countryId" href="#control.table.Table.countryId">countryId</a></code></li>
+<li><code><a title="control.table.Table.eppn" href="#control.table.Table.eppn">eppn</a></code></li>
+<li><code><a title="control.table.Table.fields" href="#control.table.Table.fields">fields</a></code></li>
 <li><code><a title="control.table.Table.forceOpen" href="#control.table.Table.forceOpen">forceOpen</a></code></li>
+<li><code><a title="control.table.Table.group" href="#control.table.Table.group">group</a></code></li>
 <li><code><a title="control.table.Table.insert" href="#control.table.Table.insert">insert</a></code></li>
 <li><code><a title="control.table.Table.insertButton" href="#control.table.Table.insertButton">insertButton</a></code></li>
+<li><code><a title="control.table.Table.isInterTable" href="#control.table.Table.isInterTable">isInterTable</a></code></li>
+<li><code><a title="control.table.Table.isMainTable" href="#control.table.Table.isMainTable">isMainTable</a></code></li>
+<li><code><a title="control.table.Table.isSystemTable" href="#control.table.Table.isSystemTable">isSystemTable</a></code></li>
+<li><code><a title="control.table.Table.isUserEntryTable" href="#control.table.Table.isUserEntryTable">isUserEntryTable</a></code></li>
+<li><code><a title="control.table.Table.isUserTable" href="#control.table.Table.isUserTable">isUserTable</a></code></li>
+<li><code><a title="control.table.Table.isValueTable" href="#control.table.Table.isValueTable">isValueTable</a></code></li>
+<li><code><a title="control.table.Table.itemLabels" href="#control.table.Table.itemLabels">itemLabels</a></code></li>
+<li><code><a title="control.table.Table.mayInsert" href="#control.table.Table.mayInsert">mayInsert</a></code></li>
 <li><code><a title="control.table.Table.mayList" href="#control.table.Table.mayList">mayList</a></code></li>
+<li><code><a title="control.table.Table.prov" href="#control.table.Table.prov">prov</a></code></li>
 <li><code><a title="control.table.Table.record" href="#control.table.Table.record">record</a></code></li>
 <li><code><a title="control.table.Table.stage" href="#control.table.Table.stage">stage</a></code></li>
+<li><code><a title="control.table.Table.table" href="#control.table.Table.table">table</a></code></li>
 <li><code><a title="control.table.Table.title" href="#control.table.Table.title">title</a></code></li>
+<li><code><a title="control.table.Table.titleSortkey" href="#control.table.Table.titleSortkey">titleSortkey</a></code></li>
+<li><code><a title="control.table.Table.uid" href="#control.table.Table.uid">uid</a></code></li>
 <li><code><a title="control.table.Table.wrap" href="#control.table.Table.wrap">wrap</a></code></li>
 </ul>
 </li>
