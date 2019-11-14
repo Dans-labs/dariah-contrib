@@ -73,10 +73,37 @@ class Workflow:
     in the database.
 
     This class is about computing and managing the workflow information.
+
+    ## Fixity
+
+    Due to workflow, records may become fixed, temporarily or permanently.
+    The following workflow attributes will be computed:
+
+    frozen
+    :   permananently fixed due to a selection decision on the contrib.
+
+        *   extends from contribs to assessments and reviews.
+        *   workflow commands: all forbidden
+
+    done
+    :   permanently fixed due to a final review decision.
+
+        *   extends from review to assessment to contrib
+        *   workflow commands: only selection decisions allowed
+
+    locked
+    :   temporarily fixed due to review in progress.
+
+        *   extends from assessment to contrib.
+        *   workflow commands: all allowed as far as they make sense
+
+    Any record that carries one of these fixity attributes cannot be edited
+    or deleted, except for the fields that get modified when an allowed
+    workflow command is executed.
     &#34;&#34;&#34;
 
     def __init__(self, db):
-        &#34;&#34;&#34;Sets up workflow information.
+        &#34;&#34;&#34;## Initialization
 
         Several pieces of data that will be used many times in workflow computations
         are fetched and stored as attributes.
@@ -86,18 +113,34 @@ class Workflow:
         Parameters
         ----------
         db: object
-            The database is needed to store computed workflow information, so we store
-            the Db singleton as attribute `db`.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        The database is needed to store computed workflow information, so we store
+        the Db singleton as attribute `db`.
+        &#34;&#34;&#34;
+
         decisionRecords = db.getValueRecords(N.decision)
         self.decisions = {
             G(record, N._id): G(record, N.rep) for record in decisionRecords
         }
+        &#34;&#34;&#34;*dict* Mapping of decision ids to decision verbs.
+
+        !!! hint
+            Think of `Accept`, `Reject`
+        &#34;&#34;&#34;
+
         self.decisionParticiple = {
             G(record, N._id): G(record, N.participle) for record in decisionRecords
         }
+        &#34;&#34;&#34;*dict* Mapping of decision ids to decision participles.
+
+        !!! hint
+            Think of `Accepted`, `Rejected`
+        &#34;&#34;&#34;
 
         scoreData = db.getValueRecords(N.score)
         self.scoreMapping = {
@@ -105,18 +148,28 @@ class Workflow:
             for record in scoreData
             if N.score in record
         }
+        &#34;&#34;&#34;*dict* Mapping of score ids to numeric scores.
+        &#34;&#34;&#34;
 
         maxScoreByCrit = {}
         for record in scoreData:
-            crit = G(record, N.criteria)
-            if crit is None:
+            criteriaId = G(record, N.criteria)
+            if criteriaId is None:
                 continue
             score = G(record, N.score, default=0)
-            prevMax = maxScoreByCrit.setdefault(crit, None)
+            prevMax = maxScoreByCrit.setdefault(criteriaId, None)
             if prevMax is None or score &gt; prevMax:
-                maxScoreByCrit[crit] = score
+                maxScoreByCrit[criteriaId] = score
 
         self.maxScoreByCrit = maxScoreByCrit
+        &#34;&#34;&#34;*dict* Mapping of criteria ids to the maximum score for that criterion.
+
+        !!! note
+            We collect the maximum score that can be given for a criteria,
+            irrespective of any concrete assessment.
+
+            We need the maximum to present a given score as a percentage.
+        &#34;&#34;&#34;
 
         self.initWorkflow(drop=True)
 
@@ -399,7 +452,8 @@ class Workflow:
         locked = aLocked or rLocked
 
         mayAdd = {
-            kind: not locked and not frozen and not G(reviewsWf, kind)
+            kind: not frozen and not G(reviewsWf, kind)
+            # kind: not locked and not frozen and not G(reviewsWf, kind)
             for kind in (N.expert, N.final)
         }
 
@@ -443,6 +497,9 @@ class Workflow:
             It should be inherited by the associated assessment and review records.
             Hence it is passed from there to here.
         &#34;&#34;&#34;
+
+        if record is None:
+            return {}
 
         decisions = self.decisions
 
@@ -628,15 +685,46 @@ There it is defined how workflow information is <em>applied</em>.</p>
 <p>At startup time, the workflow information is computed from scratch and stored
 in the database.</p>
 <p>This class is about computing and managing the workflow information.</p>
-<p>Sets up workflow information.</p>
+<h2 id="fixity">Fixity</h2>
+<p>Due to workflow, records may become fixed, temporarily or permanently.
+The following workflow attributes will be computed:</p>
+<dl>
+<dt>frozen</dt>
+<dd>
+<p>permananently fixed due to a selection decision on the contrib.</p>
+<ul>
+<li>extends from contribs to assessments and reviews.</li>
+<li>workflow commands: all forbidden</li>
+</ul>
+</dd>
+<dt>done</dt>
+<dd>
+<p>permanently fixed due to a final review decision.</p>
+<ul>
+<li>extends from review to assessment to contrib</li>
+<li>workflow commands: only selection decisions allowed</li>
+</ul>
+</dd>
+<dt>locked</dt>
+<dd>
+<p>temporarily fixed due to review in progress.</p>
+<ul>
+<li>extends from assessment to contrib.</li>
+<li>workflow commands: all allowed as far as they make sense</li>
+</ul>
+</dd>
+</dl>
+<p>Any record that carries one of these fixity attributes cannot be edited
+or deleted, except for the fields that get modified when an allowed
+workflow command is executed.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Several pieces of data that will be used many times in workflow computations
 are fetched and stored as attributes.</p>
 <p>The previous workflow table is dropped and replaced by a freshly computed one.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
-<dd>The database is needed to store computed workflow information, so we store
-the Db singleton as attribute <code>db</code>.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -661,10 +749,37 @@ the Db singleton as attribute <code>db</code>.</dd>
     in the database.
 
     This class is about computing and managing the workflow information.
+
+    ## Fixity
+
+    Due to workflow, records may become fixed, temporarily or permanently.
+    The following workflow attributes will be computed:
+
+    frozen
+    :   permananently fixed due to a selection decision on the contrib.
+
+        *   extends from contribs to assessments and reviews.
+        *   workflow commands: all forbidden
+
+    done
+    :   permanently fixed due to a final review decision.
+
+        *   extends from review to assessment to contrib
+        *   workflow commands: only selection decisions allowed
+
+    locked
+    :   temporarily fixed due to review in progress.
+
+        *   extends from assessment to contrib.
+        *   workflow commands: all allowed as far as they make sense
+
+    Any record that carries one of these fixity attributes cannot be edited
+    or deleted, except for the fields that get modified when an allowed
+    workflow command is executed.
     &#34;&#34;&#34;
 
     def __init__(self, db):
-        &#34;&#34;&#34;Sets up workflow information.
+        &#34;&#34;&#34;## Initialization
 
         Several pieces of data that will be used many times in workflow computations
         are fetched and stored as attributes.
@@ -674,18 +789,34 @@ the Db singleton as attribute <code>db</code>.</dd>
         Parameters
         ----------
         db: object
-            The database is needed to store computed workflow information, so we store
-            the Db singleton as attribute `db`.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        The database is needed to store computed workflow information, so we store
+        the Db singleton as attribute `db`.
+        &#34;&#34;&#34;
+
         decisionRecords = db.getValueRecords(N.decision)
         self.decisions = {
             G(record, N._id): G(record, N.rep) for record in decisionRecords
         }
+        &#34;&#34;&#34;*dict* Mapping of decision ids to decision verbs.
+
+        !!! hint
+            Think of `Accept`, `Reject`
+        &#34;&#34;&#34;
+
         self.decisionParticiple = {
             G(record, N._id): G(record, N.participle) for record in decisionRecords
         }
+        &#34;&#34;&#34;*dict* Mapping of decision ids to decision participles.
+
+        !!! hint
+            Think of `Accepted`, `Rejected`
+        &#34;&#34;&#34;
 
         scoreData = db.getValueRecords(N.score)
         self.scoreMapping = {
@@ -693,18 +824,28 @@ the Db singleton as attribute <code>db</code>.</dd>
             for record in scoreData
             if N.score in record
         }
+        &#34;&#34;&#34;*dict* Mapping of score ids to numeric scores.
+        &#34;&#34;&#34;
 
         maxScoreByCrit = {}
         for record in scoreData:
-            crit = G(record, N.criteria)
-            if crit is None:
+            criteriaId = G(record, N.criteria)
+            if criteriaId is None:
                 continue
             score = G(record, N.score, default=0)
-            prevMax = maxScoreByCrit.setdefault(crit, None)
+            prevMax = maxScoreByCrit.setdefault(criteriaId, None)
             if prevMax is None or score &gt; prevMax:
-                maxScoreByCrit[crit] = score
+                maxScoreByCrit[criteriaId] = score
 
         self.maxScoreByCrit = maxScoreByCrit
+        &#34;&#34;&#34;*dict* Mapping of criteria ids to the maximum score for that criterion.
+
+        !!! note
+            We collect the maximum score that can be given for a criteria,
+            irrespective of any concrete assessment.
+
+            We need the maximum to present a given score as a percentage.
+        &#34;&#34;&#34;
 
         self.initWorkflow(drop=True)
 
@@ -987,7 +1128,8 @@ the Db singleton as attribute <code>db</code>.</dd>
         locked = aLocked or rLocked
 
         mayAdd = {
-            kind: not locked and not frozen and not G(reviewsWf, kind)
+            kind: not frozen and not G(reviewsWf, kind)
+            # kind: not locked and not frozen and not G(reviewsWf, kind)
             for kind in (N.expert, N.final)
         }
 
@@ -1031,6 +1173,9 @@ the Db singleton as attribute <code>db</code>.</dd>
             It should be inherited by the associated assessment and review records.
             Hence it is passed from there to here.
         &#34;&#34;&#34;
+
+        if record is None:
+            return {}
 
         decisions = self.decisions
 
@@ -1253,6 +1398,45 @@ def aggregate(entries):
                             masterId, {}
                         ).setdefault(detailTable, []).append(record)</code></pre>
 </details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.workflow.compute.Workflow.db"><code class="name">var <span class="ident">db</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.db.Db" href="../db.html#control.db.Db"><code>Db</code></a> singleton</p>
+<p>The database is needed to store computed workflow information, so we store
+the Db singleton as attribute <code>db</code>.</p></section>
+</dd>
+<dt id="control.workflow.compute.Workflow.decisionParticiple"><code class="name">var <span class="ident">decisionParticiple</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Mapping of decision ids to decision participles.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Think of <code>Accepted</code>, <code>Rejected</code></p>
+</div></section>
+</dd>
+<dt id="control.workflow.compute.Workflow.decisions"><code class="name">var <span class="ident">decisions</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Mapping of decision ids to decision verbs.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>Think of <code>Accept</code>, <code>Reject</code></p>
+</div></section>
+</dd>
+<dt id="control.workflow.compute.Workflow.maxScoreByCrit"><code class="name">var <span class="ident">maxScoreByCrit</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Mapping of criteria ids to the maximum score for that criterion.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We collect the maximum score that can be given for a criteria,
+irrespective of any concrete assessment.</p>
+<p>We need the maximum to present a given score as a percentage.</p>
+</div></section>
+</dd>
+<dt id="control.workflow.compute.Workflow.scoreMapping"><code class="name">var <span class="ident">scoreMapping</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> Mapping of score ids to numeric scores.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1587,7 +1771,8 @@ be passed upwards to it.</dd>
     locked = aLocked or rLocked
 
     mayAdd = {
-        kind: not locked and not frozen and not G(reviewsWf, kind)
+        kind: not frozen and not G(reviewsWf, kind)
+        # kind: not locked and not frozen and not G(reviewsWf, kind)
         for kind in (N.expert, N.final)
     }
 
@@ -1662,6 +1847,9 @@ Hence it is passed from there to here.</dd>
         It should be inherited by the associated assessment and review records.
         Hence it is passed from there to here.
     &#34;&#34;&#34;
+
+    if record is None:
+        return {}
 
     decisions = self.decisions
 
@@ -1926,11 +2114,16 @@ Otherwise, the table will merely be cleared.</dd>
 <li><code><a title="control.workflow.compute.Workflow.computeWorkflow" href="#control.workflow.compute.Workflow.computeWorkflow">computeWorkflow</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.computeWorkflowAssessment" href="#control.workflow.compute.Workflow.computeWorkflowAssessment">computeWorkflowAssessment</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.computeWorkflowReview" href="#control.workflow.compute.Workflow.computeWorkflowReview">computeWorkflowReview</a></code></li>
+<li><code><a title="control.workflow.compute.Workflow.db" href="#control.workflow.compute.Workflow.db">db</a></code></li>
+<li><code><a title="control.workflow.compute.Workflow.decisionParticiple" href="#control.workflow.compute.Workflow.decisionParticiple">decisionParticiple</a></code></li>
+<li><code><a title="control.workflow.compute.Workflow.decisions" href="#control.workflow.compute.Workflow.decisions">decisions</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.delete" href="#control.workflow.compute.Workflow.delete">delete</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.getFullItem" href="#control.workflow.compute.Workflow.getFullItem">getFullItem</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.initWorkflow" href="#control.workflow.compute.Workflow.initWorkflow">initWorkflow</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.insert" href="#control.workflow.compute.Workflow.insert">insert</a></code></li>
+<li><code><a title="control.workflow.compute.Workflow.maxScoreByCrit" href="#control.workflow.compute.Workflow.maxScoreByCrit">maxScoreByCrit</a></code></li>
 <li><code><a title="control.workflow.compute.Workflow.recompute" href="#control.workflow.compute.Workflow.recompute">recompute</a></code></li>
+<li><code><a title="control.workflow.compute.Workflow.scoreMapping" href="#control.workflow.compute.Workflow.scoreMapping">scoreMapping</a></code></li>
 </ul>
 </li>
 </ul>

@@ -47,6 +47,7 @@ from control.utils import pick as G, E, now
 from control.html import HtmlElements as H
 from control.typ.datetime import Datetime
 from control.cust.score import presentScore
+from control.cust.factory_table import make as mkTable
 
 
 CT = C.tables
@@ -83,7 +84,9 @@ class WorkflowItem:
     &#34;&#34;&#34;
 
     def __init__(self, context, data):
-        &#34;&#34;&#34;Wraps a workflow item record around a workflow data record.
+        &#34;&#34;&#34;## Initialization
+
+        Wraps a workflow item record around a workflow data record.
 
         Workflow item records are created per contribution,
         but they will be referenced by contribution, assessment and review records
@@ -104,15 +107,39 @@ class WorkflowItem:
             The `control.context.Context singleton`, from which the
             `control.auth.Auth` singleton can be picked up, from which the
             details of the current user can be read off.
+        data: dict
+            See below.
         &#34;&#34;&#34;
 
         auth = context.auth
         user = auth.user
+
         self.auth = auth
+        &#34;&#34;&#34;*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        &#34;&#34;&#34;
+
         self.uid = G(user, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the current user.
+        &#34;&#34;&#34;
+
         self.eppn = G(user, N.eppn)
+        &#34;&#34;&#34;*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        &#34;&#34;&#34;
+
         self.data = data
+        &#34;&#34;&#34;*dict* The  workflow attributes.
+        &#34;&#34;&#34;
+
         self.mykind = self.myReviewerKind()
+        &#34;&#34;&#34;*dict* The kind of reviewer that the current user is.
+
+        A user is `expert` reviewer or `final` reviewer, or `None`.
+        &#34;&#34;&#34;
 
     def getKind(self, table, record):
         &#34;&#34;&#34;Determine whether a review(Entry) is `expert` or `final`.
@@ -307,6 +334,7 @@ class WorkflowItem:
         -------
         boolean
         &#34;&#34;&#34;
+        print(&#39;PERM&#39;, table, command)
         auth = self.auth
         uid = self.uid
 
@@ -330,6 +358,9 @@ class WorkflowItem:
             N.country,
             kind=kind,
         )
+
+        (contribId,) = self.info(N.contrib, N._id)
+        print(contribId)
 
         isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
@@ -375,17 +406,19 @@ class WorkflowItem:
         if frozen:
             return False
 
-        if locked and not remaining:
-            return False
-
         answer = not locked or remaining
 
         if table == N.assessment:
+            if command == N.startReview:
+                print(&#39;startReview perm&#39;, mayAdd)
+                return G(mayAdd, myKind)
+                # return G(mayAdd, myKind) and not locked
+
             if uid not in creators:
                 return False
 
-            if command == N.startReview:
-                return G(mayAdd, myKind) and not locked
+            if locked and not remaining:
+                return False
 
             if command == N.submitAssessment:
                 return stage == N.complete and answer
@@ -535,6 +568,7 @@ class WorkflowItem:
             It is always the url to the page of the contrib record.
         &#34;&#34;&#34;
 
+        context = recordObj.context
         table = recordObj.table
         eid = recordObj.eid
         kind = recordObj.kind
@@ -543,12 +577,15 @@ class WorkflowItem:
         commandInfo = commands[command]
         acro = G(commandInfo, N.acro)
 
+        urlExtra = E
+
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
             if operator == N.add:
-                tableObj = recordObj.tableObj
-
-                tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                oTable = G(commandInfo, N.table)
+                tableObj = mkTable(context, oTable)
+                oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                urlExtra = f&#34;&#34;&#34;/{N.open}/{oTable}/{oeid}&#34;&#34;&#34;
             elif operator == N.set:
                 field = G(commandInfo, N.field)
                 value = G(commandInfo, N.value)
@@ -557,7 +594,7 @@ class WorkflowItem:
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -643,6 +680,7 @@ class WorkflowItem:
 
         for (command, commandInfo) in sorted(allowedCommands.items()):
             permitted = self.permission(table, command, kind=kind)
+            print(&#39;COMMAND&#39;, command, permitted)
             if not permitted:
                 continue
 
@@ -754,6 +792,7 @@ attribute <code>data</code> and offers methods to</p>
 <dt><strong><code>mykind</code></strong> :&ensp;<code>string</code></dt>
 <dd>The kind of reviewer the current user is, if any.</dd>
 </dl>
+<h2 id="initialization">Initialization</h2>
 <p>Wraps a workflow item record around a workflow data record.</p>
 <p>Workflow item records are created per contribution,
 but they will be referenced by contribution, assessment and review records
@@ -773,6 +812,8 @@ user is, if any, and store that in attribute <code>mykind</code>.</p>
 <dd>The <code>control.context.Context singleton</code>, from which the
 <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a> singleton can be picked up, from which the
 details of the current user can be read off.</dd>
+<dt><strong><code>data</code></strong> :&ensp;<code>dict</code></dt>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -797,7 +838,9 @@ details of the current user can be read off.</dd>
     &#34;&#34;&#34;
 
     def __init__(self, context, data):
-        &#34;&#34;&#34;Wraps a workflow item record around a workflow data record.
+        &#34;&#34;&#34;## Initialization
+
+        Wraps a workflow item record around a workflow data record.
 
         Workflow item records are created per contribution,
         but they will be referenced by contribution, assessment and review records
@@ -818,15 +861,39 @@ details of the current user can be read off.</dd>
             The `control.context.Context singleton`, from which the
             `control.auth.Auth` singleton can be picked up, from which the
             details of the current user can be read off.
+        data: dict
+            See below.
         &#34;&#34;&#34;
 
         auth = context.auth
         user = auth.user
+
         self.auth = auth
+        &#34;&#34;&#34;*object* The `control.auth.Auth` singleton
+
+        Provides methods to access the attributes of the current user.
+        &#34;&#34;&#34;
+
         self.uid = G(user, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the current user.
+        &#34;&#34;&#34;
+
         self.eppn = G(user, N.eppn)
+        &#34;&#34;&#34;*ObjectId* The eppn of the current user.
+
+        !!! hint
+            The eppn is the user identifying attribute from the identity provider.
+        &#34;&#34;&#34;
+
         self.data = data
+        &#34;&#34;&#34;*dict* The  workflow attributes.
+        &#34;&#34;&#34;
+
         self.mykind = self.myReviewerKind()
+        &#34;&#34;&#34;*dict* The kind of reviewer that the current user is.
+
+        A user is `expert` reviewer or `final` reviewer, or `None`.
+        &#34;&#34;&#34;
 
     def getKind(self, table, record):
         &#34;&#34;&#34;Determine whether a review(Entry) is `expert` or `final`.
@@ -1021,6 +1088,7 @@ details of the current user can be read off.</dd>
         -------
         boolean
         &#34;&#34;&#34;
+        print(&#39;PERM&#39;, table, command)
         auth = self.auth
         uid = self.uid
 
@@ -1044,6 +1112,9 @@ details of the current user can be read off.</dd>
             N.country,
             kind=kind,
         )
+
+        (contribId,) = self.info(N.contrib, N._id)
+        print(contribId)
 
         isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
@@ -1089,17 +1160,19 @@ details of the current user can be read off.</dd>
         if frozen:
             return False
 
-        if locked and not remaining:
-            return False
-
         answer = not locked or remaining
 
         if table == N.assessment:
+            if command == N.startReview:
+                print(&#39;startReview perm&#39;, mayAdd)
+                return G(mayAdd, myKind)
+                # return G(mayAdd, myKind) and not locked
+
             if uid not in creators:
                 return False
 
-            if command == N.startReview:
-                return G(mayAdd, myKind) and not locked
+            if locked and not remaining:
+                return False
 
             if command == N.submitAssessment:
                 return stage == N.complete and answer
@@ -1249,6 +1322,7 @@ details of the current user can be read off.</dd>
             It is always the url to the page of the contrib record.
         &#34;&#34;&#34;
 
+        context = recordObj.context
         table = recordObj.table
         eid = recordObj.eid
         kind = recordObj.kind
@@ -1257,12 +1331,15 @@ details of the current user can be read off.</dd>
         commandInfo = commands[command]
         acro = G(commandInfo, N.acro)
 
+        urlExtra = E
+
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
             if operator == N.add:
-                tableObj = recordObj.tableObj
-
-                tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                oTable = G(commandInfo, N.table)
+                tableObj = mkTable(context, oTable)
+                oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                urlExtra = f&#34;&#34;&#34;/{N.open}/{oTable}/{oeid}&#34;&#34;&#34;
             elif operator == N.set:
                 field = G(commandInfo, N.field)
                 value = G(commandInfo, N.value)
@@ -1271,7 +1348,7 @@ details of the current user can be read off.</dd>
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -1357,6 +1434,7 @@ details of the current user can be read off.</dd>
 
         for (command, commandInfo) in sorted(allowedCommands.items()):
             permitted = self.permission(table, command, kind=kind)
+            print(&#39;COMMAND&#39;, command, permitted)
             if not permitted:
                 continue
 
@@ -1515,6 +1593,36 @@ def isCommand(table, field):
 </details>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.workflow.apply.WorkflowItem.auth"><code class="name">var <span class="ident">auth</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.auth.Auth" href="../auth.html#control.auth.Auth"><code>Auth</code></a> singleton</p>
+<p>Provides methods to access the attributes of the current user.</p></section>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.data"><code class="name">var <span class="ident">data</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The
+workflow attributes.</p></section>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.eppn"><code class="name">var <span class="ident">eppn</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The eppn of the current user.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The eppn is the user identifying attribute from the identity provider.</p>
+</div></section>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.mykind"><code class="name">var <span class="ident">mykind</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The kind of reviewer that the current user is.</p>
+<p>A user is <code>expert</code> reviewer or <code>final</code> reviewer, or <code>None</code>.</p></section>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.uid"><code class="name">var <span class="ident">uid</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The id of the current user.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.workflow.apply.WorkflowItem.checkFixed"><code class="name flex">
@@ -1651,6 +1759,7 @@ commands: contrib, assessment, or review.</dd>
 
     for (command, commandInfo) in sorted(allowedCommands.items()):
         permitted = self.permission(table, command, kind=kind)
+        print(&#39;COMMAND&#39;, command, permitted)
         if not permitted:
             continue
 
@@ -1717,6 +1826,7 @@ It is always the url to the page of the contrib record.</dd>
         It is always the url to the page of the contrib record.
     &#34;&#34;&#34;
 
+    context = recordObj.context
     table = recordObj.table
     eid = recordObj.eid
     kind = recordObj.kind
@@ -1725,12 +1835,15 @@ It is always the url to the page of the contrib record.</dd>
     commandInfo = commands[command]
     acro = G(commandInfo, N.acro)
 
+    urlExtra = E
+
     if self.permission(table, command, kind=kind):
         operator = G(commandInfo, N.operator)
         if operator == N.add:
-            tableObj = recordObj.tableObj
-
-            tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+            oTable = G(commandInfo, N.table)
+            tableObj = mkTable(context, oTable)
+            oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+            urlExtra = f&#34;&#34;&#34;/{N.open}/{oTable}/{oeid}&#34;&#34;&#34;
         elif operator == N.set:
             field = G(commandInfo, N.field)
             value = G(commandInfo, N.value)
@@ -1739,7 +1852,7 @@ It is always the url to the page of the contrib record.</dd>
     else:
         flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;</code></pre>
+    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.apply.WorkflowItem.getKind"><code class="name flex">
@@ -2121,6 +2234,7 @@ workflow.yaml under <code>commands</code>.</dd>
     -------
     boolean
     &#34;&#34;&#34;
+    print(&#39;PERM&#39;, table, command)
     auth = self.auth
     uid = self.uid
 
@@ -2144,6 +2258,9 @@ workflow.yaml under <code>commands</code>.</dd>
         N.country,
         kind=kind,
     )
+
+    (contribId,) = self.info(N.contrib, N._id)
+    print(contribId)
 
     isCoord = auth.coordinator(countryId=countryId)
     isSuper = auth.superuser()
@@ -2189,17 +2306,19 @@ workflow.yaml under <code>commands</code>.</dd>
     if frozen:
         return False
 
-    if locked and not remaining:
-        return False
-
     answer = not locked or remaining
 
     if table == N.assessment:
+        if command == N.startReview:
+            print(&#39;startReview perm&#39;, mayAdd)
+            return G(mayAdd, myKind)
+            # return G(mayAdd, myKind) and not locked
+
         if uid not in creators:
             return False
 
-        if command == N.startReview:
-            return G(mayAdd, myKind) and not locked
+        if locked and not remaining:
+            return False
 
         if command == N.submitAssessment:
             return stage == N.complete and answer
@@ -2443,19 +2562,24 @@ contrib, assessment, or review.</dd>
 <li>
 <h4><code><a title="control.workflow.apply.WorkflowItem" href="#control.workflow.apply.WorkflowItem">WorkflowItem</a></code></h4>
 <ul class="two-column">
+<li><code><a title="control.workflow.apply.WorkflowItem.auth" href="#control.workflow.apply.WorkflowItem.auth">auth</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.checkFixed" href="#control.workflow.apply.WorkflowItem.checkFixed">checkFixed</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.commands" href="#control.workflow.apply.WorkflowItem.commands">commands</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.data" href="#control.workflow.apply.WorkflowItem.data">data</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.doCommand" href="#control.workflow.apply.WorkflowItem.doCommand">doCommand</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.eppn" href="#control.workflow.apply.WorkflowItem.eppn">eppn</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.getKind" href="#control.workflow.apply.WorkflowItem.getKind">getKind</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.getWf" href="#control.workflow.apply.WorkflowItem.getWf">getWf</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.info" href="#control.workflow.apply.WorkflowItem.info">info</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.isCommand" href="#control.workflow.apply.WorkflowItem.isCommand">isCommand</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.isValid" href="#control.workflow.apply.WorkflowItem.isValid">isValid</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.myReviewerKind" href="#control.workflow.apply.WorkflowItem.myReviewerKind">myReviewerKind</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.mykind" href="#control.workflow.apply.WorkflowItem.mykind">mykind</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.permission" href="#control.workflow.apply.WorkflowItem.permission">permission</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.stage" href="#control.workflow.apply.WorkflowItem.stage">stage</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.status" href="#control.workflow.apply.WorkflowItem.status">status</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.statusOverview" href="#control.workflow.apply.WorkflowItem.statusOverview">statusOverview</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.uid" href="#control.workflow.apply.WorkflowItem.uid">uid</a></code></li>
 </ul>
 </li>
 </ul>

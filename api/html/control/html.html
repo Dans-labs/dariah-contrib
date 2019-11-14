@@ -65,15 +65,19 @@ class HtmlElement:
     &#34;&#34;&#34;Wrapping of attributes and content into an HTML element.&#34;&#34;&#34;
 
     def __init__(self, name):
-        &#34;&#34;&#34;An HtmlElement object.
+        &#34;&#34;&#34;## Initialization
+
+        An HtmlElement object.
 
         Parameters
         ----------
         name: string
-            The element name.
+            See below.
         &#34;&#34;&#34;
 
         self.name = name
+        &#34;&#34;&#34;*string* The element name.
+        &#34;&#34;&#34;
 
     @staticmethod
     def atNormal(k):
@@ -729,11 +733,12 @@ class HtmlElements:
 </code></dt>
 <dd>
 <section class="desc"><p>Wrapping of attributes and content into an HTML element.</p>
+<h2 id="initialization">Initialization</h2>
 <p>An HtmlElement object.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
-<dd>The element name.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -743,15 +748,19 @@ class HtmlElements:
     &#34;&#34;&#34;Wrapping of attributes and content into an HTML element.&#34;&#34;&#34;
 
     def __init__(self, name):
-        &#34;&#34;&#34;An HtmlElement object.
+        &#34;&#34;&#34;## Initialization
+
+        An HtmlElement object.
 
         Parameters
         ----------
         name: string
-            The element name.
+            See below.
         &#34;&#34;&#34;
 
         self.name = name
+        &#34;&#34;&#34;*string* The element name.
+        &#34;&#34;&#34;
 
     @staticmethod
     def atNormal(k):
@@ -927,6 +936,13 @@ def attStr(atts, addClass=None):
         if v is not None
     )</code></pre>
 </details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.html.HtmlElement.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The element name.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -2693,6 +2709,7 @@ def wrapTable(data, td):
 <ul class="">
 <li><code><a title="control.html.HtmlElement.atNormal" href="#control.html.HtmlElement.atNormal">atNormal</a></code></li>
 <li><code><a title="control.html.HtmlElement.attStr" href="#control.html.HtmlElement.attStr">attStr</a></code></li>
+<li><code><a title="control.html.HtmlElement.name" href="#control.html.HtmlElement.name">name</a></code></li>
 <li><code><a title="control.html.HtmlElement.wrap" href="#control.html.HtmlElement.wrap">wrap</a></code></li>
 </ul>
 </li>

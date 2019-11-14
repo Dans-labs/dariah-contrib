@@ -93,18 +93,17 @@ class Record:
         readonly=False,
         bodyMethod=None,
     ):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the table object
         that spawns a record object.
 
-        Set the DetailsClass to a suitable derived class of Details,
-        otherwise to the base class `control.details.Details` itself.
-
         Parameters
         ----------
         tableObj: object
-            A `control.table.Table` object (or one of a derived class)
+            See below.
         eid, record, withDetails, readonly, bodyMethod
             See `control.table.Table.record`
         &#34;&#34;&#34;
@@ -113,23 +112,46 @@ class Record:
             setattr(self, prop, getattr(tableObj, prop, None))
 
         self.tableObj = tableObj
+        &#34;&#34;&#34;*object* A `control.table.Table` object (or one of a derived class)
+        &#34;&#34;&#34;
+
         self.withDetails = withDetails
+        &#34;&#34;&#34;*boolean* Whether to present a list of detail records below the record.
+        &#34;&#34;&#34;
+
         self.readonly = readonly
+        &#34;&#34;&#34;*boolean* Whether to present the complete record in readonly mode.
+        &#34;&#34;&#34;
+
         self.bodyMethod = bodyMethod
+        &#34;&#34;&#34;*function* How to compose the HTML for the body of the record.
+        &#34;&#34;&#34;
 
         context = self.context
         table = self.table
 
         self.DetailsClass = detailsFactory(table)
+        &#34;&#34;&#34;*class* The class used for presenting details of this record.
+
+        It might be the base class `control.details.Details`  or one of its
+        derived classes.
+        &#34;&#34;&#34;
 
         if record is None:
             record = context.getItem(table, eid)
         self.record = record
+        &#34;&#34;&#34;*dict* The data of the record, keyed by field names.
+        &#34;&#34;&#34;
+
         self.eid = G(record, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the record.
+        &#34;&#34;&#34;
 
         self.setPerm()
         self.setWorkflow()
         self.mayDelete = self.getDelPerm()
+        &#34;&#34;&#34;*boolean* Whether the user may delete the record.
+        &#34;&#34;&#34;
 
     def getDelPerm(self):
         &#34;&#34;&#34;Compute the delete permission for this record.
@@ -447,6 +469,8 @@ class Record:
         expanded=1,
         withProv=True,
         hideMasters=False,
+        showTable=None,
+        showEid=None,
         extraCls=E,
     ):
         &#34;&#34;&#34;Wrap the record into HTML.
@@ -456,7 +480,7 @@ class Record:
         expanded | effect
         --- | ---
         `-1` | only a title with a control to get the full details
-        `False` | full details, no control to collapse/expand
+        `0` | full details, no control to collapse/expand
         `1` | full details, with a control to collapse to the title
 
         !!! note
@@ -597,7 +621,11 @@ class Record:
         )
 
         rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E
-        details = self.DetailsClass(self).wrap() if withDetails else E
+        details = (
+            self.DetailsClass(self).wrap(showTable=showTable, showEid=showEid)
+            if withDetails
+            else E
+        )
 
         return (
             H.details(
@@ -744,15 +772,14 @@ class Record:
 </code></dt>
 <dd>
 <section class="desc"><p>Deals with records.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the table object
 that spawns a record object.</p>
-<p>Set the DetailsClass to a suitable derived class of Details,
-otherwise to the base class <a title="control.details.Details" href="details.html#control.details.Details"><code>Details</code></a> itself.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>tableObj</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.table.Table" href="table.html#control.table.Table"><code>Table</code></a> object (or one of a derived class)</dd>
+<dd>See below.</dd>
 <dt><strong><code>eid</code></strong>, <strong><code>record</code></strong>, <strong><code>withDetails</code></strong>, <strong><code>readonly</code></strong>, <strong><code>bodyMethod</code></strong></dt>
 <dd>See <a title="control.table.Table.record" href="table.html#control.table.Table.record"><code>Table.record()</code></a></dd>
 </dl></section>
@@ -785,18 +812,17 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         readonly=False,
         bodyMethod=None,
     ):
-        &#34;&#34;&#34;Store the incoming information.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information.
 
         A number of properties will be inherited from the table object
         that spawns a record object.
 
-        Set the DetailsClass to a suitable derived class of Details,
-        otherwise to the base class `control.details.Details` itself.
-
         Parameters
         ----------
         tableObj: object
-            A `control.table.Table` object (or one of a derived class)
+            See below.
         eid, record, withDetails, readonly, bodyMethod
             See `control.table.Table.record`
         &#34;&#34;&#34;
@@ -805,23 +831,46 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
             setattr(self, prop, getattr(tableObj, prop, None))
 
         self.tableObj = tableObj
+        &#34;&#34;&#34;*object* A `control.table.Table` object (or one of a derived class)
+        &#34;&#34;&#34;
+
         self.withDetails = withDetails
+        &#34;&#34;&#34;*boolean* Whether to present a list of detail records below the record.
+        &#34;&#34;&#34;
+
         self.readonly = readonly
+        &#34;&#34;&#34;*boolean* Whether to present the complete record in readonly mode.
+        &#34;&#34;&#34;
+
         self.bodyMethod = bodyMethod
+        &#34;&#34;&#34;*function* How to compose the HTML for the body of the record.
+        &#34;&#34;&#34;
 
         context = self.context
         table = self.table
 
         self.DetailsClass = detailsFactory(table)
+        &#34;&#34;&#34;*class* The class used for presenting details of this record.
+
+        It might be the base class `control.details.Details`  or one of its
+        derived classes.
+        &#34;&#34;&#34;
 
         if record is None:
             record = context.getItem(table, eid)
         self.record = record
+        &#34;&#34;&#34;*dict* The data of the record, keyed by field names.
+        &#34;&#34;&#34;
+
         self.eid = G(record, N._id)
+        &#34;&#34;&#34;*ObjectId* The id of the record.
+        &#34;&#34;&#34;
 
         self.setPerm()
         self.setWorkflow()
         self.mayDelete = self.getDelPerm()
+        &#34;&#34;&#34;*boolean* Whether the user may delete the record.
+        &#34;&#34;&#34;
 
     def getDelPerm(self):
         &#34;&#34;&#34;Compute the delete permission for this record.
@@ -1139,6 +1188,8 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         expanded=1,
         withProv=True,
         hideMasters=False,
+        showTable=None,
+        showEid=None,
         extraCls=E,
     ):
         &#34;&#34;&#34;Wrap the record into HTML.
@@ -1148,7 +1199,7 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         expanded | effect
         --- | ---
         `-1` | only a title with a control to get the full details
-        `False` | full details, no control to collapse/expand
+        `0` | full details, no control to collapse/expand
         `1` | full details, with a control to collapse to the title
 
         !!! note
@@ -1289,7 +1340,11 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
         )
 
         rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E
-        details = self.DetailsClass(self).wrap() if withDetails else E
+        details = (
+            self.DetailsClass(self).wrap(showTable=showTable, showEid=showEid)
+            if withDetails
+            else E
+        )
 
         return (
             H.details(
@@ -1490,6 +1545,44 @@ def titleRaw(obj, record, cls=E):
 
     return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.record.Record.DetailsClass"><code class="name">var <span class="ident">DetailsClass</span></code></dt>
+<dd>
+<section class="desc"><p><em>class</em> The class used for presenting details of this record.</p>
+<p>It might be the base class <a title="control.details.Details" href="details.html#control.details.Details"><code>Details</code></a>
+or one of its
+derived classes.</p></section>
+</dd>
+<dt id="control.record.Record.bodyMethod"><code class="name">var <span class="ident">bodyMethod</span></code></dt>
+<dd>
+<section class="desc"><p><em>function</em> How to compose the HTML for the body of the record.</p></section>
+</dd>
+<dt id="control.record.Record.eid"><code class="name">var <span class="ident">eid</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> The id of the record.</p></section>
+</dd>
+<dt id="control.record.Record.mayDelete"><code class="name">var <span class="ident">mayDelete</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the user may delete the record.</p></section>
+</dd>
+<dt id="control.record.Record.readonly"><code class="name">var <span class="ident">readonly</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether to present the complete record in readonly mode.</p></section>
+</dd>
+<dt id="control.record.Record.record"><code class="name">var <span class="ident">record</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The data of the record, keyed by field names.</p></section>
+</dd>
+<dt id="control.record.Record.tableObj"><code class="name">var <span class="ident">tableObj</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.table.Table" href="table.html#control.table.Table"><code>Table</code></a> object (or one of a derived class)</p></section>
+</dd>
+<dt id="control.record.Record.withDetails"><code class="name">var <span class="ident">withDetails</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether to present a list of detail records below the record.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -2141,7 +2234,7 @@ or if there is no workflow item found,
 </details>
 </dd>
 <dt id="control.record.Record.wrap"><code class="name flex">
-<span>def <span class="ident">wrap</span></span>(<span>self, inner=True, wrapMethod=None, expanded=1, withProv=True, hideMasters=False, extraCls='')</span>
+<span>def <span class="ident">wrap</span></span>(<span>self, inner=True, wrapMethod=None, expanded=1, withProv=True, hideMasters=False, showTable=None, showEid=None, extraCls='')</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Wrap the record into HTML.</p>
@@ -2159,7 +2252,7 @@ or if there is no workflow item found,
 <td>only a title with a control to get the full details</td>
 </tr>
 <tr>
-<td><code>False</code></td>
+<td><code>0</code></td>
 <td>full details, no control to collapse/expand</td>
 </tr>
 <tr>
@@ -2246,6 +2339,8 @@ master record.</dd>
     expanded=1,
     withProv=True,
     hideMasters=False,
+    showTable=None,
+    showEid=None,
     extraCls=E,
 ):
     &#34;&#34;&#34;Wrap the record into HTML.
@@ -2255,7 +2350,7 @@ master record.</dd>
     expanded | effect
     --- | ---
     `-1` | only a title with a control to get the full details
-    `False` | full details, no control to collapse/expand
+    `0` | full details, no control to collapse/expand
     `1` | full details, with a control to collapse to the title
 
     !!! note
@@ -2396,7 +2491,11 @@ master record.</dd>
     )
 
     rButton = H.iconr(itemKey, &#34;#main&#34;, msg=table) if withRefresh else E
-    details = self.DetailsClass(self).wrap() if withDetails else E
+    details = (
+        self.DetailsClass(self).wrap(showTable=showTable, showEid=showEid)
+        if withDetails
+        else E
+    )
 
     return (
         H.details(
@@ -2436,21 +2535,29 @@ master record.</dd>
 <li>
 <h4><code><a title="control.record.Record" href="#control.record.Record">Record</a></code></h4>
 <ul class="two-column">
+<li><code><a title="control.record.Record.DetailsClass" href="#control.record.Record.DetailsClass">DetailsClass</a></code></li>
 <li><code><a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="#control.record.Record.body">body</a></code></li>
+<li><code><a title="control.record.Record.bodyMethod" href="#control.record.Record.bodyMethod">bodyMethod</a></code></li>
 <li><code><a title="control.record.Record.command" href="#control.record.Record.command">command</a></code></li>
 <li><code><a title="control.record.Record.delete" href="#control.record.Record.delete">delete</a></code></li>
 <li><code><a title="control.record.Record.deleteButton" href="#control.record.Record.deleteButton">deleteButton</a></code></li>
 <li><code><a title="control.record.Record.deleteDetails" href="#control.record.Record.deleteDetails">deleteDetails</a></code></li>
+<li><code><a title="control.record.Record.eid" href="#control.record.Record.eid">eid</a></code></li>
 <li><code><a title="control.record.Record.field" href="#control.record.Record.field">field</a></code></li>
 <li><code><a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm">getDelPerm</a></code></li>
 <li><code><a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies">getDependencies</a></code></li>
 <li><code><a title="control.record.Record.inheritProps" href="#control.record.Record.inheritProps">inheritProps</a></code></li>
+<li><code><a title="control.record.Record.mayDelete" href="#control.record.Record.mayDelete">mayDelete</a></code></li>
+<li><code><a title="control.record.Record.readonly" href="#control.record.Record.readonly">readonly</a></code></li>
+<li><code><a title="control.record.Record.record" href="#control.record.Record.record">record</a></code></li>
 <li><code><a title="control.record.Record.reload" href="#control.record.Record.reload">reload</a></code></li>
 <li><code><a title="control.record.Record.setPerm" href="#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="#control.record.Record.setWorkflow">setWorkflow</a></code></li>
+<li><code><a title="control.record.Record.tableObj" href="#control.record.Record.tableObj">tableObj</a></code></li>
 <li><code><a title="control.record.Record.title" href="#control.record.Record.title">title</a></code></li>
 <li><code><a title="control.record.Record.titleRaw" href="#control.record.Record.titleRaw">titleRaw</a></code></li>
+<li><code><a title="control.record.Record.withDetails" href="#control.record.Record.withDetails">withDetails</a></code></li>
 <li><code><a title="control.record.Record.wrap" href="#control.record.Record.wrap">wrap</a></code></li>
 </ul>
 </li>

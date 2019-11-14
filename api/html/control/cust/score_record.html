@@ -74,15 +74,14 @@ class ScoreR(Record):
 <p>A <code>wrapHelp</code> method is added which presents the score
 as a term-definition pair, where the title of the record is the term,
 and the description is the definition.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the table object
 that spawns a record object.</p>
-<p>Set the DetailsClass to a suitable derived class of Details,
-otherwise to the base class <a title="control.details.Details" href="../details.html#control.details.Details"><code>Details</code></a> itself.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>tableObj</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.table.Table" href="../table.html#control.table.Table"><code>Table</code></a> object (or one of a derived class)</dd>
+<dd>See below.</dd>
 <dt><strong><code>eid</code></strong>, <strong><code>record</code></strong>, <strong><code>withDetails</code></strong>, <strong><code>readonly</code></strong>, <strong><code>bodyMethod</code></strong></dt>
 <dd>See <a title="control.table.Table.record" href="../table.html#control.table.Table.record"><code>Table.record()</code></a></dd>
 </dl></section>
@@ -150,21 +149,29 @@ otherwise to the base class <a title="control.details.Details" href="../details.
 <ul class="hlist">
 <li><code><b><a title="control.record.Record" href="../record.html#control.record.Record">Record</a></b></code>:
 <ul class="hlist">
+<li><code><a title="control.record.Record.DetailsClass" href="../record.html#control.record.Record.DetailsClass">DetailsClass</a></code></li>
 <li><code><a title="control.record.Record.adjustWorkflow" href="../record.html#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="../record.html#control.record.Record.body">body</a></code></li>
+<li><code><a title="control.record.Record.bodyMethod" href="../record.html#control.record.Record.bodyMethod">bodyMethod</a></code></li>
 <li><code><a title="control.record.Record.command" href="../record.html#control.record.Record.command">command</a></code></li>
 <li><code><a title="control.record.Record.delete" href="../record.html#control.record.Record.delete">delete</a></code></li>
 <li><code><a title="control.record.Record.deleteButton" href="../record.html#control.record.Record.deleteButton">deleteButton</a></code></li>
 <li><code><a title="control.record.Record.deleteDetails" href="../record.html#control.record.Record.deleteDetails">deleteDetails</a></code></li>
+<li><code><a title="control.record.Record.eid" href="../record.html#control.record.Record.eid">eid</a></code></li>
 <li><code><a title="control.record.Record.field" href="../record.html#control.record.Record.field">field</a></code></li>
 <li><code><a title="control.record.Record.getDelPerm" href="../record.html#control.record.Record.getDelPerm">getDelPerm</a></code></li>
 <li><code><a title="control.record.Record.getDependencies" href="../record.html#control.record.Record.getDependencies">getDependencies</a></code></li>
 <li><code><a title="control.record.Record.inheritProps" href="../record.html#control.record.Record.inheritProps">inheritProps</a></code></li>
+<li><code><a title="control.record.Record.mayDelete" href="../record.html#control.record.Record.mayDelete">mayDelete</a></code></li>
+<li><code><a title="control.record.Record.readonly" href="../record.html#control.record.Record.readonly">readonly</a></code></li>
+<li><code><a title="control.record.Record.record" href="../record.html#control.record.Record.record">record</a></code></li>
 <li><code><a title="control.record.Record.reload" href="../record.html#control.record.Record.reload">reload</a></code></li>
 <li><code><a title="control.record.Record.setPerm" href="../record.html#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="../record.html#control.record.Record.setWorkflow">setWorkflow</a></code></li>
+<li><code><a title="control.record.Record.tableObj" href="../record.html#control.record.Record.tableObj">tableObj</a></code></li>
 <li><code><a title="control.record.Record.title" href="../record.html#control.record.Record.title">title</a></code></li>
 <li><code><a title="control.record.Record.titleRaw" href="../record.html#control.record.Record.titleRaw">titleRaw</a></code></li>
+<li><code><a title="control.record.Record.withDetails" href="../record.html#control.record.Record.withDetails">withDetails</a></code></li>
 <li><code><a title="control.record.Record.wrap" href="../record.html#control.record.Record.wrap">wrap</a></code></li>
 </ul>
 </li>

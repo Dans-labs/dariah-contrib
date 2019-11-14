@@ -41,8 +41,8 @@ class AssessmentT(Table):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, masterTable=None, masterId=None):
-        mayInsert = self.mayInsert
+    def insert(self, force=False, masterTable=None, masterId=None):
+        mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 
@@ -80,7 +80,7 @@ class AssessmentT(Table):
         db.insertMany(N.criteriaEntry, uid, eppn, records)
         self.adjustWorkflow(masterOid, new=False)
 
-        return masterId</code></pre>
+        return assessmentId</code></pre>
 </details>
 </section>
 <section>
@@ -100,15 +100,16 @@ class AssessmentT(Table):
 <section class="desc"><p>Logic for the assessment table.</p>
 <p>Inserting an assessment means also to insert the right
 set of criteriaEntry records and prefill some of their fields.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
 otherwise to the base class <a title="control.record.Record" href="../record.html#control.record.Record"><code>Record</code></a> itself.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.context.Context" href="../context.html#control.context.Context"><code>Context</code></a> singleton</dd>
+<dd>See below.</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>Name of the table in question.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -124,8 +125,8 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, masterTable=None, masterId=None):
-        mayInsert = self.mayInsert
+    def insert(self, force=False, masterTable=None, masterId=None):
+        mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 
@@ -163,7 +164,7 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
         db.insertMany(N.criteriaEntry, uid, eppn, records)
         self.adjustWorkflow(masterOid, new=False)
 
-        return masterId</code></pre>
+        return assessmentId</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -173,14 +174,32 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <ul class="hlist">
 <li><code><b><a title="control.table.Table" href="../table.html#control.table.Table">Table</a></b></code>:
 <ul class="hlist">
+<li><code><a title="control.table.Table.RecordClass" href="../table.html#control.table.Table.RecordClass">RecordClass</a></code></li>
 <li><code><a title="control.table.Table.adjustWorkflow" href="../table.html#control.table.Table.adjustWorkflow">adjustWorkflow</a></code></li>
+<li><code><a title="control.table.Table.context" href="../table.html#control.table.Table.context">context</a></code></li>
+<li><code><a title="control.table.Table.countryId" href="../table.html#control.table.Table.countryId">countryId</a></code></li>
+<li><code><a title="control.table.Table.eppn" href="../table.html#control.table.Table.eppn">eppn</a></code></li>
+<li><code><a title="control.table.Table.fields" href="../table.html#control.table.Table.fields">fields</a></code></li>
 <li><code><a title="control.table.Table.forceOpen" href="../table.html#control.table.Table.forceOpen">forceOpen</a></code></li>
+<li><code><a title="control.table.Table.group" href="../table.html#control.table.Table.group">group</a></code></li>
 <li><code><a title="control.table.Table.insert" href="../table.html#control.table.Table.insert">insert</a></code></li>
 <li><code><a title="control.table.Table.insertButton" href="../table.html#control.table.Table.insertButton">insertButton</a></code></li>
+<li><code><a title="control.table.Table.isInterTable" href="../table.html#control.table.Table.isInterTable">isInterTable</a></code></li>
+<li><code><a title="control.table.Table.isMainTable" href="../table.html#control.table.Table.isMainTable">isMainTable</a></code></li>
+<li><code><a title="control.table.Table.isSystemTable" href="../table.html#control.table.Table.isSystemTable">isSystemTable</a></code></li>
+<li><code><a title="control.table.Table.isUserEntryTable" href="../table.html#control.table.Table.isUserEntryTable">isUserEntryTable</a></code></li>
+<li><code><a title="control.table.Table.isUserTable" href="../table.html#control.table.Table.isUserTable">isUserTable</a></code></li>
+<li><code><a title="control.table.Table.isValueTable" href="../table.html#control.table.Table.isValueTable">isValueTable</a></code></li>
+<li><code><a title="control.table.Table.itemLabels" href="../table.html#control.table.Table.itemLabels">itemLabels</a></code></li>
+<li><code><a title="control.table.Table.mayInsert" href="../table.html#control.table.Table.mayInsert">mayInsert</a></code></li>
 <li><code><a title="control.table.Table.mayList" href="../table.html#control.table.Table.mayList">mayList</a></code></li>
+<li><code><a title="control.table.Table.prov" href="../table.html#control.table.Table.prov">prov</a></code></li>
 <li><code><a title="control.table.Table.record" href="../table.html#control.table.Table.record">record</a></code></li>
 <li><code><a title="control.table.Table.stage" href="../table.html#control.table.Table.stage">stage</a></code></li>
+<li><code><a title="control.table.Table.table" href="../table.html#control.table.Table.table">table</a></code></li>
 <li><code><a title="control.table.Table.title" href="../table.html#control.table.Table.title">title</a></code></li>
+<li><code><a title="control.table.Table.titleSortkey" href="../table.html#control.table.Table.titleSortkey">titleSortkey</a></code></li>
+<li><code><a title="control.table.Table.uid" href="../table.html#control.table.Table.uid">uid</a></code></li>
 <li><code><a title="control.table.Table.wrap" href="../table.html#control.table.Table.wrap">wrap</a></code></li>
 </ul>
 </li>

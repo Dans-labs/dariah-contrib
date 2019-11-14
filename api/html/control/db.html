@@ -105,22 +105,23 @@ class Db:
     &#34;&#34;&#34;
 
     def __init__(self, mongo):
-        &#34;&#34;&#34;Pick up the connection to MongoDb.
+        &#34;&#34;&#34;## Initialization
+
+        Pick up the connection to MongoDb.
 
         !!! note
-            There is a userId, fixed by configuration, that represents the system.
-            It is only used when user records are created: those records will said
-            to be created by the system.
-            The id is stored in the attribute `creatorId`.
 
         Parameters
         ----------
         mongo: object
-            The connection to the database exists before the Db singleton
-            is initialized and will be passed as `mongo` to it.
+            See below.
         &#34;&#34;&#34;
 
         self.mongo = mongo
+        &#34;&#34;&#34;*object* The connection to MongoDb.
+
+        The connnection exists before the Db singleton is initialized.
+        &#34;&#34;&#34;
 
         self.collect()
 
@@ -129,6 +130,12 @@ class Db:
             for record in self.user.values()
             if G(record, N.eppn) == CREATOR
         ][0]
+        &#34;&#34;&#34;*ObjectId* System user.
+
+        There is a userId, fixed by configuration, that represents the system.
+        It is only used when user records are created: those records will said
+        to be created by the system.
+        &#34;&#34;&#34;
 
     def mongoCmd(self, label, table, command, *args):
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
@@ -1065,19 +1072,15 @@ class Db:
 <p>It will read all content of all value tables and keep it cached.</p>
 <p>The data in the user tables will be cached by the higher level
 <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a>.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Pick up the connection to MongoDb.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>There is a userId, fixed by configuration, that represents the system.
-It is only used when user records are created: those records will said
-to be created by the system.
-The id is stored in the attribute <code>creatorId</code>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>mongo</code></strong> :&ensp;<code>object</code></dt>
-<dd>The connection to the database exists before the Db singleton
-is initialized and will be passed as <code>mongo</code> to it.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -1093,22 +1096,23 @@ is initialized and will be passed as <code>mongo</code> to it.</dd>
     &#34;&#34;&#34;
 
     def __init__(self, mongo):
-        &#34;&#34;&#34;Pick up the connection to MongoDb.
+        &#34;&#34;&#34;## Initialization
+
+        Pick up the connection to MongoDb.
 
         !!! note
-            There is a userId, fixed by configuration, that represents the system.
-            It is only used when user records are created: those records will said
-            to be created by the system.
-            The id is stored in the attribute `creatorId`.
 
         Parameters
         ----------
         mongo: object
-            The connection to the database exists before the Db singleton
-            is initialized and will be passed as `mongo` to it.
+            See below.
         &#34;&#34;&#34;
 
         self.mongo = mongo
+        &#34;&#34;&#34;*object* The connection to MongoDb.
+
+        The connnection exists before the Db singleton is initialized.
+        &#34;&#34;&#34;
 
         self.collect()
 
@@ -1117,6 +1121,12 @@ is initialized and will be passed as <code>mongo</code> to it.</dd>
             for record in self.user.values()
             if G(record, N.eppn) == CREATOR
         ][0]
+        &#34;&#34;&#34;*ObjectId* System user.
+
+        There is a userId, fixed by configuration, that represents the system.
+        It is only used when user records are created: those records will said
+        to be created by the system.
+        &#34;&#34;&#34;
 
     def mongoCmd(self, label, table, command, *args):
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
@@ -2133,6 +2143,21 @@ def satisfies(record, criterion):
             return False
     return True</code></pre>
 </details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.db.Db.creatorId"><code class="name">var <span class="ident">creatorId</span></code></dt>
+<dd>
+<section class="desc"><p><em>ObjectId</em> System user.</p>
+<p>There is a userId, fixed by configuration, that represents the system.
+It is only used when user records are created: those records will said
+to be created by the system.</p></section>
+</dd>
+<dt id="control.db.Db.mongo"><code class="name">var <span class="ident">mongo</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The connection to MongoDb.</p>
+<p>The connnection exists before the Db singleton is initialized.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -3689,6 +3714,7 @@ they are about.</p>
 <li><code><a title="control.db.Db.clearWorkflow" href="#control.db.Db.clearWorkflow">clearWorkflow</a></code></li>
 <li><code><a title="control.db.Db.collect" href="#control.db.Db.collect">collect</a></code></li>
 <li><code><a title="control.db.Db.collectActualItems" href="#control.db.Db.collectActualItems">collectActualItems</a></code></li>
+<li><code><a title="control.db.Db.creatorId" href="#control.db.Db.creatorId">creatorId</a></code></li>
 <li><code><a title="control.db.Db.deleteItem" href="#control.db.Db.deleteItem">deleteItem</a></code></li>
 <li><code><a title="control.db.Db.deleteMany" href="#control.db.Db.deleteMany">deleteMany</a></code></li>
 <li><code><a title="control.db.Db.deleteWorkflow" href="#control.db.Db.deleteWorkflow">deleteWorkflow</a></code></li>
@@ -3707,6 +3733,7 @@ they are about.</p>
 <li><code><a title="control.db.Db.insertWorkflow" href="#control.db.Db.insertWorkflow">insertWorkflow</a></code></li>
 <li><code><a title="control.db.Db.insertWorkflowMany" href="#control.db.Db.insertWorkflowMany">insertWorkflowMany</a></code></li>
 <li><code><a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit">makeCrit</a></code></li>
+<li><code><a title="control.db.Db.mongo" href="#control.db.Db.mongo">mongo</a></code></li>
 <li><code><a title="control.db.Db.mongoCmd" href="#control.db.Db.mongoCmd">mongoCmd</a></code></li>
 <li><code><a title="control.db.Db.satisfies" href="#control.db.Db.satisfies">satisfies</a></code></li>
 <li><code><a title="control.db.Db.updateField" href="#control.db.Db.updateField">updateField</a></code></li>

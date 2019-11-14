@@ -64,7 +64,9 @@ class Sidebar:
     &#34;&#34;&#34;Show a sidebar with navigation links and buttons on the interface.&#34;&#34;&#34;
 
     def __init__(self, context, path):
-        &#34;&#34;&#34;Store the incoming information and set up attributes for collecting items.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information and set up attributes for collecting items.
 
         !!! hint
             The `path` is needed to determine which items in the sidebar are the active
@@ -73,25 +75,24 @@ class Sidebar:
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         path: url
-            The current url.
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
+
         self.path = path
-        self.entries = []
-        self.mainEntries = []
-        self.Entries = []
-        self.userEntries = []
-        self.userPaths = []
-        self.userEntryEntries = []
-        self.userEntryPaths = []
-        self.valueEntries = []
-        self.valuePaths = []
+        &#34;&#34;&#34;*url* The current url.
+        &#34;&#34;&#34;
+
         self.options = {
             option: G(request.args, option, default=ZERO) for option in OPTIONS.keys()
         }
+        &#34;&#34;&#34;*dict*  The current setting of the options.
+        &#34;&#34;&#34;
 
     def makeCaption(self, label, entries, rule=False):
         &#34;&#34;&#34;Produce the caption for a section of navigation items.
@@ -429,6 +430,7 @@ class Sidebar:
 </code></dt>
 <dd>
 <section class="desc"><p>Show a sidebar with navigation links and buttons on the interface.</p>
+<h2 id="initialization">Initialization</h2>
 <p>Store the incoming information and set up attributes for collecting items.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -438,9 +440,9 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
-<dd>A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton</dd>
+<dd>See below.</dd>
 <dt><strong><code>path</code></strong> :&ensp;<code>url</code></dt>
-<dd>The current url.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -450,7 +452,9 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
     &#34;&#34;&#34;Show a sidebar with navigation links and buttons on the interface.&#34;&#34;&#34;
 
     def __init__(self, context, path):
-        &#34;&#34;&#34;Store the incoming information and set up attributes for collecting items.
+        &#34;&#34;&#34;## Initialization
+
+        Store the incoming information and set up attributes for collecting items.
 
         !!! hint
             The `path` is needed to determine which items in the sidebar are the active
@@ -459,25 +463,24 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         Parameters
         ----------
         context: object
-            A `control.context.Context` singleton
+            See below.
         path: url
-            The current url.
+            See below.
         &#34;&#34;&#34;
 
         self.context = context
+        &#34;&#34;&#34;*object* A `control.context.Context` singleton.
+        &#34;&#34;&#34;
+
         self.path = path
-        self.entries = []
-        self.mainEntries = []
-        self.Entries = []
-        self.userEntries = []
-        self.userPaths = []
-        self.userEntryEntries = []
-        self.userEntryPaths = []
-        self.valueEntries = []
-        self.valuePaths = []
+        &#34;&#34;&#34;*url* The current url.
+        &#34;&#34;&#34;
+
         self.options = {
             option: G(request.args, option, default=ZERO) for option in OPTIONS.keys()
         }
+        &#34;&#34;&#34;*dict*  The current setting of the options.
+        &#34;&#34;&#34;
 
     def makeCaption(self, label, entries, rule=False):
         &#34;&#34;&#34;Produce the caption for a section of navigation items.
@@ -799,6 +802,22 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
 
         return H.join(entries)</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.sidebar.Sidebar.context"><code class="name">var <span class="ident">context</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton.</p></section>
+</dd>
+<dt id="control.sidebar.Sidebar.options"><code class="name">var <span class="ident">options</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em>
+The current setting of the options.</p></section>
+</dd>
+<dt id="control.sidebar.Sidebar.path"><code class="name">var <span class="ident">path</span></code></dt>
+<dd>
+<section class="desc"><p><em>url</em> The current url.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.sidebar.Sidebar.makeCaption"><code class="name flex">
@@ -1257,10 +1276,13 @@ to him/her.</p>
 <ul>
 <li>
 <h4><code><a title="control.sidebar.Sidebar" href="#control.sidebar.Sidebar">Sidebar</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="control.sidebar.Sidebar.context" href="#control.sidebar.Sidebar.context">context</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.makeCaption" href="#control.sidebar.Sidebar.makeCaption">makeCaption</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.makeEntry" href="#control.sidebar.Sidebar.makeEntry">makeEntry</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.makeOptions" href="#control.sidebar.Sidebar.makeOptions">makeOptions</a></code></li>
+<li><code><a title="control.sidebar.Sidebar.options" href="#control.sidebar.Sidebar.options">options</a></code></li>
+<li><code><a title="control.sidebar.Sidebar.path" href="#control.sidebar.Sidebar.path">path</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.tableEntry" href="#control.sidebar.Sidebar.tableEntry">tableEntry</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.wrap" href="#control.sidebar.Sidebar.wrap">wrap</a></code></li>
 </ul>

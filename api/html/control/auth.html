@@ -85,36 +85,12 @@ class Auth:
 
     Facilitates the login/logout process of users.
     Maintains the attributes that the DARIAH Identity Provider supplies about users.
-
-    Attributes
-    ----------
-    isDevel: boolean
-        We also detect whether we run in production or in development,
-        because in production we use the DARIAH Identity provider,
-        while in development we use a simple, console-based way of
-        logging a few test users in.
-    authority: string
-        The name of the authority that identifies users.
-        In production it is &#34;DARIAH&#34;, which stands for the DARIAH Identity Provider.
-        In development it is &#34;local&#34;.
-    secret: string
-        The secret that is defined outside the app and stored in a file.
-        This information is needed to encrypt sessions.
-    user: dict
-        The attributes of the currently logged in user.
-    authUser, unauthUser: string
-        We store the permission group of the currently logged in user as a plain
-        string, like &#34;auth&#34;, &#34;office&#34;, not by their Mongo ids.
-        The translation is made on the base of the value table `permissionGroup`,
-        to which Db gives access.
-    authId, unauthId: ObjectId
-        The ids of the groups corresponding to `authenticated` users and
-        `unauthenticated` users.  So the values of these attributes are
-        constants, that do not depend on the currently logged in user.
     &#34;&#34;&#34;
 
     def __init__(self, app, db):
-        &#34;&#34;&#34;Include the web app and a handle to `control.db.Db` into the
+        &#34;&#34;&#34;## Initialization
+
+        Include the web app and a handle to `control.db.Db` into the
         attributes.
 
         Parameters
@@ -124,29 +100,65 @@ class Auth:
             This app has the secret key for sessions, and that is the only thing
             we need from the app.
         db: object
-            The `control.db.Db` singleton, which gives us methods to retrieve user
-            info from the database and store user info there.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        &#34;&#34;&#34;
+
         environ = os.environ
         permissionGroupInv = db.permissionGroupInv
 
         # determine production or devel
         regime = G(environ, N.REGIME)
+
         self.isDevel = regime == N.devel
+        &#34;&#34;&#34;*boolean* Whether the server runs in production or in development.
+
+        In production we use the DARIAH Identity provider,
+        while in development we use a simple, console-based way of
+        logging a few test users in.
+        &#34;&#34;&#34;
+
         self.authority = N.local if self.isDevel else N.DARIAH
+        &#34;&#34;&#34;*string* The name of the authority that identifies users.
+
+        In production it is &#34;DARIAH&#34;, which stands for the DARIAH Identity Provider.
+        In development it is &#34;local&#34;.
+        &#34;&#34;&#34;
 
         # read secret from the system
         self.secret = E
+        &#34;&#34;&#34;*string* The secret that is defined outside the app and stored in a file.
+
+        This information is needed to encrypt sessions.
+        &#34;&#34;&#34;
+
         with open(SECRET_FILE) as fh:
             app.secret_key = fh.read()
 
         self.authId = G(permissionGroupInv, AUTH)
+        &#34;&#34;&#34;*string* The groupId of the `auth` permission group.
+        &#34;&#34;&#34;
+
         self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        &#34;&#34;&#34;*string* Info of the `auth` permission group.
+        &#34;&#34;&#34;
+
         self.unauthId = G(permissionGroupInv, UNAUTH)
+        &#34;&#34;&#34;*string* The groupId of the `public` permission group.
+        &#34;&#34;&#34;
+
         self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        &#34;&#34;&#34;*string* Info of the `public` permission group.
+        &#34;&#34;&#34;
+
         self.user = {}
+        &#34;&#34;&#34;*dict* The attributes of the currently logged in user.&#34;&#34;&#34;
 
     def clearUser(self):
         &#34;&#34;&#34;Forgets the currently logged in user.
@@ -600,33 +612,7 @@ class Auth:
 <section class="desc"><p>Deal with user Authentication.</p>
 <p>Facilitates the login/logout process of users.
 Maintains the attributes that the DARIAH Identity Provider supplies about users.</p>
-<h2 id="attributes">Attributes</h2>
-<dl>
-<dt><strong><code>isDevel</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>We also detect whether we run in production or in development,
-because in production we use the DARIAH Identity provider,
-while in development we use a simple, console-based way of
-logging a few test users in.</dd>
-<dt><strong><code>authority</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of the authority that identifies users.
-In production it is "DARIAH", which stands for the DARIAH Identity Provider.
-In development it is "local".</dd>
-<dt><strong><code>secret</code></strong> :&ensp;<code>string</code></dt>
-<dd>The secret that is defined outside the app and stored in a file.
-This information is needed to encrypt sessions.</dd>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>The attributes of the currently logged in user.</dd>
-<dt><strong><code>authUser</code></strong>, <strong><code>unauthUser</code></strong> :&ensp;<code>string</code></dt>
-<dd>We store the permission group of the currently logged in user as a plain
-string, like "auth", "office", not by their Mongo ids.
-The translation is made on the base of the value table <code>permissionGroup</code>,
-to which Db gives access.</dd>
-<dt><strong><code>authId</code></strong>, <strong><code>unauthId</code></strong> :&ensp;<code>ObjectId</code></dt>
-<dd>The ids of the groups corresponding to <code>authenticated</code> users and
-<code>unauthenticated</code> users.
-So the values of these attributes are
-constants, that do not depend on the currently logged in user.</dd>
-</dl>
+<h2 id="initialization">Initialization</h2>
 <p>Include the web app and a handle to <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> into the
 attributes.</p>
 <h2 id="parameters">Parameters</h2>
@@ -636,8 +622,7 @@ attributes.</p>
 This app has the secret key for sessions, and that is the only thing
 we need from the app.</dd>
 <dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
-<dd>The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton, which gives us methods to retrieve user
-info from the database and store user info there.</dd>
+<dd>See below.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -648,36 +633,12 @@ info from the database and store user info there.</dd>
 
     Facilitates the login/logout process of users.
     Maintains the attributes that the DARIAH Identity Provider supplies about users.
-
-    Attributes
-    ----------
-    isDevel: boolean
-        We also detect whether we run in production or in development,
-        because in production we use the DARIAH Identity provider,
-        while in development we use a simple, console-based way of
-        logging a few test users in.
-    authority: string
-        The name of the authority that identifies users.
-        In production it is &#34;DARIAH&#34;, which stands for the DARIAH Identity Provider.
-        In development it is &#34;local&#34;.
-    secret: string
-        The secret that is defined outside the app and stored in a file.
-        This information is needed to encrypt sessions.
-    user: dict
-        The attributes of the currently logged in user.
-    authUser, unauthUser: string
-        We store the permission group of the currently logged in user as a plain
-        string, like &#34;auth&#34;, &#34;office&#34;, not by their Mongo ids.
-        The translation is made on the base of the value table `permissionGroup`,
-        to which Db gives access.
-    authId, unauthId: ObjectId
-        The ids of the groups corresponding to `authenticated` users and
-        `unauthenticated` users.  So the values of these attributes are
-        constants, that do not depend on the currently logged in user.
     &#34;&#34;&#34;
 
     def __init__(self, app, db):
-        &#34;&#34;&#34;Include the web app and a handle to `control.db.Db` into the
+        &#34;&#34;&#34;## Initialization
+
+        Include the web app and a handle to `control.db.Db` into the
         attributes.
 
         Parameters
@@ -687,29 +648,65 @@ info from the database and store user info there.</dd>
             This app has the secret key for sessions, and that is the only thing
             we need from the app.
         db: object
-            The `control.db.Db` singleton, which gives us methods to retrieve user
-            info from the database and store user info there.
+            See below.
         &#34;&#34;&#34;
 
         self.db = db
+        &#34;&#34;&#34;*object* The `control.db.Db` singleton
+
+        Provides methods to retrieve user
+        info from the database and store user info there.
+        &#34;&#34;&#34;
+
         environ = os.environ
         permissionGroupInv = db.permissionGroupInv
 
         # determine production or devel
         regime = G(environ, N.REGIME)
+
         self.isDevel = regime == N.devel
+        &#34;&#34;&#34;*boolean* Whether the server runs in production or in development.
+
+        In production we use the DARIAH Identity provider,
+        while in development we use a simple, console-based way of
+        logging a few test users in.
+        &#34;&#34;&#34;
+
         self.authority = N.local if self.isDevel else N.DARIAH
+        &#34;&#34;&#34;*string* The name of the authority that identifies users.
+
+        In production it is &#34;DARIAH&#34;, which stands for the DARIAH Identity Provider.
+        In development it is &#34;local&#34;.
+        &#34;&#34;&#34;
 
         # read secret from the system
         self.secret = E
+        &#34;&#34;&#34;*string* The secret that is defined outside the app and stored in a file.
+
+        This information is needed to encrypt sessions.
+        &#34;&#34;&#34;
+
         with open(SECRET_FILE) as fh:
             app.secret_key = fh.read()
 
         self.authId = G(permissionGroupInv, AUTH)
+        &#34;&#34;&#34;*string* The groupId of the `auth` permission group.
+        &#34;&#34;&#34;
+
         self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        &#34;&#34;&#34;*string* Info of the `auth` permission group.
+        &#34;&#34;&#34;
+
         self.unauthId = G(permissionGroupInv, UNAUTH)
+        &#34;&#34;&#34;*string* The groupId of the `public` permission group.
+        &#34;&#34;&#34;
+
         self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        &#34;&#34;&#34;*string* Info of the `public` permission group.
+        &#34;&#34;&#34;
+
         self.user = {}
+        &#34;&#34;&#34;*dict* The attributes of the currently logged in user.&#34;&#34;&#34;
 
     def clearUser(self):
         &#34;&#34;&#34;Forgets the currently logged in user.
@@ -1145,6 +1142,53 @@ info from the database and store user info there.</dd>
         countryId = G(user, N.country)
         return G(country, countryId, default={})</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="control.auth.Auth.authId"><code class="name">var <span class="ident">authId</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The groupId of the <code>auth</code> permission group.</p></section>
+</dd>
+<dt id="control.auth.Auth.authUser"><code class="name">var <span class="ident">authUser</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> Info of the <code>auth</code> permission group.</p></section>
+</dd>
+<dt id="control.auth.Auth.authority"><code class="name">var <span class="ident">authority</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The name of the authority that identifies users.</p>
+<p>In production it is "DARIAH", which stands for the DARIAH Identity Provider.
+In development it is "local".</p></section>
+</dd>
+<dt id="control.auth.Auth.db"><code class="name">var <span class="ident">db</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton</p>
+<p>Provides methods to retrieve user
+info from the database and store user info there.</p></section>
+</dd>
+<dt id="control.auth.Auth.isDevel"><code class="name">var <span class="ident">isDevel</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the server runs in production or in development.</p>
+<p>In production we use the DARIAH Identity provider,
+while in development we use a simple, console-based way of
+logging a few test users in.</p></section>
+</dd>
+<dt id="control.auth.Auth.secret"><code class="name">var <span class="ident">secret</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The secret that is defined outside the app and stored in a file.</p>
+<p>This information is needed to encrypt sessions.</p></section>
+</dd>
+<dt id="control.auth.Auth.unauthId"><code class="name">var <span class="ident">unauthId</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> The groupId of the <code>public</code> permission group.</p></section>
+</dd>
+<dt id="control.auth.Auth.unauthUser"><code class="name">var <span class="ident">unauthUser</span></code></dt>
+<dd>
+<section class="desc"><p><em>string</em> Info of the <code>public</code> permission group.</p></section>
+</dd>
+<dt id="control.auth.Auth.user"><code class="name">var <span class="ident">user</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> The attributes of the currently logged in user.</p></section>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="control.auth.Auth.authenticate"><code class="name flex">
@@ -1914,21 +1958,30 @@ If absent, the currently logged in user will be taken.</dd>
 <li>
 <h4><code><a title="control.auth.Auth" href="#control.auth.Auth">Auth</a></code></h4>
 <ul class="two-column">
+<li><code><a title="control.auth.Auth.authId" href="#control.auth.Auth.authId">authId</a></code></li>
+<li><code><a title="control.auth.Auth.authUser" href="#control.auth.Auth.authUser">authUser</a></code></li>
 <li><code><a title="control.auth.Auth.authenticate" href="#control.auth.Auth.authenticate">authenticate</a></code></li>
 <li><code><a title="control.auth.Auth.authenticated" href="#control.auth.Auth.authenticated">authenticated</a></code></li>
+<li><code><a title="control.auth.Auth.authority" href="#control.auth.Auth.authority">authority</a></code></li>
 <li><code><a title="control.auth.Auth.checkLogin" href="#control.auth.Auth.checkLogin">checkLogin</a></code></li>
 <li><code><a title="control.auth.Auth.clearUser" href="#control.auth.Auth.clearUser">clearUser</a></code></li>
 <li><code><a title="control.auth.Auth.coordinator" href="#control.auth.Auth.coordinator">coordinator</a></code></li>
 <li><code><a title="control.auth.Auth.country" href="#control.auth.Auth.country">country</a></code></li>
 <li><code><a title="control.auth.Auth.countryRep" href="#control.auth.Auth.countryRep">countryRep</a></code></li>
 <li><code><a title="control.auth.Auth.credentials" href="#control.auth.Auth.credentials">credentials</a></code></li>
+<li><code><a title="control.auth.Auth.db" href="#control.auth.Auth.db">db</a></code></li>
 <li><code><a title="control.auth.Auth.deauthenticate" href="#control.auth.Auth.deauthenticate">deauthenticate</a></code></li>
 <li><code><a title="control.auth.Auth.getUser" href="#control.auth.Auth.getUser">getUser</a></code></li>
 <li><code><a title="control.auth.Auth.groupRep" href="#control.auth.Auth.groupRep">groupRep</a></code></li>
 <li><code><a title="control.auth.Auth.identity" href="#control.auth.Auth.identity">identity</a></code></li>
+<li><code><a title="control.auth.Auth.isDevel" href="#control.auth.Auth.isDevel">isDevel</a></code></li>
 <li><code><a title="control.auth.Auth.officeuser" href="#control.auth.Auth.officeuser">officeuser</a></code></li>
+<li><code><a title="control.auth.Auth.secret" href="#control.auth.Auth.secret">secret</a></code></li>
 <li><code><a title="control.auth.Auth.superuser" href="#control.auth.Auth.superuser">superuser</a></code></li>
 <li><code><a title="control.auth.Auth.sysadmin" href="#control.auth.Auth.sysadmin">sysadmin</a></code></li>
+<li><code><a title="control.auth.Auth.unauthId" href="#control.auth.Auth.unauthId">unauthId</a></code></li>
+<li><code><a title="control.auth.Auth.unauthUser" href="#control.auth.Auth.unauthUser">unauthUser</a></code></li>
+<li><code><a title="control.auth.Auth.user" href="#control.auth.Auth.user">user</a></code></li>
 </ul>
 </li>
 </ul>
