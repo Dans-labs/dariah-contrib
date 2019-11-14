@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.topbar API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Topbar …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,24 @@
 <h1 class="title">Module <code>control.topbar</code></h1>
 </header>
 <section id="section-intro">
+<p>Topbar.</p>
+<ul>
+<li>The current user</li>
+<li>Login/out buttons</li>
+<li>Logo and link to docs</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Config as C, Names as N
+<pre><code class="python">&#34;&#34;&#34;Topbar.
+
+*   The current user
+*   Login/out buttons
+*   Logo and link to docs
+&#34;&#34;&#34;
+
+from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E
 

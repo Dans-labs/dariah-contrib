@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.table API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,24 @@
 <h1 class="title">Module <code>control.table</code></h1>
 </header>
 <section id="section-intro">
+<p>Tables.</p>
+<ul>
+<li>Selection</li>
+<li>Rendering</li>
+<li>Record insertion</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from itertools import chain
+<pre><code class="python">&#34;&#34;&#34;Tables.
+
+*   Selection
+*   Rendering
+*   Record insertion
+&#34;&#34;&#34;
+
+from itertools import chain
 
 from flask import request
 
@@ -318,7 +331,9 @@ class Table:
                 record
                 for record in records
                 if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject, N.reviewExpert}
+                not in {N.reviewAccept, N.reviewReject}
+                and self.stage(record, N.review, kind=N.expert)
+                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
             ]
 
         return H.div(
@@ -750,7 +765,9 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
                 record
                 for record in records
                 if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject, N.reviewExpert}
+                not in {N.reviewAccept, N.reviewReject}
+                and self.stage(record, N.review, kind=N.expert)
+                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
             ]
 
         return H.div(
@@ -1499,7 +1516,9 @@ otherwise all records go to the interface.</dd>
             record
             for record in records
             if self.stage(record, N.review, kind=N.final)
-            not in {N.reviewAccept, N.reviewReject, N.reviewExpert}
+            not in {N.reviewAccept, N.reviewReject}
+            and self.stage(record, N.review, kind=N.expert)
+            not in {N.reviewAdviseAccept, N.reviewAdviseReject}
         ]
 
     return H.div(

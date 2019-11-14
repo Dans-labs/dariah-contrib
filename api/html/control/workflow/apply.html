@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.workflow.apply API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Applying workflow …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,26 @@
 <h1 class="title">Module <code>control.workflow.apply</code></h1>
 </header>
 <section id="section-intro">
+<p>Applying workflow</p>
+<ul>
+<li>Compute workflow permissions</li>
+<li>Show workflow state</li>
+<li>Perform workflow commands</li>
+<li>Enforce workflow constraints</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from datetime import timedelta
+<pre><code class="python">&#34;&#34;&#34;Applying workflow
+
+*   Compute workflow permissions
+*   Show workflow state
+*   Perform workflow commands
+*   Enforce workflow constraints
+&#34;&#34;&#34;
+
+from datetime import timedelta
 from flask import flash
 
 from config import Config as C, Names as N
