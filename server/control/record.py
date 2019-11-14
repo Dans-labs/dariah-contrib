@@ -1,3 +1,10 @@
+"""Records in tables.
+
+*   Rendering
+*   Modification
+*   Deletion
+"""
+
 from config import Config as C, Names as N
 from control.perm import permRecord
 from control.utils import pick as G, cap1, E, ELLIPS, ONE, S
@@ -132,7 +139,7 @@ class Record:
             and isAuthenticated
             and (isSuperuser or isUserTable and G(perm, N.isEdit))
         )
-        return normalDelPerm if fixed is None else not fixed
+        return False if fixed else normalDelPerm
 
     def reload(
         self, record,

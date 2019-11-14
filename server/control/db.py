@@ -1,3 +1,10 @@
+"""All access to the database.
+
+*   MongoDb
+*   Create/Read/Update/Delete
+*   Caching values
+"""
+
 from itertools import chain
 from bson.objectid import ObjectId
 
@@ -706,7 +713,7 @@ class Db:
             (Entity) id of the record to be deleted.
         """
 
-        self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
+        self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
 

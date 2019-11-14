@@ -1,3 +1,11 @@
+"""All context info.
+
+*   Data
+*   Workflow
+*   User
+*   User content cache
+"""
+
 from config import Config as C, Names as N
 from control.typ.types import Types
 from control.utils import serverprint

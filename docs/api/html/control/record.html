@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.record API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Records in tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,24 @@
 <h1 class="title">Module <code>control.record</code></h1>
 </header>
 <section id="section-intro">
+<p>Records in tables.</p>
+<ul>
+<li>Rendering</li>
+<li>Modification</li>
+<li>Deletion</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Config as C, Names as N
+<pre><code class="python">&#34;&#34;&#34;Records in tables.
+
+*   Rendering
+*   Modification
+*   Deletion
+&#34;&#34;&#34;
+
+from config import Config as C, Names as N
 from control.perm import permRecord
 from control.utils import pick as G, cap1, E, ELLIPS, ONE, S
 from control.html import HtmlElements as H
@@ -158,7 +171,7 @@ class Record:
             and isAuthenticated
             and (isSuperuser or isUserTable and G(perm, N.isEdit))
         )
-        return normalDelPerm if fixed is None else not fixed
+        return False if fixed else normalDelPerm
 
     def reload(
         self, record,
@@ -850,7 +863,7 @@ otherwise to the base class <a title="control.details.Details" href="details.htm
             and isAuthenticated
             and (isSuperuser or isUserTable and G(perm, N.isEdit))
         )
-        return normalDelPerm if fixed is None else not fixed
+        return False if fixed else normalDelPerm
 
     def reload(
         self, record,
@@ -1967,7 +1980,7 @@ permissions allow them</li>
         and isAuthenticated
         and (isSuperuser or isUserTable and G(perm, N.isEdit))
     )
-    return normalDelPerm if fixed is None else not fixed</code></pre>
+    return False if fixed else normalDelPerm</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.getDependencies"><code class="name flex">

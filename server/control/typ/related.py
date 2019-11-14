@@ -1,3 +1,5 @@
+"""Types of values in related tables."""
+
 from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H

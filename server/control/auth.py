@@ -1,3 +1,10 @@
+"""Authentication
+
+*   User management
+*   Identity provider attribute handling
+*   Authorization
+"""
+
 import os
 
 from flask import request, session

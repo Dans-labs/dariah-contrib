@@ -1,3 +1,9 @@
+"""Computing workflow.
+
+*   Initialize the workflow table
+*   Adjust workflow after user actions
+"""
+
 from config import Config as C, Names as N
 from control.utils import getLast, pick as G, serverprint, creators
 
@@ -412,7 +418,15 @@ class Workflow:
         decision = G(decisions, G(record, N.decision))
 
         stage = (
-            (N.reviewExpert if decision else None)
+            (
+                N.reviewAdviseAccept
+                if decision == N.Accept
+                else N.reviewAdviseReject
+                if decision == N.Reject
+                else N.reviewAdviseRevise
+                if decision == N.Revise
+                else None
+            )
             if kind == N.expert
             else (
                 N.reviewAccept

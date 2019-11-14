@@ -31,9 +31,9 @@ labels:
   - collect
   - collectActualItems
   - clearWorkflow
-  - delItem
-  - delMany
-  - delWorkflow
+  - deleteItem
+  - deleteMany
+  - deleteWorkflow
   - dependencies
   - dropWorkflow
   - entries

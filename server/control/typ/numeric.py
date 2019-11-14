@@ -1,3 +1,5 @@
+"""Numeric types. """
+
 import re
 
 from config import Config as C, Names as N

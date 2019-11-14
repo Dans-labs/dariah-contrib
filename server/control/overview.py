@@ -1,3 +1,10 @@
+"""Overview page of contributions.
+
+*   Country selection
+*   Grouping by categories
+*   Statistics
+"""
+
 import json
 from flask import request, make_response
 
@@ -87,7 +94,8 @@ class Overview:
         countryId = G(db.countryInv, country) if country else userCountryId
 
         if countryId is not None:
-            countryInfo = G(db.country, countryId, default={})
+            chosenCountryId = countryId
+            countryInfo = G(db.country, chosenCountryId, default={})
             chosenCountry = countryType.titleStr(countryInfo)
             chosenCountryIso = G(countryInfo, N.iso)
 
@@ -642,7 +650,7 @@ class Overview:
         context = self.context
         auth = context.auth
         isSuperUser = self.isSuperUser
-        isCoord = auth.coordinator(country=recCountry)
+        isCoord = auth.coordinator(countryId=recCountry)
 
         disclosed = colName != "cost" or isSuperUser or isCoord
         value = values[colName] if disclosed else "undisclosed"

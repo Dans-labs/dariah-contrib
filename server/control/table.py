@@ -1,3 +1,10 @@
+"""Tables.
+
+*   Selection
+*   Rendering
+*   Record insertion
+"""
+
 from itertools import chain
 
 from flask import request
@@ -292,7 +299,9 @@ class Table:
                 record
                 for record in records
                 if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject, N.reviewExpert}
+                not in {N.reviewAccept, N.reviewReject}
+                and self.stage(record, N.review, kind=N.expert)
+                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
             ]
 
         return H.div(

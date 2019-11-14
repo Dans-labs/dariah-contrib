@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.db API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="All access to the database …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,24 @@
 <h1 class="title">Module <code>control.db</code></h1>
 </header>
 <section id="section-intro">
+<p>All access to the database.</p>
+<ul>
+<li>MongoDb</li>
+<li>Create/Read/Update/Delete</li>
+<li>Caching values</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from itertools import chain
+<pre><code class="python">&#34;&#34;&#34;All access to the database.
+
+*   MongoDb
+*   Create/Read/Update/Delete
+*   Caching values
+&#34;&#34;&#34;
+
+from itertools import chain
 from bson.objectid import ObjectId
 
 from config import Config as C, Names as N
@@ -732,7 +745,7 @@ class Db:
             (Entity) id of the record to be deleted.
         &#34;&#34;&#34;
 
-        self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
+        self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
 
@@ -1720,7 +1733,7 @@ is initialized and will be passed as <code>mongo</code> to it.</dd>
             (Entity) id of the record to be deleted.
         &#34;&#34;&#34;
 
-        self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
+        self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
 
@@ -2404,7 +2417,7 @@ involved in the concept of "actual", nothing will be done.</p>
         (Entity) id of the record to be deleted.
     &#34;&#34;&#34;
 
-    self.mongoCmd(N.delItem, table, N.delete_one, {N._id: ObjectId(eid)})
+    self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
     if table in VALUE_TABLES:
         self.collect(table=table)</code></pre>
 </details>

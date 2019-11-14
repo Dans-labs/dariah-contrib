@@ -1,8 +1,7 @@
 """Permission library
 
-*   Low-level functions to gather the information that feeds the authorization system.
-
-*   Functions that computes permissions.
+*   Computing permissions
+*   Support for the authorization system
 """
 
 from config import Config as C, Names as N

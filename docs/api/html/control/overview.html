@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.overview API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Overview page of contributions …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,24 @@
 <h1 class="title">Module <code>control.overview</code></h1>
 </header>
 <section id="section-intro">
+<p>Overview page of contributions.</p>
+<ul>
+<li>Country selection</li>
+<li>Grouping by categories</li>
+<li>Statistics</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import json
+<pre><code class="python">&#34;&#34;&#34;Overview page of contributions.
+
+*   Country selection
+*   Grouping by categories
+*   Statistics
+&#34;&#34;&#34;
+
+import json
 from flask import request, make_response
 
 from config import Config as C, Names as N
@@ -113,7 +126,8 @@ class Overview:
         countryId = G(db.countryInv, country) if country else userCountryId
 
         if countryId is not None:
-            countryInfo = G(db.country, countryId, default={})
+            chosenCountryId = countryId
+            countryInfo = G(db.country, chosenCountryId, default={})
             chosenCountry = countryType.titleStr(countryInfo)
             chosenCountryIso = G(countryInfo, N.iso)
 
@@ -668,7 +682,7 @@ class Overview:
         context = self.context
         auth = context.auth
         isSuperUser = self.isSuperUser
-        isCoord = auth.coordinator(country=recCountry)
+        isCoord = auth.coordinator(countryId=recCountry)
 
         disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
         value = values[colName] if disclosed else &#34;undisclosed&#34;
@@ -787,7 +801,8 @@ class Overview:
         countryId = G(db.countryInv, country) if country else userCountryId
 
         if countryId is not None:
-            countryInfo = G(db.country, countryId, default={})
+            chosenCountryId = countryId
+            countryInfo = G(db.country, chosenCountryId, default={})
             chosenCountry = countryType.titleStr(countryInfo)
             chosenCountryIso = G(countryInfo, N.iso)
 
@@ -1342,7 +1357,7 @@ class Overview:
         context = self.context
         auth = context.auth
         isSuperUser = self.isSuperUser
-        isCoord = auth.coordinator(country=recCountry)
+        isCoord = auth.coordinator(countryId=recCountry)
 
         disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
         value = values[colName] if disclosed else &#34;undisclosed&#34;
@@ -1625,7 +1640,7 @@ def wrapStatus(contrib, compact=True):
     context = self.context
     auth = context.auth
     isSuperUser = self.isSuperUser
-    isCoord = auth.coordinator(country=recCountry)
+    isCoord = auth.coordinator(countryId=recCountry)
 
     disclosed = colName != &#34;cost&#34; or isSuperUser or isCoord
     value = values[colName] if disclosed else &#34;undisclosed&#34;
@@ -1828,7 +1843,8 @@ def wrapStatus(contrib, compact=True):
     countryId = G(db.countryInv, country) if country else userCountryId
 
     if countryId is not None:
-        countryInfo = G(db.country, countryId, default={})
+        chosenCountryId = countryId
+        countryInfo = G(db.country, chosenCountryId, default={})
         chosenCountry = countryType.titleStr(countryInfo)
         chosenCountryIso = G(countryInfo, N.iso)
 

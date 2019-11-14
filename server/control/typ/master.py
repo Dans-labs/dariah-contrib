@@ -1,3 +1,5 @@
+"""Types of master fields."""
+
 from config import Names as N
 from control.typ.related import Related
 

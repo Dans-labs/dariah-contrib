@@ -1,3 +1,11 @@
+"""Applying workflow
+
+*   Compute workflow permissions
+*   Show workflow state
+*   Perform workflow commands
+*   Enforce workflow constraints
+"""
+
 from datetime import timedelta
 from flask import flash
 

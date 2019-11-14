@@ -1,3 +1,10 @@
+"""Deal with values of type.
+
+*   Basic types
+*   Values from other tables
+*   Customizations
+"""
+
 from config import Config as C, Names as N
 from control.utils import cap1
 from control.typ.master import Master

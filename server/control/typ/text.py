@@ -1,3 +1,5 @@
+"""Types of text."""
+
 import re
 
 from markdown import markdown

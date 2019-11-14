@@ -65,17 +65,23 @@ stageAtts:
   incompleteWithdrawn:
     msg: Withdrawn
     cls: error
-  reviewExpert:
-    msg: Expert reviewer has decided
-    cls: info
+  reviewAdviseRevise:
+    msg: "advice: Revise"
+    cls: warning
+  reviewAdviseAccept:
+    msg: "advice: Accept"
+    cls: good
+  reviewAdviseReject:
+    msg: "advice: Reject"
+    cls: error
   reviewRevise:
-    msg: Revision recommended
+    msg: Revision required
     cls: warning
   reviewAccept:
-    msg: Accepted by final reviewer
+    msg: Accepted
     cls: good
   reviewReject:
-    msg: Rejected by final reviewer
+    msg: Rejected
     cls: error
 
 statusRep:

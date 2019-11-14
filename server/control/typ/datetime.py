@@ -1,3 +1,5 @@
+"""The datetime type."""
+
 import re
 from datetime import datetime as dt
 

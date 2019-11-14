@@ -677,7 +677,7 @@ class FMConvert:
         for c in self.allData["contrib"]:
             c["creator"] = idMapping[c["creator"]]
 
-    def delTestUsers(self, db):
+    def deleteTestUsers(self, db):
         if isDevel:
             for testUser in self.testUsers:
                 eppn = testUser["eppn"]
@@ -843,7 +843,7 @@ class FMConvert:
     def importMongo(self):
         client = MongoClient()
         db = client.dariah
-        self.delTestUsers(db)
+        self.deleteTestUsers(db)
         pristine = self.PRISTINE
         tableFmt = "| {:<20} |"
         lineFmt = " {:>4} |" * 6

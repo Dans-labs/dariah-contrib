@@ -1,3 +1,5 @@
+"""Types of values in value tables."""
+
 from bson.objectid import ObjectId
 
 from control.utils import pick as G, E, NBSP

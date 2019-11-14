@@ -1,3 +1,10 @@
+"""Topbar.
+
+*   The current user
+*   Login/out buttons
+*   Logo and link to docs
+"""
+
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
 <title>control.workflow.compute API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Computing workflow …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,22 @@
 <h1 class="title">Module <code>control.workflow.compute</code></h1>
 </header>
 <section id="section-intro">
+<p>Computing workflow.</p>
+<ul>
+<li>Initialize the workflow table</li>
+<li>Adjust workflow after user actions</li>
+</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Config as C, Names as N
+<pre><code class="python">&#34;&#34;&#34;Computing workflow.
+
+*   Initialize the workflow table
+*   Adjust workflow after user actions
+&#34;&#34;&#34;
+
+from config import Config as C, Names as N
 from control.utils import getLast, pick as G, serverprint, creators
 
 
@@ -438,7 +449,15 @@ class Workflow:
         decision = G(decisions, G(record, N.decision))
 
         stage = (
-            (N.reviewExpert if decision else None)
+            (
+                N.reviewAdviseAccept
+                if decision == N.Accept
+                else N.reviewAdviseReject
+                if decision == N.Reject
+                else N.reviewAdviseRevise
+                if decision == N.Revise
+                else None
+            )
             if kind == N.expert
             else (
                 N.reviewAccept
@@ -1018,7 +1037,15 @@ the Db singleton as attribute <code>db</code>.</dd>
         decision = G(decisions, G(record, N.decision))
 
         stage = (
-            (N.reviewExpert if decision else None)
+            (
+                N.reviewAdviseAccept
+                if decision == N.Accept
+                else N.reviewAdviseReject
+                if decision == N.Reject
+                else N.reviewAdviseRevise
+                if decision == N.Revise
+                else None
+            )
             if kind == N.expert
             else (
                 N.reviewAccept
@@ -1641,7 +1668,15 @@ Hence it is passed from there to here.</dd>
     decision = G(decisions, G(record, N.decision))
 
     stage = (
-        (N.reviewExpert if decision else None)
+        (
+            N.reviewAdviseAccept
+            if decision == N.Accept
+            else N.reviewAdviseReject
+            if decision == N.Reject
+            else N.reviewAdviseRevise
+            if decision == N.Revise
+            else None
+        )
         if kind == N.expert
         else (
             N.reviewAccept

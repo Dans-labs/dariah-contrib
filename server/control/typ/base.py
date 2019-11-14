@@ -1,3 +1,5 @@
+"""Base class for data types."""
+
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 

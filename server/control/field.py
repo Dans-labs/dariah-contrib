@@ -1,3 +1,10 @@
+"""Fields of records of tables.
+
+*   Display readonly/editable
+*   Refresh buttons
+*   Saving values
+"""
+
 from flask import request
 
 from config import Config as C, Names as N

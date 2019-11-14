@@ -1,3 +1,8 @@
+"""Sidebar.
+
+*   Navigation controls
+"""
+
 from flask import request
 
 from config import Config as C, Names as N
