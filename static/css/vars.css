@@ -42,6 +42,8 @@
     --error-fore-o:                    hsla(  0, 100%,  30%, 1  );
     --error-fore:                      hsla(  0, 100%,  50%, 1  );
     --error-back:                      hsla(  0, 100%,  80%, 0.5);
+    --error-fore-i:                    hsla( 60, 100%,  60%, 1  );
+    --error-back-i:                    hsla(  0, 100%,  40%, 1  );
 
     --frozen-back:                     hsla(180, 100%,  95%, 1  );
     --frozen-border:                   hsla(180, 100%,  50%, 1  );
@@ -104,8 +106,8 @@
     --warning-fore:                    hsla( 30, 100%,  50%, 1  );
     --warning-back:                    hsla( 30, 100%,  80%, 0.5);
 
-    --msg-fore:                        hsla( 60, 100%,  50%, 1  );
-    --msg-back:                        hsla(  0,   0%,   0%, 0.5);
+    --msg-fore:                        hsla( 60, 100%,  90%, 1  );
+    --msg-back:                        hsla(  0,   0%,  70%, 0.3);
 
     --command-info-fore:               hsla(240, 100%, 100%, 1  );
     --command-info-back:               hsla(240, 100%,  30%, 1  );

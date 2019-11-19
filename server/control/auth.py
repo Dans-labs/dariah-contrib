@@ -5,19 +5,14 @@
 *   Authorization
 """
 
-import os
-
 from flask import request, session
 from control.utils import (
     pick as G,
-    serverprint,
     utf8FromLatin1,
     shiftRegional,
     E,
-    BLANK,
-    PIPE,
-    NL,
     AT,
+    BLANK,
     WHYPHEN,
 )
 from config import Config as C, Names as N
@@ -37,7 +32,6 @@ CB = C.base
 CW = C.web
 
 
-SECRET_FILE = CB.secretFile
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
@@ -55,18 +49,14 @@ class Auth:
     Maintains the attributes that the DARIAH Identity Provider supplies about users.
     """
 
-    def __init__(self, app, db):
+    def __init__(self, db, regime):
         """## Initialization
 
-        Include the web app and a handle to `control.db.Db` into the
+        Include a handle to `control.db.Db` into the
         attributes.
 
         Parameters
         ----------
-        app: object
-            The web app, as constructed by the Flask framework.
-            This app has the secret key for sessions, and that is the only thing
-            we need from the app.
         db: object
             See below.
         """
@@ -78,13 +68,10 @@ class Auth:
         info from the database and store user info there.
         """
 
-        environ = os.environ
         permissionGroupInv = db.permissionGroupInv
 
         # determine production or devel
-        regime = G(environ, N.REGIME)
-
-        self.isDevel = regime == N.devel
+        self.isDevel = regime == N.development
         """*boolean* Whether the server runs in production or in development.
 
         In production we use the DARIAH Identity provider,
@@ -98,16 +85,6 @@ class Auth:
         In production it is "DARIAH", which stands for the DARIAH Identity Provider.
         In development it is "local".
         """
-
-        # read secret from the system
-        self.secret = E
-        """*string* The secret that is defined outside the app and stored in a file.
-
-        This information is needed to encrypt sessions.
-        """
-
-        with open(SECRET_FILE) as fh:
-            app.secret_key = fh.read()
 
         self.authId = G(permissionGroupInv, AUTH)
         """*string* The groupId of the `auth` permission group.
@@ -167,9 +144,12 @@ class Auth:
 
         Returns
         -------
-        void
+        boolean
+            Whether a user was authenticated and logged in.
             The attributes retrieved from the database will be merged into
             the `user` attribute.
+            If no user was logged in, the `user` attribute will be filled with
+            info that says that the current user is the public and nothing more.
         """
 
         user = self.user
@@ -210,12 +190,50 @@ class Auth:
             else:
                 user[N.group] = authId
                 user[N.groupRep] = AUTH
+        return user[N.groupRep] != UNAUTH
+
+    def wrapTestUsers(self):
+        """Present a widget to select a test user for login.
+
+        !!! caution
+            In production this will do nothing.
+            Only in development mode one can select a test user.
+        """
+        if not self.isDevel:
+            return E
+
+        db = self.db
+
+        testUsers = {
+            record[N.eppn]: record
+            for record in db.user.values()
+            if N.eppn in record and G(record, N.authority) == N.local
+        }
+        return H.join(
+            [
+                H.div(H.a(u, href=f"/login?eppn={u}", cls="button small"))
+                for u in testUsers
+            ]
+            + [
+                H.div(
+                    H.input(
+                        E,
+                        placeholder="email",
+                        onchange="window.location.href=`/login?email=${this.value}`",
+                    )
+                )
+            ]
+        )
 
     def checkLogin(self):
         """Checks for a currently logged in user and sets `user` accordingly.
 
         This happens after a login action and is meant to adapt the `user` attribute
         to a newly logged-in user.
+
+        Returns
+        -------
+        Whether an authenticated user has just logged in.
         """
 
         db = self.db
@@ -223,44 +241,31 @@ class Auth:
         isDevel = self.isDevel
         authUser = self.authUser
         unauthUser = self.unauthUser
-        unauthId = self.unauthId
 
         env = request.environ
         self.clearUser()
         if isDevel:
-            testUsers = {
-                record[N.eppn]: record
-                for record in db.user.values()
-                if N.eppn in record and G(record, N.authority) == N.local
-            }
-
-            try:
-                answer = input("""{}|email address: """.format(PIPE.join(testUsers)))
-                if answer is not None:
-                    answer = answer.split(NL, 1)[0]
-            except Exception as err:
-                serverprint("""Low level error: {}""".format(err))
-
-            if answer in testUsers:
-                self.getUser(answer)
-            else:
-                parts = answer.split(AT, 1)
-                if len(parts) == 1:
-                    self.clearUser()
-                else:
-                    (name, domain) = parts
-                    eppn = f"""{name}@local.host"""
-                    self.getUser(eppn, email=answer)
+            eppn = G(request.args, N.eppn)
+            email = None
+            if eppn is None:
+                email = G(request.args, N.email) or E
+                if AT in email:
+                    eppn = email.split(AT, maxsplit=1)[0]
+                    if eppn:
+                        return self.getUser(eppn, email=email)
+                user.update(unauthUser)
+                return False
+            return self.getUser(eppn)
         else:
             authenticated = SHIB_KEY in env and env[SHIB_KEY]
             if authenticated:
                 eppn = utf8FromLatin1(env[N.eppn])
                 email = utf8FromLatin1(env[N.mail])
-                self.getUser(eppn, email=email)
-                if G(user, N.group) == unauthId:
+                isUser = self.getUser(eppn, email=email)
+                if not isUser:
                     # the user us refused because the database says (s)he may not login
                     self.clearUser()
-                    return
+                    return False
 
                 if N.group not in user:
                     # new users do not have yet group information
@@ -279,8 +284,10 @@ class Auth:
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
-            else:
-                user.update(unauthUser)
+                return True
+
+            user.update(unauthUser)
+            return False
 
     def countryRep(self, user=None):
         """Provide a short representation of the country of a user.
@@ -425,6 +432,12 @@ class Auth:
         that user is present. And that depends on whether the identity provider
         has sent attributes (eppn and others) to the server.
 
+        The data in the `user` attribute will be cleared if there is
+        an authenticated user. Subsequent methods that ask for the uid of
+        the currennt user will get nothing if there is no authenticated user.
+        If there is an authenticated user, and `login=False`, his/her data
+        are not loaded into the `user` attribute.
+
         Parameters
         ----------
         login: boolean, optional `False`
@@ -435,32 +448,32 @@ class Auth:
 
         Returns
         -------
-        void
-            The data in the `user` attribute will be cleared if there is
-            no authenticated user. Subsequent methods that ask for the uid of
-            the currennt user will get nothing.
-            If there is an authenticated user, and `login=False`, his/her data
-            are loaded into the `user` attribute.
+        boolean
+            Whether the current user is authenticated.
         """
 
         user = self.user
-        unauthId = self.unauthId
 
         # if login=True we want to log the user in
         # if login=False we only want the current user information
 
         if login:
             session.pop(N.eppn, None)
-            self.checkLogin()
-            if G(user, N.group, default=unauthId) != unauthId:
+            if self.checkLogin():
                 # in this case there is an eppn
                 session[N.eppn] = G(user, N.eppn)
-        else:
-            eppn = G(session, N.eppn)
-            if eppn:
-                self.getUser(eppn)
-            else:
+                return True
+            return False
+
+        eppn = G(session, N.eppn)
+        if eppn:
+            if not self.getUser(eppn):
                 self.clearUser()
+                return False
+            return True
+
+        self.clearUser()
+        return False
 
     def deauthenticate(self):
         """Log out the current user.

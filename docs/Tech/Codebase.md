@@ -219,81 +219,142 @@ There are three progressive levels of caring for your code.
     language and then format the abstract syntax three they've got. That is the end
     of all style inconsistencies.
 
-??? details "Tools"
-    Here is an overview of tools used in developing this app.
+## Where to put the  documentation
 
-    ??? details "Formatters"
-        Formatters are not perfect, sometimes they produce code at which the linter
-        balks, especially *yapf* is doing that. Luckily, you can selectively suppress
-        certain kinds of transformations.
+Documentation aimed at programmers is best put as close to the code as possible.
+The Python code is now littered with 
+[docstrings]({{pythondocstrings}}) which explain every quirk in the code.
+When writing docstrings I encountered a few stumbling blocks:
 
-        language | linter | formatter
-        --- | --- | ---
-        JavaScript | [eslint]({{eslint}}) | [prettier]({{prettier}})
-        Python | [flake8]({{flake8}}) | [black]({{black}})
+*   Docstrings are meant to be read in the code, but they are more readable when
+    properly formatted.
+*   Docstrings are more primitive than code: you have to repeat yourself quite a bit.
+*   Soon your docstrings litter your code and detract from the terse beauty of it.
+*   When you refactor, it is an extra burden to refactor the docstrings as well.
 
-    ??? details "Editor or IDE?"
-        For projects like these, you need a good editing environment.
+For some of these issues are solutions:
 
-        ??? details "IDEs"
-            The good old ones like Eclipse are not really suited to the JavaScript
-            and Python environments. There are interesting modern ones such as GitHub's
-            [Atom]({{atom}})
-            modernized ones such as Microsoft's
-            [Visual Studio Code]({{vsc}})
-            and commercial ones such as
-            [Webstorm]({{webstorm}})
-            .
+*   There are apidoc generators to that produce nice HTML formatted documentation out of them.
+    They also apply inheritance of the code to the corresponding docstrings.
+*   You can link from one identifier to another, which lessens the repetitions.
+*   In your editor you can use folding to hide all docstrings with one
+    keystroke, and then open them all again with another key stroke.
+*   Do not do docstrings early on, wait till the code is more or less mature.
+*   And then: good docstrings can  help you to spot good refactorings.
 
-        ??? details "Editors"
-            You can also choose to work with a text editor, such as the free
-            [Vim]({{vim}})
-            or the commercial
-            [Sublime Text]({{sublimeText}})
-            .
+## Tools
 
-    ??? details "Vim"
-        My choice has been Vim, since I use it from its start in 1991. These are the key
-        reasons for which Vim stands out:
+Here is an overview of tools used in developing this app.
 
-        *   it has a compositional command set, like Unix itself. By this you get all your
-            (massive) editing chores done without much remembering and thinking.
-        *   it has a rich ecosystem of plugins. By this you can turn Vim into an IDE.
-        *   It is rock solid and performant.
-            You can edit many small files and then some big ones, at the
-            same time. You do not loose data.
+??? details "Formatters, Linters, API generators"
+    Formatters are not perfect, sometimes they produce code at which the linter
+    balks, especially *yapf* is doing that. Luckily, you can selectively suppress
+    certain kinds of transformations.
 
-        ??? details "My Vim setup"
-            Just for the record, here is a piece of my `.vimrc` file (the configuration
-            file, which draws in plugins, and customises the interface).
+    language | linter | formatter |  API-generator
+    --- | --- | --- | ---
+    JavaScript | [eslint]({{eslint}}) | [prettier]({{prettier}}) | ??
+    Python | [flake8]({{flake8}}) | [black]({{black}})  | [pdoc3]({{pdoc3}})
 
-            You can find out more about the plugins by clicking on them,
-            they are all GitHub repos:
+??? details "Editor or IDE?"
+    For projects like these, you need a good editing environment.
 
-            ```vim
-            call plug#begin()
-            "Python
-            Plug 'vimjas/vim-python-pep8-indent'
-            " javascript
-            Plug 'jelera/vim-javascript-syntax'
-            Plug 'pangloss/vim-javascript'
-            Plug 'othree/yajs.vim'
-            Plug 'othree/javascript-libraries-syntax.vim'
-            Plug 'mxw/vim-jsx'
-            " css
-            Plug 'hail2u/vim-css3-syntax'
-            "utility
-            Plug 'nathanaelkane/vim-indent-guides'
-            Plug 'scrooloose/nerdtree'
-            Plug 'w0rp/ale'
-            "color
-            Plug 'morhetz/gruvbox'
-            call plug#end()
-            ```
+    ??? details "IDEs"
+        The good old ones like Eclipse are not really suited to the JavaScript
+        and Python environments. There are interesting modern ones such as GitHub's
+        [Atom]({{atom}})
+        modernized ones such as Microsoft's
+        [Visual Studio Code]({{vsc}})
+        and commercial ones such as
+        [Webstorm]({{webstorm}})
+        .
 
-            An honourable mention for the
-            [ALE]({{ale}})
-            plugin. This is an asynchronous plugin
-            that invokes linters for your files while you edit. The beauty is, that if you
-            have installed the linters first outside Vim, ALE is smart enough to detect them
-            and run them for you, asynchronously, and with zero configuration.
+    ??? details "Editors"
+        You can also choose to work with a text editor, such as the free
+        [Vim]({{vim}})
+        or the commercial
+        [Sublime Text]({{sublimeText}})
+        .
+
+??? details "Vim"
+    My choice has been Vim, since I use it from its start in 1991. These are the key
+    reasons for which Vim stands out:
+
+    *   it has a compositional command set, like Unix itself. By this you get all your
+        (massive) editing chores done without much remembering and thinking.
+    *   it has a rich ecosystem of plugins. By this you can turn Vim into an IDE.
+    *   It is rock solid and performant.
+        You can edit many small files and then some big ones, at the
+        same time. You do not loose data.
+
+    ??? details "My Vim setup"
+        Just for the record, here is a piece of my `.vimrc` file (the configuration
+        file, which draws in plugins, and customises the interface).
+
+        You can find out more about the plugins by clicking on them,
+        they are all GitHub repos:
+
+        ```vim
+        call plug#begin()
+        "Python
+        Plug 'vimjas/vim-python-pep8-indent'
+        " javascript
+        Plug 'jelera/vim-javascript-syntax'
+        Plug 'pangloss/vim-javascript'
+        Plug 'othree/yajs.vim'
+        Plug 'othree/javascript-libraries-syntax.vim'
+        Plug 'mxw/vim-jsx'
+        " css
+        Plug 'hail2u/vim-css3-syntax'
+        "utility
+        Plug 'nathanaelkane/vim-indent-guides'
+        Plug 'scrooloose/nerdtree'
+        Plug 'w0rp/ale'
+        "color
+        Plug 'morhetz/gruvbox'
+        call plug#end()
+        ```
+
+        An honourable mention for the
+        [ALE]({{ale}})
+        plugin. This is an asynchronous plugin
+        that invokes linters for your files while you edit. The beauty is, that if you
+        have installed the linters first outside Vim, ALE is smart enough to detect them
+        and run them for you, asynchronously, and with zero configuration.
+
+        Then **folding**.
+        First  customize your Python syntax file very little:
+        Make a new file `~/.vim/after/syntax/python.vim` and fill it with
+
+        ```vim
+        syn region  pythonString matchgroup=pythonTripleQuotes
+              \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend fold
+              \ contains=pythonEscape,pythonSpaceError,pythonDoctest,@Spell
+        ```
+
+        The only difference with the default is the word `fold`.
+
+        Now in your `~/vimrc` say
+
+        ```
+        set foldmethod=syntax
+        set foldnestmax=2
+        set foldenable
+        set foldcolumn=1
+        set foldlevel=2
+
+        " toggle fold under cursor
+        noremap <F6> za
+        inoremap <F6> za
+
+        " close all folds
+        noremap <S-F6> zM
+        inoremap <S-F6> zM
+
+        " open all folds
+        noremap <C-F6> zR
+        inoremap <C-F6> zR
+        ```
+
+        Then you have keystrokes  (based on `<F6>` in my case) to do simple but
+        easy to remember folding.

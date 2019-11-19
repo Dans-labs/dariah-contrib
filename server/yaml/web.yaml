@@ -12,6 +12,7 @@ wrongType:
 messages:
   forbidden: Forbidden
   noPage: Page not found
+  noCommand: No command execution
   noTable: No table
   noField: No field
   refreshCrit: refresh criteria overview
@@ -37,13 +38,20 @@ unknown:
 
 icons:
   add: ✚
+  addown: ⇟
+  adown: ▾
+  adup: ⇞
+  aup: ▴
   calc: ⌨︎
+  cdown: ↓
   chain: ⚭
   check: ✔︎
   clear: ✖︎
   cross: ✘
+  cup: ↑
   delete: ✖︎
   detached: ⚮
+  devel: ⚒︎
   dismiss: ⏏︎
   edit: ✎
   flag: ⚐ 
@@ -58,12 +66,6 @@ icons:
   ok: ↩︎
   prov: ⌚︎
   refresh: ♺
-  adown: ▾
-  aup: ▴
-  addown: ⇟
-  adup: ⇞
-  cdown: ↓
-  cup: ↑
 
 landing: >-
   Welcome to the DARIAH contribution tool

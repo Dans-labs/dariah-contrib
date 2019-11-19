@@ -7,9 +7,11 @@ from itertools import chain
 
 from control.utils import pick as G, serverprint, cap1, E, LOW, HYPHEN
 
+SERVER_PATH = os.path.split(os.path.realpath(__file__))[0]
+
 CONFIG_EXT = ".yaml"
-CONFIG_DIR = "yaml"
-TABLE_DIR = "tables"
+CONFIG_DIR = f"{SERVER_PATH}/yaml"
+TABLE_DIR = f"{SERVER_PATH}/tables"
 
 ALL = "all"
 NAMES = "names"

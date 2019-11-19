@@ -189,13 +189,14 @@ class Context:
         db = self.db
         cache = self.cache
 
-        db.deleteItem(table, eid)
+        good = db.deleteItem(table, eid)
         if table not in VALUE_TABLES:
             key = eid if type(eid) is str else str(eid)
             if table in cache:
                 cachedTable = cache[table]
                 if key in cachedTable:
                     del cachedTable[key]
+        return good
 
     def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
         """Helper to wrap caching around a raw Db fetch method.

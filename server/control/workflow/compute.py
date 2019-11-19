@@ -65,6 +65,7 @@ class Workflow:
 
         *   extends from assessment to contrib.
         *   workflow commands: all allowed as far as they make sense
+        *   also used to let final reviewer wait for expert reviewe
 
     Any record that carries one of these fixity attributes cannot be edited
     or deleted, except for the fields that get modified when an allowed
@@ -179,7 +180,8 @@ class Workflow:
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
         serverprint("WORKFLOW: Store workflow info")
-        db.insertWorkflowMany(wfRecords)
+        if wfRecords:
+            db.insertWorkflowMany(wfRecords)
         serverprint("WORKFLOW: Initialization done")
 
     def insert(self, contribId):
@@ -277,13 +279,15 @@ class Workflow:
         )
         if str(contribId) == DEBUG:
             pass
-        (locked, assessmentWf) = (
+        assessmentWf = (
             self.computeWorkflowAssessment(assessmentValid, frozen)
             if assessmentValid
-            else (False, {})
+            else{}
         )
 
-        mayAdd = not locked and not frozen and not assessmentValid
+        locked = G(assessmentWf, N.locked, default=False)
+        done = G(assessmentWf, N.done, default=False)
+        mayAdd = not done and not locked and not frozen and not assessmentValid
 
         return {
             N._id: contribId,
@@ -296,6 +300,7 @@ class Workflow:
             N.stageDate: dateDecided,
             N.frozen: frozen,
             N.locked: locked,
+            N.done: done,
             N.mayAdd: mayAdd,
         }
 
@@ -316,12 +321,26 @@ class Workflow:
             It should be inherited by the associated assessment and review records.
             Hence it is passed down.
 
+        Key attributes that will be computed are:
+
+        Attributes
+        ----------
+        locked: boolean
+            Workflow attribute that derives from the assessment
+            It is also important for the contribution, hence it will
+            be passed upwards to it.
+            Reviews have both `locked` and `done`. `done` indcates whether the final
+            reviewer has decided. `locked` is used to enforce that the final reviewer
+            takes his/her decision only when the decision of the expert
+            reviewer is known. It also inforces that the expert reviewer cannot revoke
+            his/her decision.
+        done: boolean
+            Workflow attribute that derives from the reviews.
+            It is also important for the contribution, hence it will
+            be passed upwards to it.
+
         Returns
         -------
-        locked: boolean
-            Workflow attribute that derives from the assessment and/or
-            its reviews. It is also important for the contribution, hence it will
-            be passed upwards to it.
         attributes: dict
             Workflow attributes
         """
@@ -404,45 +423,40 @@ class Workflow:
         )
         stageDate = dateWithdrawn if withdrawn else dateSubmitted
 
-        aLocked = stage in {N.submitted, N.submittedRevised}
+        locked = stage in {N.submitted, N.submittedRevised}
 
-        rLocked = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+        done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
 
-        if rLocked:
-            finalReviewWf[N.locked] = True
+        if done:
+            finalReviewWf[N.done] = True
             if expertReviewWf:
-                expertReviewWf[N.locked] = True
+                expertReviewWf[N.done] = True
         else:
             if finalReviewWf:
                 finalReviewWf[N.locked] = not expertReviewStage
             if expertReviewWf:
-                expertReviewWf[N.locked] = False
-
-        locked = aLocked or rLocked
+                expertReviewWf[N.locked] = expertReviewStage
 
         mayAdd = {
-            kind: not frozen and not G(reviewsWf, kind)
-            # kind: not locked and not frozen and not G(reviewsWf, kind)
+            kind: not frozen and not done and not G(reviewsWf, kind)
             for kind in (N.expert, N.final)
         }
 
-        return (
-            locked,
-            {
-                N._id: assessmentId,
-                N.creators: creators(record, N.creator, N.editors),
-                N.title: G(record, N.title),
-                N.reviewer: reviewer,
-                N.reviewers: reviewers,
-                N.reviews: reviewsWf,
-                N.score: score,
-                N.stage: stage,
-                N.stageDate: stageDate,
-                N.frozen: frozen,
-                N.locked: locked or aLocked,
-                N.mayAdd: mayAdd,
-            },
-        )
+        return {
+            N._id: assessmentId,
+            N.creators: creators(record, N.creator, N.editors),
+            N.title: G(record, N.title),
+            N.reviewer: reviewer,
+            N.reviewers: reviewers,
+            N.reviews: reviewsWf,
+            N.score: score,
+            N.stage: stage,
+            N.stageDate: stageDate,
+            N.frozen: frozen,
+            N.locked: locked,
+            N.done: done,
+            N.mayAdd: mayAdd,
+        }
 
     def computeWorkflowReview(self, kind, record, frozen):
         """Computes workflow info derived from a review record.

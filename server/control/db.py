@@ -723,6 +723,8 @@ class Db:
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
+        # For the moment, we do not check whether it has succeeded.
+        return True
 
     def deleteMany(self, table, crit):
         """Delete a several records.

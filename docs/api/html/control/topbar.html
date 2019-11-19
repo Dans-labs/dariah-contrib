@@ -82,27 +82,36 @@ class Topbar:
         login = (
             E
             if auth.authenticated()
-            else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+            else (
+                auth.wrapTestUsers()
+                if auth.isDevel else
+                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+            )
         )
         logout = (
-            [
-                H.a(G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;),
-                H.a(
-                    G(SLOGOUT, N.text),
-                    G(SLOGOUT, N.url),
-                    cls=&#34;button small loginout&#34;,
-                    title=G(SLOGOUT, N.title),
-                ),
-            ]
+            H.join(
+                [
+                    H.a(
+                        G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;
+                    ),
+                    H.a(
+                        G(SLOGOUT, N.text),
+                        G(SLOGOUT, N.url),
+                        cls=&#34;button small loginout&#34;,
+                        title=G(SLOGOUT, N.title),
+                    ),
+                ]
+            )
             if auth.authenticated()
-            else []
+            else E
         )
         return H.div(
             [
+                H.icon(N.devel) if auth.isDevel else E,
                 H.div(identityRep, cls=&#34;user&#34;),
                 H.div(accessRep, cls=&#34;access&#34;),
                 login,
-                *logout,
+                logout,
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),
@@ -174,27 +183,36 @@ class Topbar:
         login = (
             E
             if auth.authenticated()
-            else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+            else (
+                auth.wrapTestUsers()
+                if auth.isDevel else
+                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+            )
         )
         logout = (
-            [
-                H.a(G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;),
-                H.a(
-                    G(SLOGOUT, N.text),
-                    G(SLOGOUT, N.url),
-                    cls=&#34;button small loginout&#34;,
-                    title=G(SLOGOUT, N.title),
-                ),
-            ]
+            H.join(
+                [
+                    H.a(
+                        G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;
+                    ),
+                    H.a(
+                        G(SLOGOUT, N.text),
+                        G(SLOGOUT, N.url),
+                        cls=&#34;button small loginout&#34;,
+                        title=G(SLOGOUT, N.title),
+                    ),
+                ]
+            )
             if auth.authenticated()
-            else []
+            else E
         )
         return H.div(
             [
+                H.icon(N.devel) if auth.isDevel else E,
                 H.div(identityRep, cls=&#34;user&#34;),
                 H.div(accessRep, cls=&#34;access&#34;),
                 login,
-                *logout,
+                logout,
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),
@@ -235,27 +253,36 @@ class Topbar:
     login = (
         E
         if auth.authenticated()
-        else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+        else (
+            auth.wrapTestUsers()
+            if auth.isDevel else
+            H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+        )
     )
     logout = (
-        [
-            H.a(G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;),
-            H.a(
-                G(SLOGOUT, N.text),
-                G(SLOGOUT, N.url),
-                cls=&#34;button small loginout&#34;,
-                title=G(SLOGOUT, N.title),
-            ),
-        ]
+        H.join(
+            [
+                H.a(
+                    G(LOGOUT, N.text), G(LOGOUT, N.url), cls=&#34;button small loginout&#34;
+                ),
+                H.a(
+                    G(SLOGOUT, N.text),
+                    G(SLOGOUT, N.url),
+                    cls=&#34;button small loginout&#34;,
+                    title=G(SLOGOUT, N.title),
+                ),
+            ]
+        )
         if auth.authenticated()
-        else []
+        else E
     )
     return H.div(
         [
+            H.icon(N.devel) if auth.isDevel else E,
             H.div(identityRep, cls=&#34;user&#34;),
             H.div(accessRep, cls=&#34;access&#34;),
             login,
-            *logout,
+            logout,
             H.img(
                 G(LOGO, N.src),
                 href=G(LOGO, N.url),

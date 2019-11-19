@@ -102,8 +102,9 @@ div.msgitem.message {
 }
 
 div.msgitem.error {
-  color: var(--error-fore-o);
-  background-color: var(--error-back);
+  color: var(--error-fore-i);
+  font-weight: bold;
+  background-color: var(--error-back-i);
 }
 
 /* TOP BAR */

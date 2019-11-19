@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.1" />
+<title>control.app API documentation</title>
+<meta name="description" content="Sets up the Flask app with all its routes." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>control.app</code></h1>
+</header>
+<section id="section-intro">
+<p>Sets up the Flask app with all its routes.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Sets up the Flask app with all its routes.
+&#34;&#34;&#34;
+
+import os
+
+from pymongo import MongoClient
+from flask import (
+    Flask,
+    request,
+    render_template,
+    send_file,
+    redirect,
+    flash,
+)
+
+from config import Config as C, Names as N
+from control.utils import pick as G, E
+from control.db import Db
+from control.workflow.compute import Workflow
+from control.auth import Auth
+from control.context import Context
+from control.sidebar import Sidebar
+from control.topbar import Topbar
+from control.overview import Overview
+from control.cust.factory_table import make as mkTable
+
+
+CB = C.base
+CT = C.tables
+CW = C.web
+
+SECRET_FILE = CB.secretFile
+
+STATIC_ROOT = os.path.abspath(CW.staticRoot)
+&#34;&#34;&#34;The url to the directory from which static files are served.&#34;&#34;&#34;
+
+ALL_TABLES = CT.all
+USER_TABLES_LIST = CT.userTables
+USER_TABLES = set(USER_TABLES_LIST)
+MASTERS = CT.masters
+DETAILS = CT.details
+
+URLS = CW.urls
+&#34;&#34;&#34;A dictionary of fixed fall-back urls.&#34;&#34;&#34;
+
+MESSAGES = CW.messages
+&#34;&#34;&#34;A dictionary of fixed messages for display on the web interface.&#34;&#34;&#34;
+
+INDEX = CW.indexPage
+LANDING = CW.landing
+BODY_METHODS = set(CW.bodyMethods)
+LIST_ACTIONS = set(CW.listActions)
+FIELD_ACTIONS = set(CW.fieldActions)
+
+START = URLS[N.home][N.url]
+OVERVIEW = URLS[N.info][N.url]
+DUMMY = URLS[N.dummy][N.url]
+SHIB_LOGOUT = URLS[N.shibLogout][N.url]
+NO_PAGE = MESSAGES[N.noPage]
+NO_TABLE = MESSAGES[N.noTable]
+NO_FIELD = MESSAGES[N.noField]
+
+
+def appFactory(regime, debug, test, **kwargs):
+    &#34;&#34;&#34;Creates the flask app that serves the website.
+
+    We read a secret key from the system which is stored in a file outside the app.
+    This information is needed to encrypt sessions.
+
+    Parameters
+    ----------
+    debug: boolean
+        Whether to generate debug messages for certain actions.
+    test: boolean
+        Whether the app is in test mode.
+    kwargs: dict
+        Additional parameters to tweak the behaviour of the Flask application.
+        They will be passed to the object initializer `Flask()`.
+
+    Returns
+    -------
+    object
+        The flask app.
+    &#34;&#34;&#34;
+
+    kwargs[&#39;static_url_path&#39;] = DUMMY
+
+    app = Flask(__name__, **kwargs)
+    if test:
+        app.config.from_mapping(dict(TESTING=True))
+
+    with open(SECRET_FILE) as fh:
+        app.secret_key = fh.read()
+
+    GP = dict(methods=[N.GET, N.POST])
+
+    MONGO = MongoClient().dariah
+    &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
+
+    DB = Db(MONGO)
+    &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
+
+    WF = Workflow(DB)
+    &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton.&#34;&#34;&#34;
+
+    auth = Auth(DB, regime)
+
+    def getContext():
+        return Context(DB, WF, auth)
+
+    if debug and auth.isDevel:
+        CT.showReferences()
+        N.showNames()
+
+    @app.route(f&#34;&#34;&#34;/{N.static}/&lt;path:filepath&gt;&#34;&#34;&#34;)
+    def serveStatic(filepath):
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{filepath}&#34;&#34;&#34;
+        return send_file(path)
+
+    @app.route(f&#34;&#34;&#34;/{N.favicons}/&lt;path:filepath&gt;&#34;&#34;&#34;)
+    def serveFavicons(filepath):
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons})/{filepath}&#34;&#34;&#34;
+        return send_file(path)
+
+    @app.route(START)
+    @app.route(f&#34;&#34;&#34;/{N.index}&#34;&#34;&#34;)
+    @app.route(f&#34;&#34;&#34;/{INDEX}&#34;&#34;&#34;)
+    def serveIndex():
+        path = START
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=LANDING)
+
+    # OVERVIEW PAGE
+
+    @app.route(f&#34;&#34;&#34;{OVERVIEW}&#34;&#34;&#34;)
+    def serveOverview():
+        path = START
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        overview = Overview(context).wrap()
+        return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=overview)
+
+    @app.route(f&#34;&#34;&#34;{OVERVIEW}.tsv&#34;&#34;&#34;)
+    def serveOverviewTsv():
+        context = getContext()
+        auth.authenticate()
+        return Overview(context).wrap(asTsv=True)
+
+    # INSERT RECORD IN TABLE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
+    def serveTableInsert(table):
+        path = f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES and table not in MASTERS:
+            auth.authenticate()
+            eid = mkTable(context, table).insert()
+            newPath = (
+                f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34; if eid else f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
+            )
+            return redirect(newPath)
+        return notFound(path)
+
+    # INSERT RECORD IN DETAIL TABLE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
+    def serveTableInsertDetail(table, eid, dtable):
+        path = f&#34;&#34;&#34;/api/{table}/{eid}/{dtable}/{N.insert}&#34;&#34;&#34;
+        context = getContext()
+        if (
+            table in USER_TABLES_LIST[0:2]
+            and table in DETAILS
+            and dtable in DETAILS[table]
+        ):
+            auth.authenticate()
+            contribId = (
+                mkTable(context, dtable).insert(masterTable=table, masterId=eid) or E
+            )
+            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
+            return redirect(newPath)
+        return notFound(path)
+
+    # LIST VIEWS ON TABLE
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveTableListOpen(table, eid):
+        return serveTable(table, eid)
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}&#34;&#34;&#34;)
+    def serveTableList(table):
+        return serveTable(table, None)
+
+    def serveTable(table, eid):
+        action = G(request.args, N.action)
+        actionRep = f&#34;?action={action}&#34; if action else E
+        eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
+        path = f&#34;&#34;&#34;/{table}/{N.list}{eidRep}{actionRep}&#34;&#34;&#34;
+        if not action or action in LIST_ACTIONS:
+            context = getContext()
+            if table in ALL_TABLES:
+                auth.authenticate()
+                topbar = Topbar(context).wrap()
+                sidebar = Sidebar(context, path).wrap()
+                tableList = mkTable(context, table).wrap(eid, action=action)
+                return render_template(
+                    INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
+                )
+        return notFound(path)
+
+    # RECORD DELETE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecordDelete(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.delete}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            mkTable(context, table).record(eid=eid).delete()
+            newUrlPart = &#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
+            newPath = f&#34;&#34;&#34;/{table}/{N.list}{newUrlPart}&#34;&#34;&#34;
+            return redirect(newPath)
+        return notFound(path)
+
+    # RECORD DELETE DETAIL
+
+    @app.route(
+        f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:masterId&gt;/&#34;&#34;&#34;
+        f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
+    )
+    def serveRecordDeleteDetail(table, masterId, dtable, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{masterId}/{dtable}/{N.delete}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if (
+            table in USER_TABLES_LIST[0:2]
+            and table in DETAILS
+            and dtable in DETAILS[table]
+        ):
+            auth.authenticate()
+            recordObj = mkTable(context, dtable).record(eid=eid)
+            backId = masterId
+
+            wfitem = recordObj.wfitem
+            if wfitem:
+                recordObj.delete()
+                (contribId,) = wfitem.info(N.contrib, N._id)
+                backId = contribId
+
+            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.list}/{backId}&#34;&#34;&#34;
+
+            return redirect(newPath)
+        return notFound(path)
+
+    # RECORD VIEW
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecord(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            return (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap()
+            )
+        return notFound(path)
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
+    def serveRecordTitle(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}/{N.title}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            return (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=False, **method())
+                .wrap(expanded=-1)
+            )
+        return notFound(path)
+
+    # with specific detail opened
+
+    @app.route(
+        f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/&#34;&#34;&#34;
+        f&#34;&#34;&#34;{N.open}/&lt;string:dtable&gt;/&lt;string:deid&gt;&#34;&#34;&#34;
+    )
+    def serveRecordPageDetail(table, eid, dtable, deid):
+        path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
+            record = (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap(showTable=dtable, showEid=deid)
+            )
+            return render_template(
+                INDEX, topbar=topbar, sidebar=sidebar, material=record,
+            )
+        return notFound(path)
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecordPageDet(table, eid):
+        path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
+            record = (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap()
+            )
+            return render_template(
+                INDEX, topbar=topbar, sidebar=sidebar, material=record,
+            )
+        return notFound(path)
+
+    def method():
+        method = G(request.args, N.method)
+        if method not in BODY_METHODS:
+            return {}
+        return dict(bodyMethod=method)
+
+    # FIELD VIEWS AND EDITS
+
+    @app.route(
+        f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.field}/&lt;string:field&gt;&#34;&#34;&#34;, **GP
+    )
+    def serveField(table, eid, field):
+        action = G(request.args, N.action)
+        if action in FIELD_ACTIONS:
+            context = getContext()
+            auth.authenticate()
+            if table in ALL_TABLES:
+                return (
+                    mkTable(context, table)
+                    .record(eid=eid)
+                    .field(field)
+                    .wrap(action=action)
+                )
+        return noField(table, field)
+
+    # COMMANDS
+
+    @app.route(f&#34;&#34;&#34;/api/command/&lt;string:command&gt;/&lt;string:table&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveCommand(command, table, eid):
+        context = getContext()
+        auth.authenticate()
+        if table in ALL_TABLES:
+            newPath = mkTable(context, table).record(eid=eid).command(command)
+            if newPath:
+                return redirect(newPath)
+        return noTable(table)
+
+    # LOGIN / LOGOUT
+
+    @app.route(f&#34;&#34;&#34;/{N.slogout}&#34;&#34;&#34;)
+    def serveSlogout():
+        auth.deauthenticate()
+        flash(&#34;logged out from DARIAH&#34;)
+        return redirect(SHIB_LOGOUT)
+
+    @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
+    def serveLogin():
+        code = 302
+        if auth.authenticate(login=True):
+            flash(&#34;log in successful&#34;)
+        else:
+            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
+            code = 303
+        return redirect(START, code=code)
+
+    @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
+    def serveLogout():
+        auth.deauthenticate()
+        flash(&#34;logged out&#34;)
+        return redirect(START)
+
+    # FALL-BACK
+
+    @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
+    def serveNotFound(anything=None):
+        return notFound(anything)
+
+    def notFound(path):
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        return render_template(
+            INDEX, topbar=topbar, sidebar=sidebar, material=f&#34;&#34;&#34;{NO_PAGE} {path}&#34;&#34;&#34;,
+        )
+
+    def noTable(table):
+        return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
+
+    def noField(table, field):
+        return f&#34;&#34;&#34;{NO_FIELD} {table}:{field}&#34;&#34;&#34;
+
+    return app</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="control.app.MESSAGES"><code class="name">var <span class="ident">MESSAGES</span></code></dt>
+<dd>
+<section class="desc"><p>A dictionary of fixed messages for display on the web interface.</p></section>
+</dd>
+<dt id="control.app.STATIC_ROOT"><code class="name">var <span class="ident">STATIC_ROOT</span></code></dt>
+<dd>
+<section class="desc"><p>The url to the directory from which static files are served.</p></section>
+</dd>
+<dt id="control.app.URLS"><code class="name">var <span class="ident">URLS</span></code></dt>
+<dd>
+<section class="desc"><p>A dictionary of fixed fall-back urls.</p></section>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="control.app.appFactory"><code class="name flex">
+<span>def <span class="ident">appFactory</span></span>(<span>regime, debug, test, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Creates the flask app that serves the website.</p>
+<p>We read a secret key from the system which is stored in a file outside the app.
+This information is needed to encrypt sessions.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>debug</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether to generate debug messages for certain actions.</dd>
+<dt><strong><code>test</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether the app is in test mode.</dd>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Additional parameters to tweak the behaviour of the Flask application.
+They will be passed to the object initializer <code>Flask()</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>object</code></dt>
+<dd>The flask app.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def appFactory(regime, debug, test, **kwargs):
+    &#34;&#34;&#34;Creates the flask app that serves the website.
+
+    We read a secret key from the system which is stored in a file outside the app.
+    This information is needed to encrypt sessions.
+
+    Parameters
+    ----------
+    debug: boolean
+        Whether to generate debug messages for certain actions.
+    test: boolean
+        Whether the app is in test mode.
+    kwargs: dict
+        Additional parameters to tweak the behaviour of the Flask application.
+        They will be passed to the object initializer `Flask()`.
+
+    Returns
+    -------
+    object
+        The flask app.
+    &#34;&#34;&#34;
+
+    kwargs[&#39;static_url_path&#39;] = DUMMY
+
+    app = Flask(__name__, **kwargs)
+    if test:
+        app.config.from_mapping(dict(TESTING=True))
+
+    with open(SECRET_FILE) as fh:
+        app.secret_key = fh.read()
+
+    GP = dict(methods=[N.GET, N.POST])
+
+    MONGO = MongoClient().dariah
+    &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
+
+    DB = Db(MONGO)
+    &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
+
+    WF = Workflow(DB)
+    &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton.&#34;&#34;&#34;
+
+    auth = Auth(DB, regime)
+
+    def getContext():
+        return Context(DB, WF, auth)
+
+    if debug and auth.isDevel:
+        CT.showReferences()
+        N.showNames()
+
+    @app.route(f&#34;&#34;&#34;/{N.static}/&lt;path:filepath&gt;&#34;&#34;&#34;)
+    def serveStatic(filepath):
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{filepath}&#34;&#34;&#34;
+        return send_file(path)
+
+    @app.route(f&#34;&#34;&#34;/{N.favicons}/&lt;path:filepath&gt;&#34;&#34;&#34;)
+    def serveFavicons(filepath):
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons})/{filepath}&#34;&#34;&#34;
+        return send_file(path)
+
+    @app.route(START)
+    @app.route(f&#34;&#34;&#34;/{N.index}&#34;&#34;&#34;)
+    @app.route(f&#34;&#34;&#34;/{INDEX}&#34;&#34;&#34;)
+    def serveIndex():
+        path = START
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=LANDING)
+
+    # OVERVIEW PAGE
+
+    @app.route(f&#34;&#34;&#34;{OVERVIEW}&#34;&#34;&#34;)
+    def serveOverview():
+        path = START
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        overview = Overview(context).wrap()
+        return render_template(INDEX, topbar=topbar, sidebar=sidebar, material=overview)
+
+    @app.route(f&#34;&#34;&#34;{OVERVIEW}.tsv&#34;&#34;&#34;)
+    def serveOverviewTsv():
+        context = getContext()
+        auth.authenticate()
+        return Overview(context).wrap(asTsv=True)
+
+    # INSERT RECORD IN TABLE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
+    def serveTableInsert(table):
+        path = f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES and table not in MASTERS:
+            auth.authenticate()
+            eid = mkTable(context, table).insert()
+            newPath = (
+                f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34; if eid else f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
+            )
+            return redirect(newPath)
+        return notFound(path)
+
+    # INSERT RECORD IN DETAIL TABLE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
+    def serveTableInsertDetail(table, eid, dtable):
+        path = f&#34;&#34;&#34;/api/{table}/{eid}/{dtable}/{N.insert}&#34;&#34;&#34;
+        context = getContext()
+        if (
+            table in USER_TABLES_LIST[0:2]
+            and table in DETAILS
+            and dtable in DETAILS[table]
+        ):
+            auth.authenticate()
+            contribId = (
+                mkTable(context, dtable).insert(masterTable=table, masterId=eid) or E
+            )
+            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
+            return redirect(newPath)
+        return notFound(path)
+
+    # LIST VIEWS ON TABLE
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveTableListOpen(table, eid):
+        return serveTable(table, eid)
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}&#34;&#34;&#34;)
+    def serveTableList(table):
+        return serveTable(table, None)
+
+    def serveTable(table, eid):
+        action = G(request.args, N.action)
+        actionRep = f&#34;?action={action}&#34; if action else E
+        eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
+        path = f&#34;&#34;&#34;/{table}/{N.list}{eidRep}{actionRep}&#34;&#34;&#34;
+        if not action or action in LIST_ACTIONS:
+            context = getContext()
+            if table in ALL_TABLES:
+                auth.authenticate()
+                topbar = Topbar(context).wrap()
+                sidebar = Sidebar(context, path).wrap()
+                tableList = mkTable(context, table).wrap(eid, action=action)
+                return render_template(
+                    INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
+                )
+        return notFound(path)
+
+    # RECORD DELETE
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecordDelete(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.delete}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            mkTable(context, table).record(eid=eid).delete()
+            newUrlPart = &#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
+            newPath = f&#34;&#34;&#34;/{table}/{N.list}{newUrlPart}&#34;&#34;&#34;
+            return redirect(newPath)
+        return notFound(path)
+
+    # RECORD DELETE DETAIL
+
+    @app.route(
+        f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:masterId&gt;/&#34;&#34;&#34;
+        f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
+    )
+    def serveRecordDeleteDetail(table, masterId, dtable, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{masterId}/{dtable}/{N.delete}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if (
+            table in USER_TABLES_LIST[0:2]
+            and table in DETAILS
+            and dtable in DETAILS[table]
+        ):
+            auth.authenticate()
+            recordObj = mkTable(context, dtable).record(eid=eid)
+            backId = masterId
+
+            wfitem = recordObj.wfitem
+            if wfitem:
+                recordObj.delete()
+                (contribId,) = wfitem.info(N.contrib, N._id)
+                backId = contribId
+
+            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.list}/{backId}&#34;&#34;&#34;
+
+            return redirect(newPath)
+        return notFound(path)
+
+    # RECORD VIEW
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecord(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            return (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap()
+            )
+        return notFound(path)
+
+    @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
+    def serveRecordTitle(table, eid):
+        path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}/{N.title}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            return (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=False, **method())
+                .wrap(expanded=-1)
+            )
+        return notFound(path)
+
+    # with specific detail opened
+
+    @app.route(
+        f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/&#34;&#34;&#34;
+        f&#34;&#34;&#34;{N.open}/&lt;string:dtable&gt;/&lt;string:deid&gt;&#34;&#34;&#34;
+    )
+    def serveRecordPageDetail(table, eid, dtable, deid):
+        path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
+            record = (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap(showTable=dtable, showEid=deid)
+            )
+            return render_template(
+                INDEX, topbar=topbar, sidebar=sidebar, material=record,
+            )
+        return notFound(path)
+
+    @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveRecordPageDet(table, eid):
+        path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        context = getContext()
+        if table in ALL_TABLES:
+            auth.authenticate()
+            topbar = Topbar(context).wrap()
+            sidebar = Sidebar(context, path).wrap()
+            record = (
+                mkTable(context, table)
+                .record(eid=eid, withDetails=True, **method())
+                .wrap()
+            )
+            return render_template(
+                INDEX, topbar=topbar, sidebar=sidebar, material=record,
+            )
+        return notFound(path)
+
+    def method():
+        method = G(request.args, N.method)
+        if method not in BODY_METHODS:
+            return {}
+        return dict(bodyMethod=method)
+
+    # FIELD VIEWS AND EDITS
+
+    @app.route(
+        f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.field}/&lt;string:field&gt;&#34;&#34;&#34;, **GP
+    )
+    def serveField(table, eid, field):
+        action = G(request.args, N.action)
+        if action in FIELD_ACTIONS:
+            context = getContext()
+            auth.authenticate()
+            if table in ALL_TABLES:
+                return (
+                    mkTable(context, table)
+                    .record(eid=eid)
+                    .field(field)
+                    .wrap(action=action)
+                )
+        return noField(table, field)
+
+    # COMMANDS
+
+    @app.route(f&#34;&#34;&#34;/api/command/&lt;string:command&gt;/&lt;string:table&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveCommand(command, table, eid):
+        context = getContext()
+        auth.authenticate()
+        if table in ALL_TABLES:
+            newPath = mkTable(context, table).record(eid=eid).command(command)
+            if newPath:
+                return redirect(newPath)
+        return noTable(table)
+
+    # LOGIN / LOGOUT
+
+    @app.route(f&#34;&#34;&#34;/{N.slogout}&#34;&#34;&#34;)
+    def serveSlogout():
+        auth.deauthenticate()
+        flash(&#34;logged out from DARIAH&#34;)
+        return redirect(SHIB_LOGOUT)
+
+    @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
+    def serveLogin():
+        code = 302
+        if auth.authenticate(login=True):
+            flash(&#34;log in successful&#34;)
+        else:
+            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
+            code = 303
+        return redirect(START, code=code)
+
+    @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
+    def serveLogout():
+        auth.deauthenticate()
+        flash(&#34;logged out&#34;)
+        return redirect(START)
+
+    # FALL-BACK
+
+    @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
+    def serveNotFound(anything=None):
+        return notFound(anything)
+
+    def notFound(path):
+        context = getContext()
+        auth.authenticate()
+        topbar = Topbar(context).wrap()
+        sidebar = Sidebar(context, path).wrap()
+        return render_template(
+            INDEX, topbar=topbar, sidebar=sidebar, material=f&#34;&#34;&#34;{NO_PAGE} {path}&#34;&#34;&#34;,
+        )
+
+    def noTable(table):
+        return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
+
+    def noField(table, field):
+        return f&#34;&#34;&#34;{NO_FIELD} {table}:{field}&#34;&#34;&#34;
+
+    return app</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="control" href="index.html">control</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="control.app.MESSAGES" href="#control.app.MESSAGES">MESSAGES</a></code></li>
+<li><code><a title="control.app.STATIC_ROOT" href="#control.app.STATIC_ROOT">STATIC_ROOT</a></code></li>
+<li><code><a title="control.app.URLS" href="#control.app.URLS">URLS</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="control.app.appFactory" href="#control.app.appFactory">appFactory</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

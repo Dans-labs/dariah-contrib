@@ -251,12 +251,12 @@ class WorkflowItem:
         table = recordObj.table
         kind = recordObj.kind
 
-        (frozen, locked) = self.info(table, N.frozen, N.locked, kind=kind)
+        (frozen, done, locked) = self.info(table, N.frozen, N.done, N.locked, kind=kind)
 
         if field is None:
-            return frozen or locked
+            return frozen or done or locked
 
-        if frozen:
+        if frozen or done:
             return True
 
         if not locked:
@@ -301,7 +301,6 @@ class WorkflowItem:
         -------
         boolean
         """
-        print('PERM', table, command)
         auth = self.auth
         uid = self.uid
 
@@ -314,9 +313,19 @@ class WorkflowItem:
 
         myKind = self.mykind
 
-        (locked, frozen, mayAdd, stage, stageDate, creators, countryId) = self.info(
+        (
+            locked,
+            done,
+            frozen,
+            mayAdd,
+            stage,
+            stageDate,
+            creators,
+            countryId,
+        ) = self.info(
             table,
             N.locked,
+            N.done,
             N.frozen,
             N.mayAdd,
             N.stage,
@@ -327,7 +336,6 @@ class WorkflowItem:
         )
 
         (contribId,) = self.info(N.contrib, N._id)
-        print(contribId)
 
         isCoord = auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
@@ -352,7 +360,7 @@ class WorkflowItem:
                 return False
 
             if command == N.startAssessment:
-                return mayAdd and not frozen and not locked
+                return mayAdd and not frozen and not done
 
             if not isCoord:
                 return False
@@ -370,36 +378,31 @@ class WorkflowItem:
 
             return False
 
-        if frozen:
+        if frozen or done:
             return False
-
-        answer = not locked or remaining
 
         if table == N.assessment:
             if command == N.startReview:
-                print('startReview perm', mayAdd)
                 return G(mayAdd, myKind)
-                # return G(mayAdd, myKind) and not locked
 
             if uid not in creators:
                 return False
 
-            if locked and not remaining:
+            answer = not locked or remaining
+            if not answer:
                 return False
 
             if command == N.submitAssessment:
-                return stage == N.complete and answer
+                return stage == N.complete
 
             if command == N.resubmitAssessment:
-                return stage == N.completeWithdrawn and answer
+                return stage == N.completeWithdrawn
 
             if command == N.submitRevised:
-                return stage == N.completeRevised and answer
+                return stage == N.completeRevised
 
             if command == N.withdrawAssessment:
-                return (
-                    stage not in {N.incompleteWithdrawn, N.completeWithdrawn} and answer
-                )
+                return stage not in {N.incompleteWithdrawn, N.completeWithdrawn}
 
             return False
 
@@ -409,19 +412,23 @@ class WorkflowItem:
             if not kind or kind != commandKind or kind != myKind:
                 return False
 
+            answer = not locked or remaining
+            if not answer:
+                return False
+
             if command in {
                 N.expertReviewRevise,
                 N.expertReviewAccept,
                 N.expertReviewReject,
             }:
-                return kind == N.expert and answer
+                return kind == N.expert
 
             if command in {
                 N.finalReviewRevise,
                 N.finalReviewAccept,
                 N.finalReviewReject,
             }:
-                return kind == N.final and answer
+                return kind == N.final
 
             return False
 
@@ -647,7 +654,6 @@ class WorkflowItem:
 
         for (command, commandInfo) in sorted(allowedCommands.items()):
             permitted = self.permission(table, command, kind=kind)
-            print('COMMAND', command, permitted)
             if not permitted:
                 continue
 

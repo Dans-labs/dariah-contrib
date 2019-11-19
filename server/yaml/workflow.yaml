@@ -87,6 +87,7 @@ stageAtts:
 statusRep:
   frozen: Finalized and frozen
   locked: Locked
+  done: Finished
 
 commands:
   contrib:

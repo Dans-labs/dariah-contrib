@@ -353,29 +353,31 @@ class Record:
 
         mayDelete = self.mayDelete
         if not mayDelete:
-            return
+            return False
 
         dependencies = self.getDependencies()
         nRef = G(dependencies, N.reference, default=0)
 
         if nRef:
-            return
+            return False
 
         nCas = G(dependencies, N.cascade, default=0)
         if nCas:
             if not self.deleteDetails():
-                return
+                return False
 
         context = self.context
         table = self.table
         eid = self.eid
 
-        context.deleteItem(table, eid)
+        good = context.deleteItem(table, eid)
 
         if table == MAIN_TABLE:
             self.adjustWorkflow(delete=True)
         elif table in WORKFLOW_TABLES:
             self.adjustWorkflow(update=False)
+
+        return good
 
     def deleteDetails(self):
         """Delete the details of a record.

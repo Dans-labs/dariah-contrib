@@ -50,27 +50,36 @@ class Topbar:
         login = (
             E
             if auth.authenticated()
-            else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls="button small loginout")
+            else (
+                auth.wrapTestUsers()
+                if auth.isDevel else
+                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls="button small loginout")
+            )
         )
         logout = (
-            [
-                H.a(G(LOGOUT, N.text), G(LOGOUT, N.url), cls="button small loginout"),
-                H.a(
-                    G(SLOGOUT, N.text),
-                    G(SLOGOUT, N.url),
-                    cls="button small loginout",
-                    title=G(SLOGOUT, N.title),
-                ),
-            ]
+            H.join(
+                [
+                    H.a(
+                        G(LOGOUT, N.text), G(LOGOUT, N.url), cls="button small loginout"
+                    ),
+                    H.a(
+                        G(SLOGOUT, N.text),
+                        G(SLOGOUT, N.url),
+                        cls="button small loginout",
+                        title=G(SLOGOUT, N.title),
+                    ),
+                ]
+            )
             if auth.authenticated()
-            else []
+            else E
         )
         return H.div(
             [
+                H.icon(N.devel) if auth.isDevel else E,
                 H.div(identityRep, cls="user"),
                 H.div(accessRep, cls="access"),
                 login,
-                *logout,
+                logout,
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),

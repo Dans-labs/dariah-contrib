@@ -62,6 +62,8 @@ plugins:
   - minify:
       minify_html: true
 
+use_directory_controls: false
+
 extra:
   # App
   repoName: dariah-contrib
@@ -106,6 +108,7 @@ extra:
   python: https://www.python.org
   pythondl: https://www.python.org/downloads
   pythondocs: https://docs.python.org/3/
+  pythondocstrings: https://www.python.org/dev/peps/pep-0257/
   sha: https://www.softwareheritage.org
   shebanq: https://github.com/etcbc/shebanq
   spa: https://en.wikipedia.org/wiki/Single-page_application
@@ -119,14 +122,14 @@ extra:
   zenodo: https://zenodo.org
 
 nav:
-  - Home: 'index.md'
-  - News: 'News.md'
+  - About:
+    - Home: 'index.md'
+    - News: 'News.md'
   - "What does it do":
     - Business: 'Workings/Business.md'
     - API: 'Workings/API.md'
     - Content: 'Workings/Content.md'
   - Technical:
-    - Deploy: 'Tech/Deploy.md'
     - Model: 'Tech/Model.md'
     - Workflow: 'Tech/Workflow.md'
     - Tables: 'Tech/Tables.md'
@@ -136,4 +139,7 @@ nav:
     - Stats: 'Tech/Stats.md'
     - Inventory: 'Tech/Inventory.md'
     - Lessons: 'Tech/Lessons.md'
-  - Docstrings: 'api/html/control/index.html'
+  - Maintenance:
+    - Deploy: 'Tech/Deploy.md'
+    - Docstrings: 'api/html/control/index.html'
+    - Tests: 'api/html/tests/index.md'
