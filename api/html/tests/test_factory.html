@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>control API documentation</title>
+<title>test_factory API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,86 +17,139 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>control</code></h1>
+<h1 class="title">Module <code>test_factory</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import magic  # noqa
+
+
+TEST_USERS = [
+    (&#34;bart&#34;, &#34;eppn&#34;, True),
+    (&#34;carsten&#34;, &#34;eppn&#34;, True),
+    (&#34;d@local.host&#34;, &#34;eppn&#34;, True),
+    (&#34;dirk&#34;, &#34;eppn&#34;, True),
+    (&#34;gertjan&#34;, &#34;eppn&#34;, False),
+    (&#34;john&#34;, &#34;eppn&#34;, True),
+    (&#34;lisa&#34;, &#34;eppn&#34;, True),
+    (&#34;marie&#34;, &#34;eppn&#34;, True),
+    (&#34;rachel&#34;, &#34;eppn&#34;, True),
+    (&#34;suzan&#34;, &#34;eppn&#34;, True),
+    (&#34;@&#34;, &#34;email&#34;, False),
+    (&#34;a@b.c&#34;, &#34;email&#34;, True),
+]
+
+
+def test_test(app):
+    &#34;&#34;&#34;Is test mode on?&#34;&#34;&#34;
+    assert app.testing
+
+
+def test_notest(app_notest):
+    &#34;&#34;&#34;Is test mode off?&#34;&#34;&#34;
+    assert not app_notest.testing
+
+
+def test_login_prod(client_prod):
+    &#34;&#34;&#34;Make sure we cannot login test users in production!&#34;&#34;&#34;
+    for (user, key, mayLogin) in TEST_USERS:
+        response = client_prod.get(f&#34;/login?{key}={user}&#34;)
+        assert response.status_code == 303
+
+
+def test_login(client):
+    &#34;&#34;&#34;Make sure we canlogin test users in development.
+
+    Except for the users that have `mayLogin=False`.
+    &#34;&#34;&#34;
+
+    for (user, key, mayLogin) in TEST_USERS:
+        response = client.get(f&#34;/login?{key}={user}&#34;)
+        if mayLogin:
+            assert response.status_code == 302
+        else:
+            assert response.status_code == 303</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="control.app" href="app.html">control.app</a></code></dt>
+<dt id="test_factory.test_login"><code class="name flex">
+<span>def <span class="ident">test_login</span></span>(<span>client)</span>
+</code></dt>
 <dd>
-<section class="desc"><p>Sets up the Flask app with all its routes.</p></section>
+<section class="desc"><p>Make sure we canlogin test users in development.</p>
+<p>Except for the users that have <code>mayLogin=False</code>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_login(client):
+    &#34;&#34;&#34;Make sure we canlogin test users in development.
+
+    Except for the users that have `mayLogin=False`.
+    &#34;&#34;&#34;
+
+    for (user, key, mayLogin) in TEST_USERS:
+        response = client.get(f&#34;/login?{key}={user}&#34;)
+        if mayLogin:
+            assert response.status_code == 302
+        else:
+            assert response.status_code == 303</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="control.auth" href="auth.html">control.auth</a></code></dt>
+<dt id="test_factory.test_login_prod"><code class="name flex">
+<span>def <span class="ident">test_login_prod</span></span>(<span>client_prod)</span>
+</code></dt>
 <dd>
-<section class="desc"><p>Authentication …</p></section>
+<section class="desc"><p>Make sure we cannot login test users in production!</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_login_prod(client_prod):
+    &#34;&#34;&#34;Make sure we cannot login test users in production!&#34;&#34;&#34;
+    for (user, key, mayLogin) in TEST_USERS:
+        response = client_prod.get(f&#34;/login?{key}={user}&#34;)
+        assert response.status_code == 303</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="control.context" href="context.html">control.context</a></code></dt>
+<dt id="test_factory.test_notest"><code class="name flex">
+<span>def <span class="ident">test_notest</span></span>(<span>app_notest)</span>
+</code></dt>
 <dd>
-<section class="desc"><p>All context info …</p></section>
+<section class="desc"><p>Is test mode off?</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_notest(app_notest):
+    &#34;&#34;&#34;Is test mode off?&#34;&#34;&#34;
+    assert not app_notest.testing</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="control.cust" href="cust/index.html">control.cust</a></code></dt>
+<dt id="test_factory.test_test"><code class="name flex">
+<span>def <span class="ident">test_test</span></span>(<span>app)</span>
+</code></dt>
 <dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="control.db" href="db.html">control.db</a></code></dt>
-<dd>
-<section class="desc"><p>All access to the database …</p></section>
-</dd>
-<dt><code class="name"><a title="control.details" href="details.html">control.details</a></code></dt>
-<dd>
-<section class="desc"><p>Detail records of master records of tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.field" href="field.html">control.field</a></code></dt>
-<dd>
-<section class="desc"><p>Fields of records of tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.html" href="html.html">control.html</a></code></dt>
-<dd>
-<section class="desc"><p>HTML generation made easy …</p></section>
-</dd>
-<dt><code class="name"><a title="control.overview" href="overview.html">control.overview</a></code></dt>
-<dd>
-<section class="desc"><p>Overview page of contributions …</p></section>
-</dd>
-<dt><code class="name"><a title="control.perm" href="perm.html">control.perm</a></code></dt>
-<dd>
-<section class="desc"><p>Permission library …</p></section>
-</dd>
-<dt><code class="name"><a title="control.record" href="record.html">control.record</a></code></dt>
-<dd>
-<section class="desc"><p>Records in tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.sidebar" href="sidebar.html">control.sidebar</a></code></dt>
-<dd>
-<section class="desc"><p>Sidebar …</p></section>
-</dd>
-<dt><code class="name"><a title="control.table" href="table.html">control.table</a></code></dt>
-<dd>
-<section class="desc"><p>Tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.topbar" href="topbar.html">control.topbar</a></code></dt>
-<dd>
-<section class="desc"><p>Topbar …</p></section>
-</dd>
-<dt><code class="name"><a title="control.typ" href="typ/index.html">control.typ</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="control.utils" href="utils.html">control.utils</a></code></dt>
-<dd>
-<section class="desc"><p>Things that do not find a more logical place …</p></section>
-</dd>
-<dt><code class="name"><a title="control.workflow" href="workflow/index.html">control.workflow</a></code></dt>
-<dd>
-<section class="desc"></section>
+<section class="desc"><p>Is test mode on?</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_test(app):
+    &#34;&#34;&#34;Is test mode on?&#34;&#34;&#34;
+    assert app.testing</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -107,25 +160,12 @@
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="control.app" href="app.html">control.app</a></code></li>
-<li><code><a title="control.auth" href="auth.html">control.auth</a></code></li>
-<li><code><a title="control.context" href="context.html">control.context</a></code></li>
-<li><code><a title="control.cust" href="cust/index.html">control.cust</a></code></li>
-<li><code><a title="control.db" href="db.html">control.db</a></code></li>
-<li><code><a title="control.details" href="details.html">control.details</a></code></li>
-<li><code><a title="control.field" href="field.html">control.field</a></code></li>
-<li><code><a title="control.html" href="html.html">control.html</a></code></li>
-<li><code><a title="control.overview" href="overview.html">control.overview</a></code></li>
-<li><code><a title="control.perm" href="perm.html">control.perm</a></code></li>
-<li><code><a title="control.record" href="record.html">control.record</a></code></li>
-<li><code><a title="control.sidebar" href="sidebar.html">control.sidebar</a></code></li>
-<li><code><a title="control.table" href="table.html">control.table</a></code></li>
-<li><code><a title="control.topbar" href="topbar.html">control.topbar</a></code></li>
-<li><code><a title="control.typ" href="typ/index.html">control.typ</a></code></li>
-<li><code><a title="control.utils" href="utils.html">control.utils</a></code></li>
-<li><code><a title="control.workflow" href="workflow/index.html">control.workflow</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="test_factory.test_login" href="#test_factory.test_login">test_login</a></code></li>
+<li><code><a title="test_factory.test_login_prod" href="#test_factory.test_login_prod">test_login_prod</a></code></li>
+<li><code><a title="test_factory.test_notest" href="#test_factory.test_notest">test_notest</a></code></li>
+<li><code><a title="test_factory.test_test" href="#test_factory.test_test">test_test</a></code></li>
 </ul>
 </li>
 </ul>

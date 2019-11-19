@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>control API documentation</title>
+<title>data API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,82 +17,24 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Namespace <code>control</code></h1>
+<h1 class="title">Module <code>data</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from pymongo import MongoClient
+
+DB = &#34;test_dariah&#34;
+
+mongo = MongoClient()
+mongo.drop_database(DB)
+db = mongo[DB]
+db[&#34;contrib&#34;].insert_one(dict(title=&#34;test1&#34;))</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="control.app" href="app.html">control.app</a></code></dt>
-<dd>
-<section class="desc"><p>Sets up the Flask app with all its routes.</p></section>
-</dd>
-<dt><code class="name"><a title="control.auth" href="auth.html">control.auth</a></code></dt>
-<dd>
-<section class="desc"><p>Authentication …</p></section>
-</dd>
-<dt><code class="name"><a title="control.context" href="context.html">control.context</a></code></dt>
-<dd>
-<section class="desc"><p>All context info …</p></section>
-</dd>
-<dt><code class="name"><a title="control.cust" href="cust/index.html">control.cust</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="control.db" href="db.html">control.db</a></code></dt>
-<dd>
-<section class="desc"><p>All access to the database …</p></section>
-</dd>
-<dt><code class="name"><a title="control.details" href="details.html">control.details</a></code></dt>
-<dd>
-<section class="desc"><p>Detail records of master records of tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.field" href="field.html">control.field</a></code></dt>
-<dd>
-<section class="desc"><p>Fields of records of tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.html" href="html.html">control.html</a></code></dt>
-<dd>
-<section class="desc"><p>HTML generation made easy …</p></section>
-</dd>
-<dt><code class="name"><a title="control.overview" href="overview.html">control.overview</a></code></dt>
-<dd>
-<section class="desc"><p>Overview page of contributions …</p></section>
-</dd>
-<dt><code class="name"><a title="control.perm" href="perm.html">control.perm</a></code></dt>
-<dd>
-<section class="desc"><p>Permission library …</p></section>
-</dd>
-<dt><code class="name"><a title="control.record" href="record.html">control.record</a></code></dt>
-<dd>
-<section class="desc"><p>Records in tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.sidebar" href="sidebar.html">control.sidebar</a></code></dt>
-<dd>
-<section class="desc"><p>Sidebar …</p></section>
-</dd>
-<dt><code class="name"><a title="control.table" href="table.html">control.table</a></code></dt>
-<dd>
-<section class="desc"><p>Tables …</p></section>
-</dd>
-<dt><code class="name"><a title="control.topbar" href="topbar.html">control.topbar</a></code></dt>
-<dd>
-<section class="desc"><p>Topbar …</p></section>
-</dd>
-<dt><code class="name"><a title="control.typ" href="typ/index.html">control.typ</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-<dt><code class="name"><a title="control.utils" href="utils.html">control.utils</a></code></dt>
-<dd>
-<section class="desc"><p>Things that do not find a more logical place …</p></section>
-</dd>
-<dt><code class="name"><a title="control.workflow" href="workflow/index.html">control.workflow</a></code></dt>
-<dd>
-<section class="desc"></section>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -107,27 +49,6 @@
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="control.app" href="app.html">control.app</a></code></li>
-<li><code><a title="control.auth" href="auth.html">control.auth</a></code></li>
-<li><code><a title="control.context" href="context.html">control.context</a></code></li>
-<li><code><a title="control.cust" href="cust/index.html">control.cust</a></code></li>
-<li><code><a title="control.db" href="db.html">control.db</a></code></li>
-<li><code><a title="control.details" href="details.html">control.details</a></code></li>
-<li><code><a title="control.field" href="field.html">control.field</a></code></li>
-<li><code><a title="control.html" href="html.html">control.html</a></code></li>
-<li><code><a title="control.overview" href="overview.html">control.overview</a></code></li>
-<li><code><a title="control.perm" href="perm.html">control.perm</a></code></li>
-<li><code><a title="control.record" href="record.html">control.record</a></code></li>
-<li><code><a title="control.sidebar" href="sidebar.html">control.sidebar</a></code></li>
-<li><code><a title="control.table" href="table.html">control.table</a></code></li>
-<li><code><a title="control.topbar" href="topbar.html">control.topbar</a></code></li>
-<li><code><a title="control.typ" href="typ/index.html">control.typ</a></code></li>
-<li><code><a title="control.utils" href="utils.html">control.utils</a></code></li>
-<li><code><a title="control.workflow" href="workflow/index.html">control.workflow</a></code></li>
-</ul>
-</li>
 </ul>
 </nav>
 </main>
