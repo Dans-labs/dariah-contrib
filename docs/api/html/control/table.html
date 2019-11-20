@@ -47,7 +47,6 @@ from control.utils import pick as G, E, ELLIPS, NBSP, ONE
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
-CW = C.web
 
 
 MAIN_TABLE = CT.userTables[0]
@@ -58,8 +57,6 @@ VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
 PROV_SPECS = CT.prov
-
-FORBIDDEN = CW.messages[N.forbidden]
 
 
 class Table:
@@ -329,6 +326,7 @@ class Table:
         `assess` | records that the current user is assessing
         `assign` | records that the current office user must assign to reviewers
         `reviewer` | records that the current user is reviewing
+        `reviewdone` | records that the current user has reviewed
         `select` | records that the current national coordinator user can select
 
         Permissions will be checked before executing one of these list actions.
@@ -356,7 +354,7 @@ class Table:
         &#34;&#34;&#34;
 
         if not self.mayList(action=action):
-            return FORBIDDEN
+            return None
 
         context = self.context
         db = context.db
@@ -375,8 +373,10 @@ class Table:
             if action == N.assess
             else dict(assign=True)
             if action == N.assign
-            else dict(reviewer=uid)
+            else dict(review=uid)
             if action == N.review
+            else dict(review=uid)
+            if action == N.reviewdone
             else dict(selectable=countryId)
             if action == N.select
             else {}
@@ -384,10 +384,8 @@ class Table:
         if request.args:
             params.update(request.args)
 
+        print(&#39;PPP&#39;, params)
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        nRecords = len(records)
-        itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
         insertButton = self.insertButton()
         sep = NBSP if insertButton else E
 
@@ -399,14 +397,13 @@ class Table:
                 not in {N.reviewAccept, N.reviewReject}
             ]
         if action == N.review:
-            records = [
-                record
-                for record in records
-                if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject}
-                and self.stage(record, N.review, kind=N.expert)
-                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
-            ]
+            records = [record for record in records if not self.myFinished(uid, record)]
+        if action == N.reviewdone:
+            records = [record for record in records if self.myFinished(uid, record)]
+
+        nRecords = len(records)
+        itemLabel = itemSingular if nRecords == 1 else itemPlural
+        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
             chain.from_iterable(
@@ -429,6 +426,58 @@ class Table:
             cls=f&#34;table {table}&#34;,
         )
 
+    @staticmethod
+    def myKind(uid, record):
+        &#34;&#34;&#34;Quickly determine the kind of reviewer that somebody is.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review of which the user is or is not a reviewer.
+
+        Returns
+        -------
+        string {`expert`, `final`} | `None`
+        &#34;&#34;&#34;
+
+        return (
+            N.expert
+            if G(record, N.reviewerE) == uid
+            else N.final
+            if G(record, N.reviewerF) == uid
+            else None
+        )
+
+    def myFinished(self, uid, record):
+        &#34;&#34;&#34;Quickly determine whethe somebody is done reviewing.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review in question.
+
+        The question is: did `uid` take a review decision, or
+        has the final reviewer already decided anyway?
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        return self.stage(record, N.review, kind=N.final) in {
+            N.reviewAccept,
+            N.reviewReject,
+        } or self.stage(record, N.review, kind=Table.myKind(uid, record)) in {
+            N.reviewAdviseAccept,
+            N.reviewAdviseReject,
+            N.reviewAccept,
+            N.reviewReject,
+        }
+
     def insertButton(self):
         &#34;&#34;&#34;Present an insert button on the interface.
 
@@ -443,11 +492,10 @@ class Table:
         table = self.table
         itemSingle = self.itemLabels[0]
 
-        return H.iconx(
-            N.insert,
-            cls=&#34;large&#34;,
-            href=f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
-            title=f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+        return H.a(
+            f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+            f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
+            cls=&#34;small command info&#34;,
         )
 
     def mayList(self, action=None):
@@ -457,7 +505,9 @@ class Table:
 
         *   all users may see the whole contrib table (not all fields!);
         *   superusers may see all tables with all list actions;
-        *   authenticated users may see all contribs, assessments and value tables.
+        *   authenticated users may see
+            *   contribs, assessments, reviews
+            *   value tables.
 
         Parameters
         ----------
@@ -474,13 +524,13 @@ class Table:
         context = self.context
         auth = context.auth
         isMainTable = self.isMainTable
-        isInterTable = self.isInterTable
+        isUserTable = self.isUserTable
         isValueTable = self.isValueTable
         return (
             isMainTable
             and not action
             or auth.superuser()
-            or (isMainTable or isInterTable or isValueTable)
+            or (isUserTable or isValueTable)
             and auth.authenticated()
         )
 
@@ -836,6 +886,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         `assess` | records that the current user is assessing
         `assign` | records that the current office user must assign to reviewers
         `reviewer` | records that the current user is reviewing
+        `reviewdone` | records that the current user has reviewed
         `select` | records that the current national coordinator user can select
 
         Permissions will be checked before executing one of these list actions.
@@ -863,7 +914,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         &#34;&#34;&#34;
 
         if not self.mayList(action=action):
-            return FORBIDDEN
+            return None
 
         context = self.context
         db = context.db
@@ -882,8 +933,10 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             if action == N.assess
             else dict(assign=True)
             if action == N.assign
-            else dict(reviewer=uid)
+            else dict(review=uid)
             if action == N.review
+            else dict(review=uid)
+            if action == N.reviewdone
             else dict(selectable=countryId)
             if action == N.select
             else {}
@@ -891,10 +944,8 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         if request.args:
             params.update(request.args)
 
+        print(&#39;PPP&#39;, params)
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        nRecords = len(records)
-        itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
         insertButton = self.insertButton()
         sep = NBSP if insertButton else E
 
@@ -906,14 +957,13 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
                 not in {N.reviewAccept, N.reviewReject}
             ]
         if action == N.review:
-            records = [
-                record
-                for record in records
-                if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject}
-                and self.stage(record, N.review, kind=N.expert)
-                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
-            ]
+            records = [record for record in records if not self.myFinished(uid, record)]
+        if action == N.reviewdone:
+            records = [record for record in records if self.myFinished(uid, record)]
+
+        nRecords = len(records)
+        itemLabel = itemSingular if nRecords == 1 else itemPlural
+        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
             chain.from_iterable(
@@ -936,6 +986,58 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             cls=f&#34;table {table}&#34;,
         )
 
+    @staticmethod
+    def myKind(uid, record):
+        &#34;&#34;&#34;Quickly determine the kind of reviewer that somebody is.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review of which the user is or is not a reviewer.
+
+        Returns
+        -------
+        string {`expert`, `final`} | `None`
+        &#34;&#34;&#34;
+
+        return (
+            N.expert
+            if G(record, N.reviewerE) == uid
+            else N.final
+            if G(record, N.reviewerF) == uid
+            else None
+        )
+
+    def myFinished(self, uid, record):
+        &#34;&#34;&#34;Quickly determine whethe somebody is done reviewing.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review in question.
+
+        The question is: did `uid` take a review decision, or
+        has the final reviewer already decided anyway?
+
+        Returns
+        -------
+        bool
+        &#34;&#34;&#34;
+
+        return self.stage(record, N.review, kind=N.final) in {
+            N.reviewAccept,
+            N.reviewReject,
+        } or self.stage(record, N.review, kind=Table.myKind(uid, record)) in {
+            N.reviewAdviseAccept,
+            N.reviewAdviseReject,
+            N.reviewAccept,
+            N.reviewReject,
+        }
+
     def insertButton(self):
         &#34;&#34;&#34;Present an insert button on the interface.
 
@@ -950,11 +1052,10 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         table = self.table
         itemSingle = self.itemLabels[0]
 
-        return H.iconx(
-            N.insert,
-            cls=&#34;large&#34;,
-            href=f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
-            title=f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+        return H.a(
+            f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+            f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
+            cls=&#34;small command info&#34;,
         )
 
     def mayList(self, action=None):
@@ -964,7 +1065,9 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 
         *   all users may see the whole contrib table (not all fields!);
         *   superusers may see all tables with all list actions;
-        *   authenticated users may see all contribs, assessments and value tables.
+        *   authenticated users may see
+            *   contribs, assessments, reviews
+            *   value tables.
 
         Parameters
         ----------
@@ -981,13 +1084,13 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         context = self.context
         auth = context.auth
         isMainTable = self.isMainTable
-        isInterTable = self.isInterTable
+        isUserTable = self.isUserTable
         isValueTable = self.isValueTable
         return (
             isMainTable
             and not action
             or auth.superuser()
-            or (isMainTable or isInterTable or isValueTable)
+            or (isUserTable or isValueTable)
             and auth.authenticated()
         )
 
@@ -1047,6 +1150,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="control.cust.contrib_table.ContribT" href="cust/contrib_table.html#control.cust.contrib_table.ContribT">ContribT</a></li>
 <li><a title="control.cust.assessment_table.AssessmentT" href="cust/assessment_table.html#control.cust.assessment_table.AssessmentT">AssessmentT</a></li>
 <li><a title="control.cust.review_table.ReviewT" href="cust/review_table.html#control.cust.review_table.ReviewT">ReviewT</a></li>
 </ul>
@@ -1106,6 +1210,49 @@ def forceOpen(theEid, openEid):
     &#34;&#34;&#34;
 
     return dict(forceopen=ONE) if openEid and str(theEid) == openEid else dict()</code></pre>
+</details>
+</dd>
+<dt id="control.table.Table.myKind"><code class="name flex">
+<span>def <span class="ident">myKind</span></span>(<span>uid, record)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Quickly determine the kind of reviewer that somebody is.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>uid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The user as reviewer.</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The review of which the user is or is not a reviewer.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>string {<code>expert</code>, <code>final</code>} | <code>None</code></p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def myKind(uid, record):
+    &#34;&#34;&#34;Quickly determine the kind of reviewer that somebody is.
+
+    Parameters
+    ----------
+    uid: ObjectId
+        The user as reviewer.
+    record: dict
+        The review of which the user is or is not a reviewer.
+
+    Returns
+    -------
+    string {`expert`, `final`} | `None`
+    &#34;&#34;&#34;
+
+    return (
+        N.expert
+        if G(record, N.reviewerE) == uid
+        else N.final
+        if G(record, N.reviewerF) == uid
+        else None
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -1360,11 +1507,10 @@ records in other tables. The code for specific tables will instruct so.</p>
     table = self.table
     itemSingle = self.itemLabels[0]
 
-    return H.iconx(
-        N.insert,
-        cls=&#34;large&#34;,
-        href=f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
-        title=f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+    return H.a(
+        f&#34;&#34;&#34;New {itemSingle}&#34;&#34;&#34;,
+        f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;,
+        cls=&#34;small command info&#34;,
     )</code></pre>
 </details>
 </dd>
@@ -1377,7 +1523,11 @@ records in other tables. The code for specific tables will instruct so.</p>
 <ul>
 <li>all users may see the whole contrib table (not all fields!);</li>
 <li>superusers may see all tables with all list actions;</li>
-<li>authenticated users may see all contribs, assessments and value tables.</li>
+<li>authenticated users may see<ul>
+<li>contribs, assessments, reviews</li>
+<li>value tables.</li>
+</ul>
+</li>
 </ul>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -1402,7 +1552,9 @@ the user may see the list of all records.</dd>
 
     *   all users may see the whole contrib table (not all fields!);
     *   superusers may see all tables with all list actions;
-    *   authenticated users may see all contribs, assessments and value tables.
+    *   authenticated users may see
+        *   contribs, assessments, reviews
+        *   value tables.
 
     Parameters
     ----------
@@ -1419,15 +1571,67 @@ the user may see the list of all records.</dd>
     context = self.context
     auth = context.auth
     isMainTable = self.isMainTable
-    isInterTable = self.isInterTable
+    isUserTable = self.isUserTable
     isValueTable = self.isValueTable
     return (
         isMainTable
         and not action
         or auth.superuser()
-        or (isMainTable or isInterTable or isValueTable)
+        or (isUserTable or isValueTable)
         and auth.authenticated()
     )</code></pre>
+</details>
+</dd>
+<dt id="control.table.Table.myFinished"><code class="name flex">
+<span>def <span class="ident">myFinished</span></span>(<span>self, uid, record)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Quickly determine whethe somebody is done reviewing.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>uid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>The user as reviewer.</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The review in question.</dd>
+</dl>
+<p>The question is: did <code>uid</code> take a review decision, or
+has the final reviewer already decided anyway?</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def myFinished(self, uid, record):
+    &#34;&#34;&#34;Quickly determine whethe somebody is done reviewing.
+
+    Parameters
+    ----------
+    uid: ObjectId
+        The user as reviewer.
+    record: dict
+        The review in question.
+
+    The question is: did `uid` take a review decision, or
+    has the final reviewer already decided anyway?
+
+    Returns
+    -------
+    bool
+    &#34;&#34;&#34;
+
+    return self.stage(record, N.review, kind=N.final) in {
+        N.reviewAccept,
+        N.reviewReject,
+    } or self.stage(record, N.review, kind=Table.myKind(uid, record)) in {
+        N.reviewAdviseAccept,
+        N.reviewAdviseReject,
+        N.reviewAccept,
+        N.reviewReject,
+    }</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.record"><code class="name flex">
@@ -1641,6 +1845,10 @@ fields from the record itself.</p>
 <td>records that the current user is reviewing</td>
 </tr>
 <tr>
+<td><code>reviewdone</code></td>
+<td>records that the current user has reviewed</td>
+</tr>
+<tr>
 <td><code>select</code></td>
 <td>records that the current national coordinator user can select</td>
 </tr>
@@ -1686,6 +1894,7 @@ otherwise all records go to the interface.</dd>
     `assess` | records that the current user is assessing
     `assign` | records that the current office user must assign to reviewers
     `reviewer` | records that the current user is reviewing
+    `reviewdone` | records that the current user has reviewed
     `select` | records that the current national coordinator user can select
 
     Permissions will be checked before executing one of these list actions.
@@ -1713,7 +1922,7 @@ otherwise all records go to the interface.</dd>
     &#34;&#34;&#34;
 
     if not self.mayList(action=action):
-        return FORBIDDEN
+        return None
 
     context = self.context
     db = context.db
@@ -1732,8 +1941,10 @@ otherwise all records go to the interface.</dd>
         if action == N.assess
         else dict(assign=True)
         if action == N.assign
-        else dict(reviewer=uid)
+        else dict(review=uid)
         if action == N.review
+        else dict(review=uid)
+        if action == N.reviewdone
         else dict(selectable=countryId)
         if action == N.select
         else {}
@@ -1741,10 +1952,8 @@ otherwise all records go to the interface.</dd>
     if request.args:
         params.update(request.args)
 
+    print(&#39;PPP&#39;, params)
     records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-    nRecords = len(records)
-    itemLabel = itemSingular if nRecords == 1 else itemPlural
-    nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
     insertButton = self.insertButton()
     sep = NBSP if insertButton else E
 
@@ -1756,14 +1965,13 @@ otherwise all records go to the interface.</dd>
             not in {N.reviewAccept, N.reviewReject}
         ]
     if action == N.review:
-        records = [
-            record
-            for record in records
-            if self.stage(record, N.review, kind=N.final)
-            not in {N.reviewAccept, N.reviewReject}
-            and self.stage(record, N.review, kind=N.expert)
-            not in {N.reviewAdviseAccept, N.reviewAdviseReject}
-        ]
+        records = [record for record in records if not self.myFinished(uid, record)]
+    if action == N.reviewdone:
+        records = [record for record in records if self.myFinished(uid, record)]
+
+    nRecords = len(records)
+    itemLabel = itemSingular if nRecords == 1 else itemPlural
+    nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
     return H.div(
         chain.from_iterable(
@@ -1827,6 +2035,8 @@ otherwise all records go to the interface.</dd>
 <li><code><a title="control.table.Table.itemLabels" href="#control.table.Table.itemLabels">itemLabels</a></code></li>
 <li><code><a title="control.table.Table.mayInsert" href="#control.table.Table.mayInsert">mayInsert</a></code></li>
 <li><code><a title="control.table.Table.mayList" href="#control.table.Table.mayList">mayList</a></code></li>
+<li><code><a title="control.table.Table.myFinished" href="#control.table.Table.myFinished">myFinished</a></code></li>
+<li><code><a title="control.table.Table.myKind" href="#control.table.Table.myKind">myKind</a></code></li>
 <li><code><a title="control.table.Table.prov" href="#control.table.Table.prov">prov</a></code></li>
 <li><code><a title="control.table.Table.record" href="#control.table.Table.record">record</a></code></li>
 <li><code><a title="control.table.Table.stage" href="#control.table.Table.stage">stage</a></code></li>

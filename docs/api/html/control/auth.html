@@ -456,6 +456,37 @@ class Auth:
 
         return (identityRep, groupDesc)
 
+    def nameEmail(self, user=None):
+        &#34;&#34;&#34;Provide a string representation of the name and email of the user.
+
+        !!! note
+            Care will be taken that to unauthenticated users only
+            limited information about users will be shown.
+
+        Parameters
+        ----------
+        user: dict, optional `None`
+            The user whose identity must be represented.
+            If absent, the currently logged in user will be taken.
+
+        Returns
+        -------
+        string
+        &#34;&#34;&#34;
+
+        if user is None:
+            user = self.user
+
+        name = G(user, N.name) or E
+        if not name:
+            firstName = G(user, N.firstName) or E
+            lastName = G(user, N.lastName) or E
+            name = firstName + (BLANK if firstName and lastName else E) + lastName
+        group = self.groupRep(user=user)
+        isAuth = group != UNAUTH
+        email = (G(user, N.email) or E) if isAuth else E
+        return (name, email)
+
     def authenticate(self, login=False):
         &#34;&#34;&#34;Verify the authenticated status of the current user.
 
@@ -1018,6 +1049,37 @@ attributes.</p>
         identityRep = self.identity(user)
 
         return (identityRep, groupDesc)
+
+    def nameEmail(self, user=None):
+        &#34;&#34;&#34;Provide a string representation of the name and email of the user.
+
+        !!! note
+            Care will be taken that to unauthenticated users only
+            limited information about users will be shown.
+
+        Parameters
+        ----------
+        user: dict, optional `None`
+            The user whose identity must be represented.
+            If absent, the currently logged in user will be taken.
+
+        Returns
+        -------
+        string
+        &#34;&#34;&#34;
+
+        if user is None:
+            user = self.user
+
+        name = G(user, N.name) or E
+        if not name:
+            firstName = G(user, N.firstName) or E
+            lastName = G(user, N.lastName) or E
+            name = firstName + (BLANK if firstName and lastName else E) + lastName
+        group = self.groupRep(user=user)
+        isAuth = group != UNAUTH
+        email = (G(user, N.email) or E) if isAuth else E
+        return (name, email)
 
     def authenticate(self, login=False):
         &#34;&#34;&#34;Verify the authenticated status of the current user.
@@ -1888,6 +1950,63 @@ If absent, the currently logged in user will be taken.</dd>
     return identityRep</code></pre>
 </details>
 </dd>
+<dt id="control.auth.Auth.nameEmail"><code class="name flex">
+<span>def <span class="ident">nameEmail</span></span>(<span>self, user=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Provide a string representation of the name and email of the user.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Care will be taken that to unauthenticated users only
+limited information about users will be shown.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>user</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
+<dd>The user whose identity must be represented.
+If absent, the currently logged in user will be taken.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def nameEmail(self, user=None):
+    &#34;&#34;&#34;Provide a string representation of the name and email of the user.
+
+    !!! note
+        Care will be taken that to unauthenticated users only
+        limited information about users will be shown.
+
+    Parameters
+    ----------
+    user: dict, optional `None`
+        The user whose identity must be represented.
+        If absent, the currently logged in user will be taken.
+
+    Returns
+    -------
+    string
+    &#34;&#34;&#34;
+
+    if user is None:
+        user = self.user
+
+    name = G(user, N.name) or E
+    if not name:
+        firstName = G(user, N.firstName) or E
+        lastName = G(user, N.lastName) or E
+        name = firstName + (BLANK if firstName and lastName else E) + lastName
+    group = self.groupRep(user=user)
+    isAuth = group != UNAUTH
+    email = (G(user, N.email) or E) if isAuth else E
+    return (name, email)</code></pre>
+</details>
+</dd>
 <dt id="control.auth.Auth.officeuser"><code class="name flex">
 <span>def <span class="ident">officeuser</span></span>(<span>self)</span>
 </code></dt>
@@ -2055,6 +2174,7 @@ Only in development mode one can select a test user.</p>
 <li><code><a title="control.auth.Auth.groupRep" href="#control.auth.Auth.groupRep">groupRep</a></code></li>
 <li><code><a title="control.auth.Auth.identity" href="#control.auth.Auth.identity">identity</a></code></li>
 <li><code><a title="control.auth.Auth.isDevel" href="#control.auth.Auth.isDevel">isDevel</a></code></li>
+<li><code><a title="control.auth.Auth.nameEmail" href="#control.auth.Auth.nameEmail">nameEmail</a></code></li>
 <li><code><a title="control.auth.Auth.officeuser" href="#control.auth.Auth.officeuser">officeuser</a></code></li>
 <li><code><a title="control.auth.Auth.superuser" href="#control.auth.Auth.superuser">superuser</a></code></li>
 <li><code><a title="control.auth.Auth.sysadmin" href="#control.auth.Auth.sysadmin">sysadmin</a></code></li>

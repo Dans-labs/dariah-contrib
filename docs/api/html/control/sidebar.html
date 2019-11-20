@@ -312,10 +312,10 @@ class Sidebar:
             subEntries.extend(
                 [
                     self.tableEntry(
-                        N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                        N.contrib, action=N.my, prefix=&#34;My&#34;, withOptions=True
                     ),
-                    self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
-                    self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                    self.tableEntry(N.assessment, action=N.my, prefix=&#34;My&#34;),
+                    self.tableEntry(N.review, action=N.my, prefix=&#34;My&#34;),
                 ]
             )
 
@@ -337,7 +337,7 @@ class Sidebar:
             subEntries.append(
                 self.tableEntry(
                     N.contrib,
-                    action=&#34;select&#34;,
+                    action=N.select,
                     item=&#34;Contributions&#34;,
                     postfix=&#34;to be selected&#34;,
                     command=True,
@@ -348,7 +348,7 @@ class Sidebar:
         subEntries.append(
             self.tableEntry(
                 N.contrib,
-                action=&#34;assess&#34;,
+                action=N.assess,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;I am assessing&#34;,
                 command=True,
@@ -362,21 +362,33 @@ class Sidebar:
             subEntries.append(
                 self.tableEntry(
                     N.assessment,
-                    action=&#34;assign&#34;,
+                    action=N.assign,
                     item=&#34;Assessments&#34;,
                     postfix=&#34;needing reviewers&#34;,
                     command=True,
                 )
             )
 
-        # - reviewed by me (unfinished)
+        # - in review by me (unfinished)
 
         subEntries.append(
             self.tableEntry(
                 N.assessment,
-                action=&#34;review&#34;,
+                action=N.review,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;in review by me&#34;,
+                command=True,
+            )
+        )
+
+        # - reviewed by me (finished)
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=N.reviewdone,
+                item=&#34;Assessments&#34;,
+                postfix=&#34;reviewed by me&#34;,
                 command=True,
             )
         )
@@ -700,10 +712,10 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             subEntries.extend(
                 [
                     self.tableEntry(
-                        N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                        N.contrib, action=N.my, prefix=&#34;My&#34;, withOptions=True
                     ),
-                    self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
-                    self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                    self.tableEntry(N.assessment, action=N.my, prefix=&#34;My&#34;),
+                    self.tableEntry(N.review, action=N.my, prefix=&#34;My&#34;),
                 ]
             )
 
@@ -725,7 +737,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             subEntries.append(
                 self.tableEntry(
                     N.contrib,
-                    action=&#34;select&#34;,
+                    action=N.select,
                     item=&#34;Contributions&#34;,
                     postfix=&#34;to be selected&#34;,
                     command=True,
@@ -736,7 +748,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         subEntries.append(
             self.tableEntry(
                 N.contrib,
-                action=&#34;assess&#34;,
+                action=N.assess,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;I am assessing&#34;,
                 command=True,
@@ -750,21 +762,33 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             subEntries.append(
                 self.tableEntry(
                     N.assessment,
-                    action=&#34;assign&#34;,
+                    action=N.assign,
                     item=&#34;Assessments&#34;,
                     postfix=&#34;needing reviewers&#34;,
                     command=True,
                 )
             )
 
-        # - reviewed by me (unfinished)
+        # - in review by me (unfinished)
 
         subEntries.append(
             self.tableEntry(
                 N.assessment,
-                action=&#34;review&#34;,
+                action=N.review,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;in review by me&#34;,
+                command=True,
+            )
+        )
+
+        # - reviewed by me (finished)
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=N.reviewdone,
+                item=&#34;Assessments&#34;,
+                postfix=&#34;reviewed by me&#34;,
                 command=True,
             )
         )
@@ -1153,10 +1177,10 @@ to him/her.</p>
         subEntries.extend(
             [
                 self.tableEntry(
-                    N.contrib, action=&#34;my&#34;, prefix=&#34;My&#34;, withOptions=True
+                    N.contrib, action=N.my, prefix=&#34;My&#34;, withOptions=True
                 ),
-                self.tableEntry(N.assessment, action=&#34;my&#34;, prefix=&#34;My&#34;),
-                self.tableEntry(N.review, action=&#34;my&#34;, prefix=&#34;My&#34;),
+                self.tableEntry(N.assessment, action=N.my, prefix=&#34;My&#34;),
+                self.tableEntry(N.review, action=N.my, prefix=&#34;My&#34;),
             ]
         )
 
@@ -1178,7 +1202,7 @@ to him/her.</p>
         subEntries.append(
             self.tableEntry(
                 N.contrib,
-                action=&#34;select&#34;,
+                action=N.select,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;to be selected&#34;,
                 command=True,
@@ -1189,7 +1213,7 @@ to him/her.</p>
     subEntries.append(
         self.tableEntry(
             N.contrib,
-            action=&#34;assess&#34;,
+            action=N.assess,
             item=&#34;Contributions&#34;,
             postfix=&#34;I am assessing&#34;,
             command=True,
@@ -1203,21 +1227,33 @@ to him/her.</p>
         subEntries.append(
             self.tableEntry(
                 N.assessment,
-                action=&#34;assign&#34;,
+                action=N.assign,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;needing reviewers&#34;,
                 command=True,
             )
         )
 
-    # - reviewed by me (unfinished)
+    # - in review by me (unfinished)
 
     subEntries.append(
         self.tableEntry(
             N.assessment,
-            action=&#34;review&#34;,
+            action=N.review,
             item=&#34;Assessments&#34;,
             postfix=&#34;in review by me&#34;,
+            command=True,
+        )
+    )
+
+    # - reviewed by me (finished)
+
+    subEntries.append(
+        self.tableEntry(
+            N.assessment,
+            action=N.reviewdone,
+            item=&#34;Assessments&#34;,
+            postfix=&#34;reviewed by me&#34;,
             command=True,
         )
     )

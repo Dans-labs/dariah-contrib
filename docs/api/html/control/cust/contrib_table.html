@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>control.cust.review_table API documentation</title>
+<title>control.cust.contrib_table API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,86 +17,66 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>control.cust.review_table</code></h1>
+<h1 class="title">Module <code>control.cust.contrib_table</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from bson.objectid import ObjectId
-
-from config import Names as N
-from control.utils import pick as G
+<pre><code class="python">from config import Config as C, Names as N
 from control.table import Table
+from control.utils import pick as G, thisYear
+
+CW = C.web
+
+UNKNOWN = CW.unknown
+Qt = G(UNKNOWN, N.title)
 
 
-class ReviewT(Table):
-    &#34;&#34;&#34;Logic for the review table.
+class ContribT(Table):
+    &#34;&#34;&#34;Logic for the contrib table.
 
-    Inserting a review means also to insert the right
-    set of reviewEntry records and prefill some of their fields.
+    When we insert a contrib record, we want to fill in
+
+    *   the current year
+    *   the country of the current user
+    *   the name of the current user
+    *   the email address of the current user
+
+    set of criteriaEntry records and prefill some of their fields.
     &#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, force=False, masterTable=None, masterId=None):
+    def insert(self, force=False):
         mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 
-        if not masterTable or not masterId:
-            return None
-
         context = self.context
         db = context.db
+        auth = context.auth
         uid = self.uid
         eppn = self.eppn
+        countryId = self.countryId
         table = self.table
 
-        masterOid = ObjectId(masterId)
-        masterRecord = context.getItem(N.assessment, masterOid)
-        contribId = G(masterRecord, N.contrib)
-        if not contribId:
-            return None
+        (name, email) = auth.nameEmail()
 
-        wfitem = context.getWorkflowItem(contribId)
-
-        if not wfitem.permission(N.assessment, N.startReview):
-            return contribId
-
-        (contribType,) = wfitem.info(N.contrib, N.type)
-        (assessmentTitle,) = wfitem.info(N.assessment, N.title)
-
-        fields = {
-            N.contrib: contribId,
-            masterTable: masterOid,
-            N.reviewType: contribType,
-            N.title: f&#34;review of {assessmentTitle}&#34;,
+        prefilledFields = {
+            N.title: Qt,
+            N.year: G(db.yearInv, thisYear()),
+            N.country: countryId,
+            N.contactPersonName: name,
+            N.contactPersonEmail: [email],
         }
-        reviewId = db.insertItem(table, uid, eppn, False, **fields)
 
-        criteriaEntries = db.getDetails(
-            N.criteriaEntry,
-            N.assessment,
-            masterOid,
-            sortKey=lambda r: G(r, N.seq, default=0),
-        )
-        records = [
-            {
-                N.seq: G(critEntry, N.seq, default=0),
-                N.criteria: G(critEntry, N.criteria),
-                N.criteriaEntry: G(critEntry, N._id),
-                N.assessment: masterOid,
-                N.review: reviewId,
-            }
-            for critEntry in criteriaEntries
-        ]
-        db.insertMany(N.reviewEntry, uid, eppn, records)
-        self.adjustWorkflow(contribId, new=False)
+        result = db.insertItem(table, uid, eppn, False, **prefilledFields)
+        self.adjustWorkflow(result)
 
-        return contribId</code></pre>
+        return result</code></pre>
 </details>
 </section>
 <section>
@@ -108,14 +88,20 @@ class ReviewT(Table):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="control.cust.review_table.ReviewT"><code class="flex name class">
-<span>class <span class="ident">ReviewT</span></span>
+<dt id="control.cust.contrib_table.ContribT"><code class="flex name class">
+<span>class <span class="ident">ContribT</span></span>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Logic for the review table.</p>
-<p>Inserting a review means also to insert the right
-set of reviewEntry records and prefill some of their fields.</p>
+<section class="desc"><p>Logic for the contrib table.</p>
+<p>When we insert a contrib record, we want to fill in</p>
+<ul>
+<li>the current year</li>
+<li>the country of the current user</li>
+<li>the name of the current user</li>
+<li>the email address of the current user</li>
+</ul>
+<p>set of criteriaEntry records and prefill some of their fields.</p>
 <h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
@@ -131,72 +117,49 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ReviewT(Table):
-    &#34;&#34;&#34;Logic for the review table.
+<pre><code class="python">class ContribT(Table):
+    &#34;&#34;&#34;Logic for the contrib table.
 
-    Inserting a review means also to insert the right
-    set of reviewEntry records and prefill some of their fields.
+    When we insert a contrib record, we want to fill in
+
+    *   the current year
+    *   the country of the current user
+    *   the name of the current user
+    *   the email address of the current user
+
+    set of criteriaEntry records and prefill some of their fields.
     &#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def insert(self, force=False, masterTable=None, masterId=None):
+    def insert(self, force=False):
         mayInsert = force or self.mayInsert
         if not mayInsert:
             return None
 
-        if not masterTable or not masterId:
-            return None
-
         context = self.context
         db = context.db
+        auth = context.auth
         uid = self.uid
         eppn = self.eppn
+        countryId = self.countryId
         table = self.table
 
-        masterOid = ObjectId(masterId)
-        masterRecord = context.getItem(N.assessment, masterOid)
-        contribId = G(masterRecord, N.contrib)
-        if not contribId:
-            return None
+        (name, email) = auth.nameEmail()
 
-        wfitem = context.getWorkflowItem(contribId)
-
-        if not wfitem.permission(N.assessment, N.startReview):
-            return contribId
-
-        (contribType,) = wfitem.info(N.contrib, N.type)
-        (assessmentTitle,) = wfitem.info(N.assessment, N.title)
-
-        fields = {
-            N.contrib: contribId,
-            masterTable: masterOid,
-            N.reviewType: contribType,
-            N.title: f&#34;review of {assessmentTitle}&#34;,
+        prefilledFields = {
+            N.title: Qt,
+            N.year: G(db.yearInv, thisYear()),
+            N.country: countryId,
+            N.contactPersonName: name,
+            N.contactPersonEmail: [email],
         }
-        reviewId = db.insertItem(table, uid, eppn, False, **fields)
 
-        criteriaEntries = db.getDetails(
-            N.criteriaEntry,
-            N.assessment,
-            masterOid,
-            sortKey=lambda r: G(r, N.seq, default=0),
-        )
-        records = [
-            {
-                N.seq: G(critEntry, N.seq, default=0),
-                N.criteria: G(critEntry, N.criteria),
-                N.criteriaEntry: G(critEntry, N._id),
-                N.assessment: masterOid,
-                N.review: reviewId,
-            }
-            for critEntry in criteriaEntries
-        ]
-        db.insertMany(N.reviewEntry, uid, eppn, records)
-        self.adjustWorkflow(contribId, new=False)
+        result = db.insertItem(table, uid, eppn, False, **prefilledFields)
+        self.adjustWorkflow(result)
 
-        return contribId</code></pre>
+        return result</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -256,7 +219,7 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="control.cust.review_table.ReviewT" href="#control.cust.review_table.ReviewT">ReviewT</a></code></h4>
+<h4><code><a title="control.cust.contrib_table.ContribT" href="#control.cust.contrib_table.ContribT">ContribT</a></code></h4>
 </li>
 </ul>
 </li>

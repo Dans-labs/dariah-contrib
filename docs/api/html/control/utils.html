@@ -209,6 +209,12 @@ def now():
     return dt.utcnow()
 
 
+def thisYear():
+    &#34;&#34;&#34;The current year as number.&#34;&#34;&#34;
+
+    return dt.utcnow().year
+
+
 def serverprint(msg):
     &#34;&#34;&#34;Print a message to the console immediately.&#34;&#34;&#34;
 
@@ -937,6 +943,21 @@ items per day.</p></section>
     return modified</code></pre>
 </details>
 </dd>
+<dt id="control.utils.thisYear"><code class="name flex">
+<span>def <span class="ident">thisYear</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>The current year as number.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def thisYear():
+    &#34;&#34;&#34;The current year as number.&#34;&#34;&#34;
+
+    return dt.utcnow().year</code></pre>
+</details>
+</dd>
 <dt id="control.utils.trimM"><code class="name flex">
 <span>def <span class="ident">trimM</span></span>(<span>mdt, trim)</span>
 </code></dt>
@@ -1051,6 +1072,7 @@ those from the identity provider..</p>
 <li><code><a title="control.utils.serverprint" href="#control.utils.serverprint">serverprint</a></code></li>
 <li><code><a title="control.utils.shiftRegional" href="#control.utils.shiftRegional">shiftRegional</a></code></li>
 <li><code><a title="control.utils.thinM" href="#control.utils.thinM">thinM</a></code></li>
+<li><code><a title="control.utils.thisYear" href="#control.utils.thisYear">thisYear</a></code></li>
 <li><code><a title="control.utils.trimM" href="#control.utils.trimM">trimM</a></code></li>
 <li><code><a title="control.utils.utf8FromLatin1" href="#control.utils.utf8FromLatin1">utf8FromLatin1</a></code></li>
 </ul>

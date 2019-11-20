@@ -25,6 +25,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from bson.objectid import ObjectId
+from flask import flash
 
 from config import Names as N
 from control.utils import pick as G
@@ -61,18 +62,29 @@ class AssessmentT(Table):
         wfitem = context.getWorkflowItem(masterOid)
 
         if not wfitem.permission(N.contrib, N.startAssessment):
-            return masterId
+            return None
 
         (contribType, contribTitle) = wfitem.info(N.contrib, N.type, N.title)
+        if not contribType:
+            flash(&#34;You cannot assess a contribution without a type&#34;, &#34;error&#34;)
+            return None
+        isActual = G(G(db.typeContribution, contribType), N.actual)
+        if not isActual:
+            flash(&#34;You cannot assess a contribution with a legacy type&#34;, &#34;error&#34;)
+            return None
 
         fields = {
             masterTable: masterOid,
             N.assessmentType: contribType,
             N.title: f&#34;assessment of {contribTitle}&#34;,
         }
+        criteria = G(typeCriteria, contribType, default=[])
+        if not criteria:
+            flash(&#34;This contribution type has no criteria&#34;, &#34;error&#34;)
+            return None
+
         assessmentId = db.insertItem(table, uid, eppn, False, **fields)
 
-        criteria = G(typeCriteria, contribType, default=[])
         records = [
             {N.seq: seq, N.criteria: crit, N.assessment: assessmentId}
             for (seq, crit) in enumerate(criteria)
@@ -145,18 +157,29 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
         wfitem = context.getWorkflowItem(masterOid)
 
         if not wfitem.permission(N.contrib, N.startAssessment):
-            return masterId
+            return None
 
         (contribType, contribTitle) = wfitem.info(N.contrib, N.type, N.title)
+        if not contribType:
+            flash(&#34;You cannot assess a contribution without a type&#34;, &#34;error&#34;)
+            return None
+        isActual = G(G(db.typeContribution, contribType), N.actual)
+        if not isActual:
+            flash(&#34;You cannot assess a contribution with a legacy type&#34;, &#34;error&#34;)
+            return None
 
         fields = {
             masterTable: masterOid,
             N.assessmentType: contribType,
             N.title: f&#34;assessment of {contribTitle}&#34;,
         }
+        criteria = G(typeCriteria, contribType, default=[])
+        if not criteria:
+            flash(&#34;This contribution type has no criteria&#34;, &#34;error&#34;)
+            return None
+
         assessmentId = db.insertItem(table, uid, eppn, False, **fields)
 
-        criteria = G(typeCriteria, contribType, default=[])
         records = [
             {N.seq: seq, N.criteria: crit, N.assessment: assessmentId}
             for (seq, crit) in enumerate(criteria)
@@ -193,6 +216,8 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
 <li><code><a title="control.table.Table.itemLabels" href="../table.html#control.table.Table.itemLabels">itemLabels</a></code></li>
 <li><code><a title="control.table.Table.mayInsert" href="../table.html#control.table.Table.mayInsert">mayInsert</a></code></li>
 <li><code><a title="control.table.Table.mayList" href="../table.html#control.table.Table.mayList">mayList</a></code></li>
+<li><code><a title="control.table.Table.myFinished" href="../table.html#control.table.Table.myFinished">myFinished</a></code></li>
+<li><code><a title="control.table.Table.myKind" href="../table.html#control.table.Table.myKind">myKind</a></code></li>
 <li><code><a title="control.table.Table.prov" href="../table.html#control.table.Table.prov">prov</a></code></li>
 <li><code><a title="control.table.Table.record" href="../table.html#control.table.Table.record">record</a></code></li>
 <li><code><a title="control.table.Table.stage" href="../table.html#control.table.Table.stage">stage</a></code></li>

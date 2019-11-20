@@ -269,12 +269,21 @@ class Record:
         if wfitem:
             self.kind = wfitem.getKind(table, record)
             valid = wfitem.isValid(table, eid, record)
-            self.fixed = wfitem.checkFixed(self)
         else:
             valid = False if table in USER_TABLES - {MAIN_TABLE} else True
 
+        if valid and wfitem:
+            self.fixed = wfitem.checkFixed(self)
+            self.wfitem = wfitem
+        else:
+            self.wfitem = None
+
         self.valid = valid
-        self.wfitem = wfitem if valid and wfitem else None
+
+        if str(eid) == &#34;5d650d96f95ad52b7ef02813&#34;:
+            print(&#39;XX valid?&#39;, table, self.valid)
+            print(&#39;XX fixed?&#39;, table, self.fixed, wfitem)
+            print(&#39;XX wfitem?&#39;, table, self.wfitem)
 
     def adjustWorkflow(self, update=True, delete=False):
         &#34;&#34;&#34;Recompute workflow information.
@@ -385,29 +394,31 @@ class Record:
 
         mayDelete = self.mayDelete
         if not mayDelete:
-            return
+            return False
 
         dependencies = self.getDependencies()
         nRef = G(dependencies, N.reference, default=0)
 
         if nRef:
-            return
+            return False
 
         nCas = G(dependencies, N.cascade, default=0)
         if nCas:
             if not self.deleteDetails():
-                return
+                return False
 
         context = self.context
         table = self.table
         eid = self.eid
 
-        context.deleteItem(table, eid)
+        good = context.deleteItem(table, eid)
 
         if table == MAIN_TABLE:
             self.adjustWorkflow(delete=True)
         elif table in WORKFLOW_TABLES:
             self.adjustWorkflow(update=False)
+
+        return good
 
     def deleteDetails(self):
         &#34;&#34;&#34;Delete the details of a record.
@@ -655,6 +666,7 @@ class Record:
         &#34;&#34;&#34;
 
         mayDelete = self.mayDelete
+        print(&#39;mayDelete?&#39;, self.table, mayDelete)
 
         if not mayDelete:
             return E
@@ -728,6 +740,30 @@ class Record:
 
         return Record.titleRaw(self, record, cls=warningCls)
 
+    def actualCls(self, record):
+        &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
+
+        Actual records belong to the current `package`, a record that specifies
+        which contribution types, and criteria are currently part of the workflow.
+
+        Parameters
+        ----------
+        record: dict | `None`
+            If `self` does not have a `record` attribute, the record data must
+            be passed here.
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
+        &#34;&#34;&#34;
+
+        table = self.table
+        if record is None:
+            record = self.record
+
+        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        return E if isActual else &#34;inactual&#34;
+
     @staticmethod
     def titleRaw(obj, record, cls=E):
         &#34;&#34;&#34;Generate a title for a different record.
@@ -743,6 +779,15 @@ class Record:
             If the record is  not &#34;actual&#34;, its title will get a warning
             background color.
             See `control.db.Db.collect`.
+
+        Parameters
+        ----------
+        obj: object
+            Any object that has a table and context arttribute, e.g. a table object
+            or a record object
+        record: dict
+        cls: string, optional, `&#39;&#39;`
+            A CSS class to add to the outer element of the result
         &#34;&#34;&#34;
 
         table = obj.table
@@ -751,8 +796,8 @@ class Record:
         types = context.types
         typesObj = getattr(types, table, None)
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
-        atts = dict(cls=cls) if isActual else dict(cls=f&#34;inactual {cls}&#34;)
+        actualCls = Record.actualCls(obj, record)
+        atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
 
         return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -988,12 +1033,21 @@ that spawns a record object.</p>
         if wfitem:
             self.kind = wfitem.getKind(table, record)
             valid = wfitem.isValid(table, eid, record)
-            self.fixed = wfitem.checkFixed(self)
         else:
             valid = False if table in USER_TABLES - {MAIN_TABLE} else True
 
+        if valid and wfitem:
+            self.fixed = wfitem.checkFixed(self)
+            self.wfitem = wfitem
+        else:
+            self.wfitem = None
+
         self.valid = valid
-        self.wfitem = wfitem if valid and wfitem else None
+
+        if str(eid) == &#34;5d650d96f95ad52b7ef02813&#34;:
+            print(&#39;XX valid?&#39;, table, self.valid)
+            print(&#39;XX fixed?&#39;, table, self.fixed, wfitem)
+            print(&#39;XX wfitem?&#39;, table, self.wfitem)
 
     def adjustWorkflow(self, update=True, delete=False):
         &#34;&#34;&#34;Recompute workflow information.
@@ -1104,29 +1158,31 @@ that spawns a record object.</p>
 
         mayDelete = self.mayDelete
         if not mayDelete:
-            return
+            return False
 
         dependencies = self.getDependencies()
         nRef = G(dependencies, N.reference, default=0)
 
         if nRef:
-            return
+            return False
 
         nCas = G(dependencies, N.cascade, default=0)
         if nCas:
             if not self.deleteDetails():
-                return
+                return False
 
         context = self.context
         table = self.table
         eid = self.eid
 
-        context.deleteItem(table, eid)
+        good = context.deleteItem(table, eid)
 
         if table == MAIN_TABLE:
             self.adjustWorkflow(delete=True)
         elif table in WORKFLOW_TABLES:
             self.adjustWorkflow(update=False)
+
+        return good
 
     def deleteDetails(self):
         &#34;&#34;&#34;Delete the details of a record.
@@ -1374,6 +1430,7 @@ that spawns a record object.</p>
         &#34;&#34;&#34;
 
         mayDelete = self.mayDelete
+        print(&#39;mayDelete?&#39;, self.table, mayDelete)
 
         if not mayDelete:
             return E
@@ -1447,6 +1504,30 @@ that spawns a record object.</p>
 
         return Record.titleRaw(self, record, cls=warningCls)
 
+    def actualCls(self, record):
+        &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
+
+        Actual records belong to the current `package`, a record that specifies
+        which contribution types, and criteria are currently part of the workflow.
+
+        Parameters
+        ----------
+        record: dict | `None`
+            If `self` does not have a `record` attribute, the record data must
+            be passed here.
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
+        &#34;&#34;&#34;
+
+        table = self.table
+        if record is None:
+            record = self.record
+
+        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        return E if isActual else &#34;inactual&#34;
+
     @staticmethod
     def titleRaw(obj, record, cls=E):
         &#34;&#34;&#34;Generate a title for a different record.
@@ -1462,6 +1543,15 @@ that spawns a record object.</p>
             If the record is  not &#34;actual&#34;, its title will get a warning
             background color.
             See `control.db.Db.collect`.
+
+        Parameters
+        ----------
+        obj: object
+            Any object that has a table and context arttribute, e.g. a table object
+            or a record object
+        record: dict
+        cls: string, optional, `&#39;&#39;`
+            A CSS class to add to the outer element of the result
         &#34;&#34;&#34;
 
         table = obj.table
@@ -1470,8 +1560,8 @@ that spawns a record object.</p>
         types = context.types
         typesObj = getattr(types, table, None)
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
-        atts = dict(cls=cls) if isActual else dict(cls=f&#34;inactual {cls}&#34;)
+        actualCls = Record.actualCls(obj, record)
+        atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
 
         return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -1512,7 +1602,17 @@ type class in <a title="control.typ.types" href="typ/types.html"><code>control.t
 not "actual", its title will get a warning
 background color.
 See <a title="control.db.Db.collect" href="db.html#control.db.Db.collect"><code>Db.collect()</code></a>.</p>
-</div></section>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>obj</code></strong> :&ensp;<code>object</code></dt>
+<dd>Any object that has a table and context arttribute, e.g. a table object
+or a record object</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>cls</code></strong> :&ensp;<code>string</code>, optional, <code>''</code></dt>
+<dd>A CSS class to add to the outer element of the result</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1532,6 +1632,15 @@ def titleRaw(obj, record, cls=E):
         If the record is  not &#34;actual&#34;, its title will get a warning
         background color.
         See `control.db.Db.collect`.
+
+    Parameters
+    ----------
+    obj: object
+        Any object that has a table and context arttribute, e.g. a table object
+        or a record object
+    record: dict
+    cls: string, optional, `&#39;&#39;`
+        A CSS class to add to the outer element of the result
     &#34;&#34;&#34;
 
     table = obj.table
@@ -1540,8 +1649,8 @@ def titleRaw(obj, record, cls=E):
     types = context.types
     typesObj = getattr(types, table, None)
 
-    isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
-    atts = dict(cls=cls) if isActual else dict(cls=f&#34;inactual {cls}&#34;)
+    actualCls = Record.actualCls(obj, record)
+    atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
 
     return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -1587,6 +1696,53 @@ derived classes.</p></section>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="control.record.Record.actualCls"><code class="name flex">
+<span>def <span class="ident">actualCls</span></span>(<span>self, record)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
+<p>Actual records belong to the current <code>package</code>, a record that specifies
+which contribution types, and criteria are currently part of the workflow.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
+<dd>If <code>self</code> does not have a <code>record</code> attribute, the record data must
+be passed here.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd><code>inactual</code> if the record is not actual, else the empty string.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def actualCls(self, record):
+    &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
+
+    Actual records belong to the current `package`, a record that specifies
+    which contribution types, and criteria are currently part of the workflow.
+
+    Parameters
+    ----------
+    record: dict | `None`
+        If `self` does not have a `record` attribute, the record data must
+        be passed here.
+    Returns
+    -------
+    string
+        `inactual` if the record is not actual, else the empty string.
+    &#34;&#34;&#34;
+
+    table = self.table
+    if record is None:
+        record = self.record
+
+    isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+    return E if isActual else &#34;inactual&#34;</code></pre>
+</details>
+</dd>
 <dt id="control.record.Record.adjustWorkflow"><code class="name flex">
 <span>def <span class="ident">adjustWorkflow</span></span>(<span>self, update=True, delete=False)</span>
 </code></dt>
@@ -1774,29 +1930,31 @@ See <a title="control.record.Record.adjustWorkflow" href="#control.record.Record
 
     mayDelete = self.mayDelete
     if not mayDelete:
-        return
+        return False
 
     dependencies = self.getDependencies()
     nRef = G(dependencies, N.reference, default=0)
 
     if nRef:
-        return
+        return False
 
     nCas = G(dependencies, N.cascade, default=0)
     if nCas:
         if not self.deleteDetails():
-            return
+            return False
 
     context = self.context
     table = self.table
     eid = self.eid
 
-    context.deleteItem(table, eid)
+    good = context.deleteItem(table, eid)
 
     if table == MAIN_TABLE:
         self.adjustWorkflow(delete=True)
     elif table in WORKFLOW_TABLES:
-        self.adjustWorkflow(update=False)</code></pre>
+        self.adjustWorkflow(update=False)
+
+    return good</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.deleteButton"><code class="name flex">
@@ -1827,6 +1985,7 @@ cannot delete the record.</p>
     &#34;&#34;&#34;
 
     mayDelete = self.mayDelete
+    print(&#39;mayDelete?&#39;, self.table, mayDelete)
 
     if not mayDelete:
         return E
@@ -2206,12 +2365,21 @@ or if there is no workflow item found,
     if wfitem:
         self.kind = wfitem.getKind(table, record)
         valid = wfitem.isValid(table, eid, record)
-        self.fixed = wfitem.checkFixed(self)
     else:
         valid = False if table in USER_TABLES - {MAIN_TABLE} else True
 
+    if valid and wfitem:
+        self.fixed = wfitem.checkFixed(self)
+        self.wfitem = wfitem
+    else:
+        self.wfitem = None
+
     self.valid = valid
-    self.wfitem = wfitem if valid and wfitem else None</code></pre>
+
+    if str(eid) == &#34;5d650d96f95ad52b7ef02813&#34;:
+        print(&#39;XX valid?&#39;, table, self.valid)
+        print(&#39;XX fixed?&#39;, table, self.fixed, wfitem)
+        print(&#39;XX wfitem?&#39;, table, self.wfitem)</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.title"><code class="name flex">
@@ -2536,6 +2704,7 @@ master record.</dd>
 <h4><code><a title="control.record.Record" href="#control.record.Record">Record</a></code></h4>
 <ul class="two-column">
 <li><code><a title="control.record.Record.DetailsClass" href="#control.record.Record.DetailsClass">DetailsClass</a></code></li>
+<li><code><a title="control.record.Record.actualCls" href="#control.record.Record.actualCls">actualCls</a></code></li>
 <li><code><a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.bodyMethod" href="#control.record.Record.bodyMethod">bodyMethod</a></code></li>

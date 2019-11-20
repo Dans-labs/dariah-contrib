@@ -102,8 +102,9 @@ class Decision(Value):
             baseCls = &#34;command&#34; if clickable else &#34;status&#34;
             activeCls = &#34;active &#34; if isActive else E
             extraCls = G(record, N.acro)
+            actualCls = self.actualCls(record)
             atts = dict(
-                cls=f&#34;{baseCls} {extraCls} {activeCls} large {self.actualCls(record)}&#34;
+                cls=f&#34;{baseCls} {extraCls} {activeCls} large {actualCls}&#34;
             )
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)
@@ -207,8 +208,9 @@ class Decision(Value):
             baseCls = &#34;command&#34; if clickable else &#34;status&#34;
             activeCls = &#34;active &#34; if isActive else E
             extraCls = G(record, N.acro)
+            actualCls = self.actualCls(record)
             atts = dict(
-                cls=f&#34;{baseCls} {extraCls} {activeCls} large {self.actualCls(record)}&#34;
+                cls=f&#34;{baseCls} {extraCls} {activeCls} large {actualCls}&#34;
             )
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)
@@ -309,8 +311,9 @@ relevant for this class.</dd>
         baseCls = &#34;command&#34; if clickable else &#34;status&#34;
         activeCls = &#34;active &#34; if isActive else E
         extraCls = G(record, N.acro)
+        actualCls = self.actualCls(record)
         atts = dict(
-            cls=f&#34;{baseCls} {extraCls} {activeCls} large {self.actualCls(record)}&#34;
+            cls=f&#34;{baseCls} {extraCls} {activeCls} large {actualCls}&#34;
         )
         if clickable and eid is not None:
             atts[N.eid] = str(eid)

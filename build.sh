@@ -20,41 +20,68 @@ function setvars {
     fi
 }
 
+function dataimport {
+    cd import
+    python3 mongoFromFm.py development
+    cd ..
+}
+
+function serve {
+    cd server
+    setvars "$1"; python3 -m flask run
+    cd ..
+}
+
 function apidocs {
+    cd server
     pdoc3 --force --html --output-dir "../$apidocbase" control
     pdoc3 --force --html --output-dir "../$apidocbase/tests" tests/*.py
     python3 ../mktest.py "../$apidocbase/tests"
+    cd ..
+}
+
+function docs {
+    codestats
+    apidocs
+    if [[ "$1" == "deploy" ]]; then
+        mkdocs gh-deploy
+    else
+        mkdocs serve
+    fi
 }
 
 function runtest {
     cleandb
+    cd server
     pytest "$@"
+    cd ..
 }
 
 function cleandb {
-    mongorestore --quiet --drop --db=dariah_clean server/tests/dariah_clean
+    cd server
+    mongorestore --quiet --drop --db=dariah_clean tests/dariah_clean
     python3 cleandb.py
+    cd ..
 }
 
-cd server
+function ship {
+    runtest
+    docs "deploy"
+    git add --all .
+    git commit -m "ship: $*"
+    git push origin master
+}
 
 if [[ "$1" == "mongo" ]]; then
     mongod -f /usr/local/etc/mongod.conf
 elif [[ "$1" == "data" ]]; then
-    cd ../import
-    python3 mongoFromFm.py development
+    dataimport
 elif [[ "$1" == "serve" ]]; then
-    setvars "$2"; python3 -m flask run
+    serve "$2"
 elif [[ "$1" == "stats" ]]; then
-    cd ..
     codestats
 elif [[ "$1" == "docs" ]]; then
-    cd ..
-    codestats
-    cd server
-    apidocs
-    cd ..
-    mkdocs serve
+    docs "serve"
 elif [[ "$1" == "pdoc" ]]; then
     apidocs
 elif [[ "$1" == "cleandb" ]]; then
@@ -65,12 +92,7 @@ elif [[ "$1" == "testx" ]]; then
     runtest -vv
 elif [[ "$1" == "ship" ]]; then
     shift
-    cd ..
-    codestats
-    mkdocs gh-deploy
-    git add --all .
-    git commit -m "ship: $*"
-    git push origin master
+    ship "$@"
 else
     if [[ "$1" != "help" && "$1" != "--help" && "$1" != "" ]]; then
         echo "Unknown argument '$1'"

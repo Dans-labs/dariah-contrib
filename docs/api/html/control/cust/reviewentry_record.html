@@ -52,10 +52,6 @@ class ReviewEntryR(Record):
         super().__init__(*args, **kwargs)
 
     def title(self, *args, **kwargs):
-        wfitem = self.wfitem
-        if not wfitem:
-            return super().title(*args, **kwargs)
-
         uid = self.uid
         record = self.record
 
@@ -134,10 +130,6 @@ that spawns a record object.</p>
         super().__init__(*args, **kwargs)
 
     def title(self, *args, **kwargs):
-        wfitem = self.wfitem
-        if not wfitem:
-            return super().title(*args, **kwargs)
-
         uid = self.uid
         record = self.record
 
@@ -190,6 +182,7 @@ that spawns a record object.</p>
 <li><code><b><a title="control.record.Record" href="../record.html#control.record.Record">Record</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.record.Record.DetailsClass" href="../record.html#control.record.Record.DetailsClass">DetailsClass</a></code></li>
+<li><code><a title="control.record.Record.actualCls" href="../record.html#control.record.Record.actualCls">actualCls</a></code></li>
 <li><code><a title="control.record.Record.adjustWorkflow" href="../record.html#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="../record.html#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.bodyMethod" href="../record.html#control.record.Record.bodyMethod">bodyMethod</a></code></li>
