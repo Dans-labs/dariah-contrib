@@ -211,7 +211,8 @@ class Workflow:
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
         serverprint(&#34;WORKFLOW: Store workflow info&#34;)
-        db.insertWorkflowMany(wfRecords)
+        if wfRecords:
+            db.insertWorkflowMany(wfRecords)
         serverprint(&#34;WORKFLOW: Initialization done&#34;)
 
     def insert(self, contribId):
@@ -356,7 +357,8 @@ class Workflow:
         Attributes
         ----------
         locked: boolean
-            Workflow attribute that derives from the assessment
+            Workflow attribute that derives from the assessment.
+            It is set to `True` when an assessment is currently under review.
             It is also important for the contribution, hence it will
             be passed upwards to it.
             Reviews have both `locked` and `done`. `done` indcates whether the final
@@ -368,6 +370,12 @@ class Workflow:
             Workflow attribute that derives from the reviews.
             It is also important for the contribution, hence it will
             be passed upwards to it.
+            It is set to `True` when the reviewer has decided.
+            It is used to enforce that the final reviewer
+            takes his/her decision only when the decision of the expert
+            reviewer is known.
+            When the final reviewer is `done`, also the assessment and the contribution
+            count as `done`.
 
         Returns
         -------
@@ -424,7 +432,6 @@ class Workflow:
         finalReviewStage = None
 
         expertReviewWf = G(reviewsWf, N.expert)
-        expertReviewStage = G(expertReviewWf, N.stage)
         finalReviewWf = G(reviewsWf, N.final)
         finalReviewStage = G(finalReviewWf, N.stage)
 
@@ -458,14 +465,8 @@ class Workflow:
         done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
 
         if done:
-            finalReviewWf[N.done] = True
             if expertReviewWf:
                 expertReviewWf[N.done] = True
-        else:
-            if finalReviewWf:
-                finalReviewWf[N.locked] = not expertReviewStage
-            if expertReviewWf:
-                expertReviewWf[N.locked] = expertReviewStage
 
         mayAdd = {
             kind: not frozen and not done and not G(reviewsWf, kind)
@@ -539,6 +540,7 @@ class Workflow:
                 else None
             )
         )
+        done = not not stage
 
         return {
             N._id: G(record, N._id),
@@ -547,6 +549,7 @@ class Workflow:
             N.kind: kind,
             N.stage: stage,
             N.stageDate: G(record, N.dateDecided),
+            N.done: done,
             N.frozen: frozen,
         }
 
@@ -901,7 +904,8 @@ are fetched and stored as attributes.</p>
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
         serverprint(&#34;WORKFLOW: Store workflow info&#34;)
-        db.insertWorkflowMany(wfRecords)
+        if wfRecords:
+            db.insertWorkflowMany(wfRecords)
         serverprint(&#34;WORKFLOW: Initialization done&#34;)
 
     def insert(self, contribId):
@@ -1046,7 +1050,8 @@ are fetched and stored as attributes.</p>
         Attributes
         ----------
         locked: boolean
-            Workflow attribute that derives from the assessment
+            Workflow attribute that derives from the assessment.
+            It is set to `True` when an assessment is currently under review.
             It is also important for the contribution, hence it will
             be passed upwards to it.
             Reviews have both `locked` and `done`. `done` indcates whether the final
@@ -1058,6 +1063,12 @@ are fetched and stored as attributes.</p>
             Workflow attribute that derives from the reviews.
             It is also important for the contribution, hence it will
             be passed upwards to it.
+            It is set to `True` when the reviewer has decided.
+            It is used to enforce that the final reviewer
+            takes his/her decision only when the decision of the expert
+            reviewer is known.
+            When the final reviewer is `done`, also the assessment and the contribution
+            count as `done`.
 
         Returns
         -------
@@ -1114,7 +1125,6 @@ are fetched and stored as attributes.</p>
         finalReviewStage = None
 
         expertReviewWf = G(reviewsWf, N.expert)
-        expertReviewStage = G(expertReviewWf, N.stage)
         finalReviewWf = G(reviewsWf, N.final)
         finalReviewStage = G(finalReviewWf, N.stage)
 
@@ -1148,14 +1158,8 @@ are fetched and stored as attributes.</p>
         done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
 
         if done:
-            finalReviewWf[N.done] = True
             if expertReviewWf:
                 expertReviewWf[N.done] = True
-        else:
-            if finalReviewWf:
-                finalReviewWf[N.locked] = not expertReviewStage
-            if expertReviewWf:
-                expertReviewWf[N.locked] = expertReviewStage
 
         mayAdd = {
             kind: not frozen and not done and not G(reviewsWf, kind)
@@ -1229,6 +1233,7 @@ are fetched and stored as attributes.</p>
                 else None
             )
         )
+        done = not not stage
 
         return {
             N._id: G(record, N._id),
@@ -1237,6 +1242,7 @@ are fetched and stored as attributes.</p>
             N.kind: kind,
             N.stage: stage,
             N.stageDate: G(record, N.dateDecided),
+            N.done: done,
             N.frozen: frozen,
         }
 
@@ -1670,7 +1676,8 @@ Hence it is passed down.</dd>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>locked</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Workflow attribute that derives from the assessment
+<dd>Workflow attribute that derives from the assessment.
+It is set to <code>True</code> when an assessment is currently under review.
 It is also important for the contribution, hence it will
 be passed upwards to it.
 Reviews have both <code>locked</code> and <code>done</code>. <code>done</code> indcates whether the final
@@ -1681,7 +1688,13 @@ his/her decision.</dd>
 <dt><strong><code>done</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Workflow attribute that derives from the reviews.
 It is also important for the contribution, hence it will
-be passed upwards to it.</dd>
+be passed upwards to it.
+It is set to <code>True</code> when the reviewer has decided.
+It is used to enforce that the final reviewer
+takes his/her decision only when the decision of the expert
+reviewer is known.
+When the final reviewer is <code>done</code>, also the assessment and the contribution
+count as <code>done</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1714,7 +1727,8 @@ be passed upwards to it.</dd>
     Attributes
     ----------
     locked: boolean
-        Workflow attribute that derives from the assessment
+        Workflow attribute that derives from the assessment.
+        It is set to `True` when an assessment is currently under review.
         It is also important for the contribution, hence it will
         be passed upwards to it.
         Reviews have both `locked` and `done`. `done` indcates whether the final
@@ -1726,6 +1740,12 @@ be passed upwards to it.</dd>
         Workflow attribute that derives from the reviews.
         It is also important for the contribution, hence it will
         be passed upwards to it.
+        It is set to `True` when the reviewer has decided.
+        It is used to enforce that the final reviewer
+        takes his/her decision only when the decision of the expert
+        reviewer is known.
+        When the final reviewer is `done`, also the assessment and the contribution
+        count as `done`.
 
     Returns
     -------
@@ -1782,7 +1802,6 @@ be passed upwards to it.</dd>
     finalReviewStage = None
 
     expertReviewWf = G(reviewsWf, N.expert)
-    expertReviewStage = G(expertReviewWf, N.stage)
     finalReviewWf = G(reviewsWf, N.final)
     finalReviewStage = G(finalReviewWf, N.stage)
 
@@ -1816,14 +1835,8 @@ be passed upwards to it.</dd>
     done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
 
     if done:
-        finalReviewWf[N.done] = True
         if expertReviewWf:
             expertReviewWf[N.done] = True
-    else:
-        if finalReviewWf:
-            finalReviewWf[N.locked] = not expertReviewStage
-        if expertReviewWf:
-            expertReviewWf[N.locked] = expertReviewStage
 
     mayAdd = {
         kind: not frozen and not done and not G(reviewsWf, kind)
@@ -1928,6 +1941,7 @@ Hence it is passed from there to here.</dd>
             else None
         )
     )
+    done = not not stage
 
     return {
         N._id: G(record, N._id),
@@ -1936,6 +1950,7 @@ Hence it is passed from there to here.</dd>
         N.kind: kind,
         N.stage: stage,
         N.stageDate: G(record, N.dateDecided),
+        N.done: done,
         N.frozen: frozen,
     }</code></pre>
 </details>
@@ -2076,7 +2091,8 @@ Otherwise, the table will merely be cleared.</dd>
         info = self.computeWorkflow(record=mainRecord)
         wfRecords.append(info)
     serverprint(&#34;WORKFLOW: Store workflow info&#34;)
-    db.insertWorkflowMany(wfRecords)
+    if wfRecords:
+        db.insertWorkflowMany(wfRecords)
     serverprint(&#34;WORKFLOW: Initialization done&#34;)</code></pre>
 </details>
 </dd>

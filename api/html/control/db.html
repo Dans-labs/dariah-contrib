@@ -391,7 +391,7 @@ class Db:
         my=None,
         our=None,
         assign=False,
-        reviewer=None,
+        review=None,
         selectable=None,
         unfinished=False,
         select=False,
@@ -443,8 +443,8 @@ class Db:
             Only meaningful if the table is `assessment`.
             If `True`, only records that are submitted and who lack at least one
             reviewer pass through.
-        reviewer: ObjectId, optional `None`
-            **Task: produce a list of assessments that &#34;I&#34; am reviewing.**
+        review: ObjectId, optional `None`
+            **Task: produce a list of assessments that &#34;I&#34; am reviewing or have reviewed.**
             Only meaningful if the table is `assessment`.
             If passed, it should be the id of a user (typically the one that is
             logged in).
@@ -481,8 +481,8 @@ class Db:
             crit.update(
                 {N.submitted: True, M_OR: [{N.reviewerE: None}, {N.reviewerF: None}]}
             )
-        if reviewer:
-            crit.update({M_OR: [{N.reviewerE: reviewer}, {N.reviewerF: reviewer}]})
+        if review:
+            crit.update({M_OR: [{N.reviewerE: review}, {N.reviewerF: review}]})
         if selectable:
             crit.update({N.country: selectable, N.selected: None})
 
@@ -500,9 +500,11 @@ class Db:
                 )
             )
         else:
+            print(&#39;CRIT&#39;, crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
+            print(&#39;CRIT2&#39;, criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
@@ -755,6 +757,8 @@ class Db:
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
+        # For the moment, we do not check whether it has succeeded.
+        return True
 
     def deleteMany(self, table, crit):
         &#34;&#34;&#34;Delete a several records.
@@ -1382,7 +1386,7 @@ class Db:
         my=None,
         our=None,
         assign=False,
-        reviewer=None,
+        review=None,
         selectable=None,
         unfinished=False,
         select=False,
@@ -1434,8 +1438,8 @@ class Db:
             Only meaningful if the table is `assessment`.
             If `True`, only records that are submitted and who lack at least one
             reviewer pass through.
-        reviewer: ObjectId, optional `None`
-            **Task: produce a list of assessments that &#34;I&#34; am reviewing.**
+        review: ObjectId, optional `None`
+            **Task: produce a list of assessments that &#34;I&#34; am reviewing or have reviewed.**
             Only meaningful if the table is `assessment`.
             If passed, it should be the id of a user (typically the one that is
             logged in).
@@ -1472,8 +1476,8 @@ class Db:
             crit.update(
                 {N.submitted: True, M_OR: [{N.reviewerE: None}, {N.reviewerF: None}]}
             )
-        if reviewer:
-            crit.update({M_OR: [{N.reviewerE: reviewer}, {N.reviewerF: reviewer}]})
+        if review:
+            crit.update({M_OR: [{N.reviewerE: review}, {N.reviewerF: review}]})
         if selectable:
             crit.update({N.country: selectable, N.selected: None})
 
@@ -1491,9 +1495,11 @@ class Db:
                 )
             )
         else:
+            print(&#39;CRIT&#39;, crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
+            print(&#39;CRIT2&#39;, criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
@@ -1746,6 +1752,8 @@ class Db:
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
             self.collect(table=table)
+        # For the moment, we do not check whether it has succeeded.
+        return True
 
     def deleteMany(self, table, crit):
         &#34;&#34;&#34;Delete a several records.
@@ -2444,7 +2452,9 @@ involved in the concept of "actual", nothing will be done.</p>
 
     self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
     if table in VALUE_TABLES:
-        self.collect(table=table)</code></pre>
+        self.collect(table=table)
+    # For the moment, we do not check whether it has succeeded.
+    return True</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.deleteMany"><code class="name flex">
@@ -2766,7 +2776,7 @@ are the values.</dd>
 </details>
 </dd>
 <dt id="control.db.Db.getList"><code class="name flex">
-<span>def <span class="ident">getList</span></span>(<span>self, table, titleSort, my=None, our=None, assign=False, reviewer=None, selectable=None, unfinished=False, select=False, **conditions)</span>
+<span>def <span class="ident">getList</span></span>(<span>self, table, titleSort, my=None, our=None, assign=False, review=None, selectable=None, unfinished=False, select=False, **conditions)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Fetch a list of records from a table.</p>
@@ -2815,8 +2825,8 @@ through.</dd>
 Only meaningful if the table is <code>assessment</code>.
 If <code>True</code>, only records that are submitted and who lack at least one
 reviewer pass through.</dd>
-<dt><strong><code>reviewer</code></strong> :&ensp;<code>ObjectId</code>, optional <code>None</code></dt>
-<dd><strong>Task: produce a list of assessments that "I" am reviewing.</strong>
+<dt><strong><code>review</code></strong> :&ensp;<code>ObjectId</code>, optional <code>None</code></dt>
+<dd><strong>Task: produce a list of assessments that "I" am reviewing or have reviewed.</strong>
 Only meaningful if the table is <code>assessment</code>.
 If passed, it should be the id of a user (typically the one that is
 logged in).
@@ -2855,7 +2865,7 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
     my=None,
     our=None,
     assign=False,
-    reviewer=None,
+    review=None,
     selectable=None,
     unfinished=False,
     select=False,
@@ -2907,8 +2917,8 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
         Only meaningful if the table is `assessment`.
         If `True`, only records that are submitted and who lack at least one
         reviewer pass through.
-    reviewer: ObjectId, optional `None`
-        **Task: produce a list of assessments that &#34;I&#34; am reviewing.**
+    review: ObjectId, optional `None`
+        **Task: produce a list of assessments that &#34;I&#34; am reviewing or have reviewed.**
         Only meaningful if the table is `assessment`.
         If passed, it should be the id of a user (typically the one that is
         logged in).
@@ -2945,8 +2955,8 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
         crit.update(
             {N.submitted: True, M_OR: [{N.reviewerE: None}, {N.reviewerF: None}]}
         )
-    if reviewer:
-        crit.update({M_OR: [{N.reviewerE: reviewer}, {N.reviewerF: reviewer}]})
+    if review:
+        crit.update({M_OR: [{N.reviewerE: review}, {N.reviewerF: review}]})
     if selectable:
         crit.update({N.country: selectable, N.selected: None})
 
@@ -2964,9 +2974,11 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
             )
         )
     else:
+        print(&#39;CRIT&#39;, crit)
         records = self.mongoCmd(N.getList, table, N.find, crit)
     if select:
         criterion = self.makeCrit(table, conditions)
+        print(&#39;CRIT2&#39;, criterion)
         records = (record for record in records if Db.satisfies(record, criterion))
     return sorted(records, key=titleSort)</code></pre>
 </details>

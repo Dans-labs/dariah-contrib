@@ -222,13 +222,14 @@ class Context:
         db = self.db
         cache = self.cache
 
-        db.deleteItem(table, eid)
+        good = db.deleteItem(table, eid)
         if table not in VALUE_TABLES:
             key = eid if type(eid) is str else str(eid)
             if table in cache:
                 cachedTable = cache[table]
                 if key in cachedTable:
                     del cachedTable[key]
+        return good
 
     def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
         &#34;&#34;&#34;Helper to wrap caching around a raw Db fetch method.
@@ -539,13 +540,14 @@ to which it adds caching.</p>
         db = self.db
         cache = self.cache
 
-        db.deleteItem(table, eid)
+        good = db.deleteItem(table, eid)
         if table not in VALUE_TABLES:
             key = eid if type(eid) is str else str(eid)
             if table in cache:
                 cachedTable = cache[table]
                 if key in cachedTable:
                     del cachedTable[key]
+        return good
 
     def getCached(self, method, methodName, methodArgs, table, eid, requireFresh):
         &#34;&#34;&#34;Helper to wrap caching around a raw Db fetch method.
@@ -649,13 +651,14 @@ info from the database and store user info there.</p></section>
     db = self.db
     cache = self.cache
 
-    db.deleteItem(table, eid)
+    good = db.deleteItem(table, eid)
     if table not in VALUE_TABLES:
         key = eid if type(eid) is str else str(eid)
         if table in cache:
             cachedTable = cache[table]
             if key in cachedTable:
-                del cachedTable[key]</code></pre>
+                del cachedTable[key]
+    return good</code></pre>
 </details>
 </dd>
 <dt id="control.context.Context.getCached"><code class="name flex">

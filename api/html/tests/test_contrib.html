@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.1" />
-<title>data API documentation</title>
+<title>test_contrib API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,15 +17,40 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>data</code></h1>
+<h1 class="title">Module <code>test_contrib</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_add(client):
+    &#34;&#34;&#34;Can an unauthenticated user insert into the contrib table?&#34;&#34;&#34;
+    response = client.get(f&#34;/api/contrib/insert&#34;)</code></pre>
+</details>
 </section>
 <section>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="test_contrib.test_add"><code class="name flex">
+<span>def <span class="ident">test_add</span></span>(<span>client)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Can an unauthenticated user insert into the contrib table?</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_add(client):
+    &#34;&#34;&#34;Can an unauthenticated user insert into the contrib table?&#34;&#34;&#34;
+    response = client.get(f&#34;/api/contrib/insert&#34;)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -36,6 +61,11 @@
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="test_contrib.test_add" href="#test_contrib.test_add">test_add</a></code></li>
+</ul>
+</li>
 </ul>
 </nav>
 </main>

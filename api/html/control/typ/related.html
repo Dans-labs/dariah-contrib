@@ -111,7 +111,8 @@ class Related(TypeBase):
             if eid is None:
                 eid = G(record, N._id)
 
-            atts = dict(cls=f&#34;tag medium {self.actualCls(record)}&#34;)
+            actualCls = self.actualCls(record)
+            atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -130,7 +131,13 @@ class Related(TypeBase):
         Parameters
         ----------
         record: dict
+
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
         &#34;&#34;&#34;
+
         table = self.name
 
         isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
@@ -231,7 +238,8 @@ class Related(TypeBase):
             if eid is None:
                 eid = G(record, N._id)
 
-            atts = dict(cls=f&#34;tag medium {self.actualCls(record)}&#34;)
+            actualCls = self.actualCls(record)
+            atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -250,7 +258,13 @@ class Related(TypeBase):
         Parameters
         ----------
         record: dict
+
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
         &#34;&#34;&#34;
+
         table = self.name
 
         isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
@@ -285,6 +299,11 @@ which contribution types, and criteria are currently part of the workflow.</p>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd><code>inactual</code> if the record is not actual, else the empty string.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -299,7 +318,13 @@ which contribution types, and criteria are currently part of the workflow.</p>
     Parameters
     ----------
     record: dict
+
+    Returns
+    -------
+    string
+        `inactual` if the record is not actual, else the empty string.
     &#34;&#34;&#34;
+
     table = self.name
 
     isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
@@ -371,7 +396,8 @@ that the current user is interacting with.</dd>
         if eid is None:
             eid = G(record, N._id)
 
-        atts = dict(cls=f&#34;tag medium {self.actualCls(record)}&#34;)
+        actualCls = self.actualCls(record)
+        atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
         if titleHint:
             atts[N.title] = titleHint
 

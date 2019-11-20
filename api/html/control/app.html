@@ -84,8 +84,14 @@ OVERVIEW = URLS[N.info][N.url]
 DUMMY = URLS[N.dummy][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
+NO_COMMAND = MESSAGES[N.noCommand]
 NO_TABLE = MESSAGES[N.noTable]
 NO_FIELD = MESSAGES[N.noField]
+
+
+def redirectResult(url, good):
+    code = 302 if good else 303
+    return redirect(url, code=code)
 
 
 def appFactory(regime, debug, test, **kwargs):
@@ -121,10 +127,11 @@ def appFactory(regime, debug, test, **kwargs):
 
     GP = dict(methods=[N.GET, N.POST])
 
-    MONGO = MongoClient().dariah
+    MONGO = MongoClient()
+    myDb = MONGO.dariah_clean if test else MONGO.dariah
     &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
 
-    DB = Db(MONGO)
+    DB = Db(myDb)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)
@@ -182,22 +189,24 @@ def appFactory(regime, debug, test, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
-        path = f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
         context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
             auth.authenticate()
             eid = mkTable(context, table).insert()
-            newPath = (
-                f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34; if eid else f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
-            )
-            return redirect(newPath)
-        return notFound(path)
+            if eid:
+                newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+                flash(f&#34;item added&#34;)
+        else:
+            eid = None
+            flash(f&#34;Cannot add items to {table}&#34;, &#34;error&#34;)
+        return redirectResult(newPath, eid is not None)
 
     # INSERT RECORD IN DETAIL TABLE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
-        path = f&#34;&#34;&#34;/api/{table}/{eid}/{dtable}/{N.insert}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
         context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
@@ -205,12 +214,19 @@ def appFactory(regime, debug, test, **kwargs):
             and dtable in DETAILS[table]
         ):
             auth.authenticate()
-            contribId = (
-                mkTable(context, dtable).insert(masterTable=table, masterId=eid) or E
-            )
-            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
-            return redirect(newPath)
-        return notFound(path)
+            dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
+            if dEid:
+                newPath = (
+                    f&#34;&#34;&#34;/{table}/{N.item}/{eid}/&#34;&#34;&#34;
+                    f&#34;&#34;&#34;{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
+                )
+        else:
+            dEid = None
+        if dEid:
+            flash(f&#34;{dtable} item added&#34;)
+        else:
+            flash(f&#34;Cannot add a {dtable} here&#34;, &#34;error&#34;)
+        return redirectResult(newPath, dEid is not None)
 
     # LIST VIEWS ON TABLE
 
@@ -234,24 +250,36 @@ def appFactory(regime, debug, test, **kwargs):
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
                 tableList = mkTable(context, table).wrap(eid, action=action)
+                if not tableList:
+                    flash(f&#34;{action or E} view on {table} not allowed&#34;, &#34;error&#34;)
+                    return redirectResult(START, False)
                 return render_template(
                     INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
                 )
-        return notFound(path)
+            flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        if action:
+            flash(f&#34;Unknown view {action}&#34;, &#34;error&#34;)
+        else:
+            flash(f&#34;Missing view&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # RECORD DELETE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
-        path = f&#34;&#34;&#34;/api/{table}/{N.delete}/{eid}&#34;&#34;&#34;
         context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
-            mkTable(context, table).record(eid=eid).delete()
-            newUrlPart = &#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
+            good = mkTable(context, table).record(eid=eid).delete()
+            newUrlPart = f&#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
             newPath = f&#34;&#34;&#34;/{table}/{N.list}{newUrlPart}&#34;&#34;&#34;
-            return redirect(newPath)
-        return notFound(path)
+            if good:
+                flash(&#34;item deleted&#34;)
+            else:
+                flash(&#34;item not deleted&#34;, &#34;error&#34;)
+            return redirectResult(newPath, good)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # RECORD DELETE DETAIL
 
@@ -260,8 +288,9 @@ def appFactory(regime, debug, test, **kwargs):
         f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
-        path = f&#34;&#34;&#34;/api/{table}/{masterId}/{dtable}/{N.delete}/{eid}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
         context = getContext()
+        good = False
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -269,18 +298,16 @@ def appFactory(regime, debug, test, **kwargs):
         ):
             auth.authenticate()
             recordObj = mkTable(context, dtable).record(eid=eid)
-            backId = masterId
 
             wfitem = recordObj.wfitem
             if wfitem:
-                recordObj.delete()
-                (contribId,) = wfitem.info(N.contrib, N._id)
-                backId = contribId
+                good = recordObj.delete()
 
-            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.list}/{backId}&#34;&#34;&#34;
-
-            return redirect(newPath)
-        return notFound(path)
+        if good:
+            flash(f&#34;{dtable} detail deleted&#34;)
+        else:
+            flash(f&#34;{dtable} detail not deleted&#34;, &#34;error&#34;)
+        return redirectResult(newPath, good)
 
     # RECORD VIEW
 
@@ -331,7 +358,8 @@ def appFactory(regime, debug, test, **kwargs):
             return render_template(
                 INDEX, topbar=topbar, sidebar=sidebar, material=record,
             )
-        return notFound(path)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
@@ -346,10 +374,13 @@ def appFactory(regime, debug, test, **kwargs):
                 .record(eid=eid, withDetails=True, **method())
                 .wrap()
             )
+            if not record:
+                flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
             return render_template(
                 INDEX, topbar=topbar, sidebar=sidebar, material=record,
             )
-        return notFound(path)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     def method():
         method = G(request.args, N.method)
@@ -385,8 +416,8 @@ def appFactory(regime, debug, test, **kwargs):
         if table in ALL_TABLES:
             newPath = mkTable(context, table).record(eid=eid).command(command)
             if newPath:
-                return redirect(newPath)
-        return noTable(table)
+                return redirectResult(newPath, True)
+        return noCommand(table, command)
 
     # LOGIN / LOGOUT
 
@@ -394,29 +425,30 @@ def appFactory(regime, debug, test, **kwargs):
     def serveSlogout():
         auth.deauthenticate()
         flash(&#34;logged out from DARIAH&#34;)
-        return redirect(SHIB_LOGOUT)
+        return redirectResult(SHIB_LOGOUT, True)
 
     @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
     def serveLogin():
-        code = 302
+        good = True
         if auth.authenticate(login=True):
             flash(&#34;log in successful&#34;)
         else:
+            good = False
             flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
-            code = 303
-        return redirect(START, code=code)
+        return redirectResult(START, good)
 
     @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
     def serveLogout():
         auth.deauthenticate()
         flash(&#34;logged out&#34;)
-        return redirect(START)
+        return redirectResult(START, True)
 
     # FALL-BACK
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
     def serveNotFound(anything=None):
-        return notFound(anything)
+        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     def notFound(path):
         context = getContext()
@@ -426,6 +458,9 @@ def appFactory(regime, debug, test, **kwargs):
         return render_template(
             INDEX, topbar=topbar, sidebar=sidebar, material=f&#34;&#34;&#34;{NO_PAGE} {path}&#34;&#34;&#34;,
         )
+
+    def noCommand(table, command):
+        return f&#34;&#34;&#34;{NO_COMMAND}: {table}:{command}&#34;&#34;&#34;
 
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
@@ -517,10 +552,11 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     GP = dict(methods=[N.GET, N.POST])
 
-    MONGO = MongoClient().dariah
+    MONGO = MongoClient()
+    myDb = MONGO.dariah_clean if test else MONGO.dariah
     &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
 
-    DB = Db(MONGO)
+    DB = Db(myDb)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)
@@ -578,22 +614,24 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
-        path = f&#34;&#34;&#34;/api/{table}/{N.insert}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
         context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
             auth.authenticate()
             eid = mkTable(context, table).insert()
-            newPath = (
-                f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34; if eid else f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
-            )
-            return redirect(newPath)
-        return notFound(path)
+            if eid:
+                newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+                flash(f&#34;item added&#34;)
+        else:
+            eid = None
+            flash(f&#34;Cannot add items to {table}&#34;, &#34;error&#34;)
+        return redirectResult(newPath, eid is not None)
 
     # INSERT RECORD IN DETAIL TABLE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
-        path = f&#34;&#34;&#34;/api/{table}/{eid}/{dtable}/{N.insert}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
         context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
@@ -601,12 +639,19 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             and dtable in DETAILS[table]
         ):
             auth.authenticate()
-            contribId = (
-                mkTable(context, dtable).insert(masterTable=table, masterId=eid) or E
-            )
-            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}&#34;&#34;&#34;
-            return redirect(newPath)
-        return notFound(path)
+            dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
+            if dEid:
+                newPath = (
+                    f&#34;&#34;&#34;/{table}/{N.item}/{eid}/&#34;&#34;&#34;
+                    f&#34;&#34;&#34;{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
+                )
+        else:
+            dEid = None
+        if dEid:
+            flash(f&#34;{dtable} item added&#34;)
+        else:
+            flash(f&#34;Cannot add a {dtable} here&#34;, &#34;error&#34;)
+        return redirectResult(newPath, dEid is not None)
 
     # LIST VIEWS ON TABLE
 
@@ -630,24 +675,36 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
                 tableList = mkTable(context, table).wrap(eid, action=action)
+                if not tableList:
+                    flash(f&#34;{action or E} view on {table} not allowed&#34;, &#34;error&#34;)
+                    return redirectResult(START, False)
                 return render_template(
                     INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
                 )
-        return notFound(path)
+            flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        if action:
+            flash(f&#34;Unknown view {action}&#34;, &#34;error&#34;)
+        else:
+            flash(f&#34;Missing view&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # RECORD DELETE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
-        path = f&#34;&#34;&#34;/api/{table}/{N.delete}/{eid}&#34;&#34;&#34;
         context = getContext()
         if table in ALL_TABLES:
             auth.authenticate()
-            mkTable(context, table).record(eid=eid).delete()
-            newUrlPart = &#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
+            good = mkTable(context, table).record(eid=eid).delete()
+            newUrlPart = f&#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
             newPath = f&#34;&#34;&#34;/{table}/{N.list}{newUrlPart}&#34;&#34;&#34;
-            return redirect(newPath)
-        return notFound(path)
+            if good:
+                flash(&#34;item deleted&#34;)
+            else:
+                flash(&#34;item not deleted&#34;, &#34;error&#34;)
+            return redirectResult(newPath, good)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # RECORD DELETE DETAIL
 
@@ -656,8 +713,9 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
-        path = f&#34;&#34;&#34;/api/{table}/{masterId}/{dtable}/{N.delete}/{eid}&#34;&#34;&#34;
+        newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
         context = getContext()
+        good = False
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -665,18 +723,16 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         ):
             auth.authenticate()
             recordObj = mkTable(context, dtable).record(eid=eid)
-            backId = masterId
 
             wfitem = recordObj.wfitem
             if wfitem:
-                recordObj.delete()
-                (contribId,) = wfitem.info(N.contrib, N._id)
-                backId = contribId
+                good = recordObj.delete()
 
-            newPath = f&#34;&#34;&#34;/{N.contrib}/{N.list}/{backId}&#34;&#34;&#34;
-
-            return redirect(newPath)
-        return notFound(path)
+        if good:
+            flash(f&#34;{dtable} detail deleted&#34;)
+        else:
+            flash(f&#34;{dtable} detail not deleted&#34;, &#34;error&#34;)
+        return redirectResult(newPath, good)
 
     # RECORD VIEW
 
@@ -727,7 +783,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             return render_template(
                 INDEX, topbar=topbar, sidebar=sidebar, material=record,
             )
-        return notFound(path)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
@@ -742,10 +799,13 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
                 .record(eid=eid, withDetails=True, **method())
                 .wrap()
             )
+            if not record:
+                flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
             return render_template(
                 INDEX, topbar=topbar, sidebar=sidebar, material=record,
             )
-        return notFound(path)
+        flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     def method():
         method = G(request.args, N.method)
@@ -781,8 +841,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         if table in ALL_TABLES:
             newPath = mkTable(context, table).record(eid=eid).command(command)
             if newPath:
-                return redirect(newPath)
-        return noTable(table)
+                return redirectResult(newPath, True)
+        return noCommand(table, command)
 
     # LOGIN / LOGOUT
 
@@ -790,29 +850,30 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     def serveSlogout():
         auth.deauthenticate()
         flash(&#34;logged out from DARIAH&#34;)
-        return redirect(SHIB_LOGOUT)
+        return redirectResult(SHIB_LOGOUT, True)
 
     @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
     def serveLogin():
-        code = 302
+        good = True
         if auth.authenticate(login=True):
             flash(&#34;log in successful&#34;)
         else:
+            good = False
             flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
-            code = 303
-        return redirect(START, code=code)
+        return redirectResult(START, good)
 
     @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
     def serveLogout():
         auth.deauthenticate()
         flash(&#34;logged out&#34;)
-        return redirect(START)
+        return redirectResult(START, True)
 
     # FALL-BACK
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
     def serveNotFound(anything=None):
-        return notFound(anything)
+        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     def notFound(path):
         context = getContext()
@@ -823,6 +884,9 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             INDEX, topbar=topbar, sidebar=sidebar, material=f&#34;&#34;&#34;{NO_PAGE} {path}&#34;&#34;&#34;,
         )
 
+    def noCommand(table, command):
+        return f&#34;&#34;&#34;{NO_COMMAND}: {table}:{command}&#34;&#34;&#34;
+
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
 
@@ -830,6 +894,20 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         return f&#34;&#34;&#34;{NO_FIELD} {table}:{field}&#34;&#34;&#34;
 
     return app</code></pre>
+</details>
+</dd>
+<dt id="control.app.redirectResult"><code class="name flex">
+<span>def <span class="ident">redirectResult</span></span>(<span>url, good)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def redirectResult(url, good):
+    code = 302 if good else 303
+    return redirect(url, code=code)</code></pre>
 </details>
 </dd>
 </dl>
@@ -858,6 +936,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="control.app.appFactory" href="#control.app.appFactory">appFactory</a></code></li>
+<li><code><a title="control.app.redirectResult" href="#control.app.redirectResult">redirectResult</a></code></li>
 </ul>
 </li>
 </ul>
