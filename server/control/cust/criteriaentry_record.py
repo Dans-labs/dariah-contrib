@@ -44,10 +44,6 @@ class CriteriaEntryR(Record):
         """
 
     def title(self, *args, **kwargs):
-        wfitem = self.wfitem
-        if not wfitem:
-            return super().title(*args, **kwargs)
-
         record = self.record
         critRecord = self.critRecord
 

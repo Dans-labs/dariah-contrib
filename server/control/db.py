@@ -359,7 +359,7 @@ class Db:
         my=None,
         our=None,
         assign=False,
-        reviewer=None,
+        review=None,
         selectable=None,
         unfinished=False,
         select=False,
@@ -411,8 +411,8 @@ class Db:
             Only meaningful if the table is `assessment`.
             If `True`, only records that are submitted and who lack at least one
             reviewer pass through.
-        reviewer: ObjectId, optional `None`
-            **Task: produce a list of assessments that "I" am reviewing.**
+        review: ObjectId, optional `None`
+            **Task: produce a list of assessments that "I" am reviewing or have reviewed.**
             Only meaningful if the table is `assessment`.
             If passed, it should be the id of a user (typically the one that is
             logged in).
@@ -449,8 +449,8 @@ class Db:
             crit.update(
                 {N.submitted: True, M_OR: [{N.reviewerE: None}, {N.reviewerF: None}]}
             )
-        if reviewer:
-            crit.update({M_OR: [{N.reviewerE: reviewer}, {N.reviewerF: reviewer}]})
+        if review:
+            crit.update({M_OR: [{N.reviewerE: review}, {N.reviewerF: review}]})
         if selectable:
             crit.update({N.country: selectable, N.selected: None})
 
@@ -468,9 +468,11 @@ class Db:
                 )
             )
         else:
+            print('CRIT', crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
+            print('CRIT2', criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 

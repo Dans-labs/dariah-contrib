@@ -133,7 +133,8 @@ class Value(Related):
                 else "tag "
             )
             activeCls = "active " if isActive else E
-            atts = dict(cls=f"{baseCls}{activeCls}medium {self.actualCls(record)}")
+            actualCls = self.actualCls(record=record)
+            atts = dict(cls=f"{baseCls}{activeCls}medium {actualCls}")
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)
 

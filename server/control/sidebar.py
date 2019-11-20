@@ -282,10 +282,10 @@ class Sidebar:
             subEntries.extend(
                 [
                     self.tableEntry(
-                        N.contrib, action="my", prefix="My", withOptions=True
+                        N.contrib, action=N.my, prefix="My", withOptions=True
                     ),
-                    self.tableEntry(N.assessment, action="my", prefix="My"),
-                    self.tableEntry(N.review, action="my", prefix="My"),
+                    self.tableEntry(N.assessment, action=N.my, prefix="My"),
+                    self.tableEntry(N.review, action=N.my, prefix="My"),
                 ]
             )
 
@@ -307,7 +307,7 @@ class Sidebar:
             subEntries.append(
                 self.tableEntry(
                     N.contrib,
-                    action="select",
+                    action=N.select,
                     item="Contributions",
                     postfix="to be selected",
                     command=True,
@@ -318,7 +318,7 @@ class Sidebar:
         subEntries.append(
             self.tableEntry(
                 N.contrib,
-                action="assess",
+                action=N.assess,
                 item="Contributions",
                 postfix="I am assessing",
                 command=True,
@@ -332,21 +332,33 @@ class Sidebar:
             subEntries.append(
                 self.tableEntry(
                     N.assessment,
-                    action="assign",
+                    action=N.assign,
                     item="Assessments",
                     postfix="needing reviewers",
                     command=True,
                 )
             )
 
-        # - reviewed by me (unfinished)
+        # - in review by me (unfinished)
 
         subEntries.append(
             self.tableEntry(
                 N.assessment,
-                action="review",
+                action=N.review,
                 item="Assessments",
                 postfix="in review by me",
+                command=True,
+            )
+        )
+
+        # - reviewed by me (finished)
+
+        subEntries.append(
+            self.tableEntry(
+                N.assessment,
+                action=N.reviewdone,
+                item="Assessments",
+                postfix="reviewed by me",
                 command=True,
             )
         )

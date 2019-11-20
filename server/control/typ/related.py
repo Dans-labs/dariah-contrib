@@ -84,7 +84,8 @@ class Related(TypeBase):
             if eid is None:
                 eid = G(record, N._id)
 
-            atts = dict(cls=f"tag medium {self.actualCls(record)}")
+            actualCls = self.actualCls(record)
+            atts = dict(cls=f"tag medium {actualCls}")
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -103,7 +104,13 @@ class Related(TypeBase):
         Parameters
         ----------
         record: dict
+
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
         """
+
         table = self.name
 
         isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)

@@ -29,12 +29,13 @@ messages:
   reviewDecision: Review decision
 
 unknown:
-  generic: none
-  number: nonumber
   country: flag 
-  user: nouser
+  generic: none
   group: nogroup
+  number: nonumber
   reviewKind: detached
+  user: nouser
+  title: No Title Yet
 
 icons:
   add: ✚
@@ -205,6 +206,7 @@ listActions:
   - my
   - our
   - review
+  - reviewdone
   - select
 
 names:

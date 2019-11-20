@@ -4,11 +4,13 @@ from config import Names as N
 from control.utils import factory as baseFactory
 
 from control.table import Table
+from control.cust.contrib_table import ContribT
 from control.cust.assessment_table import AssessmentT
 from control.cust.review_table import ReviewT
 
 
 DERIVEDS = (
+    (N.contrib, ContribT),
     (N.assessment, AssessmentT),
     (N.review, ReviewT),
 )

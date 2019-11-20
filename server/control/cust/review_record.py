@@ -27,10 +27,6 @@ class ReviewR(Record):
         super().__init__(*args, **kwargs)
 
     def title(self, *args, **kwargs):
-        wfitem = self.wfitem
-        if not wfitem:
-            return super().title(*args, **kwargs)
-
         kind = self.kind
         uid = self.uid
         record = self.record

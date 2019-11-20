@@ -18,8 +18,5 @@ with os.scandir(TESTS) as it:
         )
     )
 
-print(PATH)
-print(entries)
-print(INDEX)
 with open(INDEX, 'w') as fh:
     fh.write("\n\n".join(f"[{entry}]({entry}.html)" for entry in entries))

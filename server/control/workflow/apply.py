@@ -46,7 +46,7 @@ class WorkflowItem:
     ----------
     data: dict
         All workflow attributes.
-    mykind: string
+    myKind: string
         The kind of reviewer the current user is, if any.
     """
 
@@ -66,7 +66,7 @@ class WorkflowItem:
             The user attributes `uid` and `eppn` will be stored in this `WorkflowItem`
             object.
             At this point, it is also possible to what kind of reviewer the current
-            user is, if any, and store that in attribute `mykind`.
+            user is, if any, and store that in attribute `myKind`.
 
         Parameters
         ----------
@@ -102,7 +102,7 @@ class WorkflowItem:
         """*dict* The  workflow attributes.
         """
 
-        self.mykind = self.myReviewerKind()
+        self.myKind = self.myReviewerKind()
         """*dict* The kind of reviewer that the current user is.
 
         A user is `expert` reviewer or `final` reviewer, or `None`.
@@ -311,7 +311,7 @@ class WorkflowItem:
         if uid is None or table not in USER_TABLES:
             return False
 
-        myKind = self.mykind
+        myKind = self.myKind
 
         (
             locked,
@@ -337,7 +337,7 @@ class WorkflowItem:
 
         (contribId,) = self.info(N.contrib, N._id)
 
-        isCoord = auth.coordinator(countryId=countryId)
+        isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
         commandInfo = allowedCommands[command]
@@ -402,7 +402,10 @@ class WorkflowItem:
                 return stage == N.completeRevised
 
             if command == N.withdrawAssessment:
-                return stage not in {N.incompleteWithdrawn, N.completeWithdrawn}
+                return stage in {N.submitted, N.submittedRevised} and stage not in {
+                    N.incompleteWithdrawn,
+                    N.completeWithdrawn,
+                }
 
             return False
 
@@ -428,7 +431,8 @@ class WorkflowItem:
                 N.finalReviewAccept,
                 N.finalReviewReject,
             }:
-                return kind == N.final
+                (expertStage,) = self.info(table, N.stage, kind=N.expert)
+                return kind == N.final and not not expertStage
 
             return False
 
@@ -555,16 +559,23 @@ class WorkflowItem:
 
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
+            done = False
             if operator == N.add:
                 oTable = G(commandInfo, N.table)
                 tableObj = mkTable(context, oTable)
                 oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
-                urlExtra = f"""/{N.open}/{oTable}/{oeid}"""
+                if oeid:
+                    urlExtra = f"""/{N.open}/{oTable}/{oeid}"""
+                    done = True
             elif operator == N.set:
                 field = G(commandInfo, N.field)
                 value = G(commandInfo, N.value)
-                recordObj.field(field, mayEdit=True).save(value)
-            flash(f"""<{acro}> done""", "message")
+                if recordObj.field(field, mayEdit=True).save(value):
+                    done = True
+            if done:
+                flash(f"""<{acro}> done""", "message")
+            else:
+                flash(f"""<{acro}> failed""", "error")
         else:
             flash(f"""<{acro}> not permitted""", "error")
 
@@ -586,8 +597,16 @@ class WorkflowItem:
         string(html)
         """
 
-        (stage, stageDate, locked, frozen, score, eid) = self.info(
-            table, N.stage, N.stageDate, N.locked, N.frozen, N.score, N._id, kind=kind
+        (stage, stageDate, locked, done, frozen, score, eid) = self.info(
+            table,
+            N.stage,
+            N.stageDate,
+            N.locked,
+            N.done,
+            N.frozen,
+            N.score,
+            N._id,
+            kind=kind,
         )
         stageInfo = G(STAGE_ATTS, stage)
         statusCls = G(stageInfo, N.cls)
@@ -602,15 +621,19 @@ class WorkflowItem:
         lockedCls = N.locked if locked else E
         lockedMsg = (
             H.span(G(STATUS_REP, N.locked), cls=f"large status {lockedCls}")
-            if locked and not frozen
+            if locked
             else E
+        )
+        doneCls = N.done if done else E
+        doneMsg = (
+            H.span(G(STATUS_REP, N.done), cls=f"large status {doneCls}") if done else E
         )
         frozenCls = N.frozen if frozen else E
         frozenMsg = (
-            H.span(G(STATUS_REP, N.frozen), cls=f"small status info") if frozen else E
+            H.span(G(STATUS_REP, N.frozen), cls=f"large status info") if frozen else E
         )
 
-        statusRep = H.div([statusMsg, lockedMsg, frozenMsg], cls=frozenCls)
+        statusRep = H.div([statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls)
 
         scorePart = E
         if table == N.assessment:
@@ -717,7 +740,7 @@ class WorkflowItem:
 
         Returns
         -------
-        string {`expert`, `final`}
+        string {`expert`, `final`} | `None`
             Depending on whether the current user is such a reviewer of the
             assessment of this contribution. Or `None` if (s)he is not a reviewer
             at all.

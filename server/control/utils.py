@@ -178,6 +178,12 @@ def now():
     return dt.utcnow()
 
 
+def thisYear():
+    """The current year as number."""
+
+    return dt.utcnow().year
+
+
 def serverprint(msg):
     """Print a message to the console immediately."""
 

@@ -237,12 +237,21 @@ class Record:
         if wfitem:
             self.kind = wfitem.getKind(table, record)
             valid = wfitem.isValid(table, eid, record)
-            self.fixed = wfitem.checkFixed(self)
         else:
             valid = False if table in USER_TABLES - {MAIN_TABLE} else True
 
+        if valid and wfitem:
+            self.fixed = wfitem.checkFixed(self)
+            self.wfitem = wfitem
+        else:
+            self.wfitem = None
+
         self.valid = valid
-        self.wfitem = wfitem if valid and wfitem else None
+
+        if str(eid) == "5d650d96f95ad52b7ef02813":
+            print('XX valid?', table, self.valid)
+            print('XX fixed?', table, self.fixed, wfitem)
+            print('XX wfitem?', table, self.wfitem)
 
     def adjustWorkflow(self, update=True, delete=False):
         """Recompute workflow information.
@@ -625,6 +634,7 @@ class Record:
         """
 
         mayDelete = self.mayDelete
+        print('mayDelete?', self.table, mayDelete)
 
         if not mayDelete:
             return E
@@ -698,6 +708,30 @@ class Record:
 
         return Record.titleRaw(self, record, cls=warningCls)
 
+    def actualCls(self, record):
+        """Get a CSS class name for a record based on whether it is *actual*.
+
+        Actual records belong to the current `package`, a record that specifies
+        which contribution types, and criteria are currently part of the workflow.
+
+        Parameters
+        ----------
+        record: dict | `None`
+            If `self` does not have a `record` attribute, the record data must
+            be passed here.
+        Returns
+        -------
+        string
+            `inactual` if the record is not actual, else the empty string.
+        """
+
+        table = self.table
+        if record is None:
+            record = self.record
+
+        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        return E if isActual else "inactual"
+
     @staticmethod
     def titleRaw(obj, record, cls=E):
         """Generate a title for a different record.
@@ -713,6 +747,15 @@ class Record:
             If the record is  not "actual", its title will get a warning
             background color.
             See `control.db.Db.collect`.
+
+        Parameters
+        ----------
+        obj: object
+            Any object that has a table and context arttribute, e.g. a table object
+            or a record object
+        record: dict
+        cls: string, optional, `''`
+            A CSS class to add to the outer element of the result
         """
 
         table = obj.table
@@ -721,7 +764,7 @@ class Record:
         types = context.types
         typesObj = getattr(types, table, None)
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
-        atts = dict(cls=cls) if isActual else dict(cls=f"inactual {cls}")
+        actualCls = Record.actualCls(obj, record)
+        atts = dict(cls=f"{cls} {actualCls}")
 
         return H.span(typesObj.title(record=record), **atts)

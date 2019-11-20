@@ -1,4 +1,5 @@
 from bson.objectid import ObjectId
+from flask import flash
 
 from config import Names as N
 from control.utils import pick as G
@@ -35,18 +36,29 @@ class AssessmentT(Table):
         wfitem = context.getWorkflowItem(masterOid)
 
         if not wfitem.permission(N.contrib, N.startAssessment):
-            return masterId
+            return None
 
         (contribType, contribTitle) = wfitem.info(N.contrib, N.type, N.title)
+        if not contribType:
+            flash("You cannot assess a contribution without a type", "error")
+            return None
+        isActual = G(G(db.typeContribution, contribType), N.actual)
+        if not isActual:
+            flash("You cannot assess a contribution with a legacy type", "error")
+            return None
 
         fields = {
             masterTable: masterOid,
             N.assessmentType: contribType,
             N.title: f"assessment of {contribTitle}",
         }
+        criteria = G(typeCriteria, contribType, default=[])
+        if not criteria:
+            flash("This contribution type has no criteria", "error")
+            return None
+
         assessmentId = db.insertItem(table, uid, eppn, False, **fields)
 
-        criteria = G(typeCriteria, contribType, default=[])
         records = [
             {N.seq: seq, N.criteria: crit, N.assessment: assessmentId}
             for (seq, crit) in enumerate(criteria)

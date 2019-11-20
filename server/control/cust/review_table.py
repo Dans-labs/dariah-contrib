@@ -41,7 +41,7 @@ class ReviewT(Table):
             return contribId
 
         (contribType,) = wfitem.info(N.contrib, N.type)
-        assessmentTitle = wfitem.info(N.assessment, N.title)
+        (assessmentTitle,) = wfitem.info(N.assessment, N.title)
 
         fields = {
             N.contrib: contribId,

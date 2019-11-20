@@ -424,6 +424,37 @@ class Auth:
 
         return (identityRep, groupDesc)
 
+    def nameEmail(self, user=None):
+        """Provide a string representation of the name and email of the user.
+
+        !!! note
+            Care will be taken that to unauthenticated users only
+            limited information about users will be shown.
+
+        Parameters
+        ----------
+        user: dict, optional `None`
+            The user whose identity must be represented.
+            If absent, the currently logged in user will be taken.
+
+        Returns
+        -------
+        string
+        """
+
+        if user is None:
+            user = self.user
+
+        name = G(user, N.name) or E
+        if not name:
+            firstName = G(user, N.firstName) or E
+            lastName = G(user, N.lastName) or E
+            name = firstName + (BLANK if firstName and lastName else E) + lastName
+        group = self.groupRep(user=user)
+        isAuth = group != UNAUTH
+        email = (G(user, N.email) or E) if isAuth else E
+        return (name, email)
+
     def authenticate(self, login=False):
         """Verify the authenticated status of the current user.
 

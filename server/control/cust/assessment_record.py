@@ -17,7 +17,8 @@ class AssessmentR(Record):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def title(self, *args, **kwargs):
+    def title(self, record=None, *args, **kwargs):
+        actualCls = self.actualCls(record)
         wfitem = self.wfitem
         if not wfitem:
             return super().title(*args, **kwargs)
@@ -25,4 +26,4 @@ class AssessmentR(Record):
         datetime = self.field(N.dateCreated).wrapBare()
         date = datetime.split(maxsplit=1)[0]
         creator = self.field(N.creator).wrapBare()
-        return H.span(f"""on {date} by {creator}""", cls=f"small")
+        return H.span(f"""on {date} by {creator}""", cls=f"small {actualCls}")

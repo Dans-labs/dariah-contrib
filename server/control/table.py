@@ -15,7 +15,6 @@ from control.utils import pick as G, E, ELLIPS, NBSP, ONE
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
-CW = C.web
 
 
 MAIN_TABLE = CT.userTables[0]
@@ -26,8 +25,6 @@ VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
 PROV_SPECS = CT.prov
-
-FORBIDDEN = CW.messages[N.forbidden]
 
 
 class Table:
@@ -297,6 +294,7 @@ class Table:
         `assess` | records that the current user is assessing
         `assign` | records that the current office user must assign to reviewers
         `reviewer` | records that the current user is reviewing
+        `reviewdone` | records that the current user has reviewed
         `select` | records that the current national coordinator user can select
 
         Permissions will be checked before executing one of these list actions.
@@ -324,7 +322,7 @@ class Table:
         """
 
         if not self.mayList(action=action):
-            return FORBIDDEN
+            return None
 
         context = self.context
         db = context.db
@@ -343,8 +341,10 @@ class Table:
             if action == N.assess
             else dict(assign=True)
             if action == N.assign
-            else dict(reviewer=uid)
+            else dict(review=uid)
             if action == N.review
+            else dict(review=uid)
+            if action == N.reviewdone
             else dict(selectable=countryId)
             if action == N.select
             else {}
@@ -352,10 +352,8 @@ class Table:
         if request.args:
             params.update(request.args)
 
+        print('PPP', params)
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        nRecords = len(records)
-        itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f"""{nRecords} {itemLabel}""", cls="stats")
         insertButton = self.insertButton()
         sep = NBSP if insertButton else E
 
@@ -367,14 +365,13 @@ class Table:
                 not in {N.reviewAccept, N.reviewReject}
             ]
         if action == N.review:
-            records = [
-                record
-                for record in records
-                if self.stage(record, N.review, kind=N.final)
-                not in {N.reviewAccept, N.reviewReject}
-                and self.stage(record, N.review, kind=N.expert)
-                not in {N.reviewAdviseAccept, N.reviewAdviseReject}
-            ]
+            records = [record for record in records if not self.myFinished(uid, record)]
+        if action == N.reviewdone:
+            records = [record for record in records if self.myFinished(uid, record)]
+
+        nRecords = len(records)
+        itemLabel = itemSingular if nRecords == 1 else itemPlural
+        nRep = H.span(f"""{nRecords} {itemLabel}""", cls="stats")
 
         return H.div(
             chain.from_iterable(
@@ -397,6 +394,58 @@ class Table:
             cls=f"table {table}",
         )
 
+    @staticmethod
+    def myKind(uid, record):
+        """Quickly determine the kind of reviewer that somebody is.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review of which the user is or is not a reviewer.
+
+        Returns
+        -------
+        string {`expert`, `final`} | `None`
+        """
+
+        return (
+            N.expert
+            if G(record, N.reviewerE) == uid
+            else N.final
+            if G(record, N.reviewerF) == uid
+            else None
+        )
+
+    def myFinished(self, uid, record):
+        """Quickly determine whethe somebody is done reviewing.
+
+        Parameters
+        ----------
+        uid: ObjectId
+            The user as reviewer.
+        record: dict
+            The review in question.
+
+        The question is: did `uid` take a review decision, or
+        has the final reviewer already decided anyway?
+
+        Returns
+        -------
+        bool
+        """
+
+        return self.stage(record, N.review, kind=N.final) in {
+            N.reviewAccept,
+            N.reviewReject,
+        } or self.stage(record, N.review, kind=Table.myKind(uid, record)) in {
+            N.reviewAdviseAccept,
+            N.reviewAdviseReject,
+            N.reviewAccept,
+            N.reviewReject,
+        }
+
     def insertButton(self):
         """Present an insert button on the interface.
 
@@ -411,11 +460,10 @@ class Table:
         table = self.table
         itemSingle = self.itemLabels[0]
 
-        return H.iconx(
-            N.insert,
-            cls="large",
-            href=f"""/api/{table}/{N.insert}""",
-            title=f"""New {itemSingle}""",
+        return H.a(
+            f"""New {itemSingle}""",
+            f"""/api/{table}/{N.insert}""",
+            cls="small command info",
         )
 
     def mayList(self, action=None):
@@ -425,7 +473,9 @@ class Table:
 
         *   all users may see the whole contrib table (not all fields!);
         *   superusers may see all tables with all list actions;
-        *   authenticated users may see all contribs, assessments and value tables.
+        *   authenticated users may see
+            *   contribs, assessments, reviews
+            *   value tables.
 
         Parameters
         ----------
@@ -442,13 +492,13 @@ class Table:
         context = self.context
         auth = context.auth
         isMainTable = self.isMainTable
-        isInterTable = self.isInterTable
+        isUserTable = self.isUserTable
         isValueTable = self.isValueTable
         return (
             isMainTable
             and not action
             or auth.superuser()
-            or (isMainTable or isInterTable or isValueTable)
+            or (isUserTable or isValueTable)
             and auth.authenticated()
         )
 
