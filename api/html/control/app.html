@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>control.app API documentation</title>
 <meta name="description" content="Sets up the Flask app with all its routes." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -30,7 +30,6 @@
 
 import os
 
-from pymongo import MongoClient
 from flask import (
     Flask,
     request,
@@ -82,6 +81,10 @@ FIELD_ACTIONS = set(CW.fieldActions)
 START = URLS[N.home][N.url]
 OVERVIEW = URLS[N.info][N.url]
 DUMMY = URLS[N.dummy][N.url]
+LOGIN = URLS[N.login][N.url]
+LOGOUT = URLS[N.logout][N.url]
+SLOGOUT = URLS[N.slogout][N.url]
+WORKFLOW = URLS[N.workflow][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
 NO_COMMAND = MESSAGES[N.noCommand]
@@ -99,6 +102,12 @@ def appFactory(regime, debug, test, **kwargs):
 
     We read a secret key from the system which is stored in a file outside the app.
     This information is needed to encrypt sessions.
+
+    !!! caution
+        We read and cache substantial information from MongoDb before
+        forking into workers.
+        Before we fork, we close the MongoDb connection, because PyMongo is not
+        [fork-safe](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
 
     Parameters
     ----------
@@ -127,17 +136,17 @@ def appFactory(regime, debug, test, **kwargs):
 
     GP = dict(methods=[N.GET, N.POST])
 
-    MONGO = MongoClient()
-    myDb = MONGO.dariah_clean if test else MONGO.dariah
-    &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
-
-    DB = Db(myDb)
+    DB = Db(test=test)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)
     &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton.&#34;&#34;&#34;
 
+    WF.initWorkflow(drop=True)
+
     auth = Auth(DB, regime)
+
+    DB.mongoClose()
 
     def getContext():
         return Context(DB, WF, auth)
@@ -185,13 +194,50 @@ def appFactory(regime, debug, test, **kwargs):
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
 
+    # LOGIN / LOGOUT
+
+    @app.route(f&#34;&#34;&#34;{SLOGOUT}&#34;&#34;&#34;)
+    def serveSlogout():
+        auth.deauthenticate()
+        flash(&#34;logged out from DARIAH&#34;)
+        return redirectResult(SHIB_LOGOUT, True)
+
+    @app.route(f&#34;&#34;&#34;{LOGIN}&#34;&#34;&#34;)
+    def serveLogin():
+        good = True
+        if auth.authenticate(login=True):
+            flash(&#34;log in successful&#34;)
+        else:
+            good = False
+            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
+        return redirectResult(START, good)
+
+    @app.route(f&#34;&#34;&#34;{LOGOUT}&#34;&#34;&#34;)
+    def serveLogout():
+        auth.deauthenticate()
+        flash(&#34;logged out&#34;)
+        return redirectResult(START, True)
+
+    # SYSADMIN
+
+    @app.route(f&#34;&#34;&#34;{WORKFLOW}&#34;&#34;&#34;)
+    def serveWorkflow():
+        context = getContext()
+        auth.authenticate()
+        nWf = context.resetWorkflow()
+        if nWf &gt;= 0:
+            flash(f&#34;{nWf} workflow records recomputed and stored&#34;)
+        else:
+            flash(&#34;workflow not recomputed&#34;, &#34;error&#34;)
+        return redirectResult(START, nWf &gt;= 0)
+
     # INSERT RECORD IN TABLE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
         newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
+            context = getContext()
             auth.authenticate()
             eid = mkTable(context, table).insert()
             if eid:
@@ -207,12 +253,12 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
@@ -244,8 +290,8 @@ def appFactory(regime, debug, test, **kwargs):
         eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
         path = f&#34;&#34;&#34;/{table}/{N.list}{eidRep}{actionRep}&#34;&#34;&#34;
         if not action or action in LIST_ACTIONS:
-            context = getContext()
             if table in ALL_TABLES:
+                context = getContext()
                 auth.authenticate()
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
@@ -267,8 +313,8 @@ def appFactory(regime, debug, test, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             good = mkTable(context, table).record(eid=eid).delete()
             newUrlPart = f&#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
@@ -289,13 +335,13 @@ def appFactory(regime, debug, test, **kwargs):
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
-        context = getContext()
         good = False
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             recordObj = mkTable(context, dtable).record(eid=eid)
 
@@ -314,8 +360,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecord(table, eid):
         path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -327,8 +373,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
     def serveRecordTitle(table, eid):
         path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}/{N.title}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -345,8 +391,8 @@ def appFactory(regime, debug, test, **kwargs):
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -364,8 +410,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -399,12 +445,13 @@ def appFactory(regime, debug, test, **kwargs):
             context = getContext()
             auth.authenticate()
             if table in ALL_TABLES:
-                return (
+                result = (
                     mkTable(context, table)
                     .record(eid=eid)
                     .field(field)
                     .wrap(action=action)
                 )
+                return result
         return noField(table, field)
 
     # COMMANDS
@@ -418,30 +465,6 @@ def appFactory(regime, debug, test, **kwargs):
             if newPath:
                 return redirectResult(newPath, True)
         return noCommand(table, command)
-
-    # LOGIN / LOGOUT
-
-    @app.route(f&#34;&#34;&#34;/{N.slogout}&#34;&#34;&#34;)
-    def serveSlogout():
-        auth.deauthenticate()
-        flash(&#34;logged out from DARIAH&#34;)
-        return redirectResult(SHIB_LOGOUT, True)
-
-    @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
-    def serveLogin():
-        good = True
-        if auth.authenticate(login=True):
-            flash(&#34;log in successful&#34;)
-        else:
-            good = False
-            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
-        return redirectResult(START, good)
-
-    @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
-    def serveLogout():
-        auth.deauthenticate()
-        flash(&#34;logged out&#34;)
-        return redirectResult(START, True)
 
     # FALL-BACK
 
@@ -500,6 +523,13 @@ def appFactory(regime, debug, test, **kwargs):
 <section class="desc"><p>Creates the flask app that serves the website.</p>
 <p>We read a secret key from the system which is stored in a file outside the app.
 This information is needed to encrypt sessions.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>We read and cache substantial information from MongoDb before
+forking into workers.
+Before we fork, we close the MongoDb connection, because PyMongo is not
+<a href="https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe">fork-safe</a>.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>debug</code></strong> :&ensp;<code>boolean</code></dt>
@@ -524,6 +554,12 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     We read a secret key from the system which is stored in a file outside the app.
     This information is needed to encrypt sessions.
+
+    !!! caution
+        We read and cache substantial information from MongoDb before
+        forking into workers.
+        Before we fork, we close the MongoDb connection, because PyMongo is not
+        [fork-safe](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
 
     Parameters
     ----------
@@ -552,17 +588,17 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     GP = dict(methods=[N.GET, N.POST])
 
-    MONGO = MongoClient()
-    myDb = MONGO.dariah_clean if test else MONGO.dariah
-    &#34;&#34;&#34;*object* Handle to the MongoDb.&#34;&#34;&#34;
-
-    DB = Db(myDb)
+    DB = Db(test=test)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)
     &#34;&#34;&#34;*object* The `control.workflow.compute.Workflow` singleton.&#34;&#34;&#34;
 
+    WF.initWorkflow(drop=True)
+
     auth = Auth(DB, regime)
+
+    DB.mongoClose()
 
     def getContext():
         return Context(DB, WF, auth)
@@ -610,13 +646,50 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
 
+    # LOGIN / LOGOUT
+
+    @app.route(f&#34;&#34;&#34;{SLOGOUT}&#34;&#34;&#34;)
+    def serveSlogout():
+        auth.deauthenticate()
+        flash(&#34;logged out from DARIAH&#34;)
+        return redirectResult(SHIB_LOGOUT, True)
+
+    @app.route(f&#34;&#34;&#34;{LOGIN}&#34;&#34;&#34;)
+    def serveLogin():
+        good = True
+        if auth.authenticate(login=True):
+            flash(&#34;log in successful&#34;)
+        else:
+            good = False
+            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
+        return redirectResult(START, good)
+
+    @app.route(f&#34;&#34;&#34;{LOGOUT}&#34;&#34;&#34;)
+    def serveLogout():
+        auth.deauthenticate()
+        flash(&#34;logged out&#34;)
+        return redirectResult(START, True)
+
+    # SYSADMIN
+
+    @app.route(f&#34;&#34;&#34;{WORKFLOW}&#34;&#34;&#34;)
+    def serveWorkflow():
+        context = getContext()
+        auth.authenticate()
+        nWf = context.resetWorkflow()
+        if nWf &gt;= 0:
+            flash(f&#34;{nWf} workflow records recomputed and stored&#34;)
+        else:
+            flash(&#34;workflow not recomputed&#34;, &#34;error&#34;)
+        return redirectResult(START, nWf &gt;= 0)
+
     # INSERT RECORD IN TABLE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
         newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
+            context = getContext()
             auth.authenticate()
             eid = mkTable(context, table).insert()
             if eid:
@@ -632,12 +705,12 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
@@ -669,8 +742,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
         path = f&#34;&#34;&#34;/{table}/{N.list}{eidRep}{actionRep}&#34;&#34;&#34;
         if not action or action in LIST_ACTIONS:
-            context = getContext()
             if table in ALL_TABLES:
+                context = getContext()
                 auth.authenticate()
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
@@ -692,8 +765,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             good = mkTable(context, table).record(eid=eid).delete()
             newUrlPart = f&#34;?{N.action}={N.my}&#34; if table in USER_TABLES else E
@@ -714,13 +787,13 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
-        context = getContext()
         good = False
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             recordObj = mkTable(context, dtable).record(eid=eid)
 
@@ -739,8 +812,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecord(table, eid):
         path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -752,8 +825,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
     def serveRecordTitle(table, eid):
         path = f&#34;&#34;&#34;/api/{table}/{N.item}/{eid}/{N.title}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -770,8 +843,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -789,8 +862,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -824,12 +897,13 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             context = getContext()
             auth.authenticate()
             if table in ALL_TABLES:
-                return (
+                result = (
                     mkTable(context, table)
                     .record(eid=eid)
                     .field(field)
                     .wrap(action=action)
                 )
+                return result
         return noField(table, field)
 
     # COMMANDS
@@ -843,30 +917,6 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             if newPath:
                 return redirectResult(newPath, True)
         return noCommand(table, command)
-
-    # LOGIN / LOGOUT
-
-    @app.route(f&#34;&#34;&#34;/{N.slogout}&#34;&#34;&#34;)
-    def serveSlogout():
-        auth.deauthenticate()
-        flash(&#34;logged out from DARIAH&#34;)
-        return redirectResult(SHIB_LOGOUT, True)
-
-    @app.route(f&#34;&#34;&#34;/{N.login}&#34;&#34;&#34;)
-    def serveLogin():
-        good = True
-        if auth.authenticate(login=True):
-            flash(&#34;log in successful&#34;)
-        else:
-            good = False
-            flash(&#34;log in unsuccessful&#34;, &#34;error&#34;)
-        return redirectResult(START, good)
-
-    @app.route(f&#34;&#34;&#34;/{N.logout}&#34;&#34;&#34;)
-    def serveLogout():
-        auth.deauthenticate()
-        flash(&#34;logged out&#34;)
-        return redirectResult(START, True)
 
     # FALL-BACK
 
@@ -943,7 +993,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

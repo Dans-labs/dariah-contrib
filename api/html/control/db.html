@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>control.db API documentation</title>
 <meta name="description" content="All access to the database …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -39,6 +39,7 @@
 
 from itertools import chain
 from bson.objectid import ObjectId
+from pymongo import MongoClient
 
 from config import Config as C, Names as N
 from control.utils import (
@@ -51,6 +52,7 @@ from control.utils import (
     ON,
     ONE,
     MINONE,
+    COMMA,
 )
 
 CB = C.base
@@ -84,6 +86,11 @@ VALUE_TABLES = set(CT.valueTables)
 REFERENCE_SPECS = CT.reference
 CASCADE_SPECS = CT.cascade
 
+RECOLLECT_SPECS = CT.recollect
+RECOLLECT_TABLE = RECOLLECT_SPECS[N.table]
+RECOLLECT_NAME = RECOLLECT_SPECS[N.tableField]
+RECOLLECT_DATE = RECOLLECT_SPECS[N.dateField]
+
 WORKFLOW_FIELDS = CF.fields
 FIELD_PROJ = {field: True for field in WORKFLOW_FIELDS}
 
@@ -101,10 +108,18 @@ class Db:
     It will read all content of all value tables and keep it cached.
 
     The data in the user tables will be cached by the higher level
-    `control.context.Context`.
+    `control.context.Context`, but only per request.
+
+    !!! caution
+        We start without a Mongo connection.
+        We make connection the first time we need it, and then keep the
+        connection in the `mongo` attribute.
+        This way, we have a single Mongo connection per worker process,
+        as recommended in
+        [PyMongo](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
     &#34;&#34;&#34;
 
-    def __init__(self, mongo):
+    def __init__(self, test=False):
         &#34;&#34;&#34;## Initialization
 
         Pick up the connection to MongoDb.
@@ -113,16 +128,28 @@ class Db:
 
         Parameters
         ----------
-        mongo: object
+        test: boolean
             See below.
         &#34;&#34;&#34;
 
-        self.mongo = mongo
-        &#34;&#34;&#34;*object* The connection to MongoDb.
+        self.test = test
+        &#34;&#34;&#34;*boolean* Whether to connect to the test database.&#34;&#34;&#34;
+
+        self.client = None
+        &#34;&#34;&#34;*object* The MongoDb client.&#34;&#34;&#34;
+
+        self.mongo = None
+        &#34;&#34;&#34;*object* The connection to the MongoDb database.
 
         The connnection exists before the Db singleton is initialized.
         &#34;&#34;&#34;
 
+        self.collected = {}
+        &#34;&#34;&#34;*dict* For each value table, the time that this worker last collected it.
+
+        In the database there is a table which holds the last time for each value
+        table that a worker updated a value in it.
+        &#34;&#34;&#34;
         self.collect()
 
         self.creatorId = [
@@ -137,7 +164,28 @@ class Db:
         to be created by the system.
         &#34;&#34;&#34;
 
-    def mongoCmd(self, label, table, command, *args):
+    def mongoOpen(self):
+        client = self.client
+        mongo = self.mongo
+        test = self.test
+
+        if not mongo:
+            client = MongoClient()
+            mongo = client.dariah_clean if test else client.dariah
+            self.client = client
+            self.mongo = mongo
+            serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)
+
+    def mongoClose(self):
+        client = self.client
+
+        if client:
+            client.close()
+            self.client = None
+            self.mongo = None
+            serverprint(&#34;&#34;&#34;MONGO: connection closed&#34;&#34;&#34;)
+
+    def mongoCmd(self, label, table, command, *args, **kwargs):
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
@@ -162,66 +210,169 @@ class Db:
         mixed
             Whatever the the MongoDb returns.
         &#34;&#34;&#34;
+
+        self.mongoOpen()
         mongo = self.mongo
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-        argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
         if DEBUG:
-            serverprint(f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep})&#34;&#34;&#34;)
+            argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
+            kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
+            serverprint(
+                f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep} {kwargRep})&#34;&#34;&#34;
+            )
         if method:
-            return method(*args)
+            return method(*args, **kwargs)
         return None
 
-    def collect(self, table=None):
+    def cacheValueTable(self, valueTable):
+        &#34;&#34;&#34;Caches the contents of a value table.
+
+        The tables will be cached as under two attributes:
+
+        the name of the table
+        :   dictionary keyed by id and valued by the corresponding record
+
+        the name of the table + `Inv`
+        :   dictionary keyed by a key field and valued by the corresponding id.
+
+        Parameters
+        ----------
+        valueTable: string
+            The value table to be cached.
+        &#34;&#34;&#34;
+
+        valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
+        repField = N.iso if valueTable == N.country else N.rep
+
+        setattr(
+            self, valueTable, {G(record, N._id): record for record in valueList},
+        )
+        setattr(
+            self,
+            f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
+            {G(record, repField): G(record, N._id) for record in valueList},
+        )
+        if valueTable == N.permissionGroup:
+            setattr(
+                self,
+                f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
+                {G(record, repField): G(record, N.description) for record in valueList},
+            )
+
+    def collect(self):
         &#34;&#34;&#34;Collect the contents of the value tables.
 
         Value tables have content that is needed almost all the time.
         All value tables will be completely cached within Db.
 
-        This will be done in the rare cases when a value table gets modified by
-        an office user.
+        !!! note
+            This is meant to run at start up, before the workers start.
+            After that, this worker will not execute it again.
+            See also `recollect`.
+
+        !!! caution
+            We must take other workers into account. They need a signal
+            to recollect. See `recollect`.
+            We store the time that this worker has collected each table
+            in attribute `collected`.
 
         !!! warning
             This is a complicated app.
             Some tables have records that specify whether other records are &#34;actual&#34;.
             After collecting a value table, the &#34;actual&#34; items will be recomputed.
+        &#34;&#34;&#34;
+
+        collected = self.collected
+
+        for valueTable in VALUE_TABLES:
+            self.cacheValueTable(valueTable)
+            collected[valueTable] = now()
+
+        self.collectActualItems()
+        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
+
+    def recollect(self, table=None):
+        &#34;&#34;&#34;Collect the contents of the value tables if they have changed.
+
+        For each value table it will be checked if they have been
+        collected (by another worker) after this worker has started and if so,
+        those tables and those tables only will be recollected.
+
+        !!! caution
+            Although the initial `collect` is done before workers start
+            (`gunicorn --preload`), individual workers will end up with their
+            own copy of the value table cache.
+            So when we need to recollect values for our cache, we must notify
+            in some way that other workers also have to recollect this table.
+
+        ### Global recollection
+
+        Whenever we recollect a value table, we insert the time of recollection
+        in a record in the MongoDb.
+
+        Somewhere at the start of each request, these records will be checked,
+        and if needed, recollections will be done before the actual request processing.
+
+        There is a table `collect`, with records having fields `table` and
+        `dateCollected`. After each (re)collect of a table, the `dateCollected` of
+        the appropriate record will be set to the current time.
+
+        !!! note &#34;recollect()&#34;
+            A `recollect()` without arguments should be done at the start of each
+            request.
+
+        !!! note &#34;recollect(table)&#34;
+            A `recollect(table)` should be done whenever this worker has changed
+            something in that value table.
 
         Parameters
         ----------
         table: string, optional `None`
-            A collect() without arguments collects *all* value tables.
-            By passing a table name, you can collect a single table.
+            A recollect() without arguments collects *all* value tables that need
+            collecting based on the times of change as recorded in the `collect`
+            table.
+            A recollect of a single table means that this worker has made a change.
+            After the recollect, a timestamp will go into the `collect` table,
+            so that other workers can pick it up.
         &#34;&#34;&#34;
-        if table is not None and table not in VALUE_TABLES:
-            return
 
-        for valueTable in {table} if table else VALUE_TABLES:
-            valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
-            repField = N.iso if valueTable == N.country else N.rep
+        collected = self.collected
 
-            setattr(
-                self, valueTable, {G(record, N._id): record for record in valueList},
-            )
-            setattr(
-                self,
-                f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
-                {G(record, repField): G(record, N._id) for record in valueList},
-            )
-            if valueTable == N.permissionGroup:
-                setattr(
-                    self,
-                    f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
-                    {
-                        G(record, repField): G(record, N.description)
-                        for record in valueList
-                    },
+        if table is None:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                record = self.mongoCmd(
+                    N.recollect, N.collect, N.find_one, {RECOLLECT_NAME: valueTable}
                 )
-            serverprint(f&#34;&#34;&#34;COLLECTED {valueTable}&#34;&#34;&#34;)
+                lastChangedGlobally = G(record, RECOLLECT_DATE)
+                lastChangedHere = G(collected, valueTable)
+                if lastChangedGlobally and (
+                    not lastChangedHere or lastChangedHere &lt; lastChangedGlobally
+                ):
+                    self.cacheValueTable(valueTable)
+                    collected[valueTable] = now()
+                    affected.add(valueTable)
+        else:
+            self.cacheValueTable(table)
+            collected[table] = now()
+            affected = {table}
+            self.mongoCmd(
+                N.collect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: table},
+                {M_SET: {RECOLLECT_DATE: now()}},
+                upsert=True,
+            )
 
-        self.collectActualItems(table=table)
+        self.collectActualItems(tables=affected)
 
-    def collectActualItems(self, table=None):
+        if affected:
+            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
+
+    def collectActualItems(self, tables=None):
         &#34;&#34;&#34;Determines which items are &#34;actual&#34;.
 
         Actual items are those types and criteria that are specified in a
@@ -230,14 +381,14 @@ class Db:
         and end days.
 
         !!! caution
-            If a single value table needs to be collected, and that table is not
+            If only value table needs to be collected that are not
             involved in the concept of &#34;actual&#34;, nothing will be done.
 
         Parameters
         ----------
-        table: string, optional `None`
+        tables: set of string, optional `None`
         &#34;&#34;&#34;
-        if table is not None and table not in ACTUAL_TABLES:
+        if tables is not None and not (tables &amp; ACTUAL_TABLES):
             return
 
         justNow = now()
@@ -500,11 +651,9 @@ class Db:
                 )
             )
         else:
-            print(&#39;CRIT&#39;, crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
-            print(&#39;CRIT2&#39;, criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
@@ -676,7 +825,7 @@ class Db:
         }
         result = self.mongoCmd(N.insertItem, table, N.insert_one, newRecord)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return result.inserted_id
 
     def insertMany(self, table, uid, eppn, records):
@@ -740,7 +889,7 @@ class Db:
             }
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
-        self.collect(table=N.user)
+        self.recollect(N.user)
         return result.inserted_id
 
     def deleteItem(self, table, eid):
@@ -756,7 +905,7 @@ class Db:
 
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         # For the moment, we do not check whether it has succeeded.
         return True
 
@@ -832,7 +981,7 @@ class Db:
 
         self.mongoCmd(N.updateField, table, N.update_one, criterion, instructions)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return (
             update,
             set(delete.keys()),
@@ -852,11 +1001,19 @@ class Db:
 
         if N.isPristine in record:
             del record[N.isPristine]
+        justNow = now()
+        record.update(
+            {
+                N.dateLastLogin: justNow,
+                N.statusLastLogin: N.Approved,
+                N.modified: [MOD_FMT.format(CREATOR, justNow)],
+            }
+        )
         criterion = {N._id: G(record, N._id)}
         updates = {k: v for (k, v) in record.items() if k != N._id}
         instructions = {M_SET: updates, M_UNSET: {N.isPristine: E}}
         self.mongoCmd(N.updateUser, N.user, N.update_one, criterion, instructions)
-        self.collect(table=N.user)
+        self.recollect(N.user)
 
     def dependencies(self, table, record):
         &#34;&#34;&#34;Computes the number of dependent records of a record.
@@ -902,7 +1059,7 @@ class Db:
                     else {M_OR: [{field: eid} for field in fields]}
                 )
 
-                nDep += self.mongoCmd(depKind, referringTable, N.count, crit)
+                nDep += self.mongoCmd(depKind, referringTable, N.count_documents, crit)
             depResult[depKind] = nDep
 
         return depResult
@@ -926,7 +1083,7 @@ class Db:
         (Currently this function is not used).
         &#34;&#34;&#34;
 
-        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many)
+        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many, {})
 
     def entries(self, table, crit={}):
         &#34;&#34;&#34;Get relevant records from a table as a dictionary of entries.
@@ -1069,13 +1226,22 @@ class Db:
 <dl>
 <dt id="control.db.Db"><code class="flex name class">
 <span>class <span class="ident">Db</span></span>
-<span>(</span><span>mongo)</span>
+<span>(</span><span>test=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All access to the MongoDb will happen through this class.</p>
 <p>It will read all content of all value tables and keep it cached.</p>
 <p>The data in the user tables will be cached by the higher level
-<a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a>.</p>
+<a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a>, but only per request.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>We start without a Mongo connection.
+We make connection the first time we need it, and then keep the
+connection in the <code>mongo</code> attribute.
+This way, we have a single Mongo connection per worker process,
+as recommended in
+<a href="https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe">PyMongo</a>.</p>
+</div>
 <h2 id="initialization">Initialization</h2>
 <p>Pick up the connection to MongoDb.</p>
 <div class="admonition note">
@@ -1083,7 +1249,7 @@ class Db:
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>mongo</code></strong> :&ensp;<code>object</code></dt>
+<dt><strong><code>test</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>See below.</dd>
 </dl></section>
 <details class="source">
@@ -1096,10 +1262,18 @@ class Db:
     It will read all content of all value tables and keep it cached.
 
     The data in the user tables will be cached by the higher level
-    `control.context.Context`.
+    `control.context.Context`, but only per request.
+
+    !!! caution
+        We start without a Mongo connection.
+        We make connection the first time we need it, and then keep the
+        connection in the `mongo` attribute.
+        This way, we have a single Mongo connection per worker process,
+        as recommended in
+        [PyMongo](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
     &#34;&#34;&#34;
 
-    def __init__(self, mongo):
+    def __init__(self, test=False):
         &#34;&#34;&#34;## Initialization
 
         Pick up the connection to MongoDb.
@@ -1108,16 +1282,28 @@ class Db:
 
         Parameters
         ----------
-        mongo: object
+        test: boolean
             See below.
         &#34;&#34;&#34;
 
-        self.mongo = mongo
-        &#34;&#34;&#34;*object* The connection to MongoDb.
+        self.test = test
+        &#34;&#34;&#34;*boolean* Whether to connect to the test database.&#34;&#34;&#34;
+
+        self.client = None
+        &#34;&#34;&#34;*object* The MongoDb client.&#34;&#34;&#34;
+
+        self.mongo = None
+        &#34;&#34;&#34;*object* The connection to the MongoDb database.
 
         The connnection exists before the Db singleton is initialized.
         &#34;&#34;&#34;
 
+        self.collected = {}
+        &#34;&#34;&#34;*dict* For each value table, the time that this worker last collected it.
+
+        In the database there is a table which holds the last time for each value
+        table that a worker updated a value in it.
+        &#34;&#34;&#34;
         self.collect()
 
         self.creatorId = [
@@ -1132,7 +1318,28 @@ class Db:
         to be created by the system.
         &#34;&#34;&#34;
 
-    def mongoCmd(self, label, table, command, *args):
+    def mongoOpen(self):
+        client = self.client
+        mongo = self.mongo
+        test = self.test
+
+        if not mongo:
+            client = MongoClient()
+            mongo = client.dariah_clean if test else client.dariah
+            self.client = client
+            self.mongo = mongo
+            serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)
+
+    def mongoClose(self):
+        client = self.client
+
+        if client:
+            client.close()
+            self.client = None
+            self.mongo = None
+            serverprint(&#34;&#34;&#34;MONGO: connection closed&#34;&#34;&#34;)
+
+    def mongoCmd(self, label, table, command, *args, **kwargs):
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
@@ -1157,66 +1364,169 @@ class Db:
         mixed
             Whatever the the MongoDb returns.
         &#34;&#34;&#34;
+
+        self.mongoOpen()
         mongo = self.mongo
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-        argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
         if DEBUG:
-            serverprint(f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep})&#34;&#34;&#34;)
+            argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
+            kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
+            serverprint(
+                f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep} {kwargRep})&#34;&#34;&#34;
+            )
         if method:
-            return method(*args)
+            return method(*args, **kwargs)
         return None
 
-    def collect(self, table=None):
+    def cacheValueTable(self, valueTable):
+        &#34;&#34;&#34;Caches the contents of a value table.
+
+        The tables will be cached as under two attributes:
+
+        the name of the table
+        :   dictionary keyed by id and valued by the corresponding record
+
+        the name of the table + `Inv`
+        :   dictionary keyed by a key field and valued by the corresponding id.
+
+        Parameters
+        ----------
+        valueTable: string
+            The value table to be cached.
+        &#34;&#34;&#34;
+
+        valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
+        repField = N.iso if valueTable == N.country else N.rep
+
+        setattr(
+            self, valueTable, {G(record, N._id): record for record in valueList},
+        )
+        setattr(
+            self,
+            f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
+            {G(record, repField): G(record, N._id) for record in valueList},
+        )
+        if valueTable == N.permissionGroup:
+            setattr(
+                self,
+                f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
+                {G(record, repField): G(record, N.description) for record in valueList},
+            )
+
+    def collect(self):
         &#34;&#34;&#34;Collect the contents of the value tables.
 
         Value tables have content that is needed almost all the time.
         All value tables will be completely cached within Db.
 
-        This will be done in the rare cases when a value table gets modified by
-        an office user.
+        !!! note
+            This is meant to run at start up, before the workers start.
+            After that, this worker will not execute it again.
+            See also `recollect`.
+
+        !!! caution
+            We must take other workers into account. They need a signal
+            to recollect. See `recollect`.
+            We store the time that this worker has collected each table
+            in attribute `collected`.
 
         !!! warning
             This is a complicated app.
             Some tables have records that specify whether other records are &#34;actual&#34;.
             After collecting a value table, the &#34;actual&#34; items will be recomputed.
+        &#34;&#34;&#34;
+
+        collected = self.collected
+
+        for valueTable in VALUE_TABLES:
+            self.cacheValueTable(valueTable)
+            collected[valueTable] = now()
+
+        self.collectActualItems()
+        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
+
+    def recollect(self, table=None):
+        &#34;&#34;&#34;Collect the contents of the value tables if they have changed.
+
+        For each value table it will be checked if they have been
+        collected (by another worker) after this worker has started and if so,
+        those tables and those tables only will be recollected.
+
+        !!! caution
+            Although the initial `collect` is done before workers start
+            (`gunicorn --preload`), individual workers will end up with their
+            own copy of the value table cache.
+            So when we need to recollect values for our cache, we must notify
+            in some way that other workers also have to recollect this table.
+
+        ### Global recollection
+
+        Whenever we recollect a value table, we insert the time of recollection
+        in a record in the MongoDb.
+
+        Somewhere at the start of each request, these records will be checked,
+        and if needed, recollections will be done before the actual request processing.
+
+        There is a table `collect`, with records having fields `table` and
+        `dateCollected`. After each (re)collect of a table, the `dateCollected` of
+        the appropriate record will be set to the current time.
+
+        !!! note &#34;recollect()&#34;
+            A `recollect()` without arguments should be done at the start of each
+            request.
+
+        !!! note &#34;recollect(table)&#34;
+            A `recollect(table)` should be done whenever this worker has changed
+            something in that value table.
 
         Parameters
         ----------
         table: string, optional `None`
-            A collect() without arguments collects *all* value tables.
-            By passing a table name, you can collect a single table.
+            A recollect() without arguments collects *all* value tables that need
+            collecting based on the times of change as recorded in the `collect`
+            table.
+            A recollect of a single table means that this worker has made a change.
+            After the recollect, a timestamp will go into the `collect` table,
+            so that other workers can pick it up.
         &#34;&#34;&#34;
-        if table is not None and table not in VALUE_TABLES:
-            return
 
-        for valueTable in {table} if table else VALUE_TABLES:
-            valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
-            repField = N.iso if valueTable == N.country else N.rep
+        collected = self.collected
 
-            setattr(
-                self, valueTable, {G(record, N._id): record for record in valueList},
-            )
-            setattr(
-                self,
-                f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
-                {G(record, repField): G(record, N._id) for record in valueList},
-            )
-            if valueTable == N.permissionGroup:
-                setattr(
-                    self,
-                    f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
-                    {
-                        G(record, repField): G(record, N.description)
-                        for record in valueList
-                    },
+        if table is None:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                record = self.mongoCmd(
+                    N.recollect, N.collect, N.find_one, {RECOLLECT_NAME: valueTable}
                 )
-            serverprint(f&#34;&#34;&#34;COLLECTED {valueTable}&#34;&#34;&#34;)
+                lastChangedGlobally = G(record, RECOLLECT_DATE)
+                lastChangedHere = G(collected, valueTable)
+                if lastChangedGlobally and (
+                    not lastChangedHere or lastChangedHere &lt; lastChangedGlobally
+                ):
+                    self.cacheValueTable(valueTable)
+                    collected[valueTable] = now()
+                    affected.add(valueTable)
+        else:
+            self.cacheValueTable(table)
+            collected[table] = now()
+            affected = {table}
+            self.mongoCmd(
+                N.collect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: table},
+                {M_SET: {RECOLLECT_DATE: now()}},
+                upsert=True,
+            )
 
-        self.collectActualItems(table=table)
+        self.collectActualItems(tables=affected)
 
-    def collectActualItems(self, table=None):
+        if affected:
+            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
+
+    def collectActualItems(self, tables=None):
         &#34;&#34;&#34;Determines which items are &#34;actual&#34;.
 
         Actual items are those types and criteria that are specified in a
@@ -1225,14 +1535,14 @@ class Db:
         and end days.
 
         !!! caution
-            If a single value table needs to be collected, and that table is not
+            If only value table needs to be collected that are not
             involved in the concept of &#34;actual&#34;, nothing will be done.
 
         Parameters
         ----------
-        table: string, optional `None`
+        tables: set of string, optional `None`
         &#34;&#34;&#34;
-        if table is not None and table not in ACTUAL_TABLES:
+        if tables is not None and not (tables &amp; ACTUAL_TABLES):
             return
 
         justNow = now()
@@ -1495,11 +1805,9 @@ class Db:
                 )
             )
         else:
-            print(&#39;CRIT&#39;, crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
-            print(&#39;CRIT2&#39;, criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
@@ -1671,7 +1979,7 @@ class Db:
         }
         result = self.mongoCmd(N.insertItem, table, N.insert_one, newRecord)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return result.inserted_id
 
     def insertMany(self, table, uid, eppn, records):
@@ -1735,7 +2043,7 @@ class Db:
             }
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
-        self.collect(table=N.user)
+        self.recollect(N.user)
         return result.inserted_id
 
     def deleteItem(self, table, eid):
@@ -1751,7 +2059,7 @@ class Db:
 
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         # For the moment, we do not check whether it has succeeded.
         return True
 
@@ -1827,7 +2135,7 @@ class Db:
 
         self.mongoCmd(N.updateField, table, N.update_one, criterion, instructions)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return (
             update,
             set(delete.keys()),
@@ -1847,11 +2155,19 @@ class Db:
 
         if N.isPristine in record:
             del record[N.isPristine]
+        justNow = now()
+        record.update(
+            {
+                N.dateLastLogin: justNow,
+                N.statusLastLogin: N.Approved,
+                N.modified: [MOD_FMT.format(CREATOR, justNow)],
+            }
+        )
         criterion = {N._id: G(record, N._id)}
         updates = {k: v for (k, v) in record.items() if k != N._id}
         instructions = {M_SET: updates, M_UNSET: {N.isPristine: E}}
         self.mongoCmd(N.updateUser, N.user, N.update_one, criterion, instructions)
-        self.collect(table=N.user)
+        self.recollect(N.user)
 
     def dependencies(self, table, record):
         &#34;&#34;&#34;Computes the number of dependent records of a record.
@@ -1897,7 +2213,7 @@ class Db:
                     else {M_OR: [{field: eid} for field in fields]}
                 )
 
-                nDep += self.mongoCmd(depKind, referringTable, N.count, crit)
+                nDep += self.mongoCmd(depKind, referringTable, N.count_documents, crit)
             depResult[depKind] = nDep
 
         return depResult
@@ -1921,7 +2237,7 @@ class Db:
         (Currently this function is not used).
         &#34;&#34;&#34;
 
-        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many)
+        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many, {})
 
     def entries(self, table, crit={}):
         &#34;&#34;&#34;Get relevant records from a table as a dictionary of entries.
@@ -2155,6 +2471,16 @@ def satisfies(record, criterion):
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="control.db.Db.client"><code class="name">var <span class="ident">client</span></code></dt>
+<dd>
+<section class="desc"><p><em>object</em> The MongoDb client.</p></section>
+</dd>
+<dt id="control.db.Db.collected"><code class="name">var <span class="ident">collected</span></code></dt>
+<dd>
+<section class="desc"><p><em>dict</em> For each value table, the time that this worker last collected it.</p>
+<p>In the database there is a table which holds the last time for each value
+table that a worker updated a value in it.</p></section>
+</dd>
 <dt id="control.db.Db.creatorId"><code class="name">var <span class="ident">creatorId</span></code></dt>
 <dd>
 <section class="desc"><p><em>ObjectId</em> System user.</p>
@@ -2164,8 +2490,12 @@ to be created by the system.</p></section>
 </dd>
 <dt id="control.db.Db.mongo"><code class="name">var <span class="ident">mongo</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The connection to MongoDb.</p>
+<section class="desc"><p><em>object</em> The connection to the MongoDb database.</p>
 <p>The connnection exists before the Db singleton is initialized.</p></section>
+</dd>
+<dt id="control.db.Db.test"><code class="name">var <span class="ident">test</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether to connect to the test database.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -2242,6 +2572,63 @@ for items belonging to this country are fetched.</dd>
     return records</code></pre>
 </details>
 </dd>
+<dt id="control.db.Db.cacheValueTable"><code class="name flex">
+<span>def <span class="ident">cacheValueTable</span></span>(<span>self, valueTable)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Caches the contents of a value table.</p>
+<p>The tables will be cached as under two attributes:</p>
+<dl>
+<dt>the name of the table</dt>
+<dd>dictionary keyed by id and valued by the corresponding record</dd>
+<dt>the name of the table + <code>Inv</code></dt>
+<dd>dictionary keyed by a key field and valued by the corresponding id.</dd>
+</dl>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
+<dd>The value table to be cached.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cacheValueTable(self, valueTable):
+    &#34;&#34;&#34;Caches the contents of a value table.
+
+    The tables will be cached as under two attributes:
+
+    the name of the table
+    :   dictionary keyed by id and valued by the corresponding record
+
+    the name of the table + `Inv`
+    :   dictionary keyed by a key field and valued by the corresponding id.
+
+    Parameters
+    ----------
+    valueTable: string
+        The value table to be cached.
+    &#34;&#34;&#34;
+
+    valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
+    repField = N.iso if valueTable == N.country else N.rep
+
+    setattr(
+        self, valueTable, {G(record, N._id): record for record in valueList},
+    )
+    setattr(
+        self,
+        f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
+        {G(record, repField): G(record, N._id) for record in valueList},
+    )
+    if valueTable == N.permissionGroup:
+        setattr(
+            self,
+            f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
+            {G(record, repField): G(record, N.description) for record in valueList},
+        )</code></pre>
+</details>
+</dd>
 <dt id="control.db.Db.clearWorkflow"><code class="name flex">
 <span>def <span class="ident">clearWorkflow</span></span>(<span>self)</span>
 </code></dt>
@@ -2264,85 +2651,74 @@ webserver remains running, e.g. by command of a sysadmin or office user.
     (Currently this function is not used).
     &#34;&#34;&#34;
 
-    self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many)</code></pre>
+    self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many, {})</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.collect"><code class="name flex">
-<span>def <span class="ident">collect</span></span>(<span>self, table=None)</span>
+<span>def <span class="ident">collect</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Collect the contents of the value tables.</p>
 <p>Value tables have content that is needed almost all the time.
 All value tables will be completely cached within Db.</p>
-<p>This will be done in the rare cases when a value table gets modified by
-an office user.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is meant to run at start up, before the workers start.
+After that, this worker will not execute it again.
+See also <code>recollect</code>.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>We must take other workers into account. They need a signal
+to recollect. See <code>recollect</code>.
+We store the time that this worker has collected each table
+in attribute <code>collected</code>.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This is a complicated app.
 Some tables have records that specify whether other records are "actual".
 After collecting a value table, the "actual" items will be recomputed.</p>
-</div>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
-<dd>A collect() without arguments collects <em>all</em> value tables.
-By passing a table name, you can collect a single table.</dd>
-</dl></section>
+</div></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def collect(self, table=None):
+<pre><code class="python">def collect(self):
     &#34;&#34;&#34;Collect the contents of the value tables.
 
     Value tables have content that is needed almost all the time.
     All value tables will be completely cached within Db.
 
-    This will be done in the rare cases when a value table gets modified by
-    an office user.
+    !!! note
+        This is meant to run at start up, before the workers start.
+        After that, this worker will not execute it again.
+        See also `recollect`.
+
+    !!! caution
+        We must take other workers into account. They need a signal
+        to recollect. See `recollect`.
+        We store the time that this worker has collected each table
+        in attribute `collected`.
 
     !!! warning
         This is a complicated app.
         Some tables have records that specify whether other records are &#34;actual&#34;.
         After collecting a value table, the &#34;actual&#34; items will be recomputed.
-
-    Parameters
-    ----------
-    table: string, optional `None`
-        A collect() without arguments collects *all* value tables.
-        By passing a table name, you can collect a single table.
     &#34;&#34;&#34;
-    if table is not None and table not in VALUE_TABLES:
-        return
 
-    for valueTable in {table} if table else VALUE_TABLES:
-        valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
-        repField = N.iso if valueTable == N.country else N.rep
+    collected = self.collected
 
-        setattr(
-            self, valueTable, {G(record, N._id): record for record in valueList},
-        )
-        setattr(
-            self,
-            f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;,
-            {G(record, repField): G(record, N._id) for record in valueList},
-        )
-        if valueTable == N.permissionGroup:
-            setattr(
-                self,
-                f&#34;&#34;&#34;{valueTable}Desc&#34;&#34;&#34;,
-                {
-                    G(record, repField): G(record, N.description)
-                    for record in valueList
-                },
-            )
-        serverprint(f&#34;&#34;&#34;COLLECTED {valueTable}&#34;&#34;&#34;)
+    for valueTable in VALUE_TABLES:
+        self.cacheValueTable(valueTable)
+        collected[valueTable] = now()
 
-    self.collectActualItems(table=table)</code></pre>
+    self.collectActualItems()
+    serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.collectActualItems"><code class="name flex">
-<span>def <span class="ident">collectActualItems</span></span>(<span>self, table=None)</span>
+<span>def <span class="ident">collectActualItems</span></span>(<span>self, tables=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Determines which items are "actual".</p>
@@ -2352,19 +2728,19 @@ A package record is actual if the current data is between its start
 and end days.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>If a single value table needs to be collected, and that table is not
+<p>If only value table needs to be collected that are not
 involved in the concept of "actual", nothing will be done.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dt><strong><code>tables</code></strong> :&ensp;<code>set</code> of <code>string</code>, optional <code>None</code></dt>
 <dd>&nbsp;</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def collectActualItems(self, table=None):
+<pre><code class="python">def collectActualItems(self, tables=None):
     &#34;&#34;&#34;Determines which items are &#34;actual&#34;.
 
     Actual items are those types and criteria that are specified in a
@@ -2373,14 +2749,14 @@ involved in the concept of "actual", nothing will be done.</p>
     and end days.
 
     !!! caution
-        If a single value table needs to be collected, and that table is not
+        If only value table needs to be collected that are not
         involved in the concept of &#34;actual&#34;, nothing will be done.
 
     Parameters
     ----------
-    table: string, optional `None`
+    tables: set of string, optional `None`
     &#34;&#34;&#34;
-    if table is not None and table not in ACTUAL_TABLES:
+    if tables is not None and not (tables &amp; ACTUAL_TABLES):
         return
 
     justNow = now()
@@ -2452,7 +2828,7 @@ involved in the concept of "actual", nothing will be done.</p>
 
     self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
     if table in VALUE_TABLES:
-        self.collect(table=table)
+        self.recollect(table)
     # For the moment, we do not check whether it has succeeded.
     return True</code></pre>
 </details>
@@ -2590,7 +2966,7 @@ dependencies.</dd>
                 else {M_OR: [{field: eid} for field in fields]}
             )
 
-            nDep += self.mongoCmd(depKind, referringTable, N.count, crit)
+            nDep += self.mongoCmd(depKind, referringTable, N.count_documents, crit)
         depResult[depKind] = nDep
 
     return depResult</code></pre>
@@ -2974,11 +3350,9 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
             )
         )
     else:
-        print(&#39;CRIT&#39;, crit)
         records = self.mongoCmd(N.getList, table, N.find, crit)
     if select:
         criterion = self.makeCrit(table, conditions)
-        print(&#39;CRIT2&#39;, criterion)
         records = (record for record in records if Db.satisfies(record, criterion))
     return sorted(records, key=titleSort)</code></pre>
 </details>
@@ -3194,7 +3568,7 @@ record found, if <code>onlyIfNew</code> is true.</dd>
     }
     result = self.mongoCmd(N.insertItem, table, N.insert_one, newRecord)
     if table in VALUE_TABLES:
-        self.collect(table=table)
+        self.recollect(table)
     return result.inserted_id</code></pre>
 </details>
 </dd>
@@ -3303,7 +3677,7 @@ the DARIAH authentication service.</dd>
         }
     )
     result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
-    self.collect(table=N.user)
+    self.recollect(N.user)
     return result.inserted_id</code></pre>
 </details>
 </dd>
@@ -3451,8 +3825,27 @@ Only for the criteria that do care!</dd>
     return criterion</code></pre>
 </details>
 </dd>
+<dt id="control.db.Db.mongoClose"><code class="name flex">
+<span>def <span class="ident">mongoClose</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mongoClose(self):
+    client = self.client
+
+    if client:
+        client.close()
+        self.client = None
+        self.mongo = None
+        serverprint(&#34;&#34;&#34;MONGO: connection closed&#34;&#34;&#34;)</code></pre>
+</details>
+</dd>
 <dt id="control.db.Db.mongoCmd"><code class="name flex">
-<span>def <span class="ident">mongoCmd</span></span>(<span>self, label, table, command, *args)</span>
+<span>def <span class="ident">mongoCmd</span></span>(<span>self, label, table, command, *args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Wrapper around calls to MongoDb.</p>
@@ -3481,7 +3874,7 @@ The command must be listed in the mongo.yaml config file.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def mongoCmd(self, label, table, command, *args):
+<pre><code class="python">def mongoCmd(self, label, table, command, *args, **kwargs):
     &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
     All commands fired at the NongoDb go through this wrapper.
@@ -3506,16 +3899,171 @@ The command must be listed in the mongo.yaml config file.</dd>
     mixed
         Whatever the the MongoDb returns.
     &#34;&#34;&#34;
+
+    self.mongoOpen()
     mongo = self.mongo
 
     method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
     warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-    argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
     if DEBUG:
-        serverprint(f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep})&#34;&#34;&#34;)
+        argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
+        kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
+        serverprint(
+            f&#34;&#34;&#34;MONGO&lt;&lt;{label}&gt;&gt;.{table}.{command}{warning}({argRep} {kwargRep})&#34;&#34;&#34;
+        )
     if method:
-        return method(*args)
+        return method(*args, **kwargs)
     return None</code></pre>
+</details>
+</dd>
+<dt id="control.db.Db.mongoOpen"><code class="name flex">
+<span>def <span class="ident">mongoOpen</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mongoOpen(self):
+    client = self.client
+    mongo = self.mongo
+    test = self.test
+
+    if not mongo:
+        client = MongoClient()
+        mongo = client.dariah_clean if test else client.dariah
+        self.client = client
+        self.mongo = mongo
+        serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)</code></pre>
+</details>
+</dd>
+<dt id="control.db.Db.recollect"><code class="name flex">
+<span>def <span class="ident">recollect</span></span>(<span>self, table=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Collect the contents of the value tables if they have changed.</p>
+<p>For each value table it will be checked if they have been
+collected (by another worker) after this worker has started and if so,
+those tables and those tables only will be recollected.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Although the initial <code>collect</code> is done before workers start
+(<code>gunicorn --preload</code>), individual workers will end up with their
+own copy of the value table cache.
+So when we need to recollect values for our cache, we must notify
+in some way that other workers also have to recollect this table.</p>
+</div>
+<h3 id="global-recollection">Global recollection</h3>
+<p>Whenever we recollect a value table, we insert the time of recollection
+in a record in the MongoDb.</p>
+<p>Somewhere at the start of each request, these records will be checked,
+and if needed, recollections will be done before the actual request processing.</p>
+<p>There is a table <code>collect</code>, with records having fields <code>table</code> and
+<code>dateCollected</code>. After each (re)collect of a table, the <code>dateCollected</code> of
+the appropriate record will be set to the current time.</p>
+<div class="admonition note">
+<p class="admonition-title">recollect()</p>
+<p>A <code>recollect()</code> without arguments should be done at the start of each
+request.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">recollect(table)</p>
+<p>A <code>recollect(table)</code> should be done whenever this worker has changed
+something in that value table.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dd>A recollect() without arguments collects <em>all</em> value tables that need
+collecting based on the times of change as recorded in the <code>collect</code>
+table.
+A recollect of a single table means that this worker has made a change.
+After the recollect, a timestamp will go into the <code>collect</code> table,
+so that other workers can pick it up.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def recollect(self, table=None):
+    &#34;&#34;&#34;Collect the contents of the value tables if they have changed.
+
+    For each value table it will be checked if they have been
+    collected (by another worker) after this worker has started and if so,
+    those tables and those tables only will be recollected.
+
+    !!! caution
+        Although the initial `collect` is done before workers start
+        (`gunicorn --preload`), individual workers will end up with their
+        own copy of the value table cache.
+        So when we need to recollect values for our cache, we must notify
+        in some way that other workers also have to recollect this table.
+
+    ### Global recollection
+
+    Whenever we recollect a value table, we insert the time of recollection
+    in a record in the MongoDb.
+
+    Somewhere at the start of each request, these records will be checked,
+    and if needed, recollections will be done before the actual request processing.
+
+    There is a table `collect`, with records having fields `table` and
+    `dateCollected`. After each (re)collect of a table, the `dateCollected` of
+    the appropriate record will be set to the current time.
+
+    !!! note &#34;recollect()&#34;
+        A `recollect()` without arguments should be done at the start of each
+        request.
+
+    !!! note &#34;recollect(table)&#34;
+        A `recollect(table)` should be done whenever this worker has changed
+        something in that value table.
+
+    Parameters
+    ----------
+    table: string, optional `None`
+        A recollect() without arguments collects *all* value tables that need
+        collecting based on the times of change as recorded in the `collect`
+        table.
+        A recollect of a single table means that this worker has made a change.
+        After the recollect, a timestamp will go into the `collect` table,
+        so that other workers can pick it up.
+    &#34;&#34;&#34;
+
+    collected = self.collected
+
+    if table is None:
+        affected = set()
+        for valueTable in VALUE_TABLES:
+            record = self.mongoCmd(
+                N.recollect, N.collect, N.find_one, {RECOLLECT_NAME: valueTable}
+            )
+            lastChangedGlobally = G(record, RECOLLECT_DATE)
+            lastChangedHere = G(collected, valueTable)
+            if lastChangedGlobally and (
+                not lastChangedHere or lastChangedHere &lt; lastChangedGlobally
+            ):
+                self.cacheValueTable(valueTable)
+                collected[valueTable] = now()
+                affected.add(valueTable)
+    else:
+        self.cacheValueTable(table)
+        collected[table] = now()
+        affected = {table}
+        self.mongoCmd(
+            N.collect,
+            N.collect,
+            N.update_one,
+            {RECOLLECT_NAME: table},
+            {M_SET: {RECOLLECT_DATE: now()}},
+            upsert=True,
+        )
+
+    self.collectActualItems(tables=affected)
+
+    if affected:
+        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.updateField"><code class="name flex">
@@ -3617,7 +4165,7 @@ For exampe, if <code>submitted</code> is modified, the current datetime will be 
 
     self.mongoCmd(N.updateField, table, N.update_one, criterion, instructions)
     if table in VALUE_TABLES:
-        self.collect(table=table)
+        self.recollect(table)
     return (
         update,
         set(delete.keys()),
@@ -3654,11 +4202,19 @@ some of their attributes will change.</p>
 
     if N.isPristine in record:
         del record[N.isPristine]
+    justNow = now()
+    record.update(
+        {
+            N.dateLastLogin: justNow,
+            N.statusLastLogin: N.Approved,
+            N.modified: [MOD_FMT.format(CREATOR, justNow)],
+        }
+    )
     criterion = {N._id: G(record, N._id)}
     updates = {k: v for (k, v) in record.items() if k != N._id}
     instructions = {M_SET: updates, M_UNSET: {N.isPristine: E}}
     self.mongoCmd(N.updateUser, N.user, N.update_one, criterion, instructions)
-    self.collect(table=N.user)</code></pre>
+    self.recollect(N.user)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.updateWorkflow"><code class="name flex">
@@ -3723,9 +4279,12 @@ they are about.</p>
 <h4><code><a title="control.db.Db" href="#control.db.Db">Db</a></code></h4>
 <ul class="two-column">
 <li><code><a title="control.db.Db.bulkContribWorkflow" href="#control.db.Db.bulkContribWorkflow">bulkContribWorkflow</a></code></li>
+<li><code><a title="control.db.Db.cacheValueTable" href="#control.db.Db.cacheValueTable">cacheValueTable</a></code></li>
 <li><code><a title="control.db.Db.clearWorkflow" href="#control.db.Db.clearWorkflow">clearWorkflow</a></code></li>
+<li><code><a title="control.db.Db.client" href="#control.db.Db.client">client</a></code></li>
 <li><code><a title="control.db.Db.collect" href="#control.db.Db.collect">collect</a></code></li>
 <li><code><a title="control.db.Db.collectActualItems" href="#control.db.Db.collectActualItems">collectActualItems</a></code></li>
+<li><code><a title="control.db.Db.collected" href="#control.db.Db.collected">collected</a></code></li>
 <li><code><a title="control.db.Db.creatorId" href="#control.db.Db.creatorId">creatorId</a></code></li>
 <li><code><a title="control.db.Db.deleteItem" href="#control.db.Db.deleteItem">deleteItem</a></code></li>
 <li><code><a title="control.db.Db.deleteMany" href="#control.db.Db.deleteMany">deleteMany</a></code></li>
@@ -3746,8 +4305,12 @@ they are about.</p>
 <li><code><a title="control.db.Db.insertWorkflowMany" href="#control.db.Db.insertWorkflowMany">insertWorkflowMany</a></code></li>
 <li><code><a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit">makeCrit</a></code></li>
 <li><code><a title="control.db.Db.mongo" href="#control.db.Db.mongo">mongo</a></code></li>
+<li><code><a title="control.db.Db.mongoClose" href="#control.db.Db.mongoClose">mongoClose</a></code></li>
 <li><code><a title="control.db.Db.mongoCmd" href="#control.db.Db.mongoCmd">mongoCmd</a></code></li>
+<li><code><a title="control.db.Db.mongoOpen" href="#control.db.Db.mongoOpen">mongoOpen</a></code></li>
+<li><code><a title="control.db.Db.recollect" href="#control.db.Db.recollect">recollect</a></code></li>
 <li><code><a title="control.db.Db.satisfies" href="#control.db.Db.satisfies">satisfies</a></code></li>
+<li><code><a title="control.db.Db.test" href="#control.db.Db.test">test</a></code></li>
 <li><code><a title="control.db.Db.updateField" href="#control.db.Db.updateField">updateField</a></code></li>
 <li><code><a title="control.db.Db.updateUser" href="#control.db.Db.updateUser">updateUser</a></code></li>
 <li><code><a title="control.db.Db.updateWorkflow" href="#control.db.Db.updateWorkflow">updateWorkflow</a></code></li>
@@ -3759,7 +4322,7 @@ they are about.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
