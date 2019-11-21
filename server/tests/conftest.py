@@ -2,6 +2,7 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
+from helpers import makeClient
 
 
 DEBUG = False
@@ -25,6 +26,7 @@ def app():
 @pytest.fixture
 def app_notest():
     """Special app: development mode, but test mode switched off."""
+
     yield appFactory("development", DEBUG, False)
 
 
@@ -35,19 +37,39 @@ def app_prod():
     We only use this for verifying that test users cannot log in onto
     the production app.
     """
+
     yield appFactory("production", DEBUG, False)
 
 
 @pytest.fixture
 def client_prod(app_prod):
+    """Client accessing the production app."""
+
     return app_prod.test_client()
 
 
 @pytest.fixture
 def client(app):
+    """Client accessing the development app."""
     return app.test_client()
 
 
 @pytest.fixture
-def runner(app):
-    return app.test_cli_runner()
+def clientSuzan(app):
+    """Client, logged in as Suzan, accessing the development app."""
+
+    return makeClient(app, "suzan")
+
+
+@pytest.fixture
+def clientBart(app):
+    """Client, logged in as Bart, accessing the development app."""
+
+    return makeClient(app, "bart")
+
+
+@pytest.fixture
+def clientLisa(app):
+    """Client, logged in as Lisa, accessing the development app."""
+
+    return makeClient(app, "lisa")

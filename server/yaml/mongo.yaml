@@ -12,7 +12,7 @@ IN: '$in'
 
 showArgs:
   - aggregate
-  - count
+  - count_documents
   - delete_many
   - delete_one
   - find

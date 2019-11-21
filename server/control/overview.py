@@ -16,7 +16,8 @@ from control.html import HtmlElements as H
 CT = C.tables
 CW = C.web
 
-PAGE = G(G(CW.urls, N.info), N.url)
+URLS = CW.urls
+PAGE = URLS[N.info][N.url]
 PAGEX = f"{PAGE}.tsv"
 
 COL_PLURAL = dict(country="countries",)

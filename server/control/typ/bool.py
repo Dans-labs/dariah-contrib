@@ -1,4 +1,4 @@
-"Boolean types."""
+"Boolean types." ""
 
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
@@ -31,11 +31,12 @@ class Bool(TypeBase):
     def fromStr(self, editVal):
         return editVal
 
-    def toDisplay(self, val):
+    def toDisplay(self, val, markup=True):
         values = G(BOOLEAN_TYPES, self.name)
         noneValue = False if len(values) == 2 else None
 
-        return H.icon(G(values, val, default=G(values, noneValue)), cls="medium")
+        valueBare = G(values, val, default=G(values, noneValue))
+        return H.icon(valueBare, cls="medium") if markup else valueBare
 
     def toEdit(self, val):
         return val
@@ -63,6 +64,7 @@ class Bool(TypeBase):
 
 class Bool2(Bool):
     """Type class for two-valued booleans: True and False"""
+
     def fromStr(self, editVal):
         return (
             False
@@ -73,6 +75,7 @@ class Bool2(Bool):
 
 class Bool3(Bool):
     """Type class for three-valued booleans: True and False and None"""
+
     def fromStr(self, editVal):
         return (
             None

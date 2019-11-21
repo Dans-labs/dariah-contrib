@@ -5,11 +5,11 @@
 *   Saving values
 """
 
-from flask import request
+from flask import request, abort
 
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
-from control.utils import pick as G, bencode, cap1, E, BLANK, ONE
+from control.utils import pick as G, bencode, cap1, E, BLANK, ONE, COMMA
 from control.perm import getPerms
 
 CT = C.tables
@@ -225,6 +225,11 @@ class Field:
             Python/MongoDb values
         """
 
+        mayEdit = self.mayEdit
+
+        if not mayEdit:
+            return False
+
         context = self.context
         db = context.db
         uid = self.uid
@@ -275,6 +280,8 @@ class Field:
 
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
+
+        return True
 
     def isEmpty(self):
         """Whether the value(s) is/are empty.
@@ -397,7 +404,12 @@ class Field:
         if action is not None and not asMaster:
             data = request.get_json()
             if data is not None and N.save in data:
-                self.save(data[N.save])
+                if mayEdit:
+                    good = self.save(data[N.save])
+                else:
+                    good = False
+                if not good:
+                    return abort(400)
 
         if action == N.save:
             return E
@@ -484,6 +496,18 @@ class Field:
     def wrapValue(self, editable, cls=E):
         """Wraps the value of a field.
 
+        !!! hint "field=value in comments"
+            In the result we include a string
+
+            ``` html
+            <!-- title=My contribution -->
+            ```
+
+            but then with the field name instead of `title`
+            and the unmarked-up value  instead of `My contribution`.
+            This makes it easier for the test suite
+            to spot the fields and their values.
+
         Parameters
         ----------
         editable: boolean
@@ -498,6 +522,7 @@ class Field:
         context = self.context
         types = context.types
         fieldTypeObj = self.fieldTypeObj
+        field = self.field
         value = self.value
         tp = self.tp
         multiple = self.multiple
@@ -510,7 +535,6 @@ class Field:
         args = []
         if isSelectWidget and editable:
             record = self.record
-            field = self.field
             constrain = None
             constrainField = G(CONSTRAINED, field)
             if constrainField:
@@ -534,8 +558,13 @@ class Field:
 
         method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
         extraCls = E if editable else cls
+        valueBare = (
+            COMMA.join(fieldTypeObj.toDisplay(val, markup=False) for val in value or [])
+            if multiple
+            else fieldTypeObj.toDisplay(value, markup=False)
+        )
 
-        return (
+        return f"<!-- {field}={valueBare} -->" + (
             H.div(
                 [
                     method(val, *args)

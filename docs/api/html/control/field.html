@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>control.field API documentation</title>
 <meta name="description" content="Fields of records of tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -37,11 +37,11 @@
 *   Saving values
 &#34;&#34;&#34;
 
-from flask import request
+from flask import request, abort
 
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
-from control.utils import pick as G, bencode, cap1, E, BLANK, ONE
+from control.utils import pick as G, bencode, cap1, E, BLANK, ONE, COMMA
 from control.perm import getPerms
 
 CT = C.tables
@@ -257,6 +257,11 @@ class Field:
             Python/MongoDb values
         &#34;&#34;&#34;
 
+        mayEdit = self.mayEdit
+
+        if not mayEdit:
+            return False
+
         context = self.context
         db = context.db
         uid = self.uid
@@ -307,6 +312,8 @@ class Field:
 
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
+
+        return True
 
     def isEmpty(self):
         &#34;&#34;&#34;Whether the value(s) is/are empty.
@@ -429,7 +436,12 @@ class Field:
         if action is not None and not asMaster:
             data = request.get_json()
             if data is not None and N.save in data:
-                self.save(data[N.save])
+                if mayEdit:
+                    good = self.save(data[N.save])
+                else:
+                    good = False
+                if not good:
+                    return abort(400)
 
         if action == N.save:
             return E
@@ -516,6 +528,18 @@ class Field:
     def wrapValue(self, editable, cls=E):
         &#34;&#34;&#34;Wraps the value of a field.
 
+        !!! hint &#34;field=value in comments&#34;
+            In the result we include a string
+
+            ``` html
+            &lt;!-- title=My contribution --&gt;
+            ```
+
+            but then with the field name instead of `title`
+            and the unmarked-up value  instead of `My contribution`.
+            This makes it easier for the test suite
+            to spot the fields and their values.
+
         Parameters
         ----------
         editable: boolean
@@ -530,6 +554,7 @@ class Field:
         context = self.context
         types = context.types
         fieldTypeObj = self.fieldTypeObj
+        field = self.field
         value = self.value
         tp = self.tp
         multiple = self.multiple
@@ -542,7 +567,6 @@ class Field:
         args = []
         if isSelectWidget and editable:
             record = self.record
-            field = self.field
             constrain = None
             constrainField = G(CONSTRAINED, field)
             if constrainField:
@@ -566,8 +590,13 @@ class Field:
 
         method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
         extraCls = E if editable else cls
+        valueBare = (
+            COMMA.join(fieldTypeObj.toDisplay(val, markup=False) for val in value or [])
+            if multiple
+            else fieldTypeObj.toDisplay(value, markup=False)
+        )
 
-        return (
+        return f&#34;&lt;!-- {field}={valueBare} --&gt;&#34; + (
             H.div(
                 [
                     method(val, *args)
@@ -839,6 +868,11 @@ passing values for them here.</p>
             Python/MongoDb values
         &#34;&#34;&#34;
 
+        mayEdit = self.mayEdit
+
+        if not mayEdit:
+            return False
+
         context = self.context
         db = context.db
         uid = self.uid
@@ -889,6 +923,8 @@ passing values for them here.</p>
 
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
+
+        return True
 
     def isEmpty(self):
         &#34;&#34;&#34;Whether the value(s) is/are empty.
@@ -1011,7 +1047,12 @@ passing values for them here.</p>
         if action is not None and not asMaster:
             data = request.get_json()
             if data is not None and N.save in data:
-                self.save(data[N.save])
+                if mayEdit:
+                    good = self.save(data[N.save])
+                else:
+                    good = False
+                if not good:
+                    return abort(400)
 
         if action == N.save:
             return E
@@ -1098,6 +1139,18 @@ passing values for them here.</p>
     def wrapValue(self, editable, cls=E):
         &#34;&#34;&#34;Wraps the value of a field.
 
+        !!! hint &#34;field=value in comments&#34;
+            In the result we include a string
+
+            ``` html
+            &lt;!-- title=My contribution --&gt;
+            ```
+
+            but then with the field name instead of `title`
+            and the unmarked-up value  instead of `My contribution`.
+            This makes it easier for the test suite
+            to spot the fields and their values.
+
         Parameters
         ----------
         editable: boolean
@@ -1112,6 +1165,7 @@ passing values for them here.</p>
         context = self.context
         types = context.types
         fieldTypeObj = self.fieldTypeObj
+        field = self.field
         value = self.value
         tp = self.tp
         multiple = self.multiple
@@ -1124,7 +1178,6 @@ passing values for them here.</p>
         args = []
         if isSelectWidget and editable:
             record = self.record
-            field = self.field
             constrain = None
             constrainField = G(CONSTRAINED, field)
             if constrainField:
@@ -1148,8 +1201,13 @@ passing values for them here.</p>
 
         method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
         extraCls = E if editable else cls
+        valueBare = (
+            COMMA.join(fieldTypeObj.toDisplay(val, markup=False) for val in value or [])
+            if multiple
+            else fieldTypeObj.toDisplay(value, markup=False)
+        )
 
-        return (
+        return f&#34;&lt;!-- {field}={valueBare} --&gt;&#34; + (
             H.div(
                 [
                     method(val, *args)
@@ -1361,6 +1419,11 @@ Python/MongoDb values</dd>
         Python/MongoDb values
     &#34;&#34;&#34;
 
+    mayEdit = self.mayEdit
+
+    if not mayEdit:
+        return False
+
     context = self.context
     db = context.db
     uid = self.uid
@@ -1410,7 +1473,9 @@ Python/MongoDb values</dd>
     (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
 
     if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
-        recordObj.adjustWorkflow()</code></pre>
+        recordObj.adjustWorkflow()
+
+    return True</code></pre>
 </details>
 </dd>
 <dt id="control.field.Field.wrap"><code class="name flex">
@@ -1549,7 +1614,12 @@ Otherwise, and if <code>withLabel</code>, a label is added.</dd>
     if action is not None and not asMaster:
         data = request.get_json()
         if data is not None and N.save in data:
-            self.save(data[N.save])
+            if mayEdit:
+                good = self.save(data[N.save])
+            else:
+                good = False
+            if not good:
+                return abort(400)
 
     if action == N.save:
         return E
@@ -1629,12 +1699,23 @@ type class that matches the type of the field.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Wraps the value of a field.</p>
+<div class="admonition hint">
+<p class="admonition-title">field=value in comments</p>
+<p>In the result we include a string</p>
+<p><code>html
+&lt;!-- title=My contribution --&gt;</code></p>
+<p>but then with the field name instead of <code>title</code>
+and the unmarked-up value
+instead of <code>My contribution</code>.
+This makes it easier for the test suite
+to spot the fields and their values.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>editable</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether the field should be presented in editable form</dd>
 <dt><strong><code>cls</code></strong></dt>
-<dd>See <a title="control.field.Field.wrap" href="#control.field.Field.wrap"><code>Field.wrap()</code></a></dd>
+<dd>See <code>Field.wrap()</code></dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1647,6 +1728,18 @@ type class that matches the type of the field.</p>
 </summary>
 <pre><code class="python">def wrapValue(self, editable, cls=E):
     &#34;&#34;&#34;Wraps the value of a field.
+
+    !!! hint &#34;field=value in comments&#34;
+        In the result we include a string
+
+        ``` html
+        &lt;!-- title=My contribution --&gt;
+        ```
+
+        but then with the field name instead of `title`
+        and the unmarked-up value  instead of `My contribution`.
+        This makes it easier for the test suite
+        to spot the fields and their values.
 
     Parameters
     ----------
@@ -1662,6 +1755,7 @@ type class that matches the type of the field.</p>
     context = self.context
     types = context.types
     fieldTypeObj = self.fieldTypeObj
+    field = self.field
     value = self.value
     tp = self.tp
     multiple = self.multiple
@@ -1674,7 +1768,6 @@ type class that matches the type of the field.</p>
     args = []
     if isSelectWidget and editable:
         record = self.record
-        field = self.field
         constrain = None
         constrainField = G(CONSTRAINED, field)
         if constrainField:
@@ -1698,8 +1791,13 @@ type class that matches the type of the field.</p>
 
     method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
     extraCls = E if editable else cls
+    valueBare = (
+        COMMA.join(fieldTypeObj.toDisplay(val, markup=False) for val in value or [])
+        if multiple
+        else fieldTypeObj.toDisplay(value, markup=False)
+    )
 
-    return (
+    return f&#34;&lt;!-- {field}={valueBare} --&gt;&#34; + (
         H.div(
             [
                 method(val, *args)
@@ -1875,7 +1973,7 @@ These fields will get a refresh button automatically.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

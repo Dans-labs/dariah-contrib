@@ -62,8 +62,6 @@ plugins:
   - minify:
       minify_html: true
 
-use_directory_controls: false
-
 extra:
   # App
   repoName: dariah-contrib

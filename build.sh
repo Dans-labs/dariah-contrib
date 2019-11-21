@@ -32,6 +32,37 @@ function serve {
     cd ..
 }
 
+function gserve {
+    cd server
+    if [[ "$1" == "dev" ]]; then
+        mode="dev"
+    else
+        mode="prod"
+    fi
+    if [[ "$1" != "" ]]; then
+        shift
+    fi
+    if [[ "$1" == "" ]]; then
+        workers=""
+    else
+        workers="-w $1"
+        shift
+    fi
+    echo "mode=$mode"
+    if [[ "$mode" == "dev" ]]; then
+        maxw='--worker-connections 1'
+    else
+        maxw=''
+    fi
+    host='-b 127.0.0.1:8001'
+    logfile='--access-logfile -'
+    # fmt='%(h)s・%(l)s・%(u)s・%(t)s・"%(r)s"・%(s)s・%(b)s・"%(f)s"・"%(a)s"'
+    fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
+    logformat="--access-logformat '$fmt'" 
+    gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+    cd ..
+}
+
 function apidocs {
     cd server
     pdoc3 --force --html --output-dir "../$apidocbase" control
@@ -51,8 +82,10 @@ function docs {
 }
 
 function runtest {
+    echo "RESTORING A CLEAN DB ..."
     cleandb
     cd server
+    echo "RUNNING TESTS ..."
     pytest "$@"
     cd ..
 }
@@ -61,6 +94,12 @@ function cleandb {
     cd server
     mongorestore --quiet --drop --db=dariah_clean tests/dariah_clean
     python3 cleandb.py
+    cd ..
+}
+
+function workflow {
+    cd server
+    python3 workflow.py
     cd ..
 }
 
@@ -76,8 +115,14 @@ if [[ "$1" == "mongo" ]]; then
     mongod -f /usr/local/etc/mongod.conf
 elif [[ "$1" == "data" ]]; then
     dataimport
+elif [[ "$1" == "workflow" ]]; then
+    workflow
 elif [[ "$1" == "serve" ]]; then
-    serve "$2"
+    shift
+    serve "$1"
+elif [[ "$1" == "gserve" ]]; then
+    shift
+    gserve "$@"
 elif [[ "$1" == "stats" ]]; then
     codestats
 elif [[ "$1" == "docs" ]]; then
@@ -87,9 +132,8 @@ elif [[ "$1" == "pdoc" ]]; then
 elif [[ "$1" == "cleandb" ]]; then
     cleandb
 elif [[ "$1" == "test" ]]; then
-    runtest
-elif [[ "$1" == "testx" ]]; then
-    runtest -vv
+    shift
+    runtest "$@"
 elif [[ "$1" == "ship" ]]; then
     shift
     ship "$@"
@@ -102,8 +146,9 @@ else
 #    echo "python      : activate the version of python used for this app"
     echo "mongo       : start mongo db daemon"
     echo "data        : convert legacy FileMaker data and import it into MongoDB"
-    echo "serve prod  : start webserver, with 'prod': flask development mode is off"
-    echo "serveprod   : start webserver, but not in development mode"
+    echo "workflow    : (re)initialize the workflow table"
+    echo "serve prod  : start serving with flask server; 'prod': development mode is off"
+    echo "gserve      : start serving with gunicorn"
     echo "stats       : collect codebase statistics"
     echo "docs        : build and serve github pages documentation"
     echo "pdoc        : generate api docs from docstrings, also in tests"

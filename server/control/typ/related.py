@@ -36,8 +36,9 @@ class Related(TypeBase):
     def normalize(self, strVal):
         return strVal
 
-    def toDisplay(self, val):
-        return self.title(eid=val, markup=True)[1]
+    def toDisplay(self, val, markup=True):
+        result = self.title(eid=val, markup=markup)
+        return result[1] if markup else result
 
     def titleStr(self, record):
         return H.he(G(record, N.title)) or H.he(G(record, N.rep)) or Qq

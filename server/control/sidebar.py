@@ -18,7 +18,11 @@ CW = C.web
 
 SORTED_TABLES = CT.sorted
 
-HOME = CW.urls[N.home]
+URLS = CW.urls
+HOME = URLS[N.home]
+OVERVIEW = URLS[N.info][N.url]
+WORKFLOW = URLS[N.workflow][N.url]
+WORKFLOW_TEXT = URLS[N.workflow][N.text]
 OPTIONS = CW.options
 CAPTIONS = CW.captions
 USER_TABLES_LIST = CT.userTables
@@ -26,8 +30,6 @@ USER_ENTRY_TABLES = set(CT.userEntryTables)
 VALUE_TABLES = CT.valueTables
 SYSTEM_TABLES = CT.systemTables
 OFFICE_TABLES = [t for t in VALUE_TABLES if t not in SYSTEM_TABLES]
-
-OVERVIEW = G(G(CW.urls, N.info), N.url)
 
 
 class Sidebar:
@@ -388,6 +390,9 @@ class Sidebar:
 
         subEntries = []
         if isSysAdmin:
+            subEntries.append(
+                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, command=True)
+            )
             for table in SYSTEM_TABLES:
                 subEntries.append(self.tableEntry(table))
             entries.append(

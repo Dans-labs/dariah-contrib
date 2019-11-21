@@ -1,6 +1,7 @@
 black
 flake8
 flask
+gunicorn
 lxml
 markdown
 mkdocs
@@ -8,4 +9,6 @@ pdoc3
 pygments
 pymdown-extensions
 pymongo
+pytest
+pytest-ordering
 pyyaml

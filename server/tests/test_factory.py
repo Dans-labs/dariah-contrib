@@ -1,4 +1,5 @@
 import magic  # noqa
+from helpers import isStatus, isWrong
 
 
 TEST_USERS = [
@@ -30,8 +31,7 @@ def test_notest(app_notest):
 def test_login_prod(client_prod):
     """Make sure we cannot login test users in production!"""
     for (user, key, mayLogin) in TEST_USERS:
-        response = client_prod.get(f"/login?{key}={user}")
-        assert response.status_code == 303
+        isWrong(client_prod, f"/login?{key}={user}")
 
 
 def test_login(client):
@@ -41,8 +41,4 @@ def test_login(client):
     """
 
     for (user, key, mayLogin) in TEST_USERS:
-        response = client.get(f"/login?{key}={user}")
-        if mayLogin:
-            assert response.status_code == 302
-        else:
-            assert response.status_code == 303
+        isStatus(client, f"/login?{key}={user}", mayLogin)

@@ -61,6 +61,11 @@ cascade:
   review:
     - reviewEntry
 
+recollect:
+  table: collect
+  tableField: table
+  dateField: dateCollected
+
 items:
   contrib: [contribution, contributions]
   country: [country, countries]

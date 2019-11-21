@@ -12,6 +12,7 @@ from control.typ.base import TypeBase
 CW = C.web
 
 QQ = H.icon(CW.unknown[N.generic])
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 dtTrim = re.compile(r"""[^0-9  T/:.-]+""")
 dtSep = re.compile(r"""[ T/:.-]+""")
@@ -114,8 +115,11 @@ class Datetime(TypeBase):
         cast = self.rawType
         return cast(*normalParts)
 
-    def toDisplay(self, val):
-        return QQ if val is None else H.span(self.normalize(val.isoformat()))
+    def toDisplay(self, val, markup=True):
+        if val is None:
+            return QQ if markup else Qq
+        valBare = self.normalize(val.isoformat())
+        return H.span(valBare) if markup else valBare
 
     def toEdit(self, val):
         return E if val is None else self.normalize(val.isoformat())

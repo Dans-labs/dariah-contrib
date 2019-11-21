@@ -7,6 +7,7 @@
 
 from itertools import chain
 from bson.objectid import ObjectId
+from pymongo import MongoClient
 
 from config import Config as C, Names as N
 from control.utils import (
@@ -19,6 +20,7 @@ from control.utils import (
     ON,
     ONE,
     MINONE,
+    COMMA,
 )
 
 CB = C.base
@@ -52,6 +54,11 @@ VALUE_TABLES = set(CT.valueTables)
 REFERENCE_SPECS = CT.reference
 CASCADE_SPECS = CT.cascade
 
+RECOLLECT_SPECS = CT.recollect
+RECOLLECT_TABLE = RECOLLECT_SPECS[N.table]
+RECOLLECT_NAME = RECOLLECT_SPECS[N.tableField]
+RECOLLECT_DATE = RECOLLECT_SPECS[N.dateField]
+
 WORKFLOW_FIELDS = CF.fields
 FIELD_PROJ = {field: True for field in WORKFLOW_FIELDS}
 
@@ -69,10 +76,18 @@ class Db:
     It will read all content of all value tables and keep it cached.
 
     The data in the user tables will be cached by the higher level
-    `control.context.Context`.
+    `control.context.Context`, but only per request.
+
+    !!! caution
+        We start without a Mongo connection.
+        We make connection the first time we need it, and then keep the
+        connection in the `mongo` attribute.
+        This way, we have a single Mongo connection per worker process,
+        as recommended in
+        [PyMongo](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
     """
 
-    def __init__(self, mongo):
+    def __init__(self, test=False):
         """## Initialization
 
         Pick up the connection to MongoDb.
@@ -81,16 +96,28 @@ class Db:
 
         Parameters
         ----------
-        mongo: object
+        test: boolean
             See below.
         """
 
-        self.mongo = mongo
-        """*object* The connection to MongoDb.
+        self.test = test
+        """*boolean* Whether to connect to the test database."""
+
+        self.client = None
+        """*object* The MongoDb client."""
+
+        self.mongo = None
+        """*object* The connection to the MongoDb database.
 
         The connnection exists before the Db singleton is initialized.
         """
 
+        self.collected = {}
+        """*dict* For each value table, the time that this worker last collected it.
+
+        In the database there is a table which holds the last time for each value
+        table that a worker updated a value in it.
+        """
         self.collect()
 
         self.creatorId = [
@@ -105,7 +132,28 @@ class Db:
         to be created by the system.
         """
 
-    def mongoCmd(self, label, table, command, *args):
+    def mongoOpen(self):
+        client = self.client
+        mongo = self.mongo
+        test = self.test
+
+        if not mongo:
+            client = MongoClient()
+            mongo = client.dariah_clean if test else client.dariah
+            self.client = client
+            self.mongo = mongo
+            serverprint("""MONGO: new connection""")
+
+    def mongoClose(self):
+        client = self.client
+
+        if client:
+            client.close()
+            self.client = None
+            self.mongo = None
+            serverprint("""MONGO: connection closed""")
+
+    def mongoCmd(self, label, table, command, *args, **kwargs):
         """Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
@@ -130,66 +178,169 @@ class Db:
         mixed
             Whatever the the MongoDb returns.
         """
+
+        self.mongoOpen()
         mongo = self.mongo
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = """!UNDEFINED""" if method is None else E
-        argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
         if DEBUG:
-            serverprint(f"""MONGO<<{label}>>.{table}.{command}{warning}({argRep})""")
+            argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
+            kwargRep = COMMA.join(f"{k}={v}" for (k, v) in kwargs.items())
+            serverprint(
+                f"""MONGO<<{label}>>.{table}.{command}{warning}({argRep} {kwargRep})"""
+            )
         if method:
-            return method(*args)
+            return method(*args, **kwargs)
         return None
 
-    def collect(self, table=None):
+    def cacheValueTable(self, valueTable):
+        """Caches the contents of a value table.
+
+        The tables will be cached as under two attributes:
+
+        the name of the table
+        :   dictionary keyed by id and valued by the corresponding record
+
+        the name of the table + `Inv`
+        :   dictionary keyed by a key field and valued by the corresponding id.
+
+        Parameters
+        ----------
+        valueTable: string
+            The value table to be cached.
+        """
+
+        valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
+        repField = N.iso if valueTable == N.country else N.rep
+
+        setattr(
+            self, valueTable, {G(record, N._id): record for record in valueList},
+        )
+        setattr(
+            self,
+            f"""{valueTable}Inv""",
+            {G(record, repField): G(record, N._id) for record in valueList},
+        )
+        if valueTable == N.permissionGroup:
+            setattr(
+                self,
+                f"""{valueTable}Desc""",
+                {G(record, repField): G(record, N.description) for record in valueList},
+            )
+
+    def collect(self):
         """Collect the contents of the value tables.
 
         Value tables have content that is needed almost all the time.
         All value tables will be completely cached within Db.
 
-        This will be done in the rare cases when a value table gets modified by
-        an office user.
+        !!! note
+            This is meant to run at start up, before the workers start.
+            After that, this worker will not execute it again.
+            See also `recollect`.
+
+        !!! caution
+            We must take other workers into account. They need a signal
+            to recollect. See `recollect`.
+            We store the time that this worker has collected each table
+            in attribute `collected`.
 
         !!! warning
             This is a complicated app.
             Some tables have records that specify whether other records are "actual".
             After collecting a value table, the "actual" items will be recomputed.
+        """
+
+        collected = self.collected
+
+        for valueTable in VALUE_TABLES:
+            self.cacheValueTable(valueTable)
+            collected[valueTable] = now()
+
+        self.collectActualItems()
+        serverprint(f"""COLLECTED {COMMA.join(sorted(VALUE_TABLES))}""")
+
+    def recollect(self, table=None):
+        """Collect the contents of the value tables if they have changed.
+
+        For each value table it will be checked if they have been
+        collected (by another worker) after this worker has started and if so,
+        those tables and those tables only will be recollected.
+
+        !!! caution
+            Although the initial `collect` is done before workers start
+            (`gunicorn --preload`), individual workers will end up with their
+            own copy of the value table cache.
+            So when we need to recollect values for our cache, we must notify
+            in some way that other workers also have to recollect this table.
+
+        ### Global recollection
+
+        Whenever we recollect a value table, we insert the time of recollection
+        in a record in the MongoDb.
+
+        Somewhere at the start of each request, these records will be checked,
+        and if needed, recollections will be done before the actual request processing.
+
+        There is a table `collect`, with records having fields `table` and
+        `dateCollected`. After each (re)collect of a table, the `dateCollected` of
+        the appropriate record will be set to the current time.
+
+        !!! note "recollect()"
+            A `recollect()` without arguments should be done at the start of each
+            request.
+
+        !!! note "recollect(table)"
+            A `recollect(table)` should be done whenever this worker has changed
+            something in that value table.
 
         Parameters
         ----------
         table: string, optional `None`
-            A collect() without arguments collects *all* value tables.
-            By passing a table name, you can collect a single table.
+            A recollect() without arguments collects *all* value tables that need
+            collecting based on the times of change as recorded in the `collect`
+            table.
+            A recollect of a single table means that this worker has made a change.
+            After the recollect, a timestamp will go into the `collect` table,
+            so that other workers can pick it up.
         """
-        if table is not None and table not in VALUE_TABLES:
-            return
 
-        for valueTable in {table} if table else VALUE_TABLES:
-            valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
-            repField = N.iso if valueTable == N.country else N.rep
+        collected = self.collected
 
-            setattr(
-                self, valueTable, {G(record, N._id): record for record in valueList},
-            )
-            setattr(
-                self,
-                f"""{valueTable}Inv""",
-                {G(record, repField): G(record, N._id) for record in valueList},
-            )
-            if valueTable == N.permissionGroup:
-                setattr(
-                    self,
-                    f"""{valueTable}Desc""",
-                    {
-                        G(record, repField): G(record, N.description)
-                        for record in valueList
-                    },
+        if table is None:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                record = self.mongoCmd(
+                    N.recollect, N.collect, N.find_one, {RECOLLECT_NAME: valueTable}
                 )
-            serverprint(f"""COLLECTED {valueTable}""")
+                lastChangedGlobally = G(record, RECOLLECT_DATE)
+                lastChangedHere = G(collected, valueTable)
+                if lastChangedGlobally and (
+                    not lastChangedHere or lastChangedHere < lastChangedGlobally
+                ):
+                    self.cacheValueTable(valueTable)
+                    collected[valueTable] = now()
+                    affected.add(valueTable)
+        else:
+            self.cacheValueTable(table)
+            collected[table] = now()
+            affected = {table}
+            self.mongoCmd(
+                N.collect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: table},
+                {M_SET: {RECOLLECT_DATE: now()}},
+                upsert=True,
+            )
 
-        self.collectActualItems(table=table)
+        self.collectActualItems(tables=affected)
 
-    def collectActualItems(self, table=None):
+        if affected:
+            serverprint(f"""COLLECTED {COMMA.join(sorted(affected))}""")
+
+    def collectActualItems(self, tables=None):
         """Determines which items are "actual".
 
         Actual items are those types and criteria that are specified in a
@@ -198,14 +349,14 @@ class Db:
         and end days.
 
         !!! caution
-            If a single value table needs to be collected, and that table is not
+            If only value table needs to be collected that are not
             involved in the concept of "actual", nothing will be done.
 
         Parameters
         ----------
-        table: string, optional `None`
+        tables: set of string, optional `None`
         """
-        if table is not None and table not in ACTUAL_TABLES:
+        if tables is not None and not (tables & ACTUAL_TABLES):
             return
 
         justNow = now()
@@ -468,11 +619,9 @@ class Db:
                 )
             )
         else:
-            print('CRIT', crit)
             records = self.mongoCmd(N.getList, table, N.find, crit)
         if select:
             criterion = self.makeCrit(table, conditions)
-            print('CRIT2', criterion)
             records = (record for record in records if Db.satisfies(record, criterion))
         return sorted(records, key=titleSort)
 
@@ -644,7 +793,7 @@ class Db:
         }
         result = self.mongoCmd(N.insertItem, table, N.insert_one, newRecord)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return result.inserted_id
 
     def insertMany(self, table, uid, eppn, records):
@@ -708,7 +857,7 @@ class Db:
             }
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
-        self.collect(table=N.user)
+        self.recollect(N.user)
         return result.inserted_id
 
     def deleteItem(self, table, eid):
@@ -724,7 +873,7 @@ class Db:
 
         self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         # For the moment, we do not check whether it has succeeded.
         return True
 
@@ -800,7 +949,7 @@ class Db:
 
         self.mongoCmd(N.updateField, table, N.update_one, criterion, instructions)
         if table in VALUE_TABLES:
-            self.collect(table=table)
+            self.recollect(table)
         return (
             update,
             set(delete.keys()),
@@ -820,11 +969,19 @@ class Db:
 
         if N.isPristine in record:
             del record[N.isPristine]
+        justNow = now()
+        record.update(
+            {
+                N.dateLastLogin: justNow,
+                N.statusLastLogin: N.Approved,
+                N.modified: [MOD_FMT.format(CREATOR, justNow)],
+            }
+        )
         criterion = {N._id: G(record, N._id)}
         updates = {k: v for (k, v) in record.items() if k != N._id}
         instructions = {M_SET: updates, M_UNSET: {N.isPristine: E}}
         self.mongoCmd(N.updateUser, N.user, N.update_one, criterion, instructions)
-        self.collect(table=N.user)
+        self.recollect(N.user)
 
     def dependencies(self, table, record):
         """Computes the number of dependent records of a record.
@@ -870,7 +1027,7 @@ class Db:
                     else {M_OR: [{field: eid} for field in fields]}
                 )
 
-                nDep += self.mongoCmd(depKind, referringTable, N.count, crit)
+                nDep += self.mongoCmd(depKind, referringTable, N.count_documents, crit)
             depResult[depKind] = nDep
 
         return depResult
@@ -894,7 +1051,7 @@ class Db:
         (Currently this function is not used).
         """
 
-        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many)
+        self.mongoCmd(N.clearWorkflow, N.workflow, N.delete_many, {})
 
     def entries(self, table, crit={}):
         """Get relevant records from a table as a dictionary of entries.

@@ -9,6 +9,7 @@ from control.utils import pick as G, E
 CW = C.web
 
 QQ = H.icon(CW.unknown[N.generic])
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 WRONG_TYPE = CW.messages
 
@@ -101,7 +102,7 @@ class TypeBase:
         cast = self.rawType
         return val if cast is None else cast(val)
 
-    def toDisplay(self, val):
+    def toDisplay(self, val, markup=True):
         """Turns a real value into a HTML code for readonly display.
 
         Parameters
@@ -115,7 +116,10 @@ class TypeBase:
             Possibly with nice formatting depending on the nature of the value.
         """
 
-        return QQ if val is None else H.span(H.he(self.normalize(str(val))))
+        if val is None:
+            return QQ if markup else Qq
+        valBare = H.he(self.normalize(str(val)))
+        return H.span(valBare) if markup else valBare
 
     def toEdit(self, val):
         """Turns a real value into a string for editable display.

@@ -263,7 +263,7 @@ class Auth:
                 email = utf8FromLatin1(env[N.mail])
                 isUser = self.getUser(eppn, email=email)
                 if not isUser:
-                    # the user us refused because the database says (s)he may not login
+                    # the user is refused because the database says (s)he may not login
                     self.clearUser()
                     return False
 
@@ -278,9 +278,15 @@ class Auth:
                     for (envKey, toolKey) in ATTRIBUTES.items()
                     if envKey in env
                 }
-                user.update(attributes)
+                dirty = False
+                for (att, val) in attributes.items():
+                    currentVal = G(user, att)
+                    if currentVal != val:
+                        user[att] = val
+                        dirty = True
                 if N._id in user:
-                    db.updateUser(user)
+                    if dirty:
+                        db.updateUser(user)
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id

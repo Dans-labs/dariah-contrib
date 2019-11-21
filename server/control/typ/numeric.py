@@ -12,6 +12,7 @@ from control.utils import E, EURO, MIN, DOT
 CW = C.web
 
 QQ = H.icon(CW.unknown[N.generic])
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 Qn = H.icon(CW.unknown[N.number], asChar=True)
 
 stripNonnumeric = re.compile(r"""[^-0-9.,]""")
@@ -80,5 +81,8 @@ class Decimal(Numeric):
 class Money(Decimal):
     """Type class for money quantities, negative ones and zero included."""
 
-    def toDisplay(self, val):
-        return QQ if val is None else H.span(f"""{EURO} {self.normalize(str(val))}""")
+    def toDisplay(self, val, markup=True):
+        if val is None:
+            return QQ if markup else Qq
+        valBare = f"""{EURO} {self.normalize(str(val))}"""
+        return H.span(valBare) if markup else valBare

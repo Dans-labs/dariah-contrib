@@ -352,7 +352,6 @@ class Table:
         if request.args:
             params.update(request.args)
 
-        print('PPP', params)
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
         insertButton = self.insertButton()
         sep = NBSP if insertButton else E

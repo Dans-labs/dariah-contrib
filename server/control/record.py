@@ -248,11 +248,6 @@ class Record:
 
         self.valid = valid
 
-        if str(eid) == "5d650d96f95ad52b7ef02813":
-            print('XX valid?', table, self.valid)
-            print('XX fixed?', table, self.fixed, wfitem)
-            print('XX wfitem?', table, self.wfitem)
-
     def adjustWorkflow(self, update=True, delete=False):
         """Recompute workflow information.
 
@@ -634,7 +629,6 @@ class Record:
         """
 
         mayDelete = self.mayDelete
-        print('mayDelete?', self.table, mayDelete)
 
         if not mayDelete:
             return E

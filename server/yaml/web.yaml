@@ -94,6 +94,9 @@ urls:
   logout:
     text: log out
     url: /logout
+  workflow:
+    text: Recompute workflow table
+    url: /workflow
   slogout:
     text: log out from DARIAH
     url: /slogout

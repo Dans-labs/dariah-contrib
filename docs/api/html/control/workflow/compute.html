@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>control.workflow.compute API documentation</title>
 <meta name="description" content="Computing workflow …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -172,13 +172,29 @@ class Workflow:
             We need the maximum to present a given score as a percentage.
         &#34;&#34;&#34;
 
-        self.initWorkflow(drop=True)
-
     def initWorkflow(self, drop=False):
         &#34;&#34;&#34;(Re)fills the workflow table.
 
         !!! caution
-            Clearing is not yet used in the applicatio, only dropping.
+            This is not needed if the workflow table stays in sync
+            with the other data in the database.
+            So, normally, it is best not to carry out this step, because
+            when workers start and restart, we do not want a big table
+            operation to happen that is visible across workers.
+
+            When the server starts, we carry out this function once.
+
+        !!! hint &#34;Gunicorn&#34;
+            On `gunicorn`, we start the server with `--preload`,
+            hence the workflow init happens before any worker starts.
+
+        !!! hint &#34;Build script&#34;
+            You can manually trigger the workflow initialization by means
+            of the build script, whether or not the webserver runs.
+
+        !!! hint &#34;Sysadmin&#34;
+            System administrators can trigger the workflow initialization
+            by means of a button in the sidebar, only visible and executable by them.
 
         Parameters
         ----------
@@ -186,6 +202,10 @@ class Workflow:
             If True, the complete table will first be dropped and then
             recreated.
             Otherwise, the table will merely be cleared.
+
+        Returns
+        -------
+        The number of workflow records stored.
         &#34;&#34;&#34;
 
         db = self.db
@@ -210,10 +230,13 @@ class Workflow:
         for mainRecord in G(entries, MAIN_TABLE, default={}).values():
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
-        serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+
+        nWf = len(wfRecords)
+        serverprint(f&#34;WORKFLOW: Store {nWf} workflow records&#34;)
         if wfRecords:
             db.insertWorkflowMany(wfRecords)
         serverprint(&#34;WORKFLOW: Initialization done&#34;)
+        return nWf
 
     def insert(self, contribId):
         &#34;&#34;&#34;Computes and stores workflow for a single contribution.
@@ -865,13 +888,29 @@ are fetched and stored as attributes.</p>
             We need the maximum to present a given score as a percentage.
         &#34;&#34;&#34;
 
-        self.initWorkflow(drop=True)
-
     def initWorkflow(self, drop=False):
         &#34;&#34;&#34;(Re)fills the workflow table.
 
         !!! caution
-            Clearing is not yet used in the applicatio, only dropping.
+            This is not needed if the workflow table stays in sync
+            with the other data in the database.
+            So, normally, it is best not to carry out this step, because
+            when workers start and restart, we do not want a big table
+            operation to happen that is visible across workers.
+
+            When the server starts, we carry out this function once.
+
+        !!! hint &#34;Gunicorn&#34;
+            On `gunicorn`, we start the server with `--preload`,
+            hence the workflow init happens before any worker starts.
+
+        !!! hint &#34;Build script&#34;
+            You can manually trigger the workflow initialization by means
+            of the build script, whether or not the webserver runs.
+
+        !!! hint &#34;Sysadmin&#34;
+            System administrators can trigger the workflow initialization
+            by means of a button in the sidebar, only visible and executable by them.
 
         Parameters
         ----------
@@ -879,6 +918,10 @@ are fetched and stored as attributes.</p>
             If True, the complete table will first be dropped and then
             recreated.
             Otherwise, the table will merely be cleared.
+
+        Returns
+        -------
+        The number of workflow records stored.
         &#34;&#34;&#34;
 
         db = self.db
@@ -903,10 +946,13 @@ are fetched and stored as attributes.</p>
         for mainRecord in G(entries, MAIN_TABLE, default={}).values():
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
-        serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+
+        nWf = len(wfRecords)
+        serverprint(f&#34;WORKFLOW: Store {nWf} workflow records&#34;)
         if wfRecords:
             db.insertWorkflowMany(wfRecords)
         serverprint(&#34;WORKFLOW: Initialization done&#34;)
+        return nWf
 
     def insert(self, contribId):
         &#34;&#34;&#34;Computes and stores workflow for a single contribution.
@@ -2041,7 +2087,27 @@ Hence it is passed from there to here.</dd>
 <section class="desc"><p>(Re)fills the workflow table.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>Clearing is not yet used in the applicatio, only dropping.</p>
+<p>This is not needed if the workflow table stays in sync
+with the other data in the database.
+So, normally, it is best not to carry out this step, because
+when workers start and restart, we do not want a big table
+operation to happen that is visible across workers.</p>
+<p>When the server starts, we carry out this function once.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Gunicorn</p>
+<p>On <code>gunicorn</code>, we start the server with <code>--preload</code>,
+hence the workflow init happens before any worker starts.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Build script</p>
+<p>You can manually trigger the workflow initialization by means
+of the build script, whether or not the webserver runs.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Sysadmin</p>
+<p>System administrators can trigger the workflow initialization
+by means of a button in the sidebar, only visible and executable by them.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2049,7 +2115,9 @@ Hence it is passed from there to here.</dd>
 <dd>If True, the complete table will first be dropped and then
 recreated.
 Otherwise, the table will merely be cleared.</dd>
-</dl></section>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The number of workflow records stored.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2058,7 +2126,25 @@ Otherwise, the table will merely be cleared.</dd>
     &#34;&#34;&#34;(Re)fills the workflow table.
 
     !!! caution
-        Clearing is not yet used in the applicatio, only dropping.
+        This is not needed if the workflow table stays in sync
+        with the other data in the database.
+        So, normally, it is best not to carry out this step, because
+        when workers start and restart, we do not want a big table
+        operation to happen that is visible across workers.
+
+        When the server starts, we carry out this function once.
+
+    !!! hint &#34;Gunicorn&#34;
+        On `gunicorn`, we start the server with `--preload`,
+        hence the workflow init happens before any worker starts.
+
+    !!! hint &#34;Build script&#34;
+        You can manually trigger the workflow initialization by means
+        of the build script, whether or not the webserver runs.
+
+    !!! hint &#34;Sysadmin&#34;
+        System administrators can trigger the workflow initialization
+        by means of a button in the sidebar, only visible and executable by them.
 
     Parameters
     ----------
@@ -2066,6 +2152,10 @@ Otherwise, the table will merely be cleared.</dd>
         If True, the complete table will first be dropped and then
         recreated.
         Otherwise, the table will merely be cleared.
+
+    Returns
+    -------
+    The number of workflow records stored.
     &#34;&#34;&#34;
 
     db = self.db
@@ -2090,10 +2180,13 @@ Otherwise, the table will merely be cleared.</dd>
     for mainRecord in G(entries, MAIN_TABLE, default={}).values():
         info = self.computeWorkflow(record=mainRecord)
         wfRecords.append(info)
-    serverprint(&#34;WORKFLOW: Store workflow info&#34;)
+
+    nWf = len(wfRecords)
+    serverprint(f&#34;WORKFLOW: Store {nWf} workflow records&#34;)
     if wfRecords:
         db.insertWorkflowMany(wfRecords)
-    serverprint(&#34;WORKFLOW: Initialization done&#34;)</code></pre>
+    serverprint(&#34;WORKFLOW: Initialization done&#34;)
+    return nWf</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.compute.Workflow.insert"><code class="name flex">
@@ -2200,7 +2293,7 @@ Otherwise, the table will merely be cleared.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

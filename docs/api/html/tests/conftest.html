@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>conftest API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -28,6 +28,7 @@
 
 import magic  # noqa
 from control.app import appFactory
+from helpers import makeClient
 
 
 DEBUG = False
@@ -51,6 +52,7 @@ def app():
 @pytest.fixture
 def app_notest():
     &#34;&#34;&#34;Special app: development mode, but test mode switched off.&#34;&#34;&#34;
+
     yield appFactory(&#34;development&#34;, DEBUG, False)
 
 
@@ -61,22 +63,42 @@ def app_prod():
     We only use this for verifying that test users cannot log in onto
     the production app.
     &#34;&#34;&#34;
+
     yield appFactory(&#34;production&#34;, DEBUG, False)
 
 
 @pytest.fixture
 def client_prod(app_prod):
+    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
+
     return app_prod.test_client()
 
 
 @pytest.fixture
 def client(app):
+    &#34;&#34;&#34;Client accessing the development app.&#34;&#34;&#34;
     return app.test_client()
 
 
 @pytest.fixture
-def runner(app):
-    return app.test_cli_runner()</code></pre>
+def clientSuzan(app):
+    &#34;&#34;&#34;Client, logged in as Suzan, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;suzan&#34;)
+
+
+@pytest.fixture
+def clientBart(app):
+    &#34;&#34;&#34;Client, logged in as Bart, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;bart&#34;)
+
+
+@pytest.fixture
+def clientLisa(app):
+    &#34;&#34;&#34;Client, logged in as Lisa, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;lisa&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -125,6 +147,7 @@ def app():
 <pre><code class="python">@pytest.fixture
 def app_notest():
     &#34;&#34;&#34;Special app: development mode, but test mode switched off.&#34;&#34;&#34;
+
     yield appFactory(&#34;development&#34;, DEBUG, False)</code></pre>
 </details>
 </dd>
@@ -146,6 +169,7 @@ def app_prod():
     We only use this for verifying that test users cannot log in onto
     the production app.
     &#34;&#34;&#34;
+
     yield appFactory(&#34;production&#34;, DEBUG, False)</code></pre>
 </details>
 </dd>
@@ -153,42 +177,79 @@ def app_prod():
 <span>def <span class="ident">client</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Client accessing the development app.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
 def client(app):
+    &#34;&#34;&#34;Client accessing the development app.&#34;&#34;&#34;
     return app.test_client()</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientBart"><code class="name flex">
+<span>def <span class="ident">clientBart</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Client, logged in as Bart, accessing the development app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientBart(app):
+    &#34;&#34;&#34;Client, logged in as Bart, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;bart&#34;)</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientLisa"><code class="name flex">
+<span>def <span class="ident">clientLisa</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Client, logged in as Lisa, accessing the development app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientLisa(app):
+    &#34;&#34;&#34;Client, logged in as Lisa, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;lisa&#34;)</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientSuzan"><code class="name flex">
+<span>def <span class="ident">clientSuzan</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Client, logged in as Suzan, accessing the development app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientSuzan(app):
+    &#34;&#34;&#34;Client, logged in as Suzan, accessing the development app.&#34;&#34;&#34;
+
+    return makeClient(app, &#34;suzan&#34;)</code></pre>
 </details>
 </dd>
 <dt id="conftest.client_prod"><code class="name flex">
 <span>def <span class="ident">client_prod</span></span>(<span>app_prod)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Client accessing the production app.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
 def client_prod(app_prod):
+    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
+
     return app_prod.test_client()</code></pre>
-</details>
-</dd>
-<dt id="conftest.runner"><code class="name flex">
-<span>def <span class="ident">runner</span></span>(<span>app)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def runner(app):
-    return app.test_cli_runner()</code></pre>
 </details>
 </dd>
 </dl>
@@ -208,15 +269,17 @@ def runner(app):
 <li><code><a title="conftest.app_notest" href="#conftest.app_notest">app_notest</a></code></li>
 <li><code><a title="conftest.app_prod" href="#conftest.app_prod">app_prod</a></code></li>
 <li><code><a title="conftest.client" href="#conftest.client">client</a></code></li>
+<li><code><a title="conftest.clientBart" href="#conftest.clientBart">clientBart</a></code></li>
+<li><code><a title="conftest.clientLisa" href="#conftest.clientLisa">clientLisa</a></code></li>
+<li><code><a title="conftest.clientSuzan" href="#conftest.clientSuzan">clientSuzan</a></code></li>
 <li><code><a title="conftest.client_prod" href="#conftest.client_prod">client_prod</a></code></li>
-<li><code><a title="conftest.runner" href="#conftest.runner">runner</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

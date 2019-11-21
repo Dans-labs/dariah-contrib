@@ -1,5 +1,7 @@
 [conftest](conftest.html)
 
+[helpers](helpers.html)
+
 [magic](magic.html)
 
 [test_contrib](test_contrib.html)

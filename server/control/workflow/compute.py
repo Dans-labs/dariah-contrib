@@ -141,13 +141,29 @@ class Workflow:
             We need the maximum to present a given score as a percentage.
         """
 
-        self.initWorkflow(drop=True)
-
     def initWorkflow(self, drop=False):
         """(Re)fills the workflow table.
 
         !!! caution
-            Clearing is not yet used in the applicatio, only dropping.
+            This is not needed if the workflow table stays in sync
+            with the other data in the database.
+            So, normally, it is best not to carry out this step, because
+            when workers start and restart, we do not want a big table
+            operation to happen that is visible across workers.
+
+            When the server starts, we carry out this function once.
+
+        !!! hint "Gunicorn"
+            On `gunicorn`, we start the server with `--preload`,
+            hence the workflow init happens before any worker starts.
+
+        !!! hint "Build script"
+            You can manually trigger the workflow initialization by means
+            of the build script, whether or not the webserver runs.
+
+        !!! hint "Sysadmin"
+            System administrators can trigger the workflow initialization
+            by means of a button in the sidebar, only visible and executable by them.
 
         Parameters
         ----------
@@ -155,6 +171,10 @@ class Workflow:
             If True, the complete table will first be dropped and then
             recreated.
             Otherwise, the table will merely be cleared.
+
+        Returns
+        -------
+        The number of workflow records stored.
         """
 
         db = self.db
@@ -179,10 +199,13 @@ class Workflow:
         for mainRecord in G(entries, MAIN_TABLE, default={}).values():
             info = self.computeWorkflow(record=mainRecord)
             wfRecords.append(info)
-        serverprint("WORKFLOW: Store workflow info")
+
+        nWf = len(wfRecords)
+        serverprint(f"WORKFLOW: Store {nWf} workflow records")
         if wfRecords:
             db.insertWorkflowMany(wfRecords)
         serverprint("WORKFLOW: Initialization done")
+        return nWf
 
     def insert(self, contribId):
         """Computes and stores workflow for a single contribution.

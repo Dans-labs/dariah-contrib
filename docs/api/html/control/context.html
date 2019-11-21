@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.1" />
+<meta name="generator" content="pdoc 0.7.2" />
 <title>control.context API documentation</title>
 <meta name="description" content="All context info …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -66,13 +66,37 @@ class Context:
 
     A few notes on the lifetimes of those objects and the cache.
 
-    Class | lifetime | what is cached
+    Before the Flask object is constructed, the factory reads data from config files
+    and MongoDb and stores it in data structures which become bound to the Flask
+    object.
+
+    !!! caution &#34;Python data lives per worker&#34;
+        All data bound to the Flask app is per worker.
+        The webserver may spawn several processes, and they all get a copy
+        of this data (because of `gunicorn --preload`, but after that, each
+        copy is independent.
+
+    !!! caution &#34;MongoDb connection&#34;
+        Although the Mongo connection could be constructed before the fork,
+        copying the connection to workers is bad.
+        So that connection will be closed after initialization.
+        Whenever a worker needs access to MongoDb again, it will create a connection
+        and store it, so that each worker has only a single connection to MongoDb.
+
+    !!! hint &#34;Truly global data in the database&#34;
+        The only truly global data is data stored in the MongoDb.
+        That is the ultimate source of truth for all workers.
+
+    It makes sense for workers to cache data between requests and other data
+    just for the duration of requests.
+
+    Store | lifetime | what is stored
     --- | --- | ---
-    `control.db.Db` | application process | all data in all value tables
-    `control.workflow.compute.Workflow` | application process | workflow table
-    `control.auth.Auth` | per request | holds current user data
-    `control.typ.types.Types` | per request | NN/A
-    cache | per request | user tables as far as needed for the request
+    MongoDb | permanent | all app tables
+    MongoDb | permanent | the workflow table, see `control.workflow.compute.Workflow`
+    `control.db.Db` | worker process | cache for all data in all value tables
+    `control.auth.Auth` | request | holds current user data
+    `control.context.Context.cache` | request | cache for some records inuser tables
 
     !!! note &#34;Why needed?&#34;
         During a request, several records may be shown, with their details.
@@ -81,8 +105,9 @@ class Context:
         the same workflow information.
         Caching prevents an explosion of record fetches.
 
-        However, we should not cache between requests, because the records that benefit
-        most from caching are exactly the ones that can be changed by users.
+        However, we should not cache this databetween requests,
+        because the records that benefit most from caching are exactly the ones
+        that are changed frequentlyby users.
 
     !!! note &#34;Individual items&#34;
         The cache stores individual record and workflow items (by table and id)
@@ -91,8 +116,14 @@ class Context:
     !!! note &#34;versus Db caching&#34;
         The records in value tables are already cached in Db itself.
         Such records will not go in this cache.
-        If such a record changes, Db will reread the whole table.
+        And other workers will do the same when they need that table.
         But this happens very rarely.
+
+    !!! caution &#34;refreshing the Db cache&#34;
+        Another worker may have changed a value in a value table.
+        Then our cache of that table is invalid.
+        We detect it by inspecting the table `collect` in MongoDb.
+        See `control.db.Db.recollect`.
     &#34;&#34;&#34;
 
     def __init__(self, db, wf, auth):
@@ -144,6 +175,8 @@ class Context:
         The cache lives as long as the request.
         &#34;&#34;&#34;
 
+        db.recollect()
+
     def getItem(self, table, eid, requireFresh=False):
         &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
 
@@ -174,6 +207,29 @@ class Context:
         return self.getCached(
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
+
+    def resetWorkflow(self):
+        &#34;&#34;&#34;Recompute the workflow table.
+
+        The workflow table contains only information that can be derived from the
+        other tables. In case the workflow table appears out of sync, a system
+        administrator can trigger a clearing of the workflow table followed by
+        a recomputation of all workflow info.
+
+        Returns
+        -------
+        int
+            The number of resulting workflow records.
+            If the recomputation did not take place, -1 is returned.
+        &#34;&#34;&#34;
+
+        auth = self.auth
+        wf = self.wf
+
+        nWf = -1
+        if auth.sysadmin():
+            nWf = wf.initWorkflow(drop=False)
+        return nWf
 
     def getWorkflowItem(self, contribId, requireFresh=False):
         &#34;&#34;&#34;Fetch a single workflow record from the database, possibly from cache.
@@ -296,39 +352,64 @@ Context singleton for easy passing around.</p>
 A few Db methods have a corresponding method here, which first checks a cache
 before actually calling the lower level Db method.</p>
 <p>A few notes on the lifetimes of those objects and the cache.</p>
+<p>Before the Flask object is constructed, the factory reads data from config files
+and MongoDb and stores it in data structures which become bound to the Flask
+object.</p>
+<div class="admonition caution">
+<p class="admonition-title">Python data lives per worker</p>
+<p>All data bound to the Flask app is per worker.
+The webserver may spawn several processes, and they all get a copy
+of this data (because of <code>gunicorn --preload</code>, but after that, each
+copy is independent.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">MongoDb connection</p>
+<p>Although the Mongo connection could be constructed before the fork,
+copying the connection to workers is bad.
+So that connection will be closed after initialization.
+Whenever a worker needs access to MongoDb again, it will create a connection
+and store it, so that each worker has only a single connection to MongoDb.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Truly global data in the database</p>
+<p>The only truly global data is data stored in the MongoDb.
+That is the ultimate source of truth for all workers.</p>
+</div>
+<p>It makes sense for workers to cache data between requests and other data
+just for the duration of requests.</p>
 <table>
 <thead>
 <tr>
-<th>Class</th>
+<th>Store</th>
 <th>lifetime</th>
-<th>what is cached</th>
+<th>what is stored</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a></td>
-<td>application process</td>
-<td>all data in all value tables</td>
+<td>MongoDb</td>
+<td>permanent</td>
+<td>all app tables</td>
 </tr>
 <tr>
-<td><a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a></td>
-<td>application process</td>
-<td>workflow table</td>
+<td>MongoDb</td>
+<td>permanent</td>
+<td>the workflow table, see <a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a></td>
+</tr>
+<tr>
+<td><a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a></td>
+<td>worker process</td>
+<td>cache for all data in all value tables</td>
 </tr>
 <tr>
 <td><a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a></td>
-<td>per request</td>
+<td>request</td>
 <td>holds current user data</td>
 </tr>
 <tr>
-<td><a title="control.typ.types.Types" href="typ/types.html#control.typ.types.Types"><code>Types</code></a></td>
-<td>per request</td>
-<td>NN/A</td>
-</tr>
-<tr>
-<td>cache</td>
-<td>per request</td>
-<td>user tables as far as needed for the request</td>
+<td><a title="control.context.Context.cache" href="#control.context.Context.cache"><code>Context.cache</code></a></td>
+<td>request</td>
+<td>cache for some records inuser tables</td>
 </tr>
 </tbody>
 </table>
@@ -339,8 +420,9 @@ They have to be fetched in order to get the permissions.
 Details may require the permissions of the parents. Many records may share
 the same workflow information.
 Caching prevents an explosion of record fetches.</p>
-<p>However, we should not cache between requests, because the records that benefit
-most from caching are exactly the ones that can be changed by users.</p>
+<p>However, we should not cache this databetween requests,
+because the records that benefit most from caching are exactly the ones
+that are changed frequentlyby users.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Individual items</p>
@@ -351,8 +433,15 @@ straight after fetching them from mongo, via Db.</p>
 <p class="admonition-title">versus Db caching</p>
 <p>The records in value tables are already cached in Db itself.
 Such records will not go in this cache.
-If such a record changes, Db will reread the whole table.
+And other workers will do the same when they need that table.
 But this happens very rarely.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">refreshing the Db cache</p>
+<p>Another worker may have changed a value in a value table.
+Then our cache of that table is invalid.
+We detect it by inspecting the table <code>collect</code> in MongoDb.
+See <a title="control.db.Db.recollect" href="db.html#control.db.Db.recollect"><code>Db.recollect()</code></a>.</p>
 </div>
 <h2 id="initialization">Initialization</h2>
 <p>Creates a context singleton and initializes its cache.</p>
@@ -384,13 +473,37 @@ to which it adds caching.</p>
 
     A few notes on the lifetimes of those objects and the cache.
 
-    Class | lifetime | what is cached
+    Before the Flask object is constructed, the factory reads data from config files
+    and MongoDb and stores it in data structures which become bound to the Flask
+    object.
+
+    !!! caution &#34;Python data lives per worker&#34;
+        All data bound to the Flask app is per worker.
+        The webserver may spawn several processes, and they all get a copy
+        of this data (because of `gunicorn --preload`, but after that, each
+        copy is independent.
+
+    !!! caution &#34;MongoDb connection&#34;
+        Although the Mongo connection could be constructed before the fork,
+        copying the connection to workers is bad.
+        So that connection will be closed after initialization.
+        Whenever a worker needs access to MongoDb again, it will create a connection
+        and store it, so that each worker has only a single connection to MongoDb.
+
+    !!! hint &#34;Truly global data in the database&#34;
+        The only truly global data is data stored in the MongoDb.
+        That is the ultimate source of truth for all workers.
+
+    It makes sense for workers to cache data between requests and other data
+    just for the duration of requests.
+
+    Store | lifetime | what is stored
     --- | --- | ---
-    `control.db.Db` | application process | all data in all value tables
-    `control.workflow.compute.Workflow` | application process | workflow table
-    `control.auth.Auth` | per request | holds current user data
-    `control.typ.types.Types` | per request | NN/A
-    cache | per request | user tables as far as needed for the request
+    MongoDb | permanent | all app tables
+    MongoDb | permanent | the workflow table, see `control.workflow.compute.Workflow`
+    `control.db.Db` | worker process | cache for all data in all value tables
+    `control.auth.Auth` | request | holds current user data
+    `control.context.Context.cache` | request | cache for some records inuser tables
 
     !!! note &#34;Why needed?&#34;
         During a request, several records may be shown, with their details.
@@ -399,8 +512,9 @@ to which it adds caching.</p>
         the same workflow information.
         Caching prevents an explosion of record fetches.
 
-        However, we should not cache between requests, because the records that benefit
-        most from caching are exactly the ones that can be changed by users.
+        However, we should not cache this databetween requests,
+        because the records that benefit most from caching are exactly the ones
+        that are changed frequentlyby users.
 
     !!! note &#34;Individual items&#34;
         The cache stores individual record and workflow items (by table and id)
@@ -409,8 +523,14 @@ to which it adds caching.</p>
     !!! note &#34;versus Db caching&#34;
         The records in value tables are already cached in Db itself.
         Such records will not go in this cache.
-        If such a record changes, Db will reread the whole table.
+        And other workers will do the same when they need that table.
         But this happens very rarely.
+
+    !!! caution &#34;refreshing the Db cache&#34;
+        Another worker may have changed a value in a value table.
+        Then our cache of that table is invalid.
+        We detect it by inspecting the table `collect` in MongoDb.
+        See `control.db.Db.recollect`.
     &#34;&#34;&#34;
 
     def __init__(self, db, wf, auth):
@@ -462,6 +582,8 @@ to which it adds caching.</p>
         The cache lives as long as the request.
         &#34;&#34;&#34;
 
+        db.recollect()
+
     def getItem(self, table, eid, requireFresh=False):
         &#34;&#34;&#34;Fetch an item from the database, possibly from cache.
 
@@ -492,6 +614,29 @@ to which it adds caching.</p>
         return self.getCached(
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
+
+    def resetWorkflow(self):
+        &#34;&#34;&#34;Recompute the workflow table.
+
+        The workflow table contains only information that can be derived from the
+        other tables. In case the workflow table appears out of sync, a system
+        administrator can trigger a clearing of the workflow table followed by
+        a recomputation of all workflow info.
+
+        Returns
+        -------
+        int
+            The number of resulting workflow records.
+            If the recomputation did not take place, -1 is returned.
+        &#34;&#34;&#34;
+
+        auth = self.auth
+        wf = self.wf
+
+        nWf = -1
+        if auth.sysadmin():
+            nWf = wf.initWorkflow(drop=False)
+        return nWf
 
     def getWorkflowItem(self, contribId, requireFresh=False):
         &#34;&#34;&#34;Fetch a single workflow record from the database, possibly from cache.
@@ -847,6 +992,49 @@ fetched value in the cache.</dd>
     return WorkflowItem(self, info)</code></pre>
 </details>
 </dd>
+<dt id="control.context.Context.resetWorkflow"><code class="name flex">
+<span>def <span class="ident">resetWorkflow</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Recompute the workflow table.</p>
+<p>The workflow table contains only information that can be derived from the
+other tables. In case the workflow table appears out of sync, a system
+administrator can trigger a clearing of the workflow table followed by
+a recomputation of all workflow info.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>int</code></dt>
+<dd>The number of resulting workflow records.
+If the recomputation did not take place, -1 is returned.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resetWorkflow(self):
+    &#34;&#34;&#34;Recompute the workflow table.
+
+    The workflow table contains only information that can be derived from the
+    other tables. In case the workflow table appears out of sync, a system
+    administrator can trigger a clearing of the workflow table followed by
+    a recomputation of all workflow info.
+
+    Returns
+    -------
+    int
+        The number of resulting workflow records.
+        If the recomputation did not take place, -1 is returned.
+    &#34;&#34;&#34;
+
+    auth = self.auth
+    wf = self.wf
+
+    nWf = -1
+    if auth.sysadmin():
+        nWf = wf.initWorkflow(drop=False)
+    return nWf</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -875,6 +1063,7 @@ fetched value in the cache.</dd>
 <li><code><a title="control.context.Context.getCached" href="#control.context.Context.getCached">getCached</a></code></li>
 <li><code><a title="control.context.Context.getItem" href="#control.context.Context.getItem">getItem</a></code></li>
 <li><code><a title="control.context.Context.getWorkflowItem" href="#control.context.Context.getWorkflowItem">getWorkflowItem</a></code></li>
+<li><code><a title="control.context.Context.resetWorkflow" href="#control.context.Context.resetWorkflow">resetWorkflow</a></code></li>
 <li><code><a title="control.context.Context.types" href="#control.context.Context.types">types</a></code></li>
 <li><code><a title="control.context.Context.wf" href="#control.context.Context.wf">wf</a></code></li>
 </ul>
@@ -885,7 +1074,7 @@ fetched value in the cache.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.1</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

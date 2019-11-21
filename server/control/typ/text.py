@@ -13,6 +13,7 @@ from control.typ.base import TypeBase
 CW = C.web
 
 QQ = H.icon(CW.unknown[N.generic])
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 urlStart = re.compile(r"""^https?://""", re.I)
 urlTrim = re.compile(r"""^([htps:/]*)""")
@@ -47,12 +48,11 @@ class Url(Text):
             normalVal += f"""{DOT}{N.org}"""
         return normalVal
 
-    def toDisplay(self, val):
+    def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ
-
-        val = H.he(self.normalize(str(val)))
-        return H.a(val, val)
+            return QQ if markup else Qq
+        valBare = H.he(self.normalize(str(val)))
+        return H.a(valBare, valBare) if markup else valBare
 
 
 class Email(Text):
@@ -66,12 +66,11 @@ class Email(Text):
             return E
         return normalVal
 
-    def toDisplay(self, val):
+    def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ
-
-        val = H.he(self.normalize(str(val)))
-        return H.a(val, val)
+            return QQ if markup else Qq
+        valBare = H.he(self.normalize(str(val)))
+        return H.a(valBare, valBare) if markup else valBare
 
 
 class Markdown(TypeBase):
@@ -88,8 +87,10 @@ class Markdown(TypeBase):
     def fromStr(self, editVal):
         return self.normalize(editVal)
 
-    def toDisplay(self, val):
-        return QQ if val is None else H.div(markdown(val))
+    def toDisplay(self, val, markup=True):
+        if val is None:
+            return QQ if markup else Qq
+        return H.div(markdown(val)) if markup else val
 
     def toEdit(self, val):
         return val

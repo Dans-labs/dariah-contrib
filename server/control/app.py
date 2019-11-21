@@ -3,7 +3,6 @@
 
 import os
 
-from pymongo import MongoClient
 from flask import (
     Flask,
     request,
@@ -55,6 +54,10 @@ FIELD_ACTIONS = set(CW.fieldActions)
 START = URLS[N.home][N.url]
 OVERVIEW = URLS[N.info][N.url]
 DUMMY = URLS[N.dummy][N.url]
+LOGIN = URLS[N.login][N.url]
+LOGOUT = URLS[N.logout][N.url]
+SLOGOUT = URLS[N.slogout][N.url]
+WORKFLOW = URLS[N.workflow][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
 NO_COMMAND = MESSAGES[N.noCommand]
@@ -72,6 +75,12 @@ def appFactory(regime, debug, test, **kwargs):
 
     We read a secret key from the system which is stored in a file outside the app.
     This information is needed to encrypt sessions.
+
+    !!! caution
+        We read and cache substantial information from MongoDb before
+        forking into workers.
+        Before we fork, we close the MongoDb connection, because PyMongo is not
+        [fork-safe](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
 
     Parameters
     ----------
@@ -100,17 +109,17 @@ def appFactory(regime, debug, test, **kwargs):
 
     GP = dict(methods=[N.GET, N.POST])
 
-    MONGO = MongoClient()
-    myDb = MONGO.dariah_clean if test else MONGO.dariah
-    """*object* Handle to the MongoDb."""
-
-    DB = Db(myDb)
+    DB = Db(test=test)
     """*object* The `control.db.Db` singleton."""
 
     WF = Workflow(DB)
     """*object* The `control.workflow.compute.Workflow` singleton."""
 
+    WF.initWorkflow(drop=True)
+
     auth = Auth(DB, regime)
+
+    DB.mongoClose()
 
     def getContext():
         return Context(DB, WF, auth)
@@ -158,13 +167,50 @@ def appFactory(regime, debug, test, **kwargs):
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
 
+    # LOGIN / LOGOUT
+
+    @app.route(f"""{SLOGOUT}""")
+    def serveSlogout():
+        auth.deauthenticate()
+        flash("logged out from DARIAH")
+        return redirectResult(SHIB_LOGOUT, True)
+
+    @app.route(f"""{LOGIN}""")
+    def serveLogin():
+        good = True
+        if auth.authenticate(login=True):
+            flash("log in successful")
+        else:
+            good = False
+            flash("log in unsuccessful", "error")
+        return redirectResult(START, good)
+
+    @app.route(f"""{LOGOUT}""")
+    def serveLogout():
+        auth.deauthenticate()
+        flash("logged out")
+        return redirectResult(START, True)
+
+    # SYSADMIN
+
+    @app.route(f"""{WORKFLOW}""")
+    def serveWorkflow():
+        context = getContext()
+        auth.authenticate()
+        nWf = context.resetWorkflow()
+        if nWf >= 0:
+            flash(f"{nWf} workflow records recomputed and stored")
+        else:
+            flash("workflow not recomputed", "error")
+        return redirectResult(START, nWf >= 0)
+
     # INSERT RECORD IN TABLE
 
     @app.route(f"""/api/<string:table>/{N.insert}""")
     def serveTableInsert(table):
         newPath = f"""/{table}/{N.list}"""
-        context = getContext()
         if table in ALL_TABLES and table not in MASTERS:
+            context = getContext()
             auth.authenticate()
             eid = mkTable(context, table).insert()
             if eid:
@@ -180,12 +226,12 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f"""/api/<string:table>/<string:eid>/<string:dtable>/{N.insert}""")
     def serveTableInsertDetail(table, eid, dtable):
         newPath = f"""/{table}/{N.item}/{eid}"""
-        context = getContext()
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
@@ -217,8 +263,8 @@ def appFactory(regime, debug, test, **kwargs):
         eidRep = f"""/{eid}""" if eid else E
         path = f"""/{table}/{N.list}{eidRep}{actionRep}"""
         if not action or action in LIST_ACTIONS:
-            context = getContext()
             if table in ALL_TABLES:
+                context = getContext()
                 auth.authenticate()
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
@@ -240,8 +286,8 @@ def appFactory(regime, debug, test, **kwargs):
 
     @app.route(f"""/api/<string:table>/{N.delete}/<string:eid>""")
     def serveRecordDelete(table, eid):
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             good = mkTable(context, table).record(eid=eid).delete()
             newUrlPart = f"?{N.action}={N.my}" if table in USER_TABLES else E
@@ -262,13 +308,13 @@ def appFactory(regime, debug, test, **kwargs):
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
         newPath = f"""/{table}/{N.item}/{masterId}"""
-        context = getContext()
         good = False
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
             and dtable in DETAILS[table]
         ):
+            context = getContext()
             auth.authenticate()
             recordObj = mkTable(context, dtable).record(eid=eid)
 
@@ -287,8 +333,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>""")
     def serveRecord(table, eid):
         path = f"""/api/{table}/{N.item}/{eid}"""
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -300,8 +346,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>/{N.title}""")
     def serveRecordTitle(table, eid):
         path = f"""/api/{table}/{N.item}/{eid}/{N.title}"""
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             return (
                 mkTable(context, table)
@@ -318,8 +364,8 @@ def appFactory(regime, debug, test, **kwargs):
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
         path = f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}"""
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -337,8 +383,8 @@ def appFactory(regime, debug, test, **kwargs):
     @app.route(f"""/<string:table>/{N.item}/<string:eid>""")
     def serveRecordPageDet(table, eid):
         path = f"""/{table}/{N.item}/{eid}"""
-        context = getContext()
         if table in ALL_TABLES:
+            context = getContext()
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
@@ -372,12 +418,13 @@ def appFactory(regime, debug, test, **kwargs):
             context = getContext()
             auth.authenticate()
             if table in ALL_TABLES:
-                return (
+                result = (
                     mkTable(context, table)
                     .record(eid=eid)
                     .field(field)
                     .wrap(action=action)
                 )
+                return result
         return noField(table, field)
 
     # COMMANDS
@@ -391,30 +438,6 @@ def appFactory(regime, debug, test, **kwargs):
             if newPath:
                 return redirectResult(newPath, True)
         return noCommand(table, command)
-
-    # LOGIN / LOGOUT
-
-    @app.route(f"""/{N.slogout}""")
-    def serveSlogout():
-        auth.deauthenticate()
-        flash("logged out from DARIAH")
-        return redirectResult(SHIB_LOGOUT, True)
-
-    @app.route(f"""/{N.login}""")
-    def serveLogin():
-        good = True
-        if auth.authenticate(login=True):
-            flash("log in successful")
-        else:
-            good = False
-            flash("log in unsuccessful", "error")
-        return redirectResult(START, good)
-
-    @app.route(f"""/{N.logout}""")
-    def serveLogout():
-        auth.deauthenticate()
-        flash("logged out")
-        return redirectResult(START, True)
 
     # FALL-BACK
 
