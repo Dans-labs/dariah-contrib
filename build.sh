@@ -111,6 +111,13 @@ function ship {
     git push origin master
 }
 
+function shipdocs {
+    docs "deploy"
+    git add --all .
+    git commit -m "docs update: $*"
+    git push origin master
+}
+
 if [[ "$1" == "mongo" ]]; then
     mongod -f /usr/local/etc/mongod.conf
 elif [[ "$1" == "data" ]]; then
@@ -137,6 +144,9 @@ elif [[ "$1" == "test" ]]; then
 elif [[ "$1" == "ship" ]]; then
     shift
     ship "$@"
+elif [[ "$1" == "shipdocs" ]]; then
+    shift
+    shipdocs "$@"
 else
     if [[ "$1" != "help" && "$1" != "--help" && "$1" != "" ]]; then
         echo "Unknown argument '$1'"
@@ -155,5 +165,6 @@ else
     echo "cleandb     : clean the test database"
     echo "test        : run all tests"
     echo "testx       : run all tests, verbose"
-    echo "ship \$1      : build docs, commit and push all code to github. \$=commit message"
+    echo "ship \$1      : run tests, build docs, commit/push all code to github. \$=commit message"
+    echo "shipdocs \$1  : build docs, commit/push all code to github. \$=commit message"
 fi

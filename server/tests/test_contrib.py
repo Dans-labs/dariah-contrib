@@ -13,20 +13,19 @@ We setup and test the following scenario.
 
 *   We work with the contribution table only
 *   We also inspect the user table
-
-## Acts
-
 *   We start with a clean database, i.e. a database with
     all the value tables fully filled, with a set of test users,
     with packages, criteria, and types, but not with contributions, assessments,
     and reviews, nor criteria entries, nor review entries.
+
+## Acts
+
 *   **Lisa** consults the list of users
 *   **Public** tries to add a contribution, but fails
 *   **Suzan** adds a new contribution, succeeds, and sees that year, country and some
     other fields are pre-filled with appropriate values
 *   **Public** tries to modify the title of that contribution, but fails
 *   **Suzan** changes the title
-*   **Public** tries to change the title but fails
 *   **Bart** tries to change the title, but fails
 *   **Lisa** changes the title, she is an office user
 *   **Lisa** adds **Bart** as an editor to **Lisa**'s contribution
