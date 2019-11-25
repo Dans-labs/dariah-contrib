@@ -42,8 +42,7 @@ CW = C.web
 QQ = H.icon(CW.unknown[N.generic])
 Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
-urlStart = re.compile(r&#34;&#34;&#34;^https?://&#34;&#34;&#34;, re.I)
-urlTrim = re.compile(r&#34;&#34;&#34;^([htps:/]*)&#34;&#34;&#34;)
+urlStart = re.compile(r&#34;&#34;&#34;^([a-zA-Z0-9_-]+)[:/]+(.*)&#34;&#34;&#34;, re.I)
 
 
 class Text(TypeBase):
@@ -66,11 +65,15 @@ class Url(Text):
         normalVal = str(strVal).strip()
         if not normalVal:
             return E
-        if not urlStart.match(normalVal):
-            match = urlTrim.match(normalVal)
-            if match and len(match.group(1)) &gt; 3:
-                normalVal = urlTrim.sub(E, normalVal)
-            normalVal = f&#34;&#34;&#34;{N.https}://{normalVal}&#34;&#34;&#34;
+        match = urlStart.match(normalVal)
+        if match:
+            protocol = match.group(1).lower()
+            rest = match.group(2)
+            if protocol not in {N.http, N.https}:
+                protocol = N.https
+            normalVal = f&#34;{protocol}://{rest}&#34;
+        else:
+            normalVal = f&#34;https://{normalVal}&#34;
         if DOT not in normalVal:
             normalVal += f&#34;&#34;&#34;{DOT}{N.org}&#34;&#34;&#34;
         return normalVal
@@ -349,11 +352,15 @@ errors defaults to 'strict'.</p></section>
         normalVal = str(strVal).strip()
         if not normalVal:
             return E
-        if not urlStart.match(normalVal):
-            match = urlTrim.match(normalVal)
-            if match and len(match.group(1)) &gt; 3:
-                normalVal = urlTrim.sub(E, normalVal)
-            normalVal = f&#34;&#34;&#34;{N.https}://{normalVal}&#34;&#34;&#34;
+        match = urlStart.match(normalVal)
+        if match:
+            protocol = match.group(1).lower()
+            rest = match.group(2)
+            if protocol not in {N.http, N.https}:
+                protocol = N.https
+            normalVal = f&#34;{protocol}://{rest}&#34;
+        else:
+            normalVal = f&#34;https://{normalVal}&#34;
         if DOT not in normalVal:
             normalVal += f&#34;&#34;&#34;{DOT}{N.org}&#34;&#34;&#34;
         return normalVal

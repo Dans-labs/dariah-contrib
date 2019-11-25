@@ -27,6 +27,8 @@
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Types of values in related tables.&#34;&#34;&#34;
 
+from bson.objectid import ObjectId
+
 from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
@@ -40,6 +42,27 @@ Qq = H.icon(CW.unknown[N.generic], asChar=True)
 QQ = H.icon(CW.unknown[N.generic])
 
 ACTUAL_TABLES = set(CT.actualTables)
+
+
+def castObjectId(value):
+    &#34;&#34;&#34;Try to cast the value as an ObjectId.
+    Paramaters
+    ----------
+    value:string
+        The value to cast, normally a string representation of a BSON object id.
+
+    Returns
+    -------
+    objectId | None
+        The corresponding BSON object id if the input is a valid representation of
+        such an id, otherwise `None`.
+    &#34;&#34;&#34;
+
+    try:
+        oValue = ObjectId(value)
+    except Exception:
+        oValue = None
+    return oValue
 
 
 class Related(TypeBase):
@@ -150,6 +173,49 @@ class Related(TypeBase):
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="control.typ.related.castObjectId"><code class="name flex">
+<span>def <span class="ident">castObjectId</span></span>(<span>value)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Try to cast the value as an ObjectId.
+Paramaters</p>
+<hr>
+<p>value:string
+The value to cast, normally a string representation of a BSON object id.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>objectId</code> | <code>None</code></dt>
+<dd>The corresponding BSON object id if the input is a valid representation of
+such an id, otherwise <code>None</code>.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def castObjectId(value):
+    &#34;&#34;&#34;Try to cast the value as an ObjectId.
+    Paramaters
+    ----------
+    value:string
+        The value to cast, normally a string representation of a BSON object id.
+
+    Returns
+    -------
+    objectId | None
+        The corresponding BSON object id if the input is a valid representation of
+        such an id, otherwise `None`.
+    &#34;&#34;&#34;
+
+    try:
+        oValue = ObjectId(value)
+    except Exception:
+        oValue = None
+    return oValue</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -465,6 +531,11 @@ that the current user is interacting with.</dd>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="control.typ" href="index.html">control.typ</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="control.typ.related.castObjectId" href="#control.typ.related.castObjectId">castObjectId</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
