@@ -1,11 +1,9 @@
 """Types of values in value tables."""
 
-from bson.objectid import ObjectId
-
 from control.utils import pick as G, E, NBSP
 from control.html import HtmlElements as H
 from config import Config as C, Names as N
-from control.typ.related import Related
+from control.typ.related import Related, castObjectId
 
 CW = C.web
 
@@ -55,7 +53,7 @@ class Value(Related):
 
         table = self.name
         values = getattr(db, f"""{table}Inv""", {})
-        return values[editVal] if editVal in values else ObjectId(editVal)
+        return G(values, editVal) if editVal in values else castObjectId(editVal)
 
     def toEdit(self, val):
         return val

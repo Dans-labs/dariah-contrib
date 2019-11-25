@@ -6,7 +6,6 @@
 """
 
 from itertools import chain
-from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 from config import Config as C, Names as N
@@ -22,6 +21,7 @@ from control.utils import (
     MINONE,
     COMMA,
 )
+from control.typ.related import castObjectId
 
 CB = C.base
 CM = C.mongo
@@ -642,7 +642,7 @@ class Db:
         if not eid:
             return {}
 
-        oid = ObjectId(eid)
+        oid = castObjectId(eid)
 
         if table in VALUE_TABLES:
             return G(getattr(self, table, {}), oid, default={})
@@ -869,13 +869,20 @@ class Db:
             The table which holds the record to be deleted.
         eid: ObjectId
             (Entity) id of the record to be deleted.
+
+        Returns
+        -------
+        boolean
+            Whether the MongoDB operation was successful
         """
 
-        self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: ObjectId(eid)})
+        oid = castObjectId(eid)
+        if oid is None:
+            return False
+        status = self.mongoCmd(N.deleteItem, table, N.delete_one, {N._id: oid})
         if table in VALUE_TABLES:
             self.recollect(table)
-        # For the moment, we do not check whether it has succeeded.
-        return True
+        return G(status.raw_result, N.ok, default=False)
 
     def deleteMany(self, table, crit):
         """Delete a several records.
@@ -928,13 +935,17 @@ class Db:
 
         Returns
         -------
-        dict
-            The updated record.
+        dict | boolean
+            The updated record, if the MongoDb operation was successful, else False
         """
+
+        oid = castObjectId(eid)
+        if oid is None:
+            return False
 
         justNow = now()
         newModified = filterModified((modified or []) + [f"""{actor}{ON}{justNow}"""])
-        criterion = {N._id: ObjectId(eid)}
+        criterion = {N._id: oid}
         nowItems = {nowField: justNow for nowField in nowFields}
         update = {
             field: data,
@@ -947,7 +958,12 @@ class Db:
             M_UNSET: delete,
         }
 
-        self.mongoCmd(N.updateField, table, N.update_one, criterion, instructions)
+        status = self.mongoCmd(
+            N.updateField, table, N.update_one, criterion, instructions
+        )
+        if not G(status.raw_result, N.ok, default=False):
+            return False
+
         if table in VALUE_TABLES:
             self.recollect(table)
         return (

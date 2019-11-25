@@ -322,6 +322,10 @@ class Record:
             The manipulation of such fields is under control of workflow.
             See `control.workflow.apply.WorkflowItem.isCommand`.
 
+        !!! caution
+            The name of the field must be one for which field specs are defined
+            in the yaml file for the table.
+
         Parameters
         ----------
         fieldName: string
@@ -331,6 +335,10 @@ class Record:
         object
             A `control.field.Field` object.
         """
+
+        fields = self.fields
+        if fieldName not in fields:
+            return None
 
         table = self.table
         wfitem = self.wfitem

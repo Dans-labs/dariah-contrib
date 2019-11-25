@@ -354,6 +354,10 @@ class Record:
             The manipulation of such fields is under control of workflow.
             See `control.workflow.apply.WorkflowItem.isCommand`.
 
+        !!! caution
+            The name of the field must be one for which field specs are defined
+            in the yaml file for the table.
+
         Parameters
         ----------
         fieldName: string
@@ -363,6 +367,10 @@ class Record:
         object
             A `control.field.Field` object.
         &#34;&#34;&#34;
+
+        fields = self.fields
+        if fieldName not in fields:
+            return None
 
         table = self.table
         wfitem = self.wfitem
@@ -1112,6 +1120,10 @@ that spawns a record object.</p>
             The manipulation of such fields is under control of workflow.
             See `control.workflow.apply.WorkflowItem.isCommand`.
 
+        !!! caution
+            The name of the field must be one for which field specs are defined
+            in the yaml file for the table.
+
         Parameters
         ----------
         fieldName: string
@@ -1121,6 +1133,10 @@ that spawns a record object.</p>
         object
             A `control.field.Field` object.
         &#34;&#34;&#34;
+
+        fields = self.fields
+        if fieldName not in fields:
+            return None
 
         table = self.table
         wfitem = self.wfitem
@@ -2099,6 +2115,11 @@ hence they will be set to unreadable and uneditable.
 The manipulation of such fields is under control of workflow.
 See <a title="control.workflow.apply.WorkflowItem.isCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isCommand"><code>WorkflowItem.isCommand()</code></a>.</p>
 </div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The name of the field must be one for which field specs are defined
+in the yaml file for the table.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>fieldName</code></strong> :&ensp;<code>string</code></dt>
@@ -2128,6 +2149,10 @@ See <a title="control.workflow.apply.WorkflowItem.isCommand" href="workflow/appl
         The manipulation of such fields is under control of workflow.
         See `control.workflow.apply.WorkflowItem.isCommand`.
 
+    !!! caution
+        The name of the field must be one for which field specs are defined
+        in the yaml file for the table.
+
     Parameters
     ----------
     fieldName: string
@@ -2137,6 +2162,10 @@ See <a title="control.workflow.apply.WorkflowItem.isCommand" href="workflow/appl
     object
         A `control.field.Field` object.
     &#34;&#34;&#34;
+
+    fields = self.fields
+    if fieldName not in fields:
+        return None
 
     table = self.table
     wfitem = self.wfitem

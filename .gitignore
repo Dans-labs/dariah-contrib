@@ -6,6 +6,7 @@
 *.pyc
 *.pyo
 .tmp
+.coverage
 .cache/
 client/*.zip
 databases/*.table

@@ -267,9 +267,13 @@ class Field:
                 )
                 nowFields.append(withNowField)
 
-        (updates, deletions) = db.updateField(
+        result = db.updateField(
             table, eid, field, data, eppn, modified, nowFields=nowFields,
         )
+        if not result:
+            return False
+
+        (updates, deletions) = result
         record = context.getItem(table, eid, requireFresh=True)
 
         recordObj.reload(record)
@@ -559,9 +563,15 @@ class Field:
         method = fieldTypeObj.widget if editable else fieldTypeObj.toDisplay
         extraCls = E if editable else cls
         valueBare = (
-            COMMA.join(fieldTypeObj.toDisplay(val, markup=False) for val in value or [])
-            if multiple
-            else fieldTypeObj.toDisplay(value, markup=False)
+            (COMMA.join(val for val in value or []) if multiple else value)
+            if tp == N.markdown
+            else (
+                COMMA.join(
+                    fieldTypeObj.toDisplay(val, markup=False) for val in value or []
+                )
+                if multiple
+                else fieldTypeObj.toDisplay(value, markup=False)
+            )
         )
 
         return f"<!-- {field}={valueBare} -->" + (

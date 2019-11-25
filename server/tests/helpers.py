@@ -6,12 +6,27 @@ import re
 from flask import json
 
 
-fieldRe = re.compile("""<!-- ([^=]+)=(.*?) -->""")
-msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""")
-eidRe = re.compile("""<details itemkey=['"]contrib/([^'"]*)['"]""")
+fieldRe = re.compile("""<!-- ([^=]+)=(.*?) -->""", re.S)
+msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
+eidRe = re.compile("""<details itemkey=['"]contrib/([^'"]*)['"]""", re.S)
 userRe = re.compile(
-    """<details itemkey=['"]user/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>"""
+    """<details itemkey=['"]user/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>""",
+    re.S,
 )
+valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
+
+
+def fieldEditRe(eid, field):
+    return re.compile(
+        r"""
+    <span\ [^>]*?eid=['"]{eid}['"]\s+field=['"]{field}['"].*?
+    <div\ wtype=['"]related['"]\ .*?
+    <div\ class=['"]wvalue['"]>(.*?)</div>
+    """.format(
+            eid=eid, field=field
+        ),
+        re.S | re.X,
+    )
 
 
 def makeClient(app, eppn):
@@ -139,6 +154,61 @@ def findUsers(text):
     }
 
 
+def addContrib(client):
+    """Adds a contribution on behalf of an authenticated user.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    """
+
+    response = client.get(f"/api/contrib/insert", follow_redirects=True)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    assert "item added" in msgs
+    return (text, fields, msgs, eid)
+
+
+def findContrib(client):
+    """Looks up a contribution.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    We assume that there is still only one contribution in the database.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    """
+
+    response = client.get(f"/contrib/list")
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    return (text, fields, msgs, eid)
+
+
 def postJson(client, url, value):
     """Post data to a url and retrieve the response text.
 
@@ -164,11 +234,73 @@ def postJson(client, url, value):
     return text
 
 
-def modify_auth(client, eid, newTitle):
-    """Helper for `test_modify_auth` functions."""
+def modifyField(client, eid, field, newValue):
+    """Post data to update a field and analyse the response for the effect."""
 
     text = postJson(
-        client, f"/api/contrib/item/{eid}/field/title?action=view", newTitle
+        client, f"/api/contrib/item/{eid}/field/{field}?action=view", newValue
     )
     fields = findFields(text)
     return (text, fields)
+
+
+def viewField(client, eid, field):
+    """Get the response for showing a field."""
+
+    response = client.get(f"/api/contrib/item/{eid}/field/{field}?action=view")
+    text = response.get_data(as_text=True)
+    fields = findFields(text)
+    return (text, fields)
+
+
+def getRelatedValues(client, eid, field):
+    """Get an editable view on a field that represents a related value.""
+
+    We check the contents.
+
+    """
+    url = f"/api/contrib/item/{eid}/field/{field}?action=edit"
+    response = client.get(url)
+    text = response.get_data(as_text=True)
+    thisRe = fieldEditRe(eid, field)
+    valueStr = thisRe.findall(text)
+    values = valueRe.findall(valueStr[0])
+    valueDict = {value: eid for (eid, value) in values}
+    return valueDict
+
+
+def getValueTable(client, table, requestInfo, dest):
+    """Get a mapping of values in a value table to their object ids.
+
+    We obtain the mapping by asking for an edit view of a field that
+    takes values in this value table.
+    Then we inspect the edit widget and read off the values and ids.
+
+    Except for the user table, there we directly list the items.
+
+    The mapping is stored in the dict `dest` keyed by the
+    name of the valueTable.
+
+    Parameters
+    ----------
+    table: string
+        The name of a value table
+
+    requestInfo: dict
+        Info from the request, such as text, fields, messages, eid.
+
+    Returns
+    -------
+    dict
+        The stored value dict for this table
+    """
+
+    if table == "user":
+        response = client.get(f"/user/list")
+        text = response.get_data(as_text=True)
+        dest[table] = findUsers(text)
+    else:
+        eid = requestInfo["eid"]
+        valueDict = getRelatedValues(client, eid, table)
+        dest[table] = valueDict
+    return dest[table]

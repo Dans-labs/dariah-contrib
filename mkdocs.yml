@@ -71,6 +71,8 @@ extra:
   docSite: https://dans-labs.github.io/dariah-contrib
   docSiteOrig: https://dans-labs.github.io/dariah
   docstrings: api/html/control
+  docstringtests: api/html/tests
+  coverage: api/html/coverage
 
   # DARIAH
   dans: https://dans.knaw.nl
@@ -87,7 +89,7 @@ extra:
   css: https://developer.mozilla.org/en-US/docs/Web/CSS
   eslint: http://eslint.org
   flake8: https://github.com/PyCQA/flake8
-  flask: http://flask.pocoo.org/docs/1.0/
+  flask: https://flask.palletsprojects.com/en/1.1.x/
   flexbox: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
   githubBase: https://github.com/
   hsl: https://en.wikipedia.org/wiki/HSL_and_HSV
@@ -133,11 +135,14 @@ nav:
     - Tables: 'Tech/Tables.md'
     - Web: 'Tech/Web.md'
     - Authentication: 'Tech/Authentication.md'
-    - Codebase: 'Tech/Codebase.md'
-    - Stats: 'Tech/Stats.md'
     - Inventory: 'Tech/Inventory.md'
     - Lessons: 'Tech/Lessons.md'
   - Maintenance:
     - Deploy: 'Tech/Deploy.md'
     - Docstrings: 'api/html/control/index.html'
+    - Codebase: 'Tech/Codebase.md'
+    - Stats: 'Tech/Stats.md'
+    - Testing: 'Tech/Testing.md'
+    - Results: 'Tech/Tests.txt'
     - Tests: 'api/html/tests/index.md'
+    - Coverage: 'api/html/coverage/index.html'

@@ -1,5 +1,7 @@
 """Types of values in related tables."""
 
+from bson.objectid import ObjectId
+
 from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
@@ -13,6 +15,27 @@ Qq = H.icon(CW.unknown[N.generic], asChar=True)
 QQ = H.icon(CW.unknown[N.generic])
 
 ACTUAL_TABLES = set(CT.actualTables)
+
+
+def castObjectId(value):
+    """Try to cast the value as an ObjectId.
+    Paramaters
+    ----------
+    value:string
+        The value to cast, normally a string representation of a BSON object id.
+
+    Returns
+    -------
+    objectId | None
+        The corresponding BSON object id if the input is a valid representation of
+        such an id, otherwise `None`.
+    """
+
+    try:
+        oValue = ObjectId(value)
+    except Exception:
+        oValue = None
+    return oValue
 
 
 class Related(TypeBase):

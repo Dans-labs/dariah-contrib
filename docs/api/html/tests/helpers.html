@@ -33,12 +33,27 @@ import re
 from flask import json
 
 
-fieldRe = re.compile(&#34;&#34;&#34;&lt;!-- ([^=]+)=(.*?) --&gt;&#34;&#34;&#34;)
-msgRe = re.compile(&#34;&#34;&#34;&lt;div class=&#34;msgitem.*?&gt;(.*?)&lt;/div&gt;&#34;&#34;&#34;)
-eidRe = re.compile(&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]contrib/([^&#39;&#34;]*)[&#39;&#34;]&#34;&#34;&#34;)
+fieldRe = re.compile(&#34;&#34;&#34;&lt;!-- ([^=]+)=(.*?) --&gt;&#34;&#34;&#34;, re.S)
+msgRe = re.compile(&#34;&#34;&#34;&lt;div class=&#34;msgitem.*?&gt;(.*?)&lt;/div&gt;&#34;&#34;&#34;, re.S)
+eidRe = re.compile(&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]contrib/([^&#39;&#34;]*)[&#39;&#34;]&#34;&#34;&#34;, re.S)
 userRe = re.compile(
-    &#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]user/([^&#39;&#34;]*)[&#39;&#34;].*?&lt;summary&gt;.*?&lt;span.*?&gt;([^&lt;]*)&lt;/span&gt;&#34;&#34;&#34;
+    &#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]user/([^&#39;&#34;]*)[&#39;&#34;].*?&lt;summary&gt;.*?&lt;span.*?&gt;([^&lt;]*)&lt;/span&gt;&#34;&#34;&#34;,
+    re.S,
 )
+valueRe = re.compile(&#34;&#34;&#34;eid=[&#39;&#34;](.*?)[&#39;&#34;][^&gt;]*&gt;(.*?)(?:&amp;#xa;)?&lt;&#34;&#34;&#34;, re.S)
+
+
+def fieldEditRe(eid, field):
+    return re.compile(
+        r&#34;&#34;&#34;
+    &lt;span\ [^&gt;]*?eid=[&#39;&#34;]{eid}[&#39;&#34;]\s+field=[&#39;&#34;]{field}[&#39;&#34;].*?
+    &lt;div\ wtype=[&#39;&#34;]related[&#39;&#34;]\ .*?
+    &lt;div\ class=[&#39;&#34;]wvalue[&#39;&#34;]&gt;(.*?)&lt;/div&gt;
+    &#34;&#34;&#34;.format(
+            eid=eid, field=field
+        ),
+        re.S | re.X,
+    )
 
 
 def makeClient(app, eppn):
@@ -166,6 +181,61 @@ def findUsers(text):
     }
 
 
+def addContrib(client):
+    &#34;&#34;&#34;Adds a contribution on behalf of an authenticated user.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    &#34;&#34;&#34;
+
+    response = client.get(f&#34;/api/contrib/insert&#34;, follow_redirects=True)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    assert &#34;item added&#34; in msgs
+    return (text, fields, msgs, eid)
+
+
+def findContrib(client):
+    &#34;&#34;&#34;Looks up a contribution.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    We assume that there is still only one contribution in the database.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    &#34;&#34;&#34;
+
+    response = client.get(f&#34;/contrib/list&#34;)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    return (text, fields, msgs, eid)
+
+
 def postJson(client, url, value):
     &#34;&#34;&#34;Post data to a url and retrieve the response text.
 
@@ -191,14 +261,76 @@ def postJson(client, url, value):
     return text
 
 
-def modify_auth(client, eid, newTitle):
-    &#34;&#34;&#34;Helper for `test_modify_auth` functions.&#34;&#34;&#34;
+def modifyField(client, eid, field, newValue):
+    &#34;&#34;&#34;Post data to update a field and analyse the response for the effect.&#34;&#34;&#34;
 
     text = postJson(
-        client, f&#34;/api/contrib/item/{eid}/field/title?action=view&#34;, newTitle
+        client, f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;, newValue
     )
     fields = findFields(text)
-    return (text, fields)</code></pre>
+    return (text, fields)
+
+
+def viewField(client, eid, field):
+    &#34;&#34;&#34;Get the response for showing a field.&#34;&#34;&#34;
+
+    response = client.get(f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;)
+    text = response.get_data(as_text=True)
+    fields = findFields(text)
+    return (text, fields)
+
+
+def getRelatedValues(client, eid, field):
+    &#34;&#34;&#34;Get an editable view on a field that represents a related value.&#34;&#34;
+
+    We check the contents.
+
+    &#34;&#34;&#34;
+    url = f&#34;/api/contrib/item/{eid}/field/{field}?action=edit&#34;
+    response = client.get(url)
+    text = response.get_data(as_text=True)
+    thisRe = fieldEditRe(eid, field)
+    valueStr = thisRe.findall(text)
+    values = valueRe.findall(valueStr[0])
+    valueDict = {value: eid for (eid, value) in values}
+    return valueDict
+
+
+def getValueTable(client, table, requestInfo, dest):
+    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
+
+    We obtain the mapping by asking for an edit view of a field that
+    takes values in this value table.
+    Then we inspect the edit widget and read off the values and ids.
+
+    Except for the user table, there we directly list the items.
+
+    The mapping is stored in the dict `dest` keyed by the
+    name of the valueTable.
+
+    Parameters
+    ----------
+    table: string
+        The name of a value table
+
+    requestInfo: dict
+        Info from the request, such as text, fields, messages, eid.
+
+    Returns
+    -------
+    dict
+        The stored value dict for this table
+    &#34;&#34;&#34;
+
+    if table == &#34;user&#34;:
+        response = client.get(f&#34;/user/list&#34;)
+        text = response.get_data(as_text=True)
+        dest[table] = findUsers(text)
+    else:
+        eid = requestInfo[&#34;eid&#34;]
+        valueDict = getRelatedValues(client, eid, table)
+        dest[table] = valueDict
+    return dest[table]</code></pre>
 </details>
 </section>
 <section>
@@ -208,6 +340,128 @@ def modify_auth(client, eid, newTitle):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="helpers.addContrib"><code class="name flex">
+<span>def <span class="ident">addContrib</span></span>(<span>client)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Adds a contribution on behalf of an authenticated user.</p>
+<p>The response texts will be analysed into messages and fields, the eid
+of the new contribution will be read off.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The complete response text</dd>
+<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
+<dd>All fields and their values</dd>
+<dt><strong><code>msgs</code></strong> :&ensp;<code>list</code></dt>
+<dd>All entries that have been flashed (and arrived in the flash bar)</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the inserted contribution.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def addContrib(client):
+    &#34;&#34;&#34;Adds a contribution on behalf of an authenticated user.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    &#34;&#34;&#34;
+
+    response = client.get(f&#34;/api/contrib/insert&#34;, follow_redirects=True)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    assert &#34;item added&#34; in msgs
+    return (text, fields, msgs, eid)</code></pre>
+</details>
+</dd>
+<dt id="helpers.fieldEditRe"><code class="name flex">
+<span>def <span class="ident">fieldEditRe</span></span>(<span>eid, field)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fieldEditRe(eid, field):
+    return re.compile(
+        r&#34;&#34;&#34;
+    &lt;span\ [^&gt;]*?eid=[&#39;&#34;]{eid}[&#39;&#34;]\s+field=[&#39;&#34;]{field}[&#39;&#34;].*?
+    &lt;div\ wtype=[&#39;&#34;]related[&#39;&#34;]\ .*?
+    &lt;div\ class=[&#39;&#34;]wvalue[&#39;&#34;]&gt;(.*?)&lt;/div&gt;
+    &#34;&#34;&#34;.format(
+            eid=eid, field=field
+        ),
+        re.S | re.X,
+    )</code></pre>
+</details>
+</dd>
+<dt id="helpers.findContrib"><code class="name flex">
+<span>def <span class="ident">findContrib</span></span>(<span>client)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Looks up a contribution.</p>
+<p>The response texts will be analysed into messages and fields, the eid
+of the new contribution will be read off.</p>
+<p>We assume that there is still only one contribution in the database.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The complete response text</dd>
+<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
+<dd>All fields and their values</dd>
+<dt><strong><code>msgs</code></strong> :&ensp;<code>list</code></dt>
+<dd>All entries that have been flashed (and arrived in the flash bar)</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the inserted contribution.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findContrib(client):
+    &#34;&#34;&#34;Looks up a contribution.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new contribution will be read off.
+
+    We assume that there is still only one contribution in the database.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
+    &#34;&#34;&#34;
+
+    response = client.get(f&#34;/contrib/list&#34;)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    return (text, fields, msgs, eid)</code></pre>
+</details>
+</dd>
 <dt id="helpers.findEid"><code class="name flex">
 <span>def <span class="ident">findEid</span></span>(<span>text)</span>
 </code></dt>
@@ -343,6 +597,96 @@ def modify_auth(client, eid, newTitle):
     }</code></pre>
 </details>
 </dd>
+<dt id="helpers.getRelatedValues"><code class="name flex">
+<span>def <span class="ident">getRelatedValues</span></span>(<span>client, eid, field)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get an editable view on a field that represents a related value.""</p>
+<p>We check the contents.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getRelatedValues(client, eid, field):
+    &#34;&#34;&#34;Get an editable view on a field that represents a related value.&#34;&#34;
+
+    We check the contents.
+
+    &#34;&#34;&#34;
+    url = f&#34;/api/contrib/item/{eid}/field/{field}?action=edit&#34;
+    response = client.get(url)
+    text = response.get_data(as_text=True)
+    thisRe = fieldEditRe(eid, field)
+    valueStr = thisRe.findall(text)
+    values = valueRe.findall(valueStr[0])
+    valueDict = {value: eid for (eid, value) in values}
+    return valueDict</code></pre>
+</details>
+</dd>
+<dt id="helpers.getValueTable"><code class="name flex">
+<span>def <span class="ident">getValueTable</span></span>(<span>client, table, requestInfo, dest)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get a mapping of values in a value table to their object ids.</p>
+<p>We obtain the mapping by asking for an edit view of a field that
+takes values in this value table.
+Then we inspect the edit widget and read off the values and ids.</p>
+<p>Except for the user table, there we directly list the items.</p>
+<p>The mapping is stored in the dict <code>dest</code> keyed by the
+name of the valueTable.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of a value table</dd>
+<dt><strong><code>requestInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Info from the request, such as text, fields, messages, eid.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The stored value dict for this table</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getValueTable(client, table, requestInfo, dest):
+    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
+
+    We obtain the mapping by asking for an edit view of a field that
+    takes values in this value table.
+    Then we inspect the edit widget and read off the values and ids.
+
+    Except for the user table, there we directly list the items.
+
+    The mapping is stored in the dict `dest` keyed by the
+    name of the valueTable.
+
+    Parameters
+    ----------
+    table: string
+        The name of a value table
+
+    requestInfo: dict
+        Info from the request, such as text, fields, messages, eid.
+
+    Returns
+    -------
+    dict
+        The stored value dict for this table
+    &#34;&#34;&#34;
+
+    if table == &#34;user&#34;:
+        response = client.get(f&#34;/user/list&#34;)
+        text = response.get_data(as_text=True)
+        dest[table] = findUsers(text)
+    else:
+        eid = requestInfo[&#34;eid&#34;]
+        valueDict = getRelatedValues(client, eid, table)
+        dest[table] = valueDict
+    return dest[table]</code></pre>
+</details>
+</dd>
 <dt id="helpers.isRight"><code class="name flex">
 <span>def <span class="ident">isRight</span></span>(<span>client, url)</span>
 </code></dt>
@@ -471,20 +815,20 @@ def modify_auth(client, eid, newTitle):
     return None</code></pre>
 </details>
 </dd>
-<dt id="helpers.modify_auth"><code class="name flex">
-<span>def <span class="ident">modify_auth</span></span>(<span>client, eid, newTitle)</span>
+<dt id="helpers.modifyField"><code class="name flex">
+<span>def <span class="ident">modifyField</span></span>(<span>client, eid, field, newValue)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Helper for <code>test_modify_auth</code> functions.</p></section>
+<section class="desc"><p>Post data to update a field and analyse the response for the effect.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def modify_auth(client, eid, newTitle):
-    &#34;&#34;&#34;Helper for `test_modify_auth` functions.&#34;&#34;&#34;
+<pre><code class="python">def modifyField(client, eid, field, newValue):
+    &#34;&#34;&#34;Post data to update a field and analyse the response for the effect.&#34;&#34;&#34;
 
     text = postJson(
-        client, f&#34;/api/contrib/item/{eid}/field/title?action=view&#34;, newTitle
+        client, f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;, newValue
     )
     fields = findFields(text)
     return (text, fields)</code></pre>
@@ -539,6 +883,24 @@ Will be wrapped into JSON with a proper header.</dd>
     return text</code></pre>
 </details>
 </dd>
+<dt id="helpers.viewField"><code class="name flex">
+<span>def <span class="ident">viewField</span></span>(<span>client, eid, field)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the response for showing a field.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def viewField(client, eid, field):
+    &#34;&#34;&#34;Get the response for showing a field.&#34;&#34;&#34;
+
+    response = client.get(f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;)
+    text = response.get_data(as_text=True)
+    fields = findFields(text)
+    return (text, fields)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -552,16 +914,22 @@ Will be wrapped into JSON with a proper header.</dd>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
+<li><code><a title="helpers.addContrib" href="#helpers.addContrib">addContrib</a></code></li>
+<li><code><a title="helpers.fieldEditRe" href="#helpers.fieldEditRe">fieldEditRe</a></code></li>
+<li><code><a title="helpers.findContrib" href="#helpers.findContrib">findContrib</a></code></li>
 <li><code><a title="helpers.findEid" href="#helpers.findEid">findEid</a></code></li>
 <li><code><a title="helpers.findFields" href="#helpers.findFields">findFields</a></code></li>
 <li><code><a title="helpers.findMsg" href="#helpers.findMsg">findMsg</a></code></li>
 <li><code><a title="helpers.findUsers" href="#helpers.findUsers">findUsers</a></code></li>
+<li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
+<li><code><a title="helpers.getValueTable" href="#helpers.getValueTable">getValueTable</a></code></li>
 <li><code><a title="helpers.isRight" href="#helpers.isRight">isRight</a></code></li>
 <li><code><a title="helpers.isStatus" href="#helpers.isStatus">isStatus</a></code></li>
 <li><code><a title="helpers.isWrong" href="#helpers.isWrong">isWrong</a></code></li>
 <li><code><a title="helpers.makeClient" href="#helpers.makeClient">makeClient</a></code></li>
-<li><code><a title="helpers.modify_auth" href="#helpers.modify_auth">modify_auth</a></code></li>
+<li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>
+<li><code><a title="helpers.viewField" href="#helpers.viewField">viewField</a></code></li>
 </ul>
 </li>
 </ul>

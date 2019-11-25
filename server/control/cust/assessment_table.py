@@ -1,9 +1,9 @@
-from bson.objectid import ObjectId
 from flask import flash
 
 from config import Names as N
 from control.utils import pick as G
 from control.table import Table
+from control.typ.related import castObjectId
 
 
 class AssessmentT(Table):
@@ -31,7 +31,7 @@ class AssessmentT(Table):
         table = self.table
         typeCriteria = db.typeCriteria
 
-        masterOid = ObjectId(masterId)
+        masterOid = castObjectId(masterId)
 
         wfitem = context.getWorkflowItem(masterOid)
 

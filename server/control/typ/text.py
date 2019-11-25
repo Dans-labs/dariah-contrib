@@ -15,8 +15,7 @@ CW = C.web
 QQ = H.icon(CW.unknown[N.generic])
 Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
-urlStart = re.compile(r"""^https?://""", re.I)
-urlTrim = re.compile(r"""^([htps:/]*)""")
+urlStart = re.compile(r"""^([a-zA-Z0-9_-]+)[:/]+(.*)""", re.I)
 
 
 class Text(TypeBase):
@@ -39,11 +38,15 @@ class Url(Text):
         normalVal = str(strVal).strip()
         if not normalVal:
             return E
-        if not urlStart.match(normalVal):
-            match = urlTrim.match(normalVal)
-            if match and len(match.group(1)) > 3:
-                normalVal = urlTrim.sub(E, normalVal)
-            normalVal = f"""{N.https}://{normalVal}"""
+        match = urlStart.match(normalVal)
+        if match:
+            protocol = match.group(1).lower()
+            rest = match.group(2)
+            if protocol not in {N.http, N.https}:
+                protocol = N.https
+            normalVal = f"{protocol}://{rest}"
+        else:
+            normalVal = f"https://{normalVal}"
         if DOT not in normalVal:
             normalVal += f"""{DOT}{N.org}"""
         return normalVal

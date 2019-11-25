@@ -90,6 +90,18 @@ function runtest {
     cd ..
 }
 
+function runcov {
+    echo "RUNNING TESTS with COVERAGE ..."
+    cd server
+    dest="../docs"
+    destTest="$dest/Tech/Tests.txt"
+    destCov="$dest/api/html/coverage"
+    coverage run -m pytest "$@" > $destTest
+    cat $destTest
+    coverage html -i -d $destCov
+    cd ..
+}
+
 function cleandb {
     cd server
     mongorestore --quiet --drop --db=dariah_clean tests/dariah_clean
@@ -104,7 +116,7 @@ function workflow {
 }
 
 function ship {
-    runtest
+    runcov
     docs "deploy"
     git add --all .
     git commit -m "ship: $*"
@@ -141,6 +153,9 @@ elif [[ "$1" == "cleandb" ]]; then
 elif [[ "$1" == "test" ]]; then
     shift
     runtest "$@"
+elif [[ "$1" == "testc" ]]; then
+    shift
+    runcov "$@"
 elif [[ "$1" == "ship" ]]; then
     shift
     ship "$@"
@@ -165,6 +180,7 @@ else
     echo "cleandb     : clean the test database"
     echo "test        : run all tests"
     echo "testx       : run all tests, verbose"
+    echo "testc       : run all tests with coverage"
     echo "ship \$1      : run tests, build docs, commit/push all code to github. \$=commit message"
     echo "shipdocs \$1  : build docs, commit/push all code to github. \$=commit message"
 fi

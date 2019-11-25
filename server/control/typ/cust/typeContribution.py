@@ -1,7 +1,12 @@
-from config import Names as N
+from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E, WHYPHEN
 from control.typ.value import Value
+
+
+CW = C.web
+
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
 class TypeContribution(Value):
@@ -12,6 +17,9 @@ class TypeContribution(Value):
 
     def titleStr(self, record):
         """Put the main type and the sub type in the title."""
+
+        if not record:
+            return Qq
 
         mainType = G(record, N.mainType) or E
         subType = G(record, N.subType) or E

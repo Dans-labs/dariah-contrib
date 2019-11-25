@@ -1,0 +1,617 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage report</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.ba-throttle-debounce.min.js"></script>
+    <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.index_ready);
+    </script>
+</head>
+<body class="indexfile">
+
+<div id="header">
+    <div class="content">
+        <h1>Coverage report:
+            <span class="pc_cov">72%</span>
+        </h1>
+
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+
+        <form id="filter_container">
+            <input id="filter" type="text" value="" placeholder="filter..." />
+        </form>
+    </div>
+</div>
+
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">n</span>
+        <span class="key">s</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        
+        <span class="key">c</span> &nbsp; change column sorting
+    </p>
+    </div>
+</div>
+
+<div id="index">
+    <table class="index">
+        <thead>
+            
+            <tr class="tablehead" title="Click to sort">
+                <th class="name left headerSortDown shortkey_n">Module</th>
+                <th class="shortkey_s">statements</th>
+                <th class="shortkey_m">missing</th>
+                <th class="shortkey_x">excluded</th>
+                
+                <th class="right shortkey_c">coverage</th>
+            </tr>
+        </thead>
+        
+        <tfoot>
+            <tr class="total">
+                <td class="name left">Total</td>
+                <td>4085</td>
+                <td>1126</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="2959 4085">72%</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            
+            <tr class="file">
+                <td class="name left"><a href="config_py.html">config.py</a></td>
+                <td>204</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="183 204">90%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_app_py.html">control/app.py</a></td>
+                <td>272</td>
+                <td>117</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="155 272">57%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_auth_py.html">control/auth.py</a></td>
+                <td>200</td>
+                <td>35</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="165 200">82%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_context_py.html">control/context.py</a></td>
+                <td>59</td>
+                <td>9</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="50 59">85%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_assessment_details_py.html">control/cust/assessment_details.py</a></td>
+                <td>28</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="11 28">39%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_assessment_record_py.html">control/cust/assessment_record.py</a></td>
+                <td>15</td>
+                <td>9</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="6 15">40%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_assessment_table_py.html">control/cust/assessment_table.py</a></td>
+                <td>42</td>
+                <td>33</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="9 42">21%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_contrib_details_py.html">control/cust/contrib_details.py</a></td>
+                <td>15</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="14 15">93%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_contrib_table_py.html">control/cust/contrib_table.py</a></td>
+                <td>25</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="25 25">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_criteria_record_py.html">control/cust/criteria_record.py</a></td>
+                <td>16</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 16">62%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_criteriaentry_details_py.html">control/cust/criteriaentry_details.py</a></td>
+                <td>21</td>
+                <td>14</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 21">33%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_criteriaentry_record_py.html">control/cust/criteriaentry_record.py</a></td>
+                <td>39</td>
+                <td>29</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 39">26%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_factory_details_py.html">control/cust/factory_details.py</a></td>
+                <td>10</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 10">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_factory_record_py.html">control/cust/factory_record.py</a></td>
+                <td>12</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="12 12">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_factory_table_py.html">control/cust/factory_table.py</a></td>
+                <td>13</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="13 13">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_review_details_py.html">control/cust/review_details.py</a></td>
+                <td>15</td>
+                <td>7</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="8 15">53%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_review_record_py.html">control/cust/review_record.py</a></td>
+                <td>26</td>
+                <td>16</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 26">38%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_review_table_py.html">control/cust/review_table.py</a></td>
+                <td>35</td>
+                <td>27</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="8 35">23%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_reviewentry_record_py.html">control/cust/reviewentry_record.py</a></td>
+                <td>21</td>
+                <td>11</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 21">48%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_score_py.html">control/cust/score.py</a></td>
+                <td>17</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="4 17">24%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_cust_score_record_py.html">control/cust/score_record.py</a></td>
+                <td>11</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="7 11">64%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_db_py.html">control/db.py</a></td>
+                <td>292</td>
+                <td>61</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="231 292">79%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_details_py.html">control/details.py</a></td>
+                <td>49</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="32 49">65%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_field_py.html">control/field.py</a></td>
+                <td>192</td>
+                <td>26</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="166 192">86%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_html_py.html">control/html.py</a></td>
+                <td>104</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="80 104">77%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_overview_py.html">control/overview.py</a></td>
+                <td>351</td>
+                <td>310</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="41 351">12%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_perm_py.html">control/perm.py</a></td>
+                <td>93</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="80 93">86%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_record_py.html">control/record.py</a></td>
+                <td>221</td>
+                <td>31</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="190 221">86%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_sidebar_py.html">control/sidebar.py</a></td>
+                <td>119</td>
+                <td>7</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="112 119">94%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_table_py.html">control/table.py</a></td>
+                <td>118</td>
+                <td>24</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="94 118">80%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_topbar_py.html">control/topbar.py</a></td>
+                <td>20</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="20 20">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_base_py.html">control/typ/base.py</a></td>
+                <td>41</td>
+                <td>13</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="28 41">68%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_bool_py.html">control/typ/bool.py</a></td>
+                <td>34</td>
+                <td>14</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="20 34">59%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_country_py.html">control/typ/cust/country.py</a></td>
+                <td>15</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="15 15">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_criteria_py.html">control/typ/cust/criteria.py</a></td>
+                <td>11</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 11">91%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_criteriaEntry_py.html">control/typ/cust/criteriaEntry.py</a></td>
+                <td>17</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="11 17">65%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_decision_py.html">control/typ/cust/decision.py</a></td>
+                <td>44</td>
+                <td>30</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="14 44">32%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_reviewEntry_py.html">control/typ/cust/reviewEntry.py</a></td>
+                <td>17</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="11 17">65%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_score_py.html">control/typ/cust/score.py</a></td>
+                <td>16</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 16">62%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_typeContribution_py.html">control/typ/cust/typeContribution.py</a></td>
+                <td>18</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="18 18">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_cust_user_py.html">control/typ/cust/user.py</a></td>
+                <td>10</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="10 10">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_datetime_py.html">control/typ/datetime.py</a></td>
+                <td>75</td>
+                <td>21</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="54 75">72%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_master_py.html">control/typ/master.py</a></td>
+                <td>6</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="6 6">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_numeric_py.html">control/typ/numeric.py</a></td>
+                <td>48</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="44 48">92%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_related_py.html">control/typ/related.py</a></td>
+                <td>54</td>
+                <td>15</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="39 54">72%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_text_py.html">control/typ/text.py</a></td>
+                <td>60</td>
+                <td>6</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="54 60">90%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_types_py.html">control/typ/types.py</a></td>
+                <td>49</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="49 49">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_typ_value_py.html">control/typ/value.py</a></td>
+                <td>66</td>
+                <td>2</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="64 66">97%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_utils_py.html">control/utils.py</a></td>
+                <td>125</td>
+                <td>8</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="117 125">94%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_workflow_apply_py.html">control/workflow/apply.py</a></td>
+                <td>237</td>
+                <td>103</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="134 237">57%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="control_workflow_compute_py.html">control/workflow/compute.py</a></td>
+                <td>161</td>
+                <td>4</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="157 161">98%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_conftest_py.html">tests/conftest.py</a></td>
+                <td>22</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="22 22">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_helpers_py.html">tests/helpers.py</a></td>
+                <td>78</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="73 78">94%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_magic_py.html">tests/magic.py</a></td>
+                <td>4</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="4 4">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_test_contrib1_py.html">tests/test_contrib1.py</a></td>
+                <td>72</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="72 72">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_test_contrib2_py.html">tests/test_contrib2.py</a></td>
+                <td>46</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="46 46">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_test_contrib3_py.html">tests/test_contrib3.py</a></td>
+                <td>91</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="91 91">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="tests_test_factory_py.html">tests/test_factory.py</a></td>
+                <td>13</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="13 13">100%</td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <p id="no_rows">
+        No items found using the specified filter.
+    </p>
+</div>
+
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
+            created at 2019-11-25 20:42
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

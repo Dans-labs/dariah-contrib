@@ -24,10 +24,15 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Names as N
+<pre><code class="python">from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E, WHYPHEN
 from control.typ.value import Value
+
+
+CW = C.web
+
+Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
 class TypeContribution(Value):
@@ -38,6 +43,9 @@ class TypeContribution(Value):
 
     def titleStr(self, record):
         &#34;&#34;&#34;Put the main type and the sub type in the title.&#34;&#34;&#34;
+
+        if not record:
+            return Qq
 
         mainType = G(record, N.mainType) or E
         subType = G(record, N.subType) or E
@@ -83,6 +91,9 @@ class TypeContribution(Value):
     def titleStr(self, record):
         &#34;&#34;&#34;Put the main type and the sub type in the title.&#34;&#34;&#34;
 
+        if not record:
+            return Qq
+
         mainType = G(record, N.mainType) or E
         subType = G(record, N.subType) or E
         sep = WHYPHEN if mainType and subType else E
@@ -123,6 +134,9 @@ class TypeContribution(Value):
 </summary>
 <pre><code class="python">def titleStr(self, record):
     &#34;&#34;&#34;Put the main type and the sub type in the title.&#34;&#34;&#34;
+
+    if not record:
+        return Qq
 
     mainType = G(record, N.mainType) or E
     subType = G(record, N.subType) or E

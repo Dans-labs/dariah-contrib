@@ -40,23 +40,20 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G, now
 from helpers import (
-    fieldRe,
     isWrong,
     isRight,
-    findMsg,
-    findEid,
     findFields,
-    findUsers,
     postJson,
-    modify_auth,
+    modifyField,
+    getValueTable,
+    addContrib,
 )
 
 
-text = None
-fields = None
-msgs = None
-eid = None
-users = None
+requestInfo = {}
+valueTables = {}
+
+EXAMPLE_TYPE = "activity - resource creation"
 
 
 def test_users(clientLisa):
@@ -64,14 +61,13 @@ def test_users(clientLisa):
 
     Yes.
 
-    And we'll fetch a mapping from first names to ids.
+    !!! hint "Stored for later use"
+        By using `getValueTable` we store the dict of values in the global
+        `valueTables`.
     """
 
-    global users
+    users = getValueTable(clientLisa, "user", requestInfo, valueTables)
 
-    response = clientLisa.get("/user/list")
-    text = response.get_data(as_text=True)
-    users = findUsers(text)
     assert "bart" in users
     assert "lisa" in users
     assert "suzan" in users
@@ -96,17 +92,11 @@ def test_add(clientSuzan):
     Yes.
     """
 
-    global text
-    global fields
-    global msgs
-    global eid
-
-    response = clientSuzan.get(f"/api/contrib/insert", follow_redirects=True)
-    text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
-    eid = findEid(text)
-    assert "item added" in msgs
+    (text, fields, msgs, eid) = addContrib(clientSuzan)
+    requestInfo["text"] = text
+    requestInfo["fields"] = fields
+    requestInfo["msgs"] = msgs
+    requestInfo["eid"] = eid
 
 
 @pytest.mark.parametrize(
@@ -125,6 +115,8 @@ def test_fields(field, value):
     Yes.
     """
 
+    fields = requestInfo["fields"]
+
     assert G(fields, field) == value
 
 
@@ -134,9 +126,12 @@ def test_modify_creator(clientSuzan):
     Yes.
     """
 
-    newTitle = "My contribution (Suzan)"
-    (text, fields) = modify_auth(clientSuzan, eid, newTitle)
-    assert G(fields, "title") == newTitle
+    eid = requestInfo["eid"]
+
+    field = "title"
+    newValue = "My contribution (Suzan)"
+    (text, fields) = modifyField(clientSuzan, eid, field, newValue)
+    assert G(fields, "title") == newValue
 
 
 def test_modify_public(client):
@@ -145,9 +140,12 @@ def test_modify_public(client):
     No.
     """
 
-    newTitle = "My contribution (public)"
-    (text, fields) = modify_auth(client, eid, newTitle)
-    assert G(fields, "title") != newTitle
+    eid = requestInfo["eid"]
+
+    field = "title"
+    newValue = "My contribution (public)"
+    (text, fields) = modifyField(client, eid, field, newValue)
+    assert G(fields, "title") != newValue
     assert "400 Bad Request" in text
 
 
@@ -157,9 +155,12 @@ def test_modify_auth1(clientBart):
     Not if (s)he is not Suzan, or somebody in the list of editors!
     """
 
-    newTitle = "My contribution (Bart)"
-    (text, fields) = modify_auth(clientBart, eid, newTitle)
-    assert G(fields, "title") != newTitle
+    eid = requestInfo["eid"]
+
+    field = "title"
+    newValue = "My contribution (Bart)"
+    (text, fields) = modifyField(clientBart, eid, field, newValue)
+    assert G(fields, "title") != newValue
     assert "400 Bad Request" in text
 
 
@@ -169,9 +170,12 @@ def test_modify_office(clientLisa):
     Yes.
     """
 
-    newTitle = "My contribution (Lisa)"
-    (text, fields) = modify_auth(clientLisa, eid, newTitle)
-    assert G(fields, "title") == newTitle
+    eid = requestInfo["eid"]
+
+    field = "title"
+    newValue = "My contribution (Lisa)"
+    (text, fields) = modifyField(clientLisa, eid, field, newValue)
+    assert G(fields, "title") == newValue
 
 
 def test_addEditor(clientLisa):
@@ -179,6 +183,9 @@ def test_addEditor(clientLisa):
 
     Yes.
     """
+
+    eid = requestInfo["eid"]
+    users = valueTables["user"]
 
     (bartId, bartName) = users["bart"]
 
@@ -195,10 +202,12 @@ def test_modify_auth2(clientBart):
     Yes if (s)he is in the list of editors!
     """
 
-    newTitle = "My contribution (Bart)"
+    eid = requestInfo["eid"]
 
-    (text, fields) = modify_auth(clientBart, eid, newTitle)
-    assert G(fields, "title") == newTitle
+    field = "title"
+    newValue = "My contribution (Bart)"
+    (text, fields) = modifyField(clientBart, eid, field, newValue)
+    assert G(fields, "title") == newValue
 
 
 def test_del_public(client):
@@ -206,6 +215,8 @@ def test_del_public(client):
 
     No.
     """
+
+    eid = requestInfo["eid"]
 
     isWrong(client, f"/api/contrib/delete/{eid}")
 
@@ -215,5 +226,7 @@ def test_del_editor(clientBart):
 
     Yes.
     """
+
+    eid = requestInfo["eid"]
 
     isRight(clientBart, f"/api/contrib/delete/{eid}")

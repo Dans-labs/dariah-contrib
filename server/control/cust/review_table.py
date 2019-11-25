@@ -1,8 +1,7 @@
-from bson.objectid import ObjectId
-
 from config import Names as N
 from control.utils import pick as G
 from control.table import Table
+from control.typ.related import castObjectId
 
 
 class ReviewT(Table):
@@ -29,7 +28,7 @@ class ReviewT(Table):
         eppn = self.eppn
         table = self.table
 
-        masterOid = ObjectId(masterId)
+        masterOid = castObjectId(masterId)
         masterRecord = context.getItem(N.assessment, masterOid)
         contribId = G(masterRecord, N.contrib)
         if not contribId:

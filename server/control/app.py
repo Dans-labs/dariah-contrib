@@ -63,6 +63,7 @@ NO_PAGE = MESSAGES[N.noPage]
 NO_COMMAND = MESSAGES[N.noCommand]
 NO_TABLE = MESSAGES[N.noTable]
 NO_FIELD = MESSAGES[N.noField]
+NO_ACTION = MESSAGES[N.noAction]
 
 
 def redirectResult(url, good):
@@ -418,14 +419,16 @@ def appFactory(regime, debug, test, **kwargs):
             context = getContext()
             auth.authenticate()
             if table in ALL_TABLES:
-                result = (
+                resultObj = (
                     mkTable(context, table)
                     .record(eid=eid)
                     .field(field)
-                    .wrap(action=action)
                 )
-                return result
-        return noField(table, field)
+                if resultObj:
+                    return resultObj.wrap(action=action)
+                return noField(table, field)
+            return noTable(table)
+        return noAction(action)
 
     # COMMANDS
 
@@ -463,5 +466,8 @@ def appFactory(regime, debug, test, **kwargs):
 
     def noField(table, field):
         return f"""{NO_FIELD} {table}:{field}"""
+
+    def noAction(action):
+        return f"""{NO_ACTION} {action}"""
 
     return app
