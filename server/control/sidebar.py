@@ -9,6 +9,7 @@ from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, cap1, E, Q, AMP, ZERO
 from control.typ.types import Country
+from control.perm import checkTable
 
 from control.cust.factory_table import make as mkTable
 
@@ -65,6 +66,12 @@ class Sidebar:
         }
         """*dict*  The current setting of the options.
         """
+
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
 
     def makeCaption(self, label, entries, rule=False):
         """Produce the caption for a section of navigation items.
@@ -194,6 +201,10 @@ class Sidebar:
             See web.yaml under `listActions` for all possible values.
             See also `control.table.Table.wrap`.
 
+        !!! caution
+            The table entry will only be made if the user has permissions
+            to list the detail table!
+
         Returns
         -------
         path: url
@@ -201,6 +212,9 @@ class Sidebar:
         string(html)
             The wrapped entry
         """
+
+        if not self.tablePerm(table):
+            return (E, E)
 
         context = self.context
 

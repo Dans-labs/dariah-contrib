@@ -28,6 +28,28 @@ systemTables:
   - decision
   - permissionGroup
 
+perm:
+  contrib: public
+  assessment: auth
+  review: auth
+  criteriaEntry: auth
+  reviewEntry: auth
+  country: public
+  criteria: office
+  discipline: public
+  keyword: public
+  package: office
+  score: office
+  tadirahActivity: public
+  tadirahObject: public
+  tadirahTechnique: public
+  typeContribution: public
+  user: office
+  vcc: office
+  year: public
+  decision: office
+  permissionGroup: office
+  
 actualTables:
   - criteria
   - package

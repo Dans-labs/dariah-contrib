@@ -11,6 +11,8 @@ CT = C.tables
 CP = C.perm
 
 DEFAULT_PERM = CP.default
+TABLE_PERM = CT.perm
+
 NOBODY = N.nobody
 UNAUTH = N.public
 AUTH = N.auth
@@ -22,6 +24,66 @@ SYSTEM = N.system
 ROOT = N.root
 
 ALLOW_OUR = set(CT.userTables) | set(CT.userEntryTables)
+
+
+def checkTable(
+    table, user,
+):
+    """Verify whether user's credentials match the requirements for a table.
+
+    Every table can only be listed on the interface if the user has permissions
+    for it.
+    The table permissions are configured in `tables.yaml`, under the key `perm`.
+    For each table the minimal role is stated that can access the table.
+
+    If a table is not permitted, then its records are also not permitted,
+    neither are fields in those records.
+
+    However, this holds for the generic interface. Individual tables and records
+    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    which can open up and close off material.
+
+    Parameters
+    ----------
+    table: string
+        The table for which permission is required.
+    user: dict
+        User attributes, containing in paticular: `group` which is the role a
+        user can play on the basis of his/her identity.
+
+    Returns
+    -------
+    boolean
+    """
+
+    require = G(TABLE_PERM, table)
+    if require is None:
+        return False
+
+    if require == UNAUTH:
+        return True
+
+    group = G(user, N.groupRep, default=UNAUTH)
+
+    if require == NOBODY:
+        return False
+
+    if require == AUTH:
+        return group != UNAUTH
+
+    isSuper = group in {OFFICE, SYSTEM, ROOT}
+
+    if require == OFFICE:
+        return isSuper
+
+    if require == SYSTEM:
+        return group in {SYSTEM, ROOT}
+
+    if require == ROOT:
+        return group == ROOT
+
+    if require == COORD:
+        return group == COORD or isSuper
 
 
 def checkPerm(

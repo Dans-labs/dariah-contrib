@@ -51,6 +51,7 @@ from helpers import (
     findEid,
     findItem,
     findMaterial,
+    findDetails,
     accessUrl,
     fieldValue,
 )
@@ -160,3 +161,18 @@ def test_inspectAssessment(clientPublic, clientBart, clientSuzan):
     inspectAssessment(clientPublic, False)
     inspectAssessment(clientBart, True)
     inspectAssessment(clientSuzan, True)
+
+
+def test_addAssessment(clientSuzan):
+    eid = contribInfo["eid"]
+    url = f"/api/command/startAssessment/{CONTRIB}/{eid}"
+    isWrong(clientSuzan, url)
+
+
+def test_criteriaEntries(clientSuzan):
+    aId = assessInfo["eid"]
+    (text, fields, msgs, aId) = findItem(clientSuzan, ASSESS, aId)
+
+    dtable = "criteriaEntry"
+    criteriaEntries = findDetails(text, dtable)
+    assert len(criteriaEntries) == 4

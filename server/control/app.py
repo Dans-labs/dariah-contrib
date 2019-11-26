@@ -17,6 +17,7 @@ from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.db import Db
 from control.workflow.compute import Workflow
+from control.perm import checkTable
 from control.auth import Auth
 from control.context import Context
 from control.sidebar import Sidebar
@@ -126,6 +127,9 @@ def appFactory(regime, debug, test, **kwargs):
     def getContext():
         return Context(DB, WF, auth)
 
+    def tablePerm(table):
+        return checkTable(table, auth.user)
+
     if debug and auth.isDevel:
         CT.showReferences()
         N.showNames()
@@ -214,12 +218,13 @@ def appFactory(regime, debug, test, **kwargs):
         if table in ALL_TABLES and table not in MASTERS:
             context = getContext()
             auth.authenticate()
-            eid = mkTable(context, table).insert()
+            eid = None
+            if tablePerm(table):
+                eid = mkTable(context, table).insert()
             if eid:
                 newPath = f"""/{table}/{N.item}/{eid}"""
                 flash(f"item added")
         else:
-            eid = None
             flash(f"Cannot add items to {table}", "error")
         return redirectResult(newPath, eid is not None)
 
@@ -235,14 +240,14 @@ def appFactory(regime, debug, test, **kwargs):
         ):
             context = getContext()
             auth.authenticate()
-            dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
+            dEid = None
+            if tablePerm(table):
+                dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
                 newPath = (
                     f"""/{table}/{N.item}/{eid}/"""
                     f"""{N.open}/{dtable}/{dEid}"""
                 )
-        else:
-            dEid = None
         if dEid:
             flash(f"{dtable} item added")
         else:
@@ -270,7 +275,9 @@ def appFactory(regime, debug, test, **kwargs):
                 auth.authenticate()
                 topbar = Topbar(context).wrap()
                 sidebar = Sidebar(context, path).wrap()
-                tableList = mkTable(context, table).wrap(eid, action=action)
+                tableList = None
+                if tablePerm(table):
+                    tableList = mkTable(context, table).wrap(eid, action=action)
                 if not tableList:
                     flash(f"{action or E} view on {table} not allowed", "error")
                     return redirectResult(START, False)
@@ -291,9 +298,11 @@ def appFactory(regime, debug, test, **kwargs):
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
-            good = mkTable(context, table).record(eid=eid).delete()
-            newUrlPart = f"?{N.action}={N.my}" if table in USER_TABLES else E
-            newPath = f"""/{table}/{N.list}{newUrlPart}"""
+            good = False
+            if tablePerm(table):
+                good = mkTable(context, table).record(eid=eid).delete()
+                newUrlPart = f"?{N.action}={N.my}" if table in USER_TABLES else E
+                newPath = f"""/{table}/{N.list}{newUrlPart}"""
             if good:
                 flash("item deleted")
             else:
@@ -318,11 +327,12 @@ def appFactory(regime, debug, test, **kwargs):
         ):
             context = getContext()
             auth.authenticate()
-            recordObj = mkTable(context, dtable).record(eid=eid)
+            if tablePerm(table):
+                recordObj = mkTable(context, dtable).record(eid=eid)
 
-            wfitem = recordObj.wfitem
-            if wfitem:
-                good = recordObj.delete()
+                wfitem = recordObj.wfitem
+                if wfitem:
+                    good = recordObj.delete()
 
         if good:
             flash(f"{dtable} detail deleted")
@@ -338,12 +348,13 @@ def appFactory(regime, debug, test, **kwargs):
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
-            return (
-                mkTable(context, table)
-                .record(eid=eid, withDetails=True, **method())
-                .wrap()
-            )
-        return notFound(path)
+            if tablePerm(table):
+                return (
+                    mkTable(context, table)
+                    .record(eid=eid, withDetails=True, **method())
+                    .wrap()
+                )
+        return notFound(path, bare=True)
 
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>/{N.title}""")
     def serveRecordTitle(table, eid):
@@ -351,12 +362,13 @@ def appFactory(regime, debug, test, **kwargs):
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
-            return (
-                mkTable(context, table)
-                .record(eid=eid, withDetails=False, **method())
-                .wrap(expanded=-1)
-            )
-        return notFound(path)
+            if tablePerm(table):
+                return (
+                    mkTable(context, table)
+                    .record(eid=eid, withDetails=False, **method())
+                    .wrap(expanded=-1)
+                )
+        return notFound(path, bare=True)
 
     # with specific detail opened
 
@@ -371,14 +383,17 @@ def appFactory(regime, debug, test, **kwargs):
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
-            record = (
-                mkTable(context, table)
-                .record(eid=eid, withDetails=True, **method())
-                .wrap(showTable=dtable, showEid=deid)
-            )
-            return render_template(
-                INDEX, topbar=topbar, sidebar=sidebar, material=record,
-            )
+            if tablePerm(table):
+                record = (
+                    mkTable(context, table)
+                    .record(eid=eid, withDetails=True, **method())
+                    .wrap(showTable=dtable, showEid=deid)
+                )
+                if not record:
+                    flash(f"Unknown record in table {table}", "error")
+                return render_template(
+                    INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                )
         flash(f"Unknown table {table}", "error")
         return redirectResult(START, False)
 
@@ -390,16 +405,17 @@ def appFactory(regime, debug, test, **kwargs):
             auth.authenticate()
             topbar = Topbar(context).wrap()
             sidebar = Sidebar(context, path).wrap()
-            record = (
-                mkTable(context, table)
-                .record(eid=eid, withDetails=True, **method())
-                .wrap()
-            )
-            if not record:
-                flash(f"Unknown record in table {table}", "error")
-            return render_template(
-                INDEX, topbar=topbar, sidebar=sidebar, material=record,
-            )
+            if tablePerm(table):
+                record = (
+                    mkTable(context, table)
+                    .record(eid=eid, withDetails=True, **method())
+                    .wrap()
+                )
+                if not record:
+                    flash(f"Unknown record in table {table}", "error")
+                return render_template(
+                    INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                )
         flash(f"Unknown table {table}", "error")
         return redirectResult(START, False)
 
@@ -419,7 +435,7 @@ def appFactory(regime, debug, test, **kwargs):
         if action in FIELD_ACTIONS:
             context = getContext()
             auth.authenticate()
-            if table in ALL_TABLES:
+            if table in ALL_TABLES and tablePerm(table):
                 resultObj = (
                     mkTable(context, table)
                     .record(eid=eid)
@@ -437,7 +453,7 @@ def appFactory(regime, debug, test, **kwargs):
     def serveCommand(command, table, eid):
         context = getContext()
         auth.authenticate()
-        if table in ALL_TABLES:
+        if table in ALL_TABLES and tablePerm(table):
             (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
             return redirectResult(newPath, good)
         return noCommand(table, command)
@@ -449,13 +465,17 @@ def appFactory(regime, debug, test, **kwargs):
         flash(f"Cannot find {anything}", "error")
         return redirectResult(START, False)
 
-    def notFound(path):
+    def notFound(path, bare=False):
+        message = f"""{NO_PAGE} {path}"""
+        if bare:
+            return message
+
         context = getContext()
         auth.authenticate()
         topbar = Topbar(context).wrap()
         sidebar = Sidebar(context, path).wrap()
         return render_template(
-            INDEX, topbar=topbar, sidebar=sidebar, material=f"""{NO_PAGE} {path}""",
+            INDEX, topbar=topbar, sidebar=sidebar, material=message,
         )
 
     def noCommand(table, command):

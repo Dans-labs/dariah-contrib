@@ -42,6 +42,8 @@ CT = C.tables
 CP = C.perm
 
 DEFAULT_PERM = CP.default
+TABLE_PERM = CT.perm
+
 NOBODY = N.nobody
 UNAUTH = N.public
 AUTH = N.auth
@@ -53,6 +55,66 @@ SYSTEM = N.system
 ROOT = N.root
 
 ALLOW_OUR = set(CT.userTables) | set(CT.userEntryTables)
+
+
+def checkTable(
+    table, user,
+):
+    &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements for a table.
+
+    Every table can only be listed on the interface if the user has permissions
+    for it.
+    The table permissions are configured in `tables.yaml`, under the key `perm`.
+    For each table the minimal role is stated that can access the table.
+
+    If a table is not permitted, then its records are also not permitted,
+    neither are fields in those records.
+
+    However, this holds for the generic interface. Individual tables and records
+    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    which can open up and close off material.
+
+    Parameters
+    ----------
+    table: string
+        The table for which permission is required.
+    user: dict
+        User attributes, containing in paticular: `group` which is the role a
+        user can play on the basis of his/her identity.
+
+    Returns
+    -------
+    boolean
+    &#34;&#34;&#34;
+
+    require = G(TABLE_PERM, table)
+    if require is None:
+        return False
+
+    if require == UNAUTH:
+        return True
+
+    group = G(user, N.groupRep, default=UNAUTH)
+
+    if require == NOBODY:
+        return False
+
+    if require == AUTH:
+        return group != UNAUTH
+
+    isSuper = group in {OFFICE, SYSTEM, ROOT}
+
+    if require == OFFICE:
+        return isSuper
+
+    if require == SYSTEM:
+        return group in {SYSTEM, ROOT}
+
+    if require == ROOT:
+        return group == ROOT
+
+    if require == COORD:
+        return group == COORD or isSuper
 
 
 def checkPerm(
@@ -442,6 +504,97 @@ records of which (s)he is creator/editor, or National Coordinator.</dd>
         return group == COORD and G(perm, N.sameCountry) or isSuper</code></pre>
 </details>
 </dd>
+<dt id="control.perm.checkTable"><code class="name flex">
+<span>def <span class="ident">checkTable</span></span>(<span>table, user)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Verify whether user's credentials match the requirements for a table.</p>
+<p>Every table can only be listed on the interface if the user has permissions
+for it.
+The table permissions are configured in <code>tables.yaml</code>, under the key <code>perm</code>.
+For each table the minimal role is stated that can access the table.</p>
+<p>If a table is not permitted, then its records are also not permitted,
+neither are fields in those records.</p>
+<p>However, this holds for the generic interface. Individual tables and records
+and fields may be regulated in addition by <code>control.compute.Workflow</code> conditions,
+which can open up and close off material.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table for which permission is required.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
+<dd>User attributes, containing in paticular: <code>group</code> which is the role a
+user can play on the basis of his/her identity.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>boolean</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def checkTable(
+    table, user,
+):
+    &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements for a table.
+
+    Every table can only be listed on the interface if the user has permissions
+    for it.
+    The table permissions are configured in `tables.yaml`, under the key `perm`.
+    For each table the minimal role is stated that can access the table.
+
+    If a table is not permitted, then its records are also not permitted,
+    neither are fields in those records.
+
+    However, this holds for the generic interface. Individual tables and records
+    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    which can open up and close off material.
+
+    Parameters
+    ----------
+    table: string
+        The table for which permission is required.
+    user: dict
+        User attributes, containing in paticular: `group` which is the role a
+        user can play on the basis of his/her identity.
+
+    Returns
+    -------
+    boolean
+    &#34;&#34;&#34;
+
+    require = G(TABLE_PERM, table)
+    if require is None:
+        return False
+
+    if require == UNAUTH:
+        return True
+
+    group = G(user, N.groupRep, default=UNAUTH)
+
+    if require == NOBODY:
+        return False
+
+    if require == AUTH:
+        return group != UNAUTH
+
+    isSuper = group in {OFFICE, SYSTEM, ROOT}
+
+    if require == OFFICE:
+        return isSuper
+
+    if require == SYSTEM:
+        return group in {SYSTEM, ROOT}
+
+    if require == ROOT:
+        return group == ROOT
+
+    if require == COORD:
+        return group == COORD or isSuper</code></pre>
+</details>
+</dd>
 <dt id="control.perm.coordinator"><code class="name flex">
 <span>def <span class="ident">coordinator</span></span>(<span>user, countryId)</span>
 </code></dt>
@@ -803,6 +956,7 @@ As creator/editor/reviewer/coordinator?</dd>
 <ul class="two-column">
 <li><code><a title="control.perm.authenticated" href="#control.perm.authenticated">authenticated</a></code></li>
 <li><code><a title="control.perm.checkPerm" href="#control.perm.checkPerm">checkPerm</a></code></li>
+<li><code><a title="control.perm.checkTable" href="#control.perm.checkTable">checkTable</a></code></li>
 <li><code><a title="control.perm.coordinator" href="#control.perm.coordinator">coordinator</a></code></li>
 <li><code><a title="control.perm.getPerms" href="#control.perm.getPerms">getPerms</a></code></li>
 <li><code><a title="control.perm.officeuser" href="#control.perm.officeuser">officeuser</a></code></li>

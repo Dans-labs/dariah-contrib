@@ -114,6 +114,7 @@ from helpers import (
     findEid,
     findItem,
     findMaterial,
+    findDetails,
     accessUrl,
     fieldValue,
 )
@@ -222,7 +223,22 @@ def test_inspectAssessment(clientPublic, clientBart, clientSuzan):
 
     inspectAssessment(clientPublic, False)
     inspectAssessment(clientBart, True)
-    inspectAssessment(clientSuzan, True)</code></pre>
+    inspectAssessment(clientSuzan, True)
+
+
+def test_addAssessment(clientSuzan):
+    eid = contribInfo[&#34;eid&#34;]
+    url = f&#34;/api/command/startAssessment/{CONTRIB}/{eid}&#34;
+    isWrong(clientSuzan, url)
+
+
+def test_criteriaEntries(clientSuzan):
+    aId = assessInfo[&#34;eid&#34;]
+    (text, fields, msgs, aId) = findItem(clientSuzan, ASSESS, aId)
+
+    dtable = &#34;criteriaEntry&#34;
+    criteriaEntries = findDetails(text, dtable)
+    assert len(criteriaEntries) == 4</code></pre>
 </details>
 </section>
 <section>
@@ -232,6 +248,39 @@ def test_inspectAssessment(clientPublic, clientBart, clientSuzan):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="test_C_assess1.test_addAssessment"><code class="name flex">
+<span>def <span class="ident">test_addAssessment</span></span>(<span>clientSuzan)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_addAssessment(clientSuzan):
+    eid = contribInfo[&#34;eid&#34;]
+    url = f&#34;/api/command/startAssessment/{CONTRIB}/{eid}&#34;
+    isWrong(clientSuzan, url)</code></pre>
+</details>
+</dd>
+<dt id="test_C_assess1.test_criteriaEntries"><code class="name flex">
+<span>def <span class="ident">test_criteriaEntries</span></span>(<span>clientSuzan)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_criteriaEntries(clientSuzan):
+    aId = assessInfo[&#34;eid&#34;]
+    (text, fields, msgs, aId) = findItem(clientSuzan, ASSESS, aId)
+
+    dtable = &#34;criteriaEntry&#34;
+    criteriaEntries = findDetails(text, dtable)
+    assert len(criteriaEntries) == 4</code></pre>
+</details>
+</dd>
 <dt id="test_C_assess1.test_inspectAssessment"><code class="name flex">
 <span>def <span class="ident">test_inspectAssessment</span></span>(<span>clientPublic, clientBart, clientSuzan)</span>
 </code></dt>
@@ -397,6 +446,8 @@ def test_try_start_again(
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_C_assess1.test_addAssessment" href="#test_C_assess1.test_addAssessment">test_addAssessment</a></code></li>
+<li><code><a title="test_C_assess1.test_criteriaEntries" href="#test_C_assess1.test_criteriaEntries">test_criteriaEntries</a></code></li>
 <li><code><a title="test_C_assess1.test_inspectAssessment" href="#test_C_assess1.test_inspectAssessment">test_inspectAssessment</a></code></li>
 <li><code><a title="test_C_assess1.test_mylistAssessment" href="#test_C_assess1.test_mylistAssessment">test_mylistAssessment</a></code></li>
 <li><code><a title="test_C_assess1.test_start" href="#test_C_assess1.test_start">test_start</a></code></li>

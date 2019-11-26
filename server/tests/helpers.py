@@ -41,6 +41,15 @@ def fieldEditRe(eid, field):
     )
 
 
+def detailRe(dtable):
+    return re.compile(
+        r"""<details itemkey=['"]{dtable}/([^'"]+)['"][^>]*>(.*?)</details>""".format(
+            dtable=dtable
+        ),
+        re.S,
+    )
+
+
 def makeClient(app, eppn):
     """Logs in a specific user.
 
@@ -74,7 +83,7 @@ def isStatus(client, url, status):
     if status:
         assert response.status_code in {200, 302}
     else:
-        assert response.status_code == 303
+        assert response.status_code in {400, 303}
 
 
 def isWrong(client, url):
@@ -160,6 +169,27 @@ def findFields(text):
     """
 
     return {field: value for (field, value) in fieldRe.findall(text)}
+
+
+def findDetails(text, dtable):
+    """Get the details from a response, but only those in a specific table.
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+    dtail: string
+        The detail table
+
+    Returns
+    -------
+    list of tuple of (string(id), string(html))
+        The HTML for the details, chunked per detail record.
+        Each chunk consists of two parts: the entity id of that detail,
+        and the piece of HTML representing the title of the detail.
+    """
+
+    return detailRe(dtable).findall(text)
 
 
 def findMaterial(text):

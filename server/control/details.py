@@ -7,6 +7,7 @@
 from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
+from control.perm import checkTable
 
 CT = C.tables
 
@@ -56,8 +57,18 @@ class Details:
         records in that detail table.
         """
 
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
+
     def fetchDetails(self, dtable, sortKey=None):
         """Fetch detail records from the database.
+
+        !!! caution
+            The details will only be fetched if the user has permissions
+            to list the detail table!
 
         Parameters
         ----------
@@ -72,6 +83,9 @@ class Details:
             The detail records are stored in the `details` attribute, which is a
             dict keyed by the names of the detail tables.
         """
+
+        if not self.tablePerm(dtable):
+            return
 
         context = self.context
         db = context.db
