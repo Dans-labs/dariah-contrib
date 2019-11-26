@@ -6,14 +6,26 @@ import re
 from flask import json
 
 
+materialRe = re.compile(
+    r"""<div id=['"]material['"]>(.*?)</div>\s*</div>\s*<script""", re.S
+)
 fieldRe = re.compile("""<!-- ([^=]+)=(.*?) -->""", re.S)
 msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
-eidRe = re.compile("""<details itemkey=['"]contrib/([^'"]*)['"]""", re.S)
+eidRe = re.compile("""<details itemkey=['"][a-zA-Z0-9_]+/([^/'"]*)['"]""", re.S)
 userRe = re.compile(
     """<details itemkey=['"]user/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>""",
     re.S,
 )
 valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
+
+UNDEF_VALUE = "○"
+
+WELCOME = "Welcome to the DARIAH contribution tool"
+EXAMPLE_TYPE = "activity - resource creation"
+EXAMPLE_TYPE_ID = "00000000cca4bbd9fe000015"
+BELGIUM_ID = "00000000e909c2d70600001b"
+CONTRIB = "contrib"
+ASSESS = "assessment"
 
 
 def fieldEditRe(eid, field):
@@ -60,7 +72,7 @@ def isStatus(client, url, status):
 
     response = client.get(url)
     if status:
-        assert response.status_code == 302
+        assert response.status_code in {200, 302}
     else:
         assert response.status_code == 303
 
@@ -112,6 +124,7 @@ def findEid(text):
     """Get the entity id from a response.
 
     If the response shows a record, dig out its entity id.
+    Otherwise, return `None`
 
     Parameters
     ----------
@@ -120,10 +133,11 @@ def findEid(text):
 
     Returns
     -------
-    string(ObjectId)
+    string(ObjectId) | `None`
     """
 
-    return eidRe.findall(text)[0]
+    results = eidRe.findall(text)
+    return results[0] if results else None
 
 
 def findFields(text):
@@ -148,10 +162,39 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
+def findMaterial(text):
+    """Get the text of the material div. """
+
+    results = materialRe.findall(text)
+    return results[0].strip() if results else None
+
+
 def findUsers(text):
     return {
         name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
     }
+
+
+def fieldValue(fields, field, value):
+    """Verify whether a field has a certain value.
+
+    If we pass value `None` we want to assert that the field is not present at all.
+
+    Parameters
+    ----------
+    fields: dict
+        The dictionary of fields and values.
+    field: string
+        The name of the specific field.
+    value:
+        The test value for this field.
+    """
+
+    if value is None:
+        assert field not in fields
+    else:
+        assert field in fields
+        assert value == fields[field]
 
 
 def addContrib(client):
@@ -181,13 +224,20 @@ def addContrib(client):
     return (text, fields, msgs, eid)
 
 
-def findContrib(client):
-    """Looks up a contribution.
+def findItemEid(client, table, action=None):
+    """Looks up an item from a view on a table.
 
     The response texts will be analysed into messages and fields, the eid
-    of the new contribution will be read off.
+    of the item will be read off.
 
-    We assume that there is still only one contribution in the database.
+    We assume that there is still only one item in the view.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    action: string, optional `None`
+        The view on the table, such as `my`, `our`.
 
     Returns
     -------
@@ -198,15 +248,58 @@ def findContrib(client):
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
     eid: str(ObjectId)
-        The id of the inserted contribution.
+        The id of the item.
     """
 
-    response = client.get(f"/contrib/list")
+    actionStr = "" if action is None else f"?action={action}"
+    response = client.get(f"/{table}/list{actionStr}")
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
     eid = findEid(text)
     return (text, fields, msgs, eid)
+
+
+def findItem(client, table, eid):
+    """Looks up an item directly.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the item will be read off.
+
+    We assume that there is still only one item in the view.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    action: string, optional `None`
+        The view on the table, such as `my`, `our`.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the item.
+    """
+
+    response = client.get(f"/{table}/item/{eid}")
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    return (text, fields, msgs, eid)
+
+
+def startWithContrib(client):
+    result = findItemEid(client, CONTRIB)
+    if result[3]:
+        return result
+    return addContrib(client)
 
 
 def postJson(client, url, value):
@@ -248,12 +341,20 @@ def viewField(client, table, eid, field):
     """Get the response for showing a field."""
 
     url = f"/api/{table}/item/{eid}/field/{field}?action=view"
-    print("URL", url)
     response = client.get(url)
-    print("RESPONSE", response)
     text = response.get_data(as_text=True)
     fields = findFields(text)
     return (text, fields)
+
+
+def accessUrl(client, url, redirect=False):
+    """Get the response on accessing a url."""
+
+    response = client.get(url, follow_redirects=redirect)
+    text = response.get_data(as_text=True)
+    status = response.status_code
+    msgs = findMsg(text)
+    return (text, status, msgs)
 
 
 def getRelatedValues(client, eid, field):

@@ -17,13 +17,16 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G
 from helpers import (
+    UNDEF_VALUE,
+    CONTRIB,
     modifyField,
     getValueTable,
-    findContrib,
+    startWithContrib,
+    fieldValue,
 )
 
 
-requestInfo = {}
+contribInfo = {}
 valueTables = {}
 
 EXAMPLE = dict(
@@ -216,10 +219,6 @@ Cœur du Hainaut
     ),
 )
 
-UNDEF_VALUE = "○"
-
-TABLE = "contrib"
-
 # SPECIFIC HELPERS
 
 
@@ -231,24 +230,24 @@ def modifyType(client, eid):
 
     field = "typeContribution"
     newValue = EXAMPLE["typeContribution"][-2]
-    (text, fields) = modifyField(client, TABLE, eid, field, types[newValue])
+    (text, fields) = modifyField(client, CONTRIB, eid, field, types[newValue])
     assert G(fields, field) == newValue
 
 
 # TESTS
 
 
-def test_find(clientSuzan):
-    """Can we find an item in a list of contributions?
+def test_start(clientSuzan):
+    """Can we find or make an item in a list of contributions?
 
     Yes.
     """
 
-    (text, fields, msgs, eid) = findContrib(clientSuzan)
-    requestInfo["text"] = text
-    requestInfo["fields"] = fields
-    requestInfo["msgs"] = msgs
-    requestInfo["eid"] = eid
+    (text, fields, msgs, eid) = startWithContrib(clientSuzan)
+    contribInfo["text"] = text
+    contribInfo["fields"] = fields
+    contribInfo["msgs"] = msgs
+    contribInfo["eid"] = eid
 
 
 @pytest.mark.parametrize(
@@ -275,7 +274,7 @@ def test_value_edit(clientSuzan, field):
         `valueTables`.
     """
 
-    values = getValueTable(clientSuzan, field, requestInfo, valueTables)
+    values = getValueTable(clientSuzan, field, contribInfo, valueTables)
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values
@@ -287,12 +286,12 @@ def test_modify_vcc(clientSuzan):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
 
     field = "vcc"
     (text, fields) = modifyField(
-        clientSuzan, TABLE, eid, field, [vccs["VCC1"], vccs["VCC2"]]
+        clientSuzan, CONTRIB, eid, field, [vccs["VCC1"], vccs["VCC2"]]
     )
     assert G(fields, field) == "VCC1,VCC2"
 
@@ -303,13 +302,13 @@ def test_modify_vcc_wrong(clientSuzan):
     Yes, but there will be an undefined value instead.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
 
     field = "vcc"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
     (text, fields) = modifyField(
-        clientSuzan, TABLE, eid, field, [wrongValue, vccs["VCC2"]]
+        clientSuzan, CONTRIB, eid, field, [wrongValue, vccs["VCC2"]]
     )
     assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
 
@@ -321,12 +320,12 @@ def test_modify_vcc_error(clientSuzan):
     The error will be caught.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
 
     field = "vcc"
     (text, fields) = modifyField(
-        clientSuzan, TABLE, eid, field, ["monkey", vccs["VCC2"]]
+        clientSuzan, CONTRIB, eid, field, ["monkey", vccs["VCC2"]]
     )
     assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
 
@@ -337,7 +336,7 @@ def test_modify_type_ex1(clientSuzan):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     modifyType(clientSuzan, eid)
 
@@ -348,14 +347,14 @@ def test_modify_type_mult(clientSuzan):
     No.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
 
     field = "typeContribution"
     newValue1 = EXAMPLE["typeContribution"][-2]
     newValue2 = "service - data hosting"
     (text, fields) = modifyField(
-        clientSuzan, TABLE, eid, field, [types[newValue1], types[newValue2]]
+        clientSuzan, CONTRIB, eid, field, [types[newValue1], types[newValue2]]
     )
     assert G(fields, field) == UNDEF_VALUE
 
@@ -363,7 +362,7 @@ def test_modify_type_mult(clientSuzan):
 def test_modify_type_ex2(clientSuzan):
     """Restore the type to the example value. """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     modifyType(clientSuzan, eid)
 
@@ -374,18 +373,18 @@ def test_modify_type_wrong(clientSuzan):
     Yes, but there will be an undefined value instead.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     field = "typeContribution"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, wrongValue)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, wrongValue)
     assert G(fields, field) == UNDEF_VALUE
 
 
 def test_modify_type_ex3(clientSuzan):
     """Restore the type to the example value. """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     modifyType(clientSuzan, eid)
 
@@ -396,12 +395,12 @@ def test_modify_type_typo(clientSuzan):
     No.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
 
     fieldx = "xxxContribution"
     newValue = "activity - resource creation"
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, fieldx, types[newValue])
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, fieldx, types[newValue])
     assert text == f"No field contrib:{fieldx}"
 
 
@@ -421,12 +420,12 @@ def test_modify_meta(clientSuzan, field):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
     updateValues = [meta[ex] for ex in checkValues]
 
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
     assert G(fields, field) == ",".join(checkValues)
 
 
@@ -446,10 +445,10 @@ def test_add_meta_wrong(clientSuzan, field):
     No.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     updateValues = [["xxx"]]
 
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
     assert UNDEF_VALUE in text
 
 
@@ -462,9 +461,8 @@ def test_add_meta_right(clientSuzan, field, value):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
     updateValues = [[value]]
 
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
-    assert field in fields
-    assert value in fields[field]
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
+    fieldValue(fields, field, value)

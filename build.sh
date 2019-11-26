@@ -154,7 +154,6 @@ function ship {
         echo "SHIPPING ABORTED! ($testerror)"
         return
     fi
-    echo "after error"
     docs "deploy"
     git add --all .
     git commit -m "ship: $*"

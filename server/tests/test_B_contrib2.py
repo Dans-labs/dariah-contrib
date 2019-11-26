@@ -16,12 +16,13 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G, EURO
 from helpers import (
+    CONTRIB,
     modifyField,
     addContrib,
 )
 
 
-requestInfo = {}
+contribInfo = {}
 
 DESCRIPTION_CHECKS = (
     "<h1>Resource creation.</h1>",
@@ -63,8 +64,6 @@ There are costs.
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
 
-TABLE = "contrib"
-
 
 def test_add(clientSuzan):
     """Can an authenticated user insert into the contrib table?
@@ -73,10 +72,10 @@ def test_add(clientSuzan):
     """
 
     (text, fields, msgs, eid) = addContrib(clientSuzan)
-    requestInfo["text"] = text
-    requestInfo["fields"] = fields
-    requestInfo["msgs"] = msgs
-    requestInfo["eid"] = eid
+    contribInfo["text"] = text
+    contribInfo["fields"] = fields
+    contribInfo["msgs"] = msgs
+    contribInfo["eid"] = eid
 
 
 def test_modify_title(clientSuzan):
@@ -85,11 +84,11 @@ def test_modify_title(clientSuzan):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     field = "title"
     newValue = "Resource creator"
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, newValue)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, newValue)
     assert G(fields, field) == newValue
 
 
@@ -106,9 +105,9 @@ def test_modify_description(clientSuzan, field, value):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
     assert G(fields, field) == value.strip()
 
 
@@ -125,7 +124,7 @@ def test_description_markdown(clientSuzan, field, checks):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     response = clientSuzan.get(f"/api/contrib/item/{eid}/field/{field}?action=view")
     text = response.get_data(as_text=True)
@@ -149,10 +148,10 @@ def test_modify_cost(clientSuzan, value, expected):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     field = "costTotal"
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
     assert G(fields, field) == expected
 
 
@@ -172,10 +171,10 @@ def test_modify_email(clientSuzan, value, expected):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
     field = "contactPersonEmail"
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
     assert G(fields, field) == expected
 
 
@@ -217,7 +216,7 @@ def test_modify_url(clientSuzan, field, value, expected):
     Yes.
     """
 
-    eid = requestInfo["eid"]
+    eid = contribInfo["eid"]
 
-    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
     assert G(fields, field) == expected

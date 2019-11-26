@@ -331,13 +331,19 @@ class Record:
 
         wfitem = self.wfitem
 
+        url = None
+        good = False
+
         if wfitem:
-            return wfitem.doCommand(command, self)
+            url = wfitem.doCommand(command, self)
 
-        table = self.table
-        eid = self.eid
-
-        return f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        if url is None:
+            table = self.table
+            eid = self.eid
+            url = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        else:
+            good = True
+        return (good, url)
 
     def field(self, fieldName, **kwargs):
         &#34;&#34;&#34;Factory function to wrap a field object around the data of a field.
@@ -1097,13 +1103,19 @@ that spawns a record object.</p>
 
         wfitem = self.wfitem
 
+        url = None
+        good = False
+
         if wfitem:
-            return wfitem.doCommand(command, self)
+            url = wfitem.doCommand(command, self)
 
-        table = self.table
-        eid = self.eid
-
-        return f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        if url is None:
+            table = self.table
+            eid = self.eid
+            url = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        else:
+            good = True
+        return (good, url)
 
     def field(self, fieldName, **kwargs):
         &#34;&#34;&#34;Factory function to wrap a field object around the data of a field.
@@ -1898,13 +1910,19 @@ the detail records.</p>
 
     wfitem = self.wfitem
 
+    url = None
+    good = False
+
     if wfitem:
-        return wfitem.doCommand(command, self)
+        url = wfitem.doCommand(command, self)
 
-    table = self.table
-    eid = self.eid
-
-    return f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;</code></pre>
+    if url is None:
+        table = self.table
+        eid = self.eid
+        url = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+    else:
+        good = True
+    return (good, url)</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.delete"><code class="name flex">

@@ -541,9 +541,9 @@ class WorkflowItem:
 
         Returns
         -------
-        url
+        url | `None`
             To navigate to after the action has been performed.
-            It is always the url to the page of the contrib record.
+            If the action has not been performed, `None` is returned.
         """
 
         context = recordObj.context
@@ -557,9 +557,9 @@ class WorkflowItem:
 
         urlExtra = E
 
+        done = False
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
-            done = False
             if operator == N.add:
                 oTable = G(commandInfo, N.table)
                 tableObj = mkTable(context, oTable)
@@ -579,7 +579,7 @@ class WorkflowItem:
         else:
             flash(f"""<{acro}> not permitted""", "error")
 
-        return f"""/{N.contrib}/{N.item}/{contribId}{urlExtra}"""
+        return f"""/{N.contrib}/{N.item}/{contribId}{urlExtra}""" if done else None
 
     def statusOverview(self, table, kind=None):
         """Present the current status of a record on the interface.

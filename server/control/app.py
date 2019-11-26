@@ -9,6 +9,7 @@ from flask import (
     render_template,
     send_file,
     redirect,
+    abort,
     flash,
 )
 
@@ -437,9 +438,8 @@ def appFactory(regime, debug, test, **kwargs):
         context = getContext()
         auth.authenticate()
         if table in ALL_TABLES:
-            newPath = mkTable(context, table).record(eid=eid).command(command)
-            if newPath:
-                return redirectResult(newPath, True)
+            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
+            return redirectResult(newPath, good)
         return noCommand(table, command)
 
     # FALL-BACK
@@ -459,7 +459,7 @@ def appFactory(regime, debug, test, **kwargs):
         )
 
     def noCommand(table, command):
-        return f"""{NO_COMMAND}: {table}:{command}"""
+        return abort(400)
 
     def noTable(table):
         return f"""{NO_TABLE} {table}"""

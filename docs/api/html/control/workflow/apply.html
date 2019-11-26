@@ -574,9 +574,9 @@ class WorkflowItem:
 
         Returns
         -------
-        url
+        url | `None`
             To navigate to after the action has been performed.
-            It is always the url to the page of the contrib record.
+            If the action has not been performed, `None` is returned.
         &#34;&#34;&#34;
 
         context = recordObj.context
@@ -590,9 +590,9 @@ class WorkflowItem:
 
         urlExtra = E
 
+        done = False
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
-            done = False
             if operator == N.add:
                 oTable = G(commandInfo, N.table)
                 tableObj = mkTable(context, oTable)
@@ -612,7 +612,7 @@ class WorkflowItem:
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -1357,9 +1357,9 @@ details of the current user can be read off.</dd>
 
         Returns
         -------
-        url
+        url | `None`
             To navigate to after the action has been performed.
-            It is always the url to the page of the contrib record.
+            If the action has not been performed, `None` is returned.
         &#34;&#34;&#34;
 
         context = recordObj.context
@@ -1373,9 +1373,9 @@ details of the current user can be read off.</dd>
 
         urlExtra = E
 
+        done = False
         if self.permission(table, command, kind=kind):
             operator = G(commandInfo, N.operator)
-            done = False
             if operator == N.add:
                 oTable = G(commandInfo, N.table)
                 tableObj = mkTable(context, oTable)
@@ -1395,7 +1395,7 @@ details of the current user can be read off.</dd>
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -1854,11 +1854,9 @@ commands: contrib, assessment, or review.</dd>
 <dd>The record must be passed as a record object.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<dl>
-<dt><code>url</code></dt>
-<dd>To navigate to after the action has been performed.
-It is always the url to the page of the contrib record.</dd>
-</dl></section>
+<p>url | <code>None</code>
+To navigate to after the action has been performed.
+If the action has not been performed, <code>None</code> is returned.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1878,9 +1876,9 @@ It is always the url to the page of the contrib record.</dd>
 
     Returns
     -------
-    url
+    url | `None`
         To navigate to after the action has been performed.
-        It is always the url to the page of the contrib record.
+        If the action has not been performed, `None` is returned.
     &#34;&#34;&#34;
 
     context = recordObj.context
@@ -1894,9 +1892,9 @@ It is always the url to the page of the contrib record.</dd>
 
     urlExtra = E
 
+    done = False
     if self.permission(table, command, kind=kind):
         operator = G(commandInfo, N.operator)
-        done = False
         if operator == N.add:
             oTable = G(commandInfo, N.table)
             tableObj = mkTable(context, oTable)
@@ -1916,7 +1914,7 @@ It is always the url to the page of the contrib record.</dd>
     else:
         flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34;</code></pre>
+    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.apply.WorkflowItem.getKind"><code class="name flex">

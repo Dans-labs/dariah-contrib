@@ -299,13 +299,19 @@ class Record:
 
         wfitem = self.wfitem
 
+        url = None
+        good = False
+
         if wfitem:
-            return wfitem.doCommand(command, self)
+            url = wfitem.doCommand(command, self)
 
-        table = self.table
-        eid = self.eid
-
-        return f"""/{table}/{N.item}/{eid}"""
+        if url is None:
+            table = self.table
+            eid = self.eid
+            url = f"""/{table}/{N.item}/{eid}"""
+        else:
+            good = True
+        return (good, url)
 
     def field(self, fieldName, **kwargs):
         """Factory function to wrap a field object around the data of a field.

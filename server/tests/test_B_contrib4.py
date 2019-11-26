@@ -21,47 +21,70 @@ Suzan |  Normal user, author | YES
 import pytest
 
 import magic  # noqa
-from control.utils import EURO
+from control.utils import pick as G, EURO
 from helpers import (
+    CONTRIB,
     viewField,
     modifyField,
     getValueTable,
-    findContrib,
+    startWithContrib,
+    fieldValue,
 )
 from test_B_contrib2 import EXAMPLE
 
-COST = dict(costTotal=f"{EURO} 103.456", costDescription=EXAMPLE["costDescription"][0],)
+COST = dict(
+    costBare="103.456",
+    costTotal=f"{EURO} 103.456",
+    costDescription=EXAMPLE["costDescription"][0],
+)
 
 
-requestInfo = {}
+contribInfo = {}
 valueTables = {}
 
 MARIE = "marie"
 BELGIUM = "BE🇧🇪"
 LUXEMBURG = "LU🇱🇺"
 
-TABLE = "contrib"
-
 
 # TESTS
 
 
-def test_find(clientSuzan):
-    """Can we find an item in a list of contributions?
+def test_start(clientSuzan):
+    """Can we find or make an item in a list of contributions?
 
     Yes.
     """
 
-    (text, fields, msgs, eid) = findContrib(clientSuzan)
-    requestInfo["text"] = text
-    requestInfo["fields"] = fields
-    requestInfo["msgs"] = msgs
-    requestInfo["eid"] = eid
+    (text, fields, msgs, eid) = startWithContrib(clientSuzan)
+    contribInfo["text"] = text
+    contribInfo["fields"] = fields
+    contribInfo["msgs"] = msgs
+    contribInfo["eid"] = eid
+
+    assert eid is not None
+
+    field = "costTotal"
+    value = COST["costBare"]
+    expected = COST["costTotal"]
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
+    assert G(fields, field) == expected
+
+    field = "costDescription"
+    value = COST["costDescription"]
+    expected = COST["costDescription"]
+    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
+    assert G(fields, field).strip() == expected.strip()
 
 
 def test_change_user_country(clientLisa):
-    users = getValueTable(clientLisa, "user", requestInfo, valueTables)
-    countries = getValueTable(clientLisa, "country", requestInfo, valueTables)
+    """Can Lisa assign Marie to a different country?
+
+    Yes.
+    """
+
+    users = getValueTable(clientLisa, "user", contribInfo, valueTables)
+    countries = getValueTable(clientLisa, "country", contribInfo, valueTables)
 
     assert MARIE in users
     assert BELGIUM in countries
@@ -73,28 +96,38 @@ def test_change_user_country(clientLisa):
     field = "country"
 
     (text, fields) = viewField(clientLisa, "user", marie, field)
-    assert field in fields
-    assert LUXEMBURG in fields[field]
+    fieldValue(fields, field, LUXEMBURG)
 
     (text, fields) = modifyField(clientLisa, "user", marie, field, belgium)
-    assert field in fields
-    assert BELGIUM in fields[field]
+    fieldValue(fields, field, BELGIUM)
 
 
 @pytest.mark.parametrize(
     ("field",), (("costTotal",), ("costDescription",),),
 )
-def test_view_costx(
+def test_view_cost(
     clientBart, clientSuzan, clientRachel, clientMarie, clientLisa, clientPublic, field,
 ):
+    """Try to have a look at the `costTotal` and `costDescription` fields.
+
+    Several users will try to peek the values.
+
+    Parameters
+    ----------
+    clientXXX: fixture
+        The users that undertake the actions.
+    expectOk: boolean
+        Whether this user is expected to succeed.
+    """
+
     def viewCostField(cl, expectOk):
-        eid = requestInfo["eid"]
+        eid = contribInfo["eid"]
         value = COST[field]
 
-        (text, fields) = viewField(cl, TABLE, eid, field)
+        (text, fields) = viewField(cl, CONTRIB, eid, field)
         if expectOk:
-            assert field in fields
-            assert value.strip() in fields[field]
+            valueStrip = value.strip()
+            fieldValue(fields, field, valueStrip)
         else:
             assert fields == {}
             assert text == ""
