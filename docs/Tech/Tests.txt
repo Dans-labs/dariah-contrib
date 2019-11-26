@@ -1,12 +1,13 @@
 ============================= test session starts ==============================
 platform darwin -- Python 3.7.2, pytest-3.10.0, py-1.7.0, pluggy-0.8.0
-rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile:
+rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server/tests, inifile: pytest.ini
 plugins: ordering-0.6
-collected 84 items
+collected 90 items
 
-tests/test_contrib1.py ................                                  [ 19%]
-tests/test_contrib2.py ...................................               [ 60%]
-tests/test_contrib3.py .............................                     [ 95%]
-tests/test_factory.py ....                                               [100%]
+test_A_factory.py ....                                                  [ 4/90]
+test_B_contrib1.py ................                                     [20/90]
+test_B_contrib2.py ...................................                  [55/90]
+test_B_contrib3.py ...............................                      [86/90]
+test_B_contrib4.py ....                                                 [90/90]
 
-========================== 84 passed in 9.71 seconds ===========================
+========================== 90 passed in 10.33 seconds ==========================

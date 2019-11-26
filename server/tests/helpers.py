@@ -234,20 +234,23 @@ def postJson(client, url, value):
     return text
 
 
-def modifyField(client, eid, field, newValue):
+def modifyField(client, table, eid, field, newValue):
     """Post data to update a field and analyse the response for the effect."""
 
     text = postJson(
-        client, f"/api/contrib/item/{eid}/field/{field}?action=view", newValue
+        client, f"/api/{table}/item/{eid}/field/{field}?action=view", newValue
     )
     fields = findFields(text)
     return (text, fields)
 
 
-def viewField(client, eid, field):
+def viewField(client, table, eid, field):
     """Get the response for showing a field."""
 
-    response = client.get(f"/api/contrib/item/{eid}/field/{field}?action=view")
+    url = f"/api/{table}/item/{eid}/field/{field}?action=view"
+    print("URL", url)
+    response = client.get(url)
+    print("RESPONSE", response)
     text = response.get_data(as_text=True)
     fields = findFields(text)
     return (text, fields)

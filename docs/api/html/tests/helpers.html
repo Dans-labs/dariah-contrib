@@ -261,20 +261,23 @@ def postJson(client, url, value):
     return text
 
 
-def modifyField(client, eid, field, newValue):
+def modifyField(client, table, eid, field, newValue):
     &#34;&#34;&#34;Post data to update a field and analyse the response for the effect.&#34;&#34;&#34;
 
     text = postJson(
-        client, f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;, newValue
+        client, f&#34;/api/{table}/item/{eid}/field/{field}?action=view&#34;, newValue
     )
     fields = findFields(text)
     return (text, fields)
 
 
-def viewField(client, eid, field):
+def viewField(client, table, eid, field):
     &#34;&#34;&#34;Get the response for showing a field.&#34;&#34;&#34;
 
-    response = client.get(f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;)
+    url = f&#34;/api/{table}/item/{eid}/field/{field}?action=view&#34;
+    print(&#34;URL&#34;, url)
+    response = client.get(url)
+    print(&#34;RESPONSE&#34;, response)
     text = response.get_data(as_text=True)
     fields = findFields(text)
     return (text, fields)
@@ -816,7 +819,7 @@ name of the valueTable.</p>
 </details>
 </dd>
 <dt id="helpers.modifyField"><code class="name flex">
-<span>def <span class="ident">modifyField</span></span>(<span>client, eid, field, newValue)</span>
+<span>def <span class="ident">modifyField</span></span>(<span>client, table, eid, field, newValue)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Post data to update a field and analyse the response for the effect.</p></section>
@@ -824,11 +827,11 @@ name of the valueTable.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def modifyField(client, eid, field, newValue):
+<pre><code class="python">def modifyField(client, table, eid, field, newValue):
     &#34;&#34;&#34;Post data to update a field and analyse the response for the effect.&#34;&#34;&#34;
 
     text = postJson(
-        client, f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;, newValue
+        client, f&#34;/api/{table}/item/{eid}/field/{field}?action=view&#34;, newValue
     )
     fields = findFields(text)
     return (text, fields)</code></pre>
@@ -884,7 +887,7 @@ Will be wrapped into JSON with a proper header.</dd>
 </details>
 </dd>
 <dt id="helpers.viewField"><code class="name flex">
-<span>def <span class="ident">viewField</span></span>(<span>client, eid, field)</span>
+<span>def <span class="ident">viewField</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Get the response for showing a field.</p></section>
@@ -892,10 +895,13 @@ Will be wrapped into JSON with a proper header.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def viewField(client, eid, field):
+<pre><code class="python">def viewField(client, table, eid, field):
     &#34;&#34;&#34;Get the response for showing a field.&#34;&#34;&#34;
 
-    response = client.get(f&#34;/api/contrib/item/{eid}/field/{field}?action=view&#34;)
+    url = f&#34;/api/{table}/item/{eid}/field/{field}?action=view&#34;
+    print(&#34;URL&#34;, url)
+    response = client.get(url)
+    print(&#34;RESPONSE&#34;, response)
     text = response.get_data(as_text=True)
     fields = findFields(text)
     return (text, fields)</code></pre>

@@ -34,11 +34,11 @@ def test_login_prod(client_prod):
         isWrong(client_prod, f"/login?{key}={user}")
 
 
-def test_login(client):
+def test_login(clientPublic):
     """Make sure we canlogin test users in development.
 
     Except for the users that have `mayLogin=False`.
     """
 
     for (user, key, mayLogin) in TEST_USERS:
-        isStatus(client, f"/login?{key}={user}", mayLogin)
+        isStatus(clientPublic, f"/login?{key}={user}", mayLogin)

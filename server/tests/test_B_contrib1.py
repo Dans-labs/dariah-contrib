@@ -7,6 +7,8 @@ We setup and test the following scenario.
 *   Lisa, office user
 *   Suzan, normal user
 *   Bart, normal user
+*   Marie, National Coordinator of Belgium (was Luxemburg)
+*   Rachel, National Coordinator of the Netherlands
 *   Public, an unauthenticated user
 
 ## Domain
@@ -21,6 +23,7 @@ We setup and test the following scenario.
 ## Acts
 
 *   **Lisa** consults the list of users
+*   **Lisa** changes the country of Marie from Luzemburg to Belgium.
 *   **Public** tries to add a contribution, but fails
 *   **Suzan** adds a new contribution, succeeds, and sees that year, country and some
     other fields are pre-filled with appropriate values
@@ -53,6 +56,8 @@ from helpers import (
 requestInfo = {}
 valueTables = {}
 
+TABLE = "contrib"
+
 EXAMPLE_TYPE = "activity - resource creation"
 
 
@@ -77,13 +82,13 @@ def test_users(clientLisa):
     assert "rachel" in users
 
 
-def test_add_public(client):
+def test_add_public(clientPublic):
     """Can an unauthenticated user insert into the contrib table?
 
     No.
     """
 
-    isWrong(client, f"/api/contrib/insert")
+    isWrong(clientPublic, f"/api/contrib/insert")
 
 
 def test_add(clientSuzan):
@@ -130,11 +135,11 @@ def test_modify_creator(clientSuzan):
 
     field = "title"
     newValue = "My contribution (Suzan)"
-    (text, fields) = modifyField(clientSuzan, eid, field, newValue)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, newValue)
     assert G(fields, "title") == newValue
 
 
-def test_modify_public(client):
+def test_modify_public(clientPublic):
     """Can the public modify the new record?
 
     No.
@@ -144,7 +149,7 @@ def test_modify_public(client):
 
     field = "title"
     newValue = "My contribution (public)"
-    (text, fields) = modifyField(client, eid, field, newValue)
+    (text, fields) = modifyField(clientPublic, TABLE, eid, field, newValue)
     assert G(fields, "title") != newValue
     assert "400 Bad Request" in text
 
@@ -159,7 +164,7 @@ def test_modify_auth1(clientBart):
 
     field = "title"
     newValue = "My contribution (Bart)"
-    (text, fields) = modifyField(clientBart, eid, field, newValue)
+    (text, fields) = modifyField(clientBart, TABLE, eid, field, newValue)
     assert G(fields, "title") != newValue
     assert "400 Bad Request" in text
 
@@ -174,7 +179,7 @@ def test_modify_office(clientLisa):
 
     field = "title"
     newValue = "My contribution (Lisa)"
-    (text, fields) = modifyField(clientLisa, eid, field, newValue)
+    (text, fields) = modifyField(clientLisa, TABLE, eid, field, newValue)
     assert G(fields, "title") == newValue
 
 
@@ -206,11 +211,11 @@ def test_modify_auth2(clientBart):
 
     field = "title"
     newValue = "My contribution (Bart)"
-    (text, fields) = modifyField(clientBart, eid, field, newValue)
+    (text, fields) = modifyField(clientBart, TABLE, eid, field, newValue)
     assert G(fields, "title") == newValue
 
 
-def test_del_public(client):
+def test_del_public(clientPublic):
     """Can an unauthenticated user delete from the contrib table?
 
     No.
@@ -218,7 +223,7 @@ def test_del_public(client):
 
     eid = requestInfo["eid"]
 
-    isWrong(client, f"/api/contrib/delete/{eid}")
+    isWrong(clientPublic, f"/api/contrib/delete/{eid}")
 
 
 def test_del_editor(clientBart):

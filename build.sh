@@ -82,31 +82,64 @@ function docs {
 }
 
 function runtest {
-    echo "RESTORING A CLEAN DB ..."
+    testmode="$1"
+    if [[ "$testmode" == "plain" ]]; then
+        echo "RUNNING TESTS ..."
+        shift
+    elif [[ "$testmode" == "cov" ]]; then
+        echo "RUNNING TESTS with COVERAGE ..."
+        shift
+    else
+        echo "Unknown test mode: '$1'"
+        exit
+    fi
     cleandb
-    cd server
-    echo "RUNNING TESTS ..."
-    pytest "$@"
-    cd ..
-}
-
-function runcov {
-    echo "RUNNING TESTS with COVERAGE ..."
-    cd server
-    dest="../docs"
+    cd server/tests
+    dest="../../docs"
+    destTestTmp="$dest/Tech/Tests.tmp"
     destTest="$dest/Tech/Tests.txt"
-    destCov="$dest/api/html/coverage"
-    coverage run -m pytest "$@" > $destTest
-    cat $destTest
-    coverage html -i -d $destCov
-    cd ..
+    set -o pipefail
+    testerror=0
+    if [[ "$testmode" == "cov" ]]; then
+        destCov="$dest/api/html/coverage"
+        coverage run -m pytest "$@" | tee $destTestTmp
+        testerror=$?
+        if [[ $testerror == 0 ]]; then
+            coverage html -i -d $destCov
+        else
+            echo "SKIPPING COVERAGE REPORTING"
+        fi
+    else
+        pytest "$@" | tee $destTestTmp
+        testerror=$?
+    fi
+    set +o pipefail
+    sed $'s/\x1B\[[0-9;]*[JKmsu]//g' $destTestTmp > $destTest
+    rm $destTestTmp
+    if [[ $testerror == 0 ]]; then
+        echo "ALL TESTS PASSED"
+    elif [[ $testerror == 1 ]]; then
+        echo "SOME TESTS FAILED"
+    elif [[ $testerror == 2 ]]; then
+        echo "TESTING INTERRUPTED"
+    elif [[ $testerror == 3 ]]; then
+        echo "ERROR DURING TESTING"
+    elif [[ $testerror == 4 ]]; then
+        echo "WRONG TEST COMMAND"
+    elif [[ $testerror == 5 ]]; then
+        echo "NO TESTS FOUND"
+    else
+        echo "SOMETHING WENT WRONG DURING TESTING"
+    fi
+    cd ../..
 }
 
 function cleandb {
-    cd server
-    mongorestore --quiet --drop --db=dariah_clean tests/dariah_clean
+    cd server/tests
+    echo "RESET THE TEST DATABASE"
+    mongorestore --quiet --drop --db=dariah_clean dariah_clean
     python3 cleandb.py
-    cd ..
+    cd ../..
 }
 
 function workflow {
@@ -116,7 +149,12 @@ function workflow {
 }
 
 function ship {
-    runcov
+    runtest cov
+    if [[ $testerror != 0 ]]; then
+        echo "SHIPPING ABORTED! ($testerror)"
+        return
+    fi
+    echo "after error"
     docs "deploy"
     git add --all .
     git commit -m "ship: $*"
@@ -152,10 +190,10 @@ elif [[ "$1" == "cleandb" ]]; then
     cleandb
 elif [[ "$1" == "test" ]]; then
     shift
-    runtest "$@"
+    runtest plain "$@"
 elif [[ "$1" == "testc" ]]; then
     shift
-    runcov "$@"
+    runtest cov "$@"
 elif [[ "$1" == "ship" ]]; then
     shift
     ship "$@"

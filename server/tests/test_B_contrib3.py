@@ -27,6 +27,28 @@ requestInfo = {}
 valueTables = {}
 
 EXAMPLE = dict(
+    year=tuple(str(yr) for yr in range(2010, 2030)),
+    country="""
+AT🇦🇹
+BE🇧🇪
+HR🇭🇷
+CY🇨🇾
+DK🇩🇰
+FR🇫🇷
+DE🇩🇪
+GR🇬🇷
+IE🇮🇪
+IT🇮🇹
+LU🇱🇺
+MT🇲🇹
+NL🇳🇱
+PT🇵🇹
+RS🇷🇸
+SI🇸🇮
+PL🇵🇱
+""".strip().split(
+        "\n"
+    ),
     vcc="""
 Coordination
 VCC1
@@ -196,6 +218,8 @@ Cœur du Hainaut
 
 UNDEF_VALUE = "○"
 
+TABLE = "contrib"
+
 # SPECIFIC HELPERS
 
 
@@ -207,7 +231,7 @@ def modifyType(client, eid):
 
     field = "typeContribution"
     newValue = EXAMPLE["typeContribution"][-2]
-    (text, fields) = modifyField(client, eid, field, types[newValue])
+    (text, fields) = modifyField(client, TABLE, eid, field, types[newValue])
     assert G(fields, field) == newValue
 
 
@@ -230,6 +254,8 @@ def test_find(clientSuzan):
 @pytest.mark.parametrize(
     ("field",),
     (
+        ("year",),
+        ("country",),
         ("vcc",),
         ("typeContribution",),
         ("tadirahObject",),
@@ -265,7 +291,9 @@ def test_modify_vcc(clientSuzan):
     vccs = valueTables["vcc"]
 
     field = "vcc"
-    (text, fields) = modifyField(clientSuzan, eid, field, [vccs["VCC1"], vccs["VCC2"]])
+    (text, fields) = modifyField(
+        clientSuzan, TABLE, eid, field, [vccs["VCC1"], vccs["VCC2"]]
+    )
     assert G(fields, field) == "VCC1,VCC2"
 
 
@@ -280,7 +308,9 @@ def test_modify_vcc_wrong(clientSuzan):
 
     field = "vcc"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    (text, fields) = modifyField(clientSuzan, eid, field, [wrongValue, vccs["VCC2"]])
+    (text, fields) = modifyField(
+        clientSuzan, TABLE, eid, field, [wrongValue, vccs["VCC2"]]
+    )
     assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
 
 
@@ -295,7 +325,9 @@ def test_modify_vcc_error(clientSuzan):
     vccs = valueTables["vcc"]
 
     field = "vcc"
-    (text, fields) = modifyField(clientSuzan, eid, field, ["monkey", vccs["VCC2"]])
+    (text, fields) = modifyField(
+        clientSuzan, TABLE, eid, field, ["monkey", vccs["VCC2"]]
+    )
     assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
 
 
@@ -323,7 +355,7 @@ def test_modify_type_mult(clientSuzan):
     newValue1 = EXAMPLE["typeContribution"][-2]
     newValue2 = "service - data hosting"
     (text, fields) = modifyField(
-        clientSuzan, eid, field, [types[newValue1], types[newValue2]]
+        clientSuzan, TABLE, eid, field, [types[newValue1], types[newValue2]]
     )
     assert G(fields, field) == UNDEF_VALUE
 
@@ -346,7 +378,7 @@ def test_modify_type_wrong(clientSuzan):
 
     field = "typeContribution"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    (text, fields) = modifyField(clientSuzan, eid, field, wrongValue)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, wrongValue)
     assert G(fields, field) == UNDEF_VALUE
 
 
@@ -369,7 +401,7 @@ def test_modify_type_typo(clientSuzan):
 
     fieldx = "xxxContribution"
     newValue = "activity - resource creation"
-    (text, fields) = modifyField(clientSuzan, eid, fieldx, types[newValue])
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, fieldx, types[newValue])
     assert text == f"No field contrib:{fieldx}"
 
 
@@ -394,7 +426,7 @@ def test_modify_meta(clientSuzan, field):
     checkValues = EXAMPLE[field][0:3]
     updateValues = [meta[ex] for ex in checkValues]
 
-    (text, fields) = modifyField(clientSuzan, eid, field, updateValues)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
     assert G(fields, field) == ",".join(checkValues)
 
 
@@ -415,18 +447,14 @@ def test_add_meta_wrong(clientSuzan, field):
     """
 
     eid = requestInfo["eid"]
-    updateValues = [['xxx']]
+    updateValues = [["xxx"]]
 
-    (text, fields) = modifyField(clientSuzan, eid, field, updateValues)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
     assert UNDEF_VALUE in text
 
 
 @pytest.mark.parametrize(
-    ("field", "value"),
-    (
-        ("discipline", "ddd"),
-        ("keyword", "kkk"),
-    ),
+    ("field", "value"), (("discipline", "ddd"), ("keyword", "kkk"),),
 )
 def test_add_meta_right(clientSuzan, field, value):
     """Can we add an extra discipline or keyword?
@@ -437,6 +465,6 @@ def test_add_meta_right(clientSuzan, field, value):
     eid = requestInfo["eid"]
     updateValues = [[value]]
 
-    (text, fields) = modifyField(clientSuzan, eid, field, updateValues)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, updateValues)
     assert field in fields
     assert value in fields[field]

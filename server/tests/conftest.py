@@ -49,27 +49,80 @@ def client_prod(app_prod):
 
 
 @pytest.fixture
-def client(app):
-    """Client accessing the development app."""
+def clientPublic(app):
+    """Client accessing the development app.
+
+    Unauthenticated user a.k.a. public.
+    """
     return app.test_client()
 
 
 @pytest.fixture
 def clientSuzan(app):
-    """Client, logged in as Suzan, accessing the development app."""
+    """Client, logged in as Suzan, accessing the development app.
+
+    A normal user from Belgium.
+    """
 
     return makeClient(app, "suzan")
 
 
 @pytest.fixture
 def clientBart(app):
-    """Client, logged in as Bart, accessing the development app."""
+    """Client, logged in as Bart, accessing the development app.
+
+    A normal user from an unspecified country.
+    """
 
     return makeClient(app, "bart")
 
 
 @pytest.fixture
+def clientMarie(app):
+    """Client, logged in as Marie, accessing the development app.
+
+    National coordinator for Luxemburg initially, will be assigned
+    to Belgium later.
+    """
+
+    return makeClient(app, "marie")
+
+
+@pytest.fixture
+def clientRachel(app):
+    """Client, logged in as Rachel, accessing the development app.
+
+    National coordinator for the Netherlands.
+    """
+
+    return makeClient(app, "rachel")
+
+
+@pytest.fixture
 def clientLisa(app):
-    """Client, logged in as Lisa, accessing the development app."""
+    """Client, logged in as Lisa, accessing the development app.
+
+    Office user.
+    """
 
     return makeClient(app, "lisa")
+
+
+@pytest.fixture
+def clientCarsten(app):
+    """Client, logged in as Carsten, accessing the development app.
+
+    System administrator.
+    """
+
+    return makeClient(app, "carsten")
+
+
+@pytest.fixture
+def clientDirk(app):
+    """Client, logged in as Dirk, accessing the development app.
+
+    Root.
+    """
+
+    return makeClient(app, "dirk")

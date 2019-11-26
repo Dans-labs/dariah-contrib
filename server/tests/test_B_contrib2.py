@@ -38,26 +38,32 @@ COST_DESCRIPTION_CHECKS = (
 )
 
 EXAMPLE = dict(
-    description=["""
+    description=[
+        """
 # Resource creation.
 
 This tool creates resources.
 
 *   How, we don't know yet
 *   More details will follow.
-"""],
-    costDescription=["""
+"""
+    ],
+    costDescription=[
+        """
 # Cost of resource creation.
 
 There are costs.
 
 *   The amount, we don't know yet
 *   More cost details will follow.
-"""],
+"""
+    ],
 )
 
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
+
+TABLE = "contrib"
 
 
 def test_add(clientSuzan):
@@ -83,7 +89,7 @@ def test_modify_title(clientSuzan):
 
     field = "title"
     newValue = "Resource creator"
-    (text, fields) = modifyField(clientSuzan, eid, field, newValue)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, newValue)
     assert G(fields, field) == newValue
 
 
@@ -102,7 +108,7 @@ def test_modify_description(clientSuzan, field, value):
 
     eid = requestInfo["eid"]
 
-    (text, fields) = modifyField(clientSuzan, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
     assert G(fields, field) == value.strip()
 
 
@@ -146,7 +152,7 @@ def test_modify_cost(clientSuzan, value, expected):
     eid = requestInfo["eid"]
 
     field = "costTotal"
-    (text, fields) = modifyField(clientSuzan, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
     assert G(fields, field) == expected
 
 
@@ -169,7 +175,7 @@ def test_modify_email(clientSuzan, value, expected):
     eid = requestInfo["eid"]
 
     field = "contactPersonEmail"
-    (text, fields) = modifyField(clientSuzan, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
     assert G(fields, field) == expected
 
 
@@ -213,5 +219,5 @@ def test_modify_url(clientSuzan, field, value, expected):
 
     eid = requestInfo["eid"]
 
-    (text, fields) = modifyField(clientSuzan, eid, field, value)
+    (text, fields) = modifyField(clientSuzan, TABLE, eid, field, value)
     assert G(fields, field) == expected
