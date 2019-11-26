@@ -68,6 +68,15 @@ def fieldEditRe(eid, field):
     )
 
 
+def detailRe(dtable):
+    return re.compile(
+        r&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{dtable}/([^&#39;&#34;]+)[&#39;&#34;][^&gt;]*&gt;(.*?)&lt;/details&gt;&#34;&#34;&#34;.format(
+            dtable=dtable
+        ),
+        re.S,
+    )
+
+
 def makeClient(app, eppn):
     &#34;&#34;&#34;Logs in a specific user.
 
@@ -101,7 +110,7 @@ def isStatus(client, url, status):
     if status:
         assert response.status_code in {200, 302}
     else:
-        assert response.status_code == 303
+        assert response.status_code in {400, 303}
 
 
 def isWrong(client, url):
@@ -187,6 +196,27 @@ def findFields(text):
     &#34;&#34;&#34;
 
     return {field: value for (field, value) in fieldRe.findall(text)}
+
+
+def findDetails(text, dtable):
+    &#34;&#34;&#34;Get the details from a response, but only those in a specific table.
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+    dtail: string
+        The detail table
+
+    Returns
+    -------
+    list of tuple of (string(id), string(html))
+        The HTML for the details, chunked per detail record.
+        Each chunk consists of two parts: the entity id of that detail,
+        and the piece of HTML representing the title of the detail.
+    &#34;&#34;&#34;
+
+    return detailRe(dtable).findall(text)
 
 
 def findMaterial(text):
@@ -512,6 +542,24 @@ of the new contribution will be read off.</p>
     return (text, fields, msgs, eid)</code></pre>
 </details>
 </dd>
+<dt id="helpers.detailRe"><code class="name flex">
+<span>def <span class="ident">detailRe</span></span>(<span>dtable)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def detailRe(dtable):
+    return re.compile(
+        r&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{dtable}/([^&#39;&#34;]+)[&#39;&#34;][^&gt;]*&gt;(.*?)&lt;/details&gt;&#34;&#34;&#34;.format(
+            dtable=dtable
+        ),
+        re.S,
+    )</code></pre>
+</details>
+</dd>
 <dt id="helpers.fieldEditRe"><code class="name flex">
 <span>def <span class="ident">fieldEditRe</span></span>(<span>eid, field)</span>
 </code></dt>
@@ -573,6 +621,50 @@ The test value for this field.</p></section>
     else:
         assert field in fields
         assert value == fields[field]</code></pre>
+</details>
+</dd>
+<dt id="helpers.findDetails"><code class="name flex">
+<span>def <span class="ident">findDetails</span></span>(<span>text, dtable)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the details from a response, but only those in a specific table.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The response text.</dd>
+<dt><strong><code>dtail</code></strong> :&ensp;<code>string</code></dt>
+<dd>The detail table</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>tuple</code> of (<code>string</code>(<code>id</code>), <code>string</code>(<code>html</code>))</dt>
+<dd>The HTML for the details, chunked per detail record.
+Each chunk consists of two parts: the entity id of that detail,
+and the piece of HTML representing the title of the detail.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findDetails(text, dtable):
+    &#34;&#34;&#34;Get the details from a response, but only those in a specific table.
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+    dtail: string
+        The detail table
+
+    Returns
+    -------
+    list of tuple of (string(id), string(html))
+        The HTML for the details, chunked per detail record.
+        Each chunk consists of two parts: the entity id of that detail,
+        and the piece of HTML representing the title of the detail.
+    &#34;&#34;&#34;
+
+    return detailRe(dtable).findall(text)</code></pre>
 </details>
 </dd>
 <dt id="helpers.findEid"><code class="name flex">
@@ -1014,7 +1106,7 @@ name of the valueTable.</p>
     if status:
         assert response.status_code in {200, 302}
     else:
-        assert response.status_code == 303</code></pre>
+        assert response.status_code in {400, 303}</code></pre>
 </details>
 </dd>
 <dt id="helpers.isWrong"><code class="name flex">
@@ -1197,8 +1289,10 @@ Will be wrapped into JSON with a proper header.</dd>
 <ul class="two-column">
 <li><code><a title="helpers.accessUrl" href="#helpers.accessUrl">accessUrl</a></code></li>
 <li><code><a title="helpers.addContrib" href="#helpers.addContrib">addContrib</a></code></li>
+<li><code><a title="helpers.detailRe" href="#helpers.detailRe">detailRe</a></code></li>
 <li><code><a title="helpers.fieldEditRe" href="#helpers.fieldEditRe">fieldEditRe</a></code></li>
 <li><code><a title="helpers.fieldValue" href="#helpers.fieldValue">fieldValue</a></code></li>
+<li><code><a title="helpers.findDetails" href="#helpers.findDetails">findDetails</a></code></li>
 <li><code><a title="helpers.findEid" href="#helpers.findEid">findEid</a></code></li>
 <li><code><a title="helpers.findFields" href="#helpers.findFields">findFields</a></code></li>
 <li><code><a title="helpers.findItem" href="#helpers.findItem">findItem</a></code></li>

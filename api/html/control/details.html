@@ -38,6 +38,7 @@
 from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
+from control.perm import checkTable
 
 CT = C.tables
 
@@ -87,8 +88,18 @@ class Details:
         records in that detail table.
         &#34;&#34;&#34;
 
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
+
     def fetchDetails(self, dtable, sortKey=None):
         &#34;&#34;&#34;Fetch detail records from the database.
+
+        !!! caution
+            The details will only be fetched if the user has permissions
+            to list the detail table!
 
         Parameters
         ----------
@@ -103,6 +114,9 @@ class Details:
             The detail records are stored in the `details` attribute, which is a
             dict keyed by the names of the detail tables.
         &#34;&#34;&#34;
+
+        if not self.tablePerm(dtable):
+            return
 
         context = self.context
         db = context.db
@@ -333,8 +347,18 @@ that spawns a detail record object.</p>
         records in that detail table.
         &#34;&#34;&#34;
 
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
+
     def fetchDetails(self, dtable, sortKey=None):
         &#34;&#34;&#34;Fetch detail records from the database.
+
+        !!! caution
+            The details will only be fetched if the user has permissions
+            to list the detail table!
 
         Parameters
         ----------
@@ -349,6 +373,9 @@ that spawns a detail record object.</p>
             The detail records are stored in the `details` attribute, which is a
             dict keyed by the names of the detail tables.
         &#34;&#34;&#34;
+
+        if not self.tablePerm(dtable):
+            return
 
         context = self.context
         db = context.db
@@ -581,6 +608,11 @@ records in that detail table.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Fetch detail records from the database.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The details will only be fetched if the user has permissions
+to list the detail table!</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>dtable</code></strong> :&ensp;<code>string</code></dt>
@@ -601,6 +633,10 @@ dict keyed by the names of the detail tables.</dd>
 <pre><code class="python">def fetchDetails(self, dtable, sortKey=None):
     &#34;&#34;&#34;Fetch detail records from the database.
 
+    !!! caution
+        The details will only be fetched if the user has permissions
+        to list the detail table!
+
     Parameters
     ----------
     dtable: string
@@ -615,6 +651,9 @@ dict keyed by the names of the detail tables.</dd>
         dict keyed by the names of the detail tables.
     &#34;&#34;&#34;
 
+    if not self.tablePerm(dtable):
+        return
+
     context = self.context
     db = context.db
     mkTable = self.mkTable
@@ -627,6 +666,22 @@ dict keyed by the names of the detail tables.</dd>
         dtableObj,
         tuple(drecords),
     )</code></pre>
+</details>
+</dd>
+<dt id="control.details.Details.tablePerm"><code class="name flex">
+<span>def <span class="ident">tablePerm</span></span>(<span>self, table)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tablePerm(self, table):
+    context = self.context
+    auth = context.auth
+
+    return checkTable(table, auth.user)</code></pre>
 </details>
 </dd>
 <dt id="control.details.Details.wrap"><code class="name flex">
@@ -842,6 +897,7 @@ instruct to reorder/restructure those representations.</dd>
 <li><code><a title="control.details.Details.fetchDetails" href="#control.details.Details.fetchDetails">fetchDetails</a></code></li>
 <li><code><a title="control.details.Details.inheritProps" href="#control.details.Details.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.details.Details.mustShow" href="#control.details.Details.mustShow">mustShow</a></code></li>
+<li><code><a title="control.details.Details.tablePerm" href="#control.details.Details.tablePerm">tablePerm</a></code></li>
 <li><code><a title="control.details.Details.wrap" href="#control.details.Details.wrap">wrap</a></code></li>
 <li><code><a title="control.details.Details.wrapDetail" href="#control.details.Details.wrapDetail">wrapDetail</a></code></li>
 </ul>

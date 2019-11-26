@@ -39,6 +39,7 @@ from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, cap1, E, Q, AMP, ZERO
 from control.typ.types import Country
+from control.perm import checkTable
 
 from control.cust.factory_table import make as mkTable
 
@@ -95,6 +96,12 @@ class Sidebar:
         }
         &#34;&#34;&#34;*dict*  The current setting of the options.
         &#34;&#34;&#34;
+
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
 
     def makeCaption(self, label, entries, rule=False):
         &#34;&#34;&#34;Produce the caption for a section of navigation items.
@@ -224,6 +231,10 @@ class Sidebar:
             See web.yaml under `listActions` for all possible values.
             See also `control.table.Table.wrap`.
 
+        !!! caution
+            The table entry will only be made if the user has permissions
+            to list the detail table!
+
         Returns
         -------
         path: url
@@ -231,6 +242,9 @@ class Sidebar:
         string(html)
             The wrapped entry
         &#34;&#34;&#34;
+
+        if not self.tablePerm(table):
+            return (E, E)
 
         context = self.context
 
@@ -499,6 +513,12 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         &#34;&#34;&#34;*dict*  The current setting of the options.
         &#34;&#34;&#34;
 
+    def tablePerm(self, table):
+        context = self.context
+        auth = context.auth
+
+        return checkTable(table, auth.user)
+
     def makeCaption(self, label, entries, rule=False):
         &#34;&#34;&#34;Produce the caption for a section of navigation items.
 
@@ -627,6 +647,10 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             See web.yaml under `listActions` for all possible values.
             See also `control.table.Table.wrap`.
 
+        !!! caution
+            The table entry will only be made if the user has permissions
+            to list the detail table!
+
         Returns
         -------
         path: url
@@ -634,6 +658,9 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         string(html)
             The wrapped entry
         &#34;&#34;&#34;
+
+        if not self.tablePerm(table):
+            return (E, E)
 
         context = self.context
 
@@ -1039,6 +1066,11 @@ string under the key <code>items</code></dd>
 See web.yaml under <code>listActions</code> for all possible values.
 See also <code>control.table.Table.wrap</code>.</dd>
 </dl>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The table entry will only be made if the user has permissions
+to list the detail table!</p>
+</div>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>path</code></strong> :&ensp;<code>url</code></dt>
@@ -1076,6 +1108,10 @@ See also <code>control.table.Table.wrap</code>.</dd>
         See web.yaml under `listActions` for all possible values.
         See also `control.table.Table.wrap`.
 
+    !!! caution
+        The table entry will only be made if the user has permissions
+        to list the detail table!
+
     Returns
     -------
     path: url
@@ -1083,6 +1119,9 @@ See also <code>control.table.Table.wrap</code>.</dd>
     string(html)
         The wrapped entry
     &#34;&#34;&#34;
+
+    if not self.tablePerm(table):
+        return (E, E)
 
     context = self.context
 
@@ -1098,6 +1137,22 @@ See also <code>control.table.Table.wrap</code>.</dd>
         withOptions=True,
         command=command,
     )</code></pre>
+</details>
+</dd>
+<dt id="control.sidebar.Sidebar.tablePerm"><code class="name flex">
+<span>def <span class="ident">tablePerm</span></span>(<span>self, table)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tablePerm(self, table):
+    context = self.context
+    auth = context.auth
+
+    return checkTable(table, auth.user)</code></pre>
 </details>
 </dd>
 <dt id="control.sidebar.Sidebar.wrap"><code class="name flex">
@@ -1331,6 +1386,7 @@ to him/her.</p>
 <li><code><a title="control.sidebar.Sidebar.options" href="#control.sidebar.Sidebar.options">options</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.path" href="#control.sidebar.Sidebar.path">path</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.tableEntry" href="#control.sidebar.Sidebar.tableEntry">tableEntry</a></code></li>
+<li><code><a title="control.sidebar.Sidebar.tablePerm" href="#control.sidebar.Sidebar.tablePerm">tablePerm</a></code></li>
 <li><code><a title="control.sidebar.Sidebar.wrap" href="#control.sidebar.Sidebar.wrap">wrap</a></code></li>
 </ul>
 </li>
