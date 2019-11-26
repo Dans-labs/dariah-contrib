@@ -36,6 +36,7 @@ from flask import (
     render_template,
     send_file,
     redirect,
+    abort,
     flash,
 )
 
@@ -464,9 +465,8 @@ def appFactory(regime, debug, test, **kwargs):
         context = getContext()
         auth.authenticate()
         if table in ALL_TABLES:
-            newPath = mkTable(context, table).record(eid=eid).command(command)
-            if newPath:
-                return redirectResult(newPath, True)
+            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
+            return redirectResult(newPath, good)
         return noCommand(table, command)
 
     # FALL-BACK
@@ -486,7 +486,7 @@ def appFactory(regime, debug, test, **kwargs):
         )
 
     def noCommand(table, command):
-        return f&#34;&#34;&#34;{NO_COMMAND}: {table}:{command}&#34;&#34;&#34;
+        return abort(400)
 
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
@@ -921,9 +921,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         context = getContext()
         auth.authenticate()
         if table in ALL_TABLES:
-            newPath = mkTable(context, table).record(eid=eid).command(command)
-            if newPath:
-                return redirectResult(newPath, True)
+            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
+            return redirectResult(newPath, good)
         return noCommand(table, command)
 
     # FALL-BACK
@@ -943,7 +942,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         )
 
     def noCommand(table, command):
-        return f&#34;&#34;&#34;{NO_COMMAND}: {table}:{command}&#34;&#34;&#34;
+        return abort(400)
 
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
