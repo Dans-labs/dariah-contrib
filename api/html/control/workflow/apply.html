@@ -54,7 +54,10 @@ CT = C.tables
 CF = C.workflow
 
 USER_TABLES_LIST = CT.userTables
+MAIN_TABLE = USER_TABLES_LIST[0]
+USER_ENTRY_TABLES = set(CT.userEntryTables)
 USER_TABLES = set(USER_TABLES_LIST)
+SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
 
 STAGE_ATTS = CF.stageAtts
 COMMANDS = CF.commands
@@ -251,6 +254,114 @@ class WorkflowItem:
 
         thisData = self.getWf(table, kind=kind)
         return (G(thisData, att) for att in atts)
+
+    def checkReadable(self, recordObj):
+        &#34;&#34;&#34;Whether a record is readable because of workflow.
+
+        When a contribution, assessment, review is in a certain stage
+        in the workflow, its record may be closed to others than the owner, and
+        after finalization,  some fields may be open to authenticated users or
+        the public.
+
+        This method determines the record is readable by the current user.
+
+        If the record is not part of the workflow, `None` is returned, and
+        the normal permission rules applay.
+
+        !!! note
+            It also depends on the current user.
+
+        Here are the rules:
+
+        #### Assessment, Criteria Entry
+
+        Not submitted:
+        : authors and editors only
+
+        Submitted, review not yet complete, or negative outcome
+        :   authors, editors, reviewers, national coordinator only
+
+        Review with positive outcome
+        :   public
+
+        Negative outcome
+        :   authors, editors, reviewers, national coordinator only
+
+        #### Review, Review Entry
+
+        Review has no decision and there is no final decision
+        :   authors, editors
+
+        Review in question has a decision, but still no final positive decision
+        :   authors/editors, other reviewer, authors/editors of the assessment,
+            national coordinator
+
+        There is a positive final decision
+        :   public
+
+        !!! caution &#34;The influence of selection is nihil&#34;
+            Whether a contribution is selected or not has no influence on the
+            readability of the assessment and review.
+
+        !!! caution &#34;The influence on the contribution records is nihil&#34;
+            Whether a contribution is readable does not depend on the
+            workflow, only on the normal rules.
+
+        Parameters
+        ----------
+        recordObj: object
+            The record in question (from which the table and the kind
+            maybe inferred. It should be the record that contains this
+            WorkflowItem object as its `wfitem` attribute.
+        field: string, optional `None`
+            If None, we check for the readability of the record as a whole.
+            Otherwise, we check for the readability of this field in the record.
+
+        Returns
+        -------
+        boolean | `None`
+        &#34;&#34;&#34;
+
+        table = recordObj.table
+        if table not in SENSITIVE_TABLES:
+            return None
+
+        kind = recordObj.kind
+        perm = recordObj.perm
+        uid = self.uid
+
+        (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+
+        if table in {N.assessment, N.criteriaEntry}:
+            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            return (
+                True
+                if rStage == N.reviewAccept
+                else perm[N.isOur]
+                if stage in {N.submitted, N.submittedRevised}
+                else perm[N.isEdit]
+            )
+
+        if table in {N.review, N.reviewEntry}:
+            (creators,) = self.info(N.assessment, N.creators)
+            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            result = (
+                True
+                if rStage == N.reviewAccept
+                else uid in creators or perm[N.isOur]
+                if stage
+                in {
+                    N.reviewAdviseRevise,
+                    N.reviewAdviseAccept,
+                    N.reviewAdviseReject,
+                    N.reviewRevise,
+                    N.reviewReject,
+                }
+                or rStage in {N.reviewRevise, N.reviewReject}
+                else perm[N.isEdit]
+            )
+            return result
+        return None
 
     def checkFixed(self, recordObj, field=None):
         &#34;&#34;&#34;Whether a record or field is fixed because of workflow.
@@ -666,7 +777,9 @@ class WorkflowItem:
             H.span(G(STATUS_REP, N.frozen), cls=f&#34;large status info&#34;) if frozen else E
         )
 
-        statusRep = H.div([statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls)
+        statusRep = f&#34;&lt;!-- stage:{stage} --&gt;&#34; + H.div(
+            [statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls
+        )
 
         scorePart = E
         if table == N.assessment:
@@ -1035,6 +1148,114 @@ details of the current user can be read off.</dd>
         thisData = self.getWf(table, kind=kind)
         return (G(thisData, att) for att in atts)
 
+    def checkReadable(self, recordObj):
+        &#34;&#34;&#34;Whether a record is readable because of workflow.
+
+        When a contribution, assessment, review is in a certain stage
+        in the workflow, its record may be closed to others than the owner, and
+        after finalization,  some fields may be open to authenticated users or
+        the public.
+
+        This method determines the record is readable by the current user.
+
+        If the record is not part of the workflow, `None` is returned, and
+        the normal permission rules applay.
+
+        !!! note
+            It also depends on the current user.
+
+        Here are the rules:
+
+        #### Assessment, Criteria Entry
+
+        Not submitted:
+        : authors and editors only
+
+        Submitted, review not yet complete, or negative outcome
+        :   authors, editors, reviewers, national coordinator only
+
+        Review with positive outcome
+        :   public
+
+        Negative outcome
+        :   authors, editors, reviewers, national coordinator only
+
+        #### Review, Review Entry
+
+        Review has no decision and there is no final decision
+        :   authors, editors
+
+        Review in question has a decision, but still no final positive decision
+        :   authors/editors, other reviewer, authors/editors of the assessment,
+            national coordinator
+
+        There is a positive final decision
+        :   public
+
+        !!! caution &#34;The influence of selection is nihil&#34;
+            Whether a contribution is selected or not has no influence on the
+            readability of the assessment and review.
+
+        !!! caution &#34;The influence on the contribution records is nihil&#34;
+            Whether a contribution is readable does not depend on the
+            workflow, only on the normal rules.
+
+        Parameters
+        ----------
+        recordObj: object
+            The record in question (from which the table and the kind
+            maybe inferred. It should be the record that contains this
+            WorkflowItem object as its `wfitem` attribute.
+        field: string, optional `None`
+            If None, we check for the readability of the record as a whole.
+            Otherwise, we check for the readability of this field in the record.
+
+        Returns
+        -------
+        boolean | `None`
+        &#34;&#34;&#34;
+
+        table = recordObj.table
+        if table not in SENSITIVE_TABLES:
+            return None
+
+        kind = recordObj.kind
+        perm = recordObj.perm
+        uid = self.uid
+
+        (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+
+        if table in {N.assessment, N.criteriaEntry}:
+            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            return (
+                True
+                if rStage == N.reviewAccept
+                else perm[N.isOur]
+                if stage in {N.submitted, N.submittedRevised}
+                else perm[N.isEdit]
+            )
+
+        if table in {N.review, N.reviewEntry}:
+            (creators,) = self.info(N.assessment, N.creators)
+            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            result = (
+                True
+                if rStage == N.reviewAccept
+                else uid in creators or perm[N.isOur]
+                if stage
+                in {
+                    N.reviewAdviseRevise,
+                    N.reviewAdviseAccept,
+                    N.reviewAdviseReject,
+                    N.reviewRevise,
+                    N.reviewReject,
+                }
+                or rStage in {N.reviewRevise, N.reviewReject}
+                else perm[N.isEdit]
+            )
+            return result
+        return None
+
     def checkFixed(self, recordObj, field=None):
         &#34;&#34;&#34;Whether a record or field is fixed because of workflow.
 
@@ -1449,7 +1670,9 @@ details of the current user can be read off.</dd>
             H.span(G(STATUS_REP, N.frozen), cls=f&#34;large status info&#34;) if frozen else E
         )
 
-        statusRep = H.div([statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls)
+        statusRep = f&#34;&lt;!-- stage:{stage} --&gt;&#34; + H.div(
+            [statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls
+        )
 
         scorePart = E
         if table == N.assessment:
@@ -1764,6 +1987,180 @@ Otherwise, we check for the fixity of this field in the record.</dd>
         return field not in {N.reviewerE, N.reviewerF}
 
     return True</code></pre>
+</details>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.checkReadable"><code class="name flex">
+<span>def <span class="ident">checkReadable</span></span>(<span>self, recordObj)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Whether a record is readable because of workflow.</p>
+<p>When a contribution, assessment, review is in a certain stage
+in the workflow, its record may be closed to others than the owner, and
+after finalization,
+some fields may be open to authenticated users or
+the public.</p>
+<p>This method determines the record is readable by the current user.</p>
+<p>If the record is not part of the workflow, <code>None</code> is returned, and
+the normal permission rules applay.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It also depends on the current user.</p>
+</div>
+<p>Here are the rules:</p>
+<h4 id="assessment-criteria-entry">Assessment, Criteria Entry</h4>
+<dl>
+<dt>Not submitted:</dt>
+<dd>authors and editors only</dd>
+<dt>Submitted, review not yet complete, or negative outcome</dt>
+<dd>authors, editors, reviewers, national coordinator only</dd>
+<dt>Review with positive outcome</dt>
+<dd>public</dd>
+<dt>Negative outcome</dt>
+<dd>authors, editors, reviewers, national coordinator only</dd>
+</dl>
+<h4 id="review-review-entry">Review, Review Entry</h4>
+<dl>
+<dt>Review has no decision and there is no final decision</dt>
+<dd>authors, editors</dd>
+<dt>Review in question has a decision, but still no final positive decision</dt>
+<dd>authors/editors, other reviewer, authors/editors of the assessment,
+national coordinator</dd>
+<dt>There is a positive final decision</dt>
+<dd>public</dd>
+</dl>
+<div class="admonition caution">
+<p class="admonition-title">The influence of selection is nihil</p>
+<p>Whether a contribution is selected or not has no influence on the
+readability of the assessment and review.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">The influence on the contribution records is nihil</p>
+<p>Whether a contribution is readable does not depend on the
+workflow, only on the normal rules.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>recordObj</code></strong> :&ensp;<code>object</code></dt>
+<dd>The record in question (from which the table and the kind
+maybe inferred. It should be the record that contains this
+WorkflowItem object as its <code>wfitem</code> attribute.</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dd>If None, we check for the readability of the record as a whole.
+Otherwise, we check for the readability of this field in the record.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>boolean | <code>None</code></p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def checkReadable(self, recordObj):
+    &#34;&#34;&#34;Whether a record is readable because of workflow.
+
+    When a contribution, assessment, review is in a certain stage
+    in the workflow, its record may be closed to others than the owner, and
+    after finalization,  some fields may be open to authenticated users or
+    the public.
+
+    This method determines the record is readable by the current user.
+
+    If the record is not part of the workflow, `None` is returned, and
+    the normal permission rules applay.
+
+    !!! note
+        It also depends on the current user.
+
+    Here are the rules:
+
+    #### Assessment, Criteria Entry
+
+    Not submitted:
+    : authors and editors only
+
+    Submitted, review not yet complete, or negative outcome
+    :   authors, editors, reviewers, national coordinator only
+
+    Review with positive outcome
+    :   public
+
+    Negative outcome
+    :   authors, editors, reviewers, national coordinator only
+
+    #### Review, Review Entry
+
+    Review has no decision and there is no final decision
+    :   authors, editors
+
+    Review in question has a decision, but still no final positive decision
+    :   authors/editors, other reviewer, authors/editors of the assessment,
+        national coordinator
+
+    There is a positive final decision
+    :   public
+
+    !!! caution &#34;The influence of selection is nihil&#34;
+        Whether a contribution is selected or not has no influence on the
+        readability of the assessment and review.
+
+    !!! caution &#34;The influence on the contribution records is nihil&#34;
+        Whether a contribution is readable does not depend on the
+        workflow, only on the normal rules.
+
+    Parameters
+    ----------
+    recordObj: object
+        The record in question (from which the table and the kind
+        maybe inferred. It should be the record that contains this
+        WorkflowItem object as its `wfitem` attribute.
+    field: string, optional `None`
+        If None, we check for the readability of the record as a whole.
+        Otherwise, we check for the readability of this field in the record.
+
+    Returns
+    -------
+    boolean | `None`
+    &#34;&#34;&#34;
+
+    table = recordObj.table
+    if table not in SENSITIVE_TABLES:
+        return None
+
+    kind = recordObj.kind
+    perm = recordObj.perm
+    uid = self.uid
+
+    (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+
+    if table in {N.assessment, N.criteriaEntry}:
+        (rStage,) = self.info(N.review, N.stage, kind=N.final)
+        return (
+            True
+            if rStage == N.reviewAccept
+            else perm[N.isOur]
+            if stage in {N.submitted, N.submittedRevised}
+            else perm[N.isEdit]
+        )
+
+    if table in {N.review, N.reviewEntry}:
+        (creators,) = self.info(N.assessment, N.creators)
+        (rStage,) = self.info(N.review, N.stage, kind=N.final)
+        result = (
+            True
+            if rStage == N.reviewAccept
+            else uid in creators or perm[N.isOur]
+            if stage
+            in {
+                N.reviewAdviseRevise,
+                N.reviewAdviseAccept,
+                N.reviewAdviseReject,
+                N.reviewRevise,
+                N.reviewReject,
+            }
+            or rStage in {N.reviewRevise, N.reviewReject}
+            else perm[N.isEdit]
+        )
+        return result
+    return None</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.apply.WorkflowItem.commands"><code class="name flex">
@@ -2610,7 +3007,9 @@ contrib, assessment, or review.</dd>
         H.span(G(STATUS_REP, N.frozen), cls=f&#34;large status info&#34;) if frozen else E
     )
 
-    statusRep = H.div([statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls)
+    statusRep = f&#34;&lt;!-- stage:{stage} --&gt;&#34; + H.div(
+        [statusMsg, lockedMsg, doneMsg, frozenMsg], cls=frozenCls
+    )
 
     scorePart = E
     if table == N.assessment:
@@ -2649,6 +3048,7 @@ contrib, assessment, or review.</dd>
 <ul class="two-column">
 <li><code><a title="control.workflow.apply.WorkflowItem.auth" href="#control.workflow.apply.WorkflowItem.auth">auth</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.checkFixed" href="#control.workflow.apply.WorkflowItem.checkFixed">checkFixed</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.checkReadable" href="#control.workflow.apply.WorkflowItem.checkReadable">checkReadable</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.commands" href="#control.workflow.apply.WorkflowItem.commands">commands</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.data" href="#control.workflow.apply.WorkflowItem.data">data</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.doCommand" href="#control.workflow.apply.WorkflowItem.doCommand">doCommand</a></code></li>

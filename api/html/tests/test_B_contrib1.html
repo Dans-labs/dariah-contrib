@@ -110,9 +110,9 @@ from helpers import (
     isRight,
     findFields,
     postJson,
-    modifyField,
+    tryModifyField,
     getValueTable,
-    addContrib,
+    addItem,
 )
 
 
@@ -130,7 +130,7 @@ def test_users(clientLisa):
         `valueTables`.
     &#34;&#34;&#34;
 
-    users = getValueTable(clientLisa, &#34;user&#34;, contribInfo, valueTables)
+    users = getValueTable(clientLisa, CONTRIB, None, &#34;user&#34;, valueTables)
 
     assert &#34;bart&#34; in users
     assert &#34;lisa&#34; in users
@@ -147,7 +147,7 @@ def test_add_public(clientPublic):
     No.
     &#34;&#34;&#34;
 
-    isWrong(clientPublic, f&#34;/api/contrib/insert&#34;)
+    isWrong(clientPublic, f&#34;/api/{CONTRIB}/insert&#34;)
 
 
 def test_add(clientSuzan):
@@ -156,7 +156,7 @@ def test_add(clientSuzan):
     Yes.
     &#34;&#34;&#34;
 
-    (text, fields, msgs, eid) = addContrib(clientSuzan)
+    (text, fields, msgs, eid) = addItem(clientSuzan, CONTRIB)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
@@ -180,7 +180,6 @@ def test_fields(field, value):
     &#34;&#34;&#34;
 
     fields = contribInfo[&#34;fields&#34;]
-
     assert G(fields, field) == value
 
 
@@ -191,11 +190,9 @@ def test_modify_creator(clientSuzan):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;title&#34;
     newValue = &#34;My contribution (Suzan)&#34;
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue
+    tryModifyField(clientSuzan, CONTRIB, eid, field, newValue, True)
 
 
 def test_modify_public(clientPublic):
@@ -205,12 +202,9 @@ def test_modify_public(clientPublic):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;title&#34;
     newValue = &#34;My contribution (public)&#34;
-    (text, fields) = modifyField(clientPublic, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) != newValue
-    assert &#34;400 Bad Request&#34; in text
+    tryModifyField(clientPublic, CONTRIB, eid, field, newValue, False)
 
 
 def test_modify_auth1(clientBart):
@@ -223,9 +217,7 @@ def test_modify_auth1(clientBart):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Bart)&#34;
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) != newValue
-    assert &#34;400 Bad Request&#34; in text
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, False)
 
 
 def test_modify_office(clientLisa):
@@ -238,8 +230,7 @@ def test_modify_office(clientLisa):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Lisa)&#34;
-    (text, fields) = modifyField(clientLisa, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue
+    tryModifyField(clientLisa, CONTRIB, eid, field, newValue, True)
 
 
 def test_addEditor(clientLisa):
@@ -254,7 +245,7 @@ def test_addEditor(clientLisa):
     (bartId, bartName) = users[&#34;bart&#34;]
 
     text = postJson(
-        clientLisa, f&#34;/api/contrib/item/{eid}/field/editors?action=view&#34;, [bartId],
+        clientLisa, f&#34;/api/{CONTRIB}/item/{eid}/field/editors?action=view&#34;, [bartId],
     )
     fields = findFields(text)
     assert G(fields, &#34;editors&#34;) == bartName
@@ -270,8 +261,7 @@ def test_modify_auth2(clientBart):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Bart)&#34;
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, True)
 
 
 def test_del_public(clientPublic):
@@ -281,8 +271,7 @@ def test_del_public(clientPublic):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
-    isWrong(clientPublic, f&#34;/api/contrib/delete/{eid}&#34;)
+    isWrong(clientPublic, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)
 
 
 def test_del_editor(clientBart):
@@ -292,8 +281,7 @@ def test_del_editor(clientBart):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
-    isRight(clientBart, f&#34;/api/contrib/delete/{eid}&#34;)</code></pre>
+    isRight(clientBart, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -319,7 +307,7 @@ def test_del_editor(clientBart):
     Yes.
     &#34;&#34;&#34;
 
-    (text, fields, msgs, eid) = addContrib(clientSuzan)
+    (text, fields, msgs, eid) = addItem(clientSuzan, CONTRIB)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
@@ -348,7 +336,7 @@ def test_del_editor(clientBart):
     (bartId, bartName) = users[&#34;bart&#34;]
 
     text = postJson(
-        clientLisa, f&#34;/api/contrib/item/{eid}/field/editors?action=view&#34;, [bartId],
+        clientLisa, f&#34;/api/{CONTRIB}/item/{eid}/field/editors?action=view&#34;, [bartId],
     )
     fields = findFields(text)
     assert G(fields, &#34;editors&#34;) == bartName</code></pre>
@@ -370,7 +358,7 @@ def test_del_editor(clientBart):
     No.
     &#34;&#34;&#34;
 
-    isWrong(clientPublic, f&#34;/api/contrib/insert&#34;)</code></pre>
+    isWrong(clientPublic, f&#34;/api/{CONTRIB}/insert&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_del_editor"><code class="name flex">
@@ -390,8 +378,7 @@ def test_del_editor(clientBart):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
-    isRight(clientBart, f&#34;/api/contrib/delete/{eid}&#34;)</code></pre>
+    isRight(clientBart, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_del_public"><code class="name flex">
@@ -411,8 +398,7 @@ def test_del_editor(clientBart):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
-    isWrong(clientPublic, f&#34;/api/contrib/delete/{eid}&#34;)</code></pre>
+    isWrong(clientPublic, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_fields"><code class="name flex">
@@ -442,7 +428,6 @@ def test_fields(field, value):
     &#34;&#34;&#34;
 
     fields = contribInfo[&#34;fields&#34;]
-
     assert G(fields, field) == value</code></pre>
 </details>
 </dd>
@@ -466,9 +451,7 @@ def test_fields(field, value):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Bart)&#34;
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) != newValue
-    assert &#34;400 Bad Request&#34; in text</code></pre>
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_modify_auth2"><code class="name flex">
@@ -491,8 +474,7 @@ def test_fields(field, value):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Bart)&#34;
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue</code></pre>
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_modify_creator"><code class="name flex">
@@ -512,11 +494,9 @@ def test_fields(field, value):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;title&#34;
     newValue = &#34;My contribution (Suzan)&#34;
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue</code></pre>
+    tryModifyField(clientSuzan, CONTRIB, eid, field, newValue, True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_modify_office"><code class="name flex">
@@ -539,8 +519,7 @@ def test_fields(field, value):
 
     field = &#34;title&#34;
     newValue = &#34;My contribution (Lisa)&#34;
-    (text, fields) = modifyField(clientLisa, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) == newValue</code></pre>
+    tryModifyField(clientLisa, CONTRIB, eid, field, newValue, True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_modify_public"><code class="name flex">
@@ -560,12 +539,9 @@ def test_fields(field, value):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;title&#34;
     newValue = &#34;My contribution (public)&#34;
-    (text, fields) = modifyField(clientPublic, CONTRIB, eid, field, newValue)
-    assert G(fields, &#34;title&#34;) != newValue
-    assert &#34;400 Bad Request&#34; in text</code></pre>
+    tryModifyField(clientPublic, CONTRIB, eid, field, newValue, False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib1.test_users"><code class="name flex">
@@ -593,7 +569,7 @@ def test_fields(field, value):
         `valueTables`.
     &#34;&#34;&#34;
 
-    users = getValueTable(clientLisa, &#34;user&#34;, contribInfo, valueTables)
+    users = getValueTable(clientLisa, CONTRIB, None, &#34;user&#34;, valueTables)
 
     assert &#34;bart&#34; in users
     assert &#34;lisa&#34; in users

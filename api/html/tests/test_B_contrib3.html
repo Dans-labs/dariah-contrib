@@ -49,14 +49,12 @@ Here we focus on the fields that have values in other tables, the valueTables.
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G
 from helpers import (
-    UNDEF_VALUE,
     CONTRIB,
     modifyField,
+    tryModifyField,
     getValueTable,
     startWithContrib,
-    fieldValue,
 )
 
 
@@ -253,6 +251,8 @@ Cœur du Hainaut
     ),
 )
 
+VCC12 = &#34;VCC1,VCC2&#34;
+
 # SPECIFIC HELPERS
 
 
@@ -261,11 +261,9 @@ def modifyType(client, eid):
     &#34;&#34;&#34;
 
     types = valueTables[&#34;typeContribution&#34;]
-
     field = &#34;typeContribution&#34;
     newValue = EXAMPLE[&#34;typeContribution&#34;][-2]
-    (text, fields) = modifyField(client, CONTRIB, eid, field, types[newValue])
-    assert G(fields, field) == newValue
+    tryModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
 
 
 # TESTS
@@ -308,7 +306,8 @@ def test_value_edit(clientSuzan, field):
         `valueTables`.
     &#34;&#34;&#34;
 
-    values = getValueTable(clientSuzan, field, contribInfo, valueTables)
+    eid = contribInfo[&#34;eid&#34;]
+    values = getValueTable(clientSuzan, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values
@@ -320,48 +319,39 @@ def test_modify_vcc(clientSuzan):
     Yes.
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == &#34;VCC1,VCC2&#34;
+    vcc12 = [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vcc12, VCC12), True)
 
 
 def test_modify_vcc_wrong(clientSuzan):
     &#34;&#34;&#34;Can we update the vcc with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [wrongValue, vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == f&#34;{UNDEF_VALUE},VCC2&#34;
+    vccVal = [wrongValue, vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
 
 
 def test_modify_vcc_error(clientSuzan):
     &#34;&#34;&#34;Can we update the vcc with a value that is not even an ObjectId?
 
-    Yes, but there will be an undefined value instead.
+    No.
     The error will be caught.
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == f&#34;{UNDEF_VALUE},VCC2&#34;
+    vccVal = [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
 
 
 def test_modify_type_ex1(clientSuzan):
@@ -371,7 +361,6 @@ def test_modify_type_ex1(clientSuzan):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     modifyType(clientSuzan, eid)
 
 
@@ -383,44 +372,30 @@ def test_modify_type_mult(clientSuzan):
 
     eid = contribInfo[&#34;eid&#34;]
     types = valueTables[&#34;typeContribution&#34;]
-
     field = &#34;typeContribution&#34;
-    newValue1 = EXAMPLE[&#34;typeContribution&#34;][-2]
-    newValue2 = &#34;service - data hosting&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [types[newValue1], types[newValue2]]
-    )
-    assert G(fields, field) == UNDEF_VALUE
+    oldValue = EXAMPLE[&#34;typeContribution&#34;][-2]
+    otherValue = &#34;service - data hosting&#34;
+    newValue = (types[oldValue], types[otherValue])
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (newValue, None), False)
 
 
 def test_modify_type_ex2(clientSuzan):
     &#34;&#34;&#34;Restore the type to the example value. &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     modifyType(clientSuzan, eid)
 
 
 def test_modify_type_wrong(clientSuzan):
     &#34;&#34;&#34;Can we update the type with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No.
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;typeContribution&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, wrongValue)
-    assert G(fields, field) == UNDEF_VALUE
-
-
-def test_modify_type_ex3(clientSuzan):
-    &#34;&#34;&#34;Restore the type to the example value. &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-
-    modifyType(clientSuzan, eid)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, wrongValue, False)
 
 
 def test_modify_type_typo(clientSuzan):
@@ -431,11 +406,10 @@ def test_modify_type_typo(clientSuzan):
 
     eid = contribInfo[&#34;eid&#34;]
     types = valueTables[&#34;typeContribution&#34;]
-
     fieldx = &#34;xxxContribution&#34;
     newValue = &#34;activity - resource creation&#34;
     (text, fields) = modifyField(clientSuzan, CONTRIB, eid, fieldx, types[newValue])
-    assert text == f&#34;No field contrib:{fieldx}&#34;
+    assert text == f&#34;No field {CONTRIB}:{fieldx}&#34;
 
 
 @pytest.mark.parametrize(
@@ -457,10 +431,9 @@ def test_modify_meta(clientSuzan, field):
     eid = contribInfo[&#34;eid&#34;]
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
-    updateValues = [meta[ex] for ex in checkValues]
+    updateValues = tuple(meta[ex] for ex in checkValues)
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert G(fields, field) == &#34;,&#34;.join(checkValues)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, &#34;,&#34;.join(checkValues)), True)
 
 
 @pytest.mark.parametrize(
@@ -482,8 +455,7 @@ def test_add_meta_wrong(clientSuzan, field):
     eid = contribInfo[&#34;eid&#34;]
     updateValues = [[&#34;xxx&#34;]]
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert UNDEF_VALUE in text
+    tryModifyField(clientSuzan, CONTRIB, eid, field, updateValues, False)
 
 
 @pytest.mark.parametrize(
@@ -496,10 +468,8 @@ def test_add_meta_right(clientSuzan, field, value):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-    updateValues = [[value]]
-
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    fieldValue(fields, field, value)</code></pre>
+    updateValues = ((value,),)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, value), True)</code></pre>
 </details>
 </section>
 <section>
@@ -523,11 +493,9 @@ def test_add_meta_right(clientSuzan, field, value):
     &#34;&#34;&#34;
 
     types = valueTables[&#34;typeContribution&#34;]
-
     field = &#34;typeContribution&#34;
     newValue = EXAMPLE[&#34;typeContribution&#34;][-2]
-    (text, fields) = modifyField(client, CONTRIB, eid, field, types[newValue])
-    assert G(fields, field) == newValue</code></pre>
+    tryModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_add_meta_right"><code class="name flex">
@@ -550,10 +518,8 @@ def test_add_meta_right(clientSuzan, field, value):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-    updateValues = [[value]]
-
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    fieldValue(fields, field, value)</code></pre>
+    updateValues = ((value,),)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, value), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_add_meta_wrong"><code class="name flex">
@@ -585,8 +551,7 @@ def test_add_meta_wrong(clientSuzan, field):
     eid = contribInfo[&#34;eid&#34;]
     updateValues = [[&#34;xxx&#34;]]
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert UNDEF_VALUE in text</code></pre>
+    tryModifyField(clientSuzan, CONTRIB, eid, field, updateValues, False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_meta"><code class="name flex">
@@ -618,10 +583,9 @@ def test_modify_meta(clientSuzan, field):
     eid = contribInfo[&#34;eid&#34;]
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
-    updateValues = [meta[ex] for ex in checkValues]
+    updateValues = tuple(meta[ex] for ex in checkValues)
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert G(fields, field) == &#34;,&#34;.join(checkValues)</code></pre>
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, &#34;,&#34;.join(checkValues)), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_type_ex1"><code class="name flex">
@@ -641,7 +605,6 @@ def test_modify_meta(clientSuzan, field):
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     modifyType(clientSuzan, eid)</code></pre>
 </details>
 </dd>
@@ -658,24 +621,6 @@ def test_modify_meta(clientSuzan, field):
     &#34;&#34;&#34;Restore the type to the example value. &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
-    modifyType(clientSuzan, eid)</code></pre>
-</details>
-</dd>
-<dt id="test_B_contrib3.test_modify_type_ex3"><code class="name flex">
-<span>def <span class="ident">test_modify_type_ex3</span></span>(<span>clientSuzan)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Restore the type to the example value.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_modify_type_ex3(clientSuzan):
-    &#34;&#34;&#34;Restore the type to the example value. &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-
     modifyType(clientSuzan, eid)</code></pre>
 </details>
 </dd>
@@ -697,14 +642,11 @@ def test_modify_meta(clientSuzan, field):
 
     eid = contribInfo[&#34;eid&#34;]
     types = valueTables[&#34;typeContribution&#34;]
-
     field = &#34;typeContribution&#34;
-    newValue1 = EXAMPLE[&#34;typeContribution&#34;][-2]
-    newValue2 = &#34;service - data hosting&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [types[newValue1], types[newValue2]]
-    )
-    assert G(fields, field) == UNDEF_VALUE</code></pre>
+    oldValue = EXAMPLE[&#34;typeContribution&#34;][-2]
+    otherValue = &#34;service - data hosting&#34;
+    newValue = (types[oldValue], types[otherValue])
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (newValue, None), False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_type_typo"><code class="name flex">
@@ -725,11 +667,10 @@ def test_modify_meta(clientSuzan, field):
 
     eid = contribInfo[&#34;eid&#34;]
     types = valueTables[&#34;typeContribution&#34;]
-
     fieldx = &#34;xxxContribution&#34;
     newValue = &#34;activity - resource creation&#34;
     (text, fields) = modifyField(clientSuzan, CONTRIB, eid, fieldx, types[newValue])
-    assert text == f&#34;No field contrib:{fieldx}&#34;</code></pre>
+    assert text == f&#34;No field {CONTRIB}:{fieldx}&#34;</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_type_wrong"><code class="name flex">
@@ -737,7 +678,7 @@ def test_modify_meta(clientSuzan, field):
 </code></dt>
 <dd>
 <section class="desc"><p>Can we update the type with a nonsense value?</p>
-<p>Yes, but there will be an undefined value instead.</p></section>
+<p>No.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -745,15 +686,13 @@ def test_modify_meta(clientSuzan, field):
 <pre><code class="python">def test_modify_type_wrong(clientSuzan):
     &#34;&#34;&#34;Can we update the type with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No.
     &#34;&#34;&#34;
 
     eid = contribInfo[&#34;eid&#34;]
-
     field = &#34;typeContribution&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, wrongValue)
-    assert G(fields, field) == UNDEF_VALUE</code></pre>
+    tryModifyField(clientSuzan, CONTRIB, eid, field, wrongValue, False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_vcc"><code class="name flex">
@@ -772,14 +711,11 @@ def test_modify_meta(clientSuzan, field):
     Yes.
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == &#34;VCC1,VCC2&#34;</code></pre>
+    vcc12 = [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vcc12, VCC12), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_vcc_error"><code class="name flex">
@@ -787,7 +723,7 @@ def test_modify_meta(clientSuzan, field):
 </code></dt>
 <dd>
 <section class="desc"><p>Can we update the vcc with a value that is not even an ObjectId?</p>
-<p>Yes, but there will be an undefined value instead.
+<p>No.
 The error will be caught.</p></section>
 <details class="source">
 <summary>
@@ -796,18 +732,15 @@ The error will be caught.</p></section>
 <pre><code class="python">def test_modify_vcc_error(clientSuzan):
     &#34;&#34;&#34;Can we update the vcc with a value that is not even an ObjectId?
 
-    Yes, but there will be an undefined value instead.
+    No.
     The error will be caught.
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == f&#34;{UNDEF_VALUE},VCC2&#34;</code></pre>
+    vccVal = [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_modify_vcc_wrong"><code class="name flex">
@@ -815,7 +748,7 @@ The error will be caught.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Can we update the vcc with a nonsense value?</p>
-<p>Yes, but there will be an undefined value instead.</p></section>
+<p>No</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -823,18 +756,15 @@ The error will be caught.</p></section>
 <pre><code class="python">def test_modify_vcc_wrong(clientSuzan):
     &#34;&#34;&#34;Can we update the vcc with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No
     &#34;&#34;&#34;
 
+    field = &#34;vcc&#34;
     eid = contribInfo[&#34;eid&#34;]
     vccs = valueTables[&#34;vcc&#34;]
-
-    field = &#34;vcc&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [wrongValue, vccs[&#34;VCC2&#34;]]
-    )
-    assert G(fields, field) == f&#34;{UNDEF_VALUE},VCC2&#34;</code></pre>
+    vccVal = [wrongValue, vccs[&#34;VCC2&#34;]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib3.test_start"><code class="name flex">
@@ -899,7 +829,8 @@ def test_value_edit(clientSuzan, field):
         `valueTables`.
     &#34;&#34;&#34;
 
-    values = getValueTable(clientSuzan, field, contribInfo, valueTables)
+    eid = contribInfo[&#34;eid&#34;]
+    values = getValueTable(clientSuzan, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values</code></pre>
@@ -926,7 +857,6 @@ def test_value_edit(clientSuzan, field):
 <li><code><a title="test_B_contrib3.test_modify_meta" href="#test_B_contrib3.test_modify_meta">test_modify_meta</a></code></li>
 <li><code><a title="test_B_contrib3.test_modify_type_ex1" href="#test_B_contrib3.test_modify_type_ex1">test_modify_type_ex1</a></code></li>
 <li><code><a title="test_B_contrib3.test_modify_type_ex2" href="#test_B_contrib3.test_modify_type_ex2">test_modify_type_ex2</a></code></li>
-<li><code><a title="test_B_contrib3.test_modify_type_ex3" href="#test_B_contrib3.test_modify_type_ex3">test_modify_type_ex3</a></code></li>
 <li><code><a title="test_B_contrib3.test_modify_type_mult" href="#test_B_contrib3.test_modify_type_mult">test_modify_type_mult</a></code></li>
 <li><code><a title="test_B_contrib3.test_modify_type_typo" href="#test_B_contrib3.test_modify_type_typo">test_modify_type_typo</a></code></li>
 <li><code><a title="test_B_contrib3.test_modify_type_wrong" href="#test_B_contrib3.test_modify_type_wrong">test_modify_type_wrong</a></code></li>

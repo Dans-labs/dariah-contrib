@@ -37,13 +37,12 @@
 *   Record insertion
 &#34;&#34;&#34;
 
-from itertools import chain
-
 from flask import request
 
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E, ELLIPS, NBSP, ONE
+from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
@@ -53,6 +52,7 @@ MAIN_TABLE = CT.userTables[0]
 INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
 USER_ENTRY_TABLES = set(CT.userEntryTables)
+SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
 VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
@@ -198,7 +198,7 @@ class Table:
         ----------
         eid: ObjectId, optional `None`
             Entity id to identify the record
-        record: dict
+        record: dict, optional `None`
             The full record
         withDetails: boolean, optional `False`
             Whether to present a list of detail records below the record
@@ -225,6 +225,26 @@ class Table:
             readonly=readonly,
             bodyMethod=bodyMethod,
         )
+
+    def readable(self, record):
+        &#34;&#34;&#34;Is the record readable?
+
+        !!! note
+            Readibility is a workflow condition.
+            We have to construct a record object and retrieve workflow info
+            to find out.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
+        return self.RecordClass(self, record=record).mayRead is not False
 
     def insert(self, force=False):
         &#34;&#34;&#34;Insert a new, (blank) record into the table.
@@ -332,6 +352,11 @@ class Table:
         Permissions will be checked before executing one of these list actions.
         See `control.table.Table.mayList`.
 
+        !!! caution &#34;Workflow restrictions&#34;
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         !!! note
             Whether records are presented  in an opened or closed state
             depends onn how the user has last left them.
@@ -400,28 +425,28 @@ class Table:
         if action == N.reviewdone:
             records = [record for record in records if self.myFinished(uid, record)]
 
-        nRecords = len(records)
+        recordsHtml = []
+        sensitive = table in SENSITIVE_TABLES
+        for record in records:
+            if not sensitive or self.readable(record) is not False:
+                recordsHtml.append(
+                    H.details(
+                        self.title(record),
+                        H.div(ELLIPS),
+                        f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
+                        fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
+                        urltitle=E,
+                        urlextra=E,
+                        **self.forceOpen(G(record, N._id), openEid),
+                    )
+                )
+
+        nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
         nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
-            chain.from_iterable(
-                (
-                    [H.span([self.insertButton(), sep, nRep])],
-                    (
-                        H.details(
-                            self.title(record),
-                            H.div(ELLIPS),
-                            f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
-                            fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
-                            urltitle=E,
-                            urlextra=E,
-                            **self.forceOpen(G(record, N._id), openEid),
-                        )
-                        for record in records
-                    ),
-                )
-            ),
+            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
             cls=f&#34;table {table}&#34;,
         )
 
@@ -520,18 +545,10 @@ class Table:
         boolean
         &#34;&#34;&#34;
 
+        table = self.table
         context = self.context
         auth = context.auth
-        isMainTable = self.isMainTable
-        isUserTable = self.isUserTable
-        isValueTable = self.isValueTable
-        return (
-            isMainTable
-            and not action
-            or auth.superuser()
-            or (isUserTable or isValueTable)
-            and auth.authenticated()
-        )
+        return checkTable(table, auth.user) and (action is None or auth.authenticated())
 
     def title(self, record):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
@@ -757,7 +774,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         ----------
         eid: ObjectId, optional `None`
             Entity id to identify the record
-        record: dict
+        record: dict, optional `None`
             The full record
         withDetails: boolean, optional `False`
             Whether to present a list of detail records below the record
@@ -784,6 +801,26 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             readonly=readonly,
             bodyMethod=bodyMethod,
         )
+
+    def readable(self, record):
+        &#34;&#34;&#34;Is the record readable?
+
+        !!! note
+            Readibility is a workflow condition.
+            We have to construct a record object and retrieve workflow info
+            to find out.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+
+        Returns
+        -------
+        boolean
+        &#34;&#34;&#34;
+
+        return self.RecordClass(self, record=record).mayRead is not False
 
     def insert(self, force=False):
         &#34;&#34;&#34;Insert a new, (blank) record into the table.
@@ -891,6 +928,11 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         Permissions will be checked before executing one of these list actions.
         See `control.table.Table.mayList`.
 
+        !!! caution &#34;Workflow restrictions&#34;
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         !!! note
             Whether records are presented  in an opened or closed state
             depends onn how the user has last left them.
@@ -959,28 +1001,28 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         if action == N.reviewdone:
             records = [record for record in records if self.myFinished(uid, record)]
 
-        nRecords = len(records)
+        recordsHtml = []
+        sensitive = table in SENSITIVE_TABLES
+        for record in records:
+            if not sensitive or self.readable(record) is not False:
+                recordsHtml.append(
+                    H.details(
+                        self.title(record),
+                        H.div(ELLIPS),
+                        f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
+                        fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
+                        urltitle=E,
+                        urlextra=E,
+                        **self.forceOpen(G(record, N._id), openEid),
+                    )
+                )
+
+        nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
         nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
-            chain.from_iterable(
-                (
-                    [H.span([self.insertButton(), sep, nRep])],
-                    (
-                        H.details(
-                            self.title(record),
-                            H.div(ELLIPS),
-                            f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
-                            fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
-                            urltitle=E,
-                            urlextra=E,
-                            **self.forceOpen(G(record, N._id), openEid),
-                        )
-                        for record in records
-                    ),
-                )
-            ),
+            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
             cls=f&#34;table {table}&#34;,
         )
 
@@ -1079,18 +1121,10 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         boolean
         &#34;&#34;&#34;
 
+        table = self.table
         context = self.context
         auth = context.auth
-        isMainTable = self.isMainTable
-        isUserTable = self.isUserTable
-        isValueTable = self.isValueTable
-        return (
-            isMainTable
-            and not action
-            or auth.superuser()
-            or (isUserTable or isValueTable)
-            and auth.authenticated()
-        )
+        return checkTable(table, auth.user) and (action is None or auth.authenticated())
 
     def title(self, record):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
@@ -1566,18 +1600,10 @@ the user may see the list of all records.</dd>
     boolean
     &#34;&#34;&#34;
 
+    table = self.table
     context = self.context
     auth = context.auth
-    isMainTable = self.isMainTable
-    isUserTable = self.isUserTable
-    isValueTable = self.isValueTable
-    return (
-        isMainTable
-        and not action
-        or auth.superuser()
-        or (isUserTable or isValueTable)
-        and auth.authenticated()
-    )</code></pre>
+    return checkTable(table, auth.user) and (action is None or auth.authenticated())</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.myFinished"><code class="name flex">
@@ -1632,6 +1658,52 @@ has the final reviewer already decided anyway?</p>
     }</code></pre>
 </details>
 </dd>
+<dt id="control.table.Table.readable"><code class="name flex">
+<span>def <span class="ident">readable</span></span>(<span>self, record)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Is the record readable?</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Readibility is a workflow condition.
+We have to construct a record object and retrieve workflow info
+to find out.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The full record</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>boolean</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def readable(self, record):
+    &#34;&#34;&#34;Is the record readable?
+
+    !!! note
+        Readibility is a workflow condition.
+        We have to construct a record object and retrieve workflow info
+        to find out.
+
+    Parameters
+    ----------
+    record: dict
+        The full record
+
+    Returns
+    -------
+    boolean
+    &#34;&#34;&#34;
+
+    return self.RecordClass(self, record=record).mayRead is not False</code></pre>
+</details>
+</dd>
 <dt id="control.table.Table.record"><code class="name flex">
 <span>def <span class="ident">record</span></span>(<span>self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None)</span>
 </code></dt>
@@ -1646,7 +1718,7 @@ one of <code>eid</code> or <code>record</code> needs to be passed.</p>
 <dl>
 <dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code>, optional <code>None</code></dt>
 <dd>Entity id to identify the record</dd>
-<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
 <dd>The full record</dd>
 <dt><strong><code>withDetails</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>Whether to present a list of detail records below the record</dd>
@@ -1680,7 +1752,7 @@ and they may supply alternative body methods as well.</dd>
     ----------
     eid: ObjectId, optional `None`
         Entity id to identify the record
-    record: dict
+    record: dict, optional `None`
         The full record
     withDetails: boolean, optional `False`
         Whether to present a list of detail records below the record
@@ -1854,6 +1926,12 @@ fields from the record itself.</p>
 </table>
 <p>Permissions will be checked before executing one of these list actions.
 See <a title="control.table.Table.mayList" href="#control.table.Table.mayList"><code>Table.mayList()</code></a>.</p>
+<div class="admonition caution">
+<p class="admonition-title">Workflow restrictions</p>
+<p>There might be additional restrictions on individual records
+due to workflow. Some records may not be readable.
+They will be filtered out.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Whether records are presented
@@ -1897,6 +1975,11 @@ otherwise all records go to the interface.</dd>
 
     Permissions will be checked before executing one of these list actions.
     See `control.table.Table.mayList`.
+
+    !!! caution &#34;Workflow restrictions&#34;
+        There might be additional restrictions on individual records
+        due to workflow. Some records may not be readable.
+        They will be filtered out.
 
     !!! note
         Whether records are presented  in an opened or closed state
@@ -1966,28 +2049,28 @@ otherwise all records go to the interface.</dd>
     if action == N.reviewdone:
         records = [record for record in records if self.myFinished(uid, record)]
 
-    nRecords = len(records)
+    recordsHtml = []
+    sensitive = table in SENSITIVE_TABLES
+    for record in records:
+        if not sensitive or self.readable(record) is not False:
+            recordsHtml.append(
+                H.details(
+                    self.title(record),
+                    H.div(ELLIPS),
+                    f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
+                    fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
+                    urltitle=E,
+                    urlextra=E,
+                    **self.forceOpen(G(record, N._id), openEid),
+                )
+            )
+
+    nRecords = len(recordsHtml)
     itemLabel = itemSingular if nRecords == 1 else itemPlural
     nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
     return H.div(
-        chain.from_iterable(
-            (
-                [H.span([self.insertButton(), sep, nRep])],
-                (
-                    H.details(
-                        self.title(record),
-                        H.div(ELLIPS),
-                        f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
-                        fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
-                        urltitle=E,
-                        urlextra=E,
-                        **self.forceOpen(G(record, N._id), openEid),
-                    )
-                    for record in records
-                ),
-            )
-        ),
+        [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
         cls=f&#34;table {table}&#34;,
     )</code></pre>
 </details>
@@ -2035,6 +2118,7 @@ otherwise all records go to the interface.</dd>
 <li><code><a title="control.table.Table.myFinished" href="#control.table.Table.myFinished">myFinished</a></code></li>
 <li><code><a title="control.table.Table.myKind" href="#control.table.Table.myKind">myKind</a></code></li>
 <li><code><a title="control.table.Table.prov" href="#control.table.Table.prov">prov</a></code></li>
+<li><code><a title="control.table.Table.readable" href="#control.table.Table.readable">readable</a></code></li>
 <li><code><a title="control.table.Table.record" href="#control.table.Table.record">record</a></code></li>
 <li><code><a title="control.table.Table.stage" href="#control.table.Table.stage">stage</a></code></li>
 <li><code><a title="control.table.Table.table" href="#control.table.Table.table">table</a></code></li>
