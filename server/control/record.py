@@ -237,8 +237,10 @@ class Record:
         if wfitem:
             self.kind = wfitem.getKind(table, record)
             valid = wfitem.isValid(table, eid, record)
+            self.mayRead = wfitem.checkReadable(self)
         else:
             valid = False if table in USER_TABLES - {MAIN_TABLE} else True
+            self.mayRead = None
 
         if valid and wfitem:
             self.fixed = wfitem.checkFixed(self)

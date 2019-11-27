@@ -14,6 +14,7 @@ messages:
   noPage: Page not found
   noCommand: No command execution
   noTable: No table
+  noRecord: No suitable record in
   noField: No field
   noAction: No action
   refreshCrit: refresh criteria overview

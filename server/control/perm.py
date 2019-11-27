@@ -299,7 +299,7 @@ def permRecord(context, table, record):
         Is this record under the jurisdiction of the current user as National
         Coordinator?
     isOur: boolean
-        Is this record i the workflow of the current user?
+        Is this record in the workflow of the current user?
         As creator/editor/reviewer/coordinator?
     contribId: ObjectId
         The id of the contrib to which this record is linked.

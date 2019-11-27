@@ -15,14 +15,12 @@ Here we focus on the fields that have values in other tables, the valueTables.
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G
 from helpers import (
-    UNDEF_VALUE,
     CONTRIB,
     modifyField,
+    tryModifyField,
     getValueTable,
     startWithContrib,
-    fieldValue,
 )
 
 
@@ -219,6 +217,8 @@ Cœur du Hainaut
     ),
 )
 
+VCC12 = "VCC1,VCC2"
+
 # SPECIFIC HELPERS
 
 
@@ -227,11 +227,9 @@ def modifyType(client, eid):
     """
 
     types = valueTables["typeContribution"]
-
     field = "typeContribution"
     newValue = EXAMPLE["typeContribution"][-2]
-    (text, fields) = modifyField(client, CONTRIB, eid, field, types[newValue])
-    assert G(fields, field) == newValue
+    tryModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
 
 
 # TESTS
@@ -274,7 +272,8 @@ def test_value_edit(clientSuzan, field):
         `valueTables`.
     """
 
-    values = getValueTable(clientSuzan, field, contribInfo, valueTables)
+    eid = contribInfo["eid"]
+    values = getValueTable(clientSuzan, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values
@@ -286,48 +285,39 @@ def test_modify_vcc(clientSuzan):
     Yes.
     """
 
+    field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
-
-    field = "vcc"
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [vccs["VCC1"], vccs["VCC2"]]
-    )
-    assert G(fields, field) == "VCC1,VCC2"
+    vcc12 = [vccs["VCC1"], vccs["VCC2"]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vcc12, VCC12), True)
 
 
 def test_modify_vcc_wrong(clientSuzan):
     """Can we update the vcc with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No
     """
 
+    field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
-
-    field = "vcc"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [wrongValue, vccs["VCC2"]]
-    )
-    assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
+    vccVal = [wrongValue, vccs["VCC2"]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
 
 
 def test_modify_vcc_error(clientSuzan):
     """Can we update the vcc with a value that is not even an ObjectId?
 
-    Yes, but there will be an undefined value instead.
+    No.
     The error will be caught.
     """
 
+    field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
-
-    field = "vcc"
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, ["monkey", vccs["VCC2"]]
-    )
-    assert G(fields, field) == f"{UNDEF_VALUE},VCC2"
+    vccVal = ["monkey", vccs["VCC2"]]
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
 
 
 def test_modify_type_ex1(clientSuzan):
@@ -337,7 +327,6 @@ def test_modify_type_ex1(clientSuzan):
     """
 
     eid = contribInfo["eid"]
-
     modifyType(clientSuzan, eid)
 
 
@@ -349,44 +338,30 @@ def test_modify_type_mult(clientSuzan):
 
     eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
-
     field = "typeContribution"
-    newValue1 = EXAMPLE["typeContribution"][-2]
-    newValue2 = "service - data hosting"
-    (text, fields) = modifyField(
-        clientSuzan, CONTRIB, eid, field, [types[newValue1], types[newValue2]]
-    )
-    assert G(fields, field) == UNDEF_VALUE
+    oldValue = EXAMPLE["typeContribution"][-2]
+    otherValue = "service - data hosting"
+    newValue = (types[oldValue], types[otherValue])
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (newValue, None), False)
 
 
 def test_modify_type_ex2(clientSuzan):
     """Restore the type to the example value. """
 
     eid = contribInfo["eid"]
-
     modifyType(clientSuzan, eid)
 
 
 def test_modify_type_wrong(clientSuzan):
     """Can we update the type with a nonsense value?
 
-    Yes, but there will be an undefined value instead.
+    No.
     """
 
     eid = contribInfo["eid"]
-
     field = "typeContribution"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, wrongValue)
-    assert G(fields, field) == UNDEF_VALUE
-
-
-def test_modify_type_ex3(clientSuzan):
-    """Restore the type to the example value. """
-
-    eid = contribInfo["eid"]
-
-    modifyType(clientSuzan, eid)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, wrongValue, False)
 
 
 def test_modify_type_typo(clientSuzan):
@@ -397,11 +372,10 @@ def test_modify_type_typo(clientSuzan):
 
     eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
-
     fieldx = "xxxContribution"
     newValue = "activity - resource creation"
     (text, fields) = modifyField(clientSuzan, CONTRIB, eid, fieldx, types[newValue])
-    assert text == f"No field contrib:{fieldx}"
+    assert text == f"No field {CONTRIB}:{fieldx}"
 
 
 @pytest.mark.parametrize(
@@ -423,10 +397,9 @@ def test_modify_meta(clientSuzan, field):
     eid = contribInfo["eid"]
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
-    updateValues = [meta[ex] for ex in checkValues]
+    updateValues = tuple(meta[ex] for ex in checkValues)
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert G(fields, field) == ",".join(checkValues)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, ",".join(checkValues)), True)
 
 
 @pytest.mark.parametrize(
@@ -448,8 +421,7 @@ def test_add_meta_wrong(clientSuzan, field):
     eid = contribInfo["eid"]
     updateValues = [["xxx"]]
 
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    assert UNDEF_VALUE in text
+    tryModifyField(clientSuzan, CONTRIB, eid, field, updateValues, False)
 
 
 @pytest.mark.parametrize(
@@ -462,7 +434,5 @@ def test_add_meta_right(clientSuzan, field, value):
     """
 
     eid = contribInfo["eid"]
-    updateValues = [[value]]
-
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, updateValues)
-    fieldValue(fields, field, value)
+    updateValues = ((value,),)
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, value), True)

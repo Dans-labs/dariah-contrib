@@ -1,0 +1,9 @@
+[run]
+branch = True
+
+[paths]
+source =
+    control
+
+[report]
+precision = 0

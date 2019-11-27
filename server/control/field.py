@@ -11,6 +11,7 @@ from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, bencode, cap1, E, BLANK, ONE, COMMA
 from control.perm import getPerms
+from control.typ.value import ConversionError
 
 CT = C.tables
 CW = C.web
@@ -39,6 +40,7 @@ class Field:
         N.eid,
         N.perm,
         N.readonly,
+        N.mayRead,
     )
 
     def __init__(
@@ -241,17 +243,28 @@ class Field:
         record = self.record
         recordObj = self.recordObj
         require = self.require
+        constrain = None
+        constrainField = G(CONSTRAINED, field)
+        if constrainField:
+            constrainValue = G(record, constrainField)
+            if constrainValue:
+                constrain = (constrainField, constrainValue)
 
         multiple = self.multiple
         fieldTypeObj = self.fieldTypeObj
         conversion = fieldTypeObj.fromStr if fieldTypeObj else None
-        args = dict(uid=uid, eppn=eppn, extensible=extensible) if extensible else {}
+        kwargs = dict(uid=uid, eppn=eppn, extensible=extensible) if extensible else {}
+        if constrain:
+            kwargs[N.constrain] = constrain
 
         if conversion is not None:
-            if multiple:
-                data = [conversion(d, **args) for d in data or []]
-            else:
-                data = conversion(data, **args)
+            try:
+                if multiple:
+                    data = [conversion(d, **kwargs) for d in data or []]
+                else:
+                    data = conversion(data, **kwargs)
+            except ConversionError:
+                return False
 
         modified = G(record, N.modified)
         nowFields = []
@@ -399,7 +412,7 @@ class Field:
 
         mayRead = self.mayRead
 
-        if not mayRead:
+        if mayRead is False:
             return E
 
         asMaster = self.asMaster

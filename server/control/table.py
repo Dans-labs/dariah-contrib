@@ -5,13 +5,12 @@
 *   Record insertion
 """
 
-from itertools import chain
-
 from flask import request
 
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, E, ELLIPS, NBSP, ONE
+from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
@@ -21,6 +20,7 @@ MAIN_TABLE = CT.userTables[0]
 INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
 USER_ENTRY_TABLES = set(CT.userEntryTables)
+SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
 VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
@@ -166,7 +166,7 @@ class Table:
         ----------
         eid: ObjectId, optional `None`
             Entity id to identify the record
-        record: dict
+        record: dict, optional `None`
             The full record
         withDetails: boolean, optional `False`
             Whether to present a list of detail records below the record
@@ -193,6 +193,26 @@ class Table:
             readonly=readonly,
             bodyMethod=bodyMethod,
         )
+
+    def readable(self, record):
+        """Is the record readable?
+
+        !!! note
+            Readibility is a workflow condition.
+            We have to construct a record object and retrieve workflow info
+            to find out.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+
+        Returns
+        -------
+        boolean
+        """
+
+        return self.RecordClass(self, record=record).mayRead is not False
 
     def insert(self, force=False):
         """Insert a new, (blank) record into the table.
@@ -300,6 +320,11 @@ class Table:
         Permissions will be checked before executing one of these list actions.
         See `control.table.Table.mayList`.
 
+        !!! caution "Workflow restrictions"
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         !!! note
             Whether records are presented  in an opened or closed state
             depends onn how the user has last left them.
@@ -368,28 +393,28 @@ class Table:
         if action == N.reviewdone:
             records = [record for record in records if self.myFinished(uid, record)]
 
-        nRecords = len(records)
+        recordsHtml = []
+        sensitive = table in SENSITIVE_TABLES
+        for record in records:
+            if not sensitive or self.readable(record) is not False:
+                recordsHtml.append(
+                    H.details(
+                        self.title(record),
+                        H.div(ELLIPS),
+                        f"""{table}/{G(record, N._id)}""",
+                        fetchurl=f"""/api/{table}/{N.item}/{G(record, N._id)}""",
+                        urltitle=E,
+                        urlextra=E,
+                        **self.forceOpen(G(record, N._id), openEid),
+                    )
+                )
+
+        nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
         nRep = H.span(f"""{nRecords} {itemLabel}""", cls="stats")
 
         return H.div(
-            chain.from_iterable(
-                (
-                    [H.span([self.insertButton(), sep, nRep])],
-                    (
-                        H.details(
-                            self.title(record),
-                            H.div(ELLIPS),
-                            f"""{table}/{G(record, N._id)}""",
-                            fetchurl=f"""/api/{table}/{N.item}/{G(record, N._id)}""",
-                            urltitle=E,
-                            urlextra=E,
-                            **self.forceOpen(G(record, N._id), openEid),
-                        )
-                        for record in records
-                    ),
-                )
-            ),
+            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
             cls=f"table {table}",
         )
 
@@ -488,18 +513,10 @@ class Table:
         boolean
         """
 
+        table = self.table
         context = self.context
         auth = context.auth
-        isMainTable = self.isMainTable
-        isUserTable = self.isUserTable
-        isValueTable = self.isValueTable
-        return (
-            isMainTable
-            and not action
-            or auth.superuser()
-            or (isUserTable or isValueTable)
-            and auth.authenticated()
-        )
+        return checkTable(table, auth.user) and (action is None or auth.authenticated())
 
     def title(self, record):
         """Fast way to get a title on the basis of the record only.

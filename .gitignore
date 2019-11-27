@@ -22,3 +22,4 @@ site/*
 _temp
 _temp/*
 __pycache__/*
+.pytest_cache/*

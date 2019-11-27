@@ -14,11 +14,11 @@ Here we focus on the fields that do not have values in other tables.
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G, EURO
+from control.utils import EURO
 from helpers import (
     CONTRIB,
-    modifyField,
-    addContrib,
+    tryModifyField,
+    addItem,
 )
 
 
@@ -71,7 +71,7 @@ def test_add(clientSuzan):
     Yes.
     """
 
-    (text, fields, msgs, eid) = addContrib(clientSuzan)
+    (text, fields, msgs, eid) = addItem(clientSuzan, CONTRIB)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
@@ -85,11 +85,9 @@ def test_modify_title(clientSuzan):
     """
 
     eid = contribInfo["eid"]
-
     field = "title"
     newValue = "Resource creator"
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, newValue)
-    assert G(fields, field) == newValue
+    tryModifyField(clientSuzan, CONTRIB, eid, field, newValue, True)
 
 
 @pytest.mark.parametrize(
@@ -106,9 +104,7 @@ def test_modify_description(clientSuzan, field, value):
     """
 
     eid = contribInfo["eid"]
-
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == value.strip()
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, value.strip()), True)
 
 
 @pytest.mark.parametrize(
@@ -125,8 +121,7 @@ def test_description_markdown(clientSuzan, field, checks):
     """
 
     eid = contribInfo["eid"]
-
-    response = clientSuzan.get(f"/api/contrib/item/{eid}/field/{field}?action=view")
+    response = clientSuzan.get(f"/api/{CONTRIB}/item/{eid}/field/{field}?action=view")
     text = response.get_data(as_text=True)
     for check in checks:
         assert check in text
@@ -149,10 +144,8 @@ def test_modify_cost(clientSuzan, value, expected):
     """
 
     eid = contribInfo["eid"]
-
     field = "costTotal"
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
 
 @pytest.mark.parametrize(
@@ -172,10 +165,8 @@ def test_modify_email(clientSuzan, value, expected):
     """
 
     eid = contribInfo["eid"]
-
     field = "contactPersonEmail"
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
 
 @pytest.mark.parametrize(
@@ -217,6 +208,4 @@ def test_modify_url(clientSuzan, field, value, expected):
     """
 
     eid = contribInfo["eid"]
-
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)

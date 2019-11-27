@@ -15,6 +15,10 @@ QQ = H.icon(CW.unknown[N.generic])
 Qq = H.icon(CW.unknown[N.generic], asChar=True)
 
 
+class ConversionError(Exception):
+    pass
+
+
 class Value(Related):
     """Type class for types with values in value tables."""
 
@@ -35,25 +39,61 @@ class Value(Related):
         """*object* A `control.context.Context` singleton.
         """
 
-    def fromStr(self, editVal, uid=None, eppn=None, extensible=False):
+    def fromStr(self, editVal, constrain=None, uid=None, eppn=None, extensible=False):
+        """Convert a value to an object id by looking it up in a value table.
+
+        If the value is a singleton list, and if the value list is extensible,
+        we insert the new value into the value table, and return the new id.
+
+        Otherwise, the value must be the string representation of id of a value
+        in the value table. Possibly not just any value, but a value in a subset
+        defined by a constraint.
+
+        Parameters
+        ----------
+        editVal: string
+            The value as it has been sent from the client
+        constrain:
+            An additional constraint for the value.
+            See `control.db.Db.getValueRecords`.
+        """
+
         if not editVal:
             return None
 
         context = self.context
         db = context.db
-
-        if type(editVal) is list:
-            if extensible and editVal:
-                table = self.name
-                fieldName = N.rep if extensible is True else extensible
-                field = {fieldName: editVal[0]}
-                return db.insertItem(table, uid, eppn, True, **field)
-            else:
-                return None
-
         table = self.name
-        values = getattr(db, f"""{table}Inv""", {})
-        return G(values, editVal) if editVal in values else castObjectId(editVal)
+
+        valuesInv = (
+            getattr(db, f"""{table}Inv""", {})
+            if constrain is None
+            else db.getValueInv(table, constrain)
+        )
+        valType = type(editVal)
+        if valType is list or valType is tuple:
+            if extensible and editVal:
+                editVal = editVal[0]
+                if editVal in valuesInv:
+                    return valuesInv[editVal]
+                fieldName = N.rep if extensible is True else extensible
+                field = {fieldName: editVal}
+                return db.insertItem(table, uid, eppn, True, **field)
+            raise ConversionError
+
+        values = (
+            getattr(db, f"""{table}""", {})
+            if constrain is None
+            else db.getValueIds(table, constrain)
+        )
+        try:
+            valId = castObjectId(editVal)
+        except Exception:
+            raise ConversionError
+
+        if valId in values:
+            return valId
+        raise ConversionError
 
     def toEdit(self, val):
         return val

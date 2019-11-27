@@ -744,6 +744,67 @@ class Db:
             else records
         )
 
+    def getValueInv(self, valueTable, constrain):
+        """Fetch a mapping from values to ids from a value table.
+
+        The mapping is like the *valueTable*`Inv` attribute of `Db`,
+        but with members restricted by a constraint.
+
+        !!! caution
+            This only works properly if the valueTable has a field `rep`.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        dict
+            Keyed by values, valued by ids.
+        """
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        eids = {G(r, N._id) for r in records}
+        return {
+            value: eid
+            for (value, eid) in getattr(self, f"""{valueTable}Inv""", {}).items()
+            if eid in eids
+        }
+
+    def getValueIds(self, valueTable, constrain):
+        """Fetch a set of ids from a value table.
+
+        The ids are taken from the value reocrds that satisfy a constraint.
+        but with members restricted by a constraint.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        set of ObjectId
+        """
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        return {G(r, N._id) for r in records}
+
     def insertItem(self, table, uid, eppn, onlyIfNew, **fields):
         """Inserts a new record in a table, possibly only if it is new.
 

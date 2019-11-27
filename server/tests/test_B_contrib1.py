@@ -48,9 +48,9 @@ from helpers import (
     isRight,
     findFields,
     postJson,
-    modifyField,
+    tryModifyField,
     getValueTable,
-    addContrib,
+    addItem,
 )
 
 
@@ -68,7 +68,7 @@ def test_users(clientLisa):
         `valueTables`.
     """
 
-    users = getValueTable(clientLisa, "user", contribInfo, valueTables)
+    users = getValueTable(clientLisa, CONTRIB, None, "user", valueTables)
 
     assert "bart" in users
     assert "lisa" in users
@@ -85,7 +85,7 @@ def test_add_public(clientPublic):
     No.
     """
 
-    isWrong(clientPublic, f"/api/contrib/insert")
+    isWrong(clientPublic, f"/api/{CONTRIB}/insert")
 
 
 def test_add(clientSuzan):
@@ -94,7 +94,7 @@ def test_add(clientSuzan):
     Yes.
     """
 
-    (text, fields, msgs, eid) = addContrib(clientSuzan)
+    (text, fields, msgs, eid) = addItem(clientSuzan, CONTRIB)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
@@ -118,7 +118,6 @@ def test_fields(field, value):
     """
 
     fields = contribInfo["fields"]
-
     assert G(fields, field) == value
 
 
@@ -129,11 +128,9 @@ def test_modify_creator(clientSuzan):
     """
 
     eid = contribInfo["eid"]
-
     field = "title"
     newValue = "My contribution (Suzan)"
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, newValue)
-    assert G(fields, "title") == newValue
+    tryModifyField(clientSuzan, CONTRIB, eid, field, newValue, True)
 
 
 def test_modify_public(clientPublic):
@@ -143,12 +140,9 @@ def test_modify_public(clientPublic):
     """
 
     eid = contribInfo["eid"]
-
     field = "title"
     newValue = "My contribution (public)"
-    (text, fields) = modifyField(clientPublic, CONTRIB, eid, field, newValue)
-    assert G(fields, "title") != newValue
-    assert "400 Bad Request" in text
+    tryModifyField(clientPublic, CONTRIB, eid, field, newValue, False)
 
 
 def test_modify_auth1(clientBart):
@@ -161,9 +155,7 @@ def test_modify_auth1(clientBart):
 
     field = "title"
     newValue = "My contribution (Bart)"
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, "title") != newValue
-    assert "400 Bad Request" in text
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, False)
 
 
 def test_modify_office(clientLisa):
@@ -176,8 +168,7 @@ def test_modify_office(clientLisa):
 
     field = "title"
     newValue = "My contribution (Lisa)"
-    (text, fields) = modifyField(clientLisa, CONTRIB, eid, field, newValue)
-    assert G(fields, "title") == newValue
+    tryModifyField(clientLisa, CONTRIB, eid, field, newValue, True)
 
 
 def test_addEditor(clientLisa):
@@ -192,7 +183,7 @@ def test_addEditor(clientLisa):
     (bartId, bartName) = users["bart"]
 
     text = postJson(
-        clientLisa, f"/api/contrib/item/{eid}/field/editors?action=view", [bartId],
+        clientLisa, f"/api/{CONTRIB}/item/{eid}/field/editors?action=view", [bartId],
     )
     fields = findFields(text)
     assert G(fields, "editors") == bartName
@@ -208,8 +199,7 @@ def test_modify_auth2(clientBart):
 
     field = "title"
     newValue = "My contribution (Bart)"
-    (text, fields) = modifyField(clientBart, CONTRIB, eid, field, newValue)
-    assert G(fields, "title") == newValue
+    tryModifyField(clientBart, CONTRIB, eid, field, newValue, True)
 
 
 def test_del_public(clientPublic):
@@ -219,8 +209,7 @@ def test_del_public(clientPublic):
     """
 
     eid = contribInfo["eid"]
-
-    isWrong(clientPublic, f"/api/contrib/delete/{eid}")
+    isWrong(clientPublic, f"/api/{CONTRIB}/delete/{eid}")
 
 
 def test_del_editor(clientBart):
@@ -230,5 +219,4 @@ def test_del_editor(clientBart):
     """
 
     eid = contribInfo["eid"]
-
-    isRight(clientBart, f"/api/contrib/delete/{eid}")
+    isRight(clientBart, f"/api/{CONTRIB}/delete/{eid}")

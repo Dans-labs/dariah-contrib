@@ -5,9 +5,16 @@ apidocbase='docs/api/html'
 
 function codestats {
     xd=".git,images,fonts,favicons"
+    xdx=",tests"
+    xdt=",dariah_clean,.pytest_cache,.coverage"
     xf="cloc_exclude.lst"
     rf="docs/Tech/Stats.md"
-    cloc --counted ~/Downloads/dariah-contrib.lst --no-autogen --exclude_dir=$xd --exclude-list-file=$xf --report-file=$rf --md .
+    rft="docs/Tech/StatsTest.md"
+    cloc --no-autogen --exclude_dir=$xd$xdx --exclude-list-file=$xf --report-file=$rf --md .
+    cloc --no-autogen --exclude_dir=$xd$xdt --exclude-list-file=$xf --report-file=$rft --md server/tests
+    echo "\nTESTS\n" >> $rf
+    cat $rft >> $rf
+    rm $rft
     cat $rf
 }
 
@@ -94,8 +101,8 @@ function runtest {
         exit
     fi
     cleandb
-    cd server/tests
-    dest="../../docs"
+    cd server
+    dest="../docs"
     destTestTmp="$dest/Tech/Tests.tmp"
     destTest="$dest/Tech/Tests.txt"
     set -o pipefail
@@ -106,6 +113,7 @@ function runtest {
         testerror=$?
         if [[ $testerror == 0 ]]; then
             coverage html -i -d $destCov
+            coverage report
         else
             echo "SKIPPING COVERAGE REPORTING"
         fi
@@ -131,7 +139,7 @@ function runtest {
     else
         echo "SOMETHING WENT WRONG DURING TESTING"
     fi
-    cd ../..
+    cd ..
 }
 
 function cleandb {
@@ -155,9 +163,9 @@ function ship {
         return
     fi
     docs "deploy"
-    git add --all .
-    git commit -m "ship: $*"
-    git push origin master
+    # git add --all .
+    # git commit -m "ship: $*"
+    # git push origin master
 }
 
 function shipdocs {

@@ -776,6 +776,67 @@ class Db:
             else records
         )
 
+    def getValueInv(self, valueTable, constrain):
+        &#34;&#34;&#34;Fetch a mapping from values to ids from a value table.
+
+        The mapping is like the *valueTable*`Inv` attribute of `Db`,
+        but with members restricted by a constraint.
+
+        !!! caution
+            This only works properly if the valueTable has a field `rep`.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        dict
+            Keyed by values, valued by ids.
+        &#34;&#34;&#34;
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        eids = {G(r, N._id) for r in records}
+        return {
+            value: eid
+            for (value, eid) in getattr(self, f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;, {}).items()
+            if eid in eids
+        }
+
+    def getValueIds(self, valueTable, constrain):
+        &#34;&#34;&#34;Fetch a set of ids from a value table.
+
+        The ids are taken from the value reocrds that satisfy a constraint.
+        but with members restricted by a constraint.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        set of ObjectId
+        &#34;&#34;&#34;
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        return {G(r, N._id) for r in records}
+
     def insertItem(self, table, uid, eppn, onlyIfNew, **fields):
         &#34;&#34;&#34;Inserts a new record in a table, possibly only if it is new.
 
@@ -1945,6 +2006,67 @@ as recommended in
             if constrain
             else records
         )
+
+    def getValueInv(self, valueTable, constrain):
+        &#34;&#34;&#34;Fetch a mapping from values to ids from a value table.
+
+        The mapping is like the *valueTable*`Inv` attribute of `Db`,
+        but with members restricted by a constraint.
+
+        !!! caution
+            This only works properly if the valueTable has a field `rep`.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        dict
+            Keyed by values, valued by ids.
+        &#34;&#34;&#34;
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        eids = {G(r, N._id) for r in records}
+        return {
+            value: eid
+            for (value, eid) in getattr(self, f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;, {}).items()
+            if eid in eids
+        }
+
+    def getValueIds(self, valueTable, constrain):
+        &#34;&#34;&#34;Fetch a set of ids from a value table.
+
+        The ids are taken from the value reocrds that satisfy a constraint.
+        but with members restricted by a constraint.
+
+        Parameters
+        ----------
+        valueTable: string
+            The table that contains the records.
+        constrain: 2-tuple, optional `None`
+            A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+            Only records with that value in that field will be delivered.
+
+        Returns
+        -------
+        set of ObjectId
+        &#34;&#34;&#34;
+
+        records = (
+            r
+            for r in getattr(self, valueTable, {}).values()
+            if G(r, constrain[0]) == constrain[1]
+        )
+        return {G(r, N._id) for r in records}
 
     def insertItem(self, table, uid, eppn, onlyIfNew, **fields):
         &#34;&#34;&#34;Inserts a new record in a table, possibly only if it is new.
@@ -3401,6 +3523,121 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
     return sorted(records, key=titleSort)</code></pre>
 </details>
 </dd>
+<dt id="control.db.Db.getValueIds"><code class="name flex">
+<span>def <span class="ident">getValueIds</span></span>(<span>self, valueTable, constrain)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Fetch a set of ids from a value table.</p>
+<p>The ids are taken from the value reocrds that satisfy a constraint.
+but with members restricted by a constraint.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table that contains the records.</dd>
+<dt><strong><code>constrain</code></strong> :&ensp;<code>2</code>-<code>tuple</code>, optional <code>None</code></dt>
+<dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
+Only records with that value in that field will be delivered.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>set</code> of <code>ObjectId</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getValueIds(self, valueTable, constrain):
+    &#34;&#34;&#34;Fetch a set of ids from a value table.
+
+    The ids are taken from the value reocrds that satisfy a constraint.
+    but with members restricted by a constraint.
+
+    Parameters
+    ----------
+    valueTable: string
+        The table that contains the records.
+    constrain: 2-tuple, optional `None`
+        A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+        Only records with that value in that field will be delivered.
+
+    Returns
+    -------
+    set of ObjectId
+    &#34;&#34;&#34;
+
+    records = (
+        r
+        for r in getattr(self, valueTable, {}).values()
+        if G(r, constrain[0]) == constrain[1]
+    )
+    return {G(r, N._id) for r in records}</code></pre>
+</details>
+</dd>
+<dt id="control.db.Db.getValueInv"><code class="name flex">
+<span>def <span class="ident">getValueInv</span></span>(<span>self, valueTable, constrain)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Fetch a mapping from values to ids from a value table.</p>
+<p>The mapping is like the <em>valueTable</em><code>Inv</code> attribute of <a title="control.db.Db" href="#control.db.Db"><code>Db</code></a>,
+but with members restricted by a constraint.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This only works properly if the valueTable has a field <code>rep</code>.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table that contains the records.</dd>
+<dt><strong><code>constrain</code></strong> :&ensp;<code>2</code>-<code>tuple</code>, optional <code>None</code></dt>
+<dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
+Only records with that value in that field will be delivered.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Keyed by values, valued by ids.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getValueInv(self, valueTable, constrain):
+    &#34;&#34;&#34;Fetch a mapping from values to ids from a value table.
+
+    The mapping is like the *valueTable*`Inv` attribute of `Db`,
+    but with members restricted by a constraint.
+
+    !!! caution
+        This only works properly if the valueTable has a field `rep`.
+
+    Parameters
+    ----------
+    valueTable: string
+        The table that contains the records.
+    constrain: 2-tuple, optional `None`
+        A custom constraint. If present, it should be a tuple `(fieldName, value)`.
+        Only records with that value in that field will be delivered.
+
+    Returns
+    -------
+    dict
+        Keyed by values, valued by ids.
+    &#34;&#34;&#34;
+
+    records = (
+        r
+        for r in getattr(self, valueTable, {}).values()
+        if G(r, constrain[0]) == constrain[1]
+    )
+    eids = {G(r, N._id) for r in records}
+    return {
+        value: eid
+        for (value, eid) in getattr(self, f&#34;&#34;&#34;{valueTable}Inv&#34;&#34;&#34;, {}).items()
+        if eid in eids
+    }</code></pre>
+</details>
+</dd>
 <dt id="control.db.Db.getValueRecords"><code class="name flex">
 <span>def <span class="ident">getValueRecords</span></span>(<span>self, valueTable, constrain=None)</span>
 </code></dt>
@@ -4348,6 +4585,8 @@ they are about.</p>
 <li><code><a title="control.db.Db.getDetails" href="#control.db.Db.getDetails">getDetails</a></code></li>
 <li><code><a title="control.db.Db.getItem" href="#control.db.Db.getItem">getItem</a></code></li>
 <li><code><a title="control.db.Db.getList" href="#control.db.Db.getList">getList</a></code></li>
+<li><code><a title="control.db.Db.getValueIds" href="#control.db.Db.getValueIds">getValueIds</a></code></li>
+<li><code><a title="control.db.Db.getValueInv" href="#control.db.Db.getValueInv">getValueInv</a></code></li>
 <li><code><a title="control.db.Db.getValueRecords" href="#control.db.Db.getValueRecords">getValueRecords</a></code></li>
 <li><code><a title="control.db.Db.getWorkflowItem" href="#control.db.Db.getWorkflowItem">getWorkflowItem</a></code></li>
 <li><code><a title="control.db.Db.inCrit" href="#control.db.Db.inCrit">inCrit</a></code></li>

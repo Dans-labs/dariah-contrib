@@ -101,6 +101,11 @@ class Details:
             The details will only be fetched if the user has permissions
             to list the detail table!
 
+        !!! caution &#34;Workflow restrictions&#34;
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         Parameters
         ----------
         dtable: string
@@ -128,7 +133,7 @@ class Details:
         drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
         self.details[dtable] = (
             dtableObj,
-            tuple(drecords),
+            tuple(drecord for drecord in drecords if dtableObj.readable(drecord)),
         )
 
     def wrap(self, readonly=False, showTable=None, showEid=None):
@@ -271,9 +276,7 @@ class Details:
             expanded state.
         &#34;&#34;&#34;
 
-        return (
-            G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None
-        )</code></pre>
+        return G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None</code></pre>
 </details>
 </section>
 <section>
@@ -360,6 +363,11 @@ that spawns a detail record object.</p>
             The details will only be fetched if the user has permissions
             to list the detail table!
 
+        !!! caution &#34;Workflow restrictions&#34;
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         Parameters
         ----------
         dtable: string
@@ -387,7 +395,7 @@ that spawns a detail record object.</p>
         drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
         self.details[dtable] = (
             dtableObj,
-            tuple(drecords),
+            tuple(drecord for drecord in drecords if dtableObj.readable(drecord)),
         )
 
     def wrap(self, readonly=False, showTable=None, showEid=None):
@@ -530,9 +538,7 @@ that spawns a detail record object.</p>
             expanded state.
         &#34;&#34;&#34;
 
-        return (
-            G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None
-        )</code></pre>
+        return G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -585,9 +591,7 @@ def mustShow(table, kwargs):
         expanded state.
     &#34;&#34;&#34;
 
-    return (
-        G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None
-    )</code></pre>
+    return G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None</code></pre>
 </details>
 </dd>
 </dl>
@@ -613,6 +617,12 @@ records in that detail table.</p></section>
 <p>The details will only be fetched if the user has permissions
 to list the detail table!</p>
 </div>
+<div class="admonition caution">
+<p class="admonition-title">Workflow restrictions</p>
+<p>There might be additional restrictions on individual records
+due to workflow. Some records may not be readable.
+They will be filtered out.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>dtable</code></strong> :&ensp;<code>string</code></dt>
@@ -636,6 +646,11 @@ dict keyed by the names of the detail tables.</dd>
     !!! caution
         The details will only be fetched if the user has permissions
         to list the detail table!
+
+    !!! caution &#34;Workflow restrictions&#34;
+        There might be additional restrictions on individual records
+        due to workflow. Some records may not be readable.
+        They will be filtered out.
 
     Parameters
     ----------
@@ -664,7 +679,7 @@ dict keyed by the names of the detail tables.</dd>
     drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
     self.details[dtable] = (
         dtableObj,
-        tuple(drecords),
+        tuple(drecord for drecord in drecords if dtableObj.readable(drecord)),
     )</code></pre>
 </details>
 </dd>

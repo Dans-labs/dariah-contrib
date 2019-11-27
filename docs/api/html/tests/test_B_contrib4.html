@@ -90,11 +90,11 @@ Suzan |  Normal user, author | YES
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G, EURO
+from control.utils import EURO
 from helpers import (
     CONTRIB,
     viewField,
-    modifyField,
+    tryModifyField,
     getValueTable,
     startWithContrib,
     fieldValue,
@@ -136,14 +136,12 @@ def test_start(clientSuzan):
     field = &#34;costTotal&#34;
     value = COST[&#34;costBare&#34;]
     expected = COST[&#34;costTotal&#34;]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
     field = &#34;costDescription&#34;
     value = COST[&#34;costDescription&#34;]
-    expected = COST[&#34;costDescription&#34;]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field).strip() == expected.strip()
+    expected = COST[&#34;costDescription&#34;].strip()
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
 
 def test_change_user_country(clientLisa):
@@ -152,8 +150,9 @@ def test_change_user_country(clientLisa):
     Yes.
     &#34;&#34;&#34;
 
-    users = getValueTable(clientLisa, &#34;user&#34;, contribInfo, valueTables)
-    countries = getValueTable(clientLisa, &#34;country&#34;, contribInfo, valueTables)
+    eid = contribInfo[&#34;eid&#34;]
+    users = getValueTable(clientLisa, CONTRIB, None, &#34;user&#34;, valueTables)
+    countries = getValueTable(clientLisa, CONTRIB, eid, &#34;country&#34;, valueTables)
 
     assert MARIE in users
     assert BELGIUM in countries
@@ -167,8 +166,7 @@ def test_change_user_country(clientLisa):
     (text, fields) = viewField(clientLisa, &#34;user&#34;, marie, field)
     fieldValue(fields, field, LUXEMBURG)
 
-    (text, fields) = modifyField(clientLisa, &#34;user&#34;, marie, field, belgium)
-    fieldValue(fields, field, BELGIUM)
+    tryModifyField(clientLisa, &#34;user&#34;, marie, field, (belgium, BELGIUM), True)
 
 
 @pytest.mark.parametrize(
@@ -232,8 +230,9 @@ def test_view_cost(
     Yes.
     &#34;&#34;&#34;
 
-    users = getValueTable(clientLisa, &#34;user&#34;, contribInfo, valueTables)
-    countries = getValueTable(clientLisa, &#34;country&#34;, contribInfo, valueTables)
+    eid = contribInfo[&#34;eid&#34;]
+    users = getValueTable(clientLisa, CONTRIB, None, &#34;user&#34;, valueTables)
+    countries = getValueTable(clientLisa, CONTRIB, eid, &#34;country&#34;, valueTables)
 
     assert MARIE in users
     assert BELGIUM in countries
@@ -247,8 +246,7 @@ def test_view_cost(
     (text, fields) = viewField(clientLisa, &#34;user&#34;, marie, field)
     fieldValue(fields, field, LUXEMBURG)
 
-    (text, fields) = modifyField(clientLisa, &#34;user&#34;, marie, field, belgium)
-    fieldValue(fields, field, BELGIUM)</code></pre>
+    tryModifyField(clientLisa, &#34;user&#34;, marie, field, (belgium, BELGIUM), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib4.test_start"><code class="name flex">
@@ -278,14 +276,12 @@ def test_view_cost(
     field = &#34;costTotal&#34;
     value = COST[&#34;costBare&#34;]
     expected = COST[&#34;costTotal&#34;]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
     field = &#34;costDescription&#34;
     value = COST[&#34;costDescription&#34;]
-    expected = COST[&#34;costDescription&#34;]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field).strip() == expected.strip()</code></pre>
+    expected = COST[&#34;costDescription&#34;].strip()
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)</code></pre>
 </details>
 </dd>
 <dt id="test_B_contrib4.test_view_cost"><code class="name flex">

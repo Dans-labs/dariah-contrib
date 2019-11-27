@@ -21,11 +21,11 @@ Suzan |  Normal user, author | YES
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G, EURO
+from control.utils import EURO
 from helpers import (
     CONTRIB,
     viewField,
-    modifyField,
+    tryModifyField,
     getValueTable,
     startWithContrib,
     fieldValue,
@@ -67,14 +67,12 @@ def test_start(clientSuzan):
     field = "costTotal"
     value = COST["costBare"]
     expected = COST["costTotal"]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field) == expected
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
     field = "costDescription"
     value = COST["costDescription"]
-    expected = COST["costDescription"]
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, field, value)
-    assert G(fields, field).strip() == expected.strip()
+    expected = COST["costDescription"].strip()
+    tryModifyField(clientSuzan, CONTRIB, eid, field, (value, expected), True)
 
 
 def test_change_user_country(clientLisa):
@@ -83,8 +81,9 @@ def test_change_user_country(clientLisa):
     Yes.
     """
 
-    users = getValueTable(clientLisa, "user", contribInfo, valueTables)
-    countries = getValueTable(clientLisa, "country", contribInfo, valueTables)
+    eid = contribInfo["eid"]
+    users = getValueTable(clientLisa, CONTRIB, None, "user", valueTables)
+    countries = getValueTable(clientLisa, CONTRIB, eid, "country", valueTables)
 
     assert MARIE in users
     assert BELGIUM in countries
@@ -98,8 +97,7 @@ def test_change_user_country(clientLisa):
     (text, fields) = viewField(clientLisa, "user", marie, field)
     fieldValue(fields, field, LUXEMBURG)
 
-    (text, fields) = modifyField(clientLisa, "user", marie, field, belgium)
-    fieldValue(fields, field, BELGIUM)
+    tryModifyField(clientLisa, "user", marie, field, (belgium, BELGIUM), True)
 
 
 @pytest.mark.parametrize(

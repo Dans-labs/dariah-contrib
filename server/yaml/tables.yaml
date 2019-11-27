@@ -30,10 +30,10 @@ systemTables:
 
 perm:
   contrib: public
-  assessment: auth
-  review: auth
-  criteriaEntry: auth
-  reviewEntry: auth
+  assessment: public
+  review: public
+  criteriaEntry: public
+  reviewEntry: public
   country: public
   criteria: office
   discipline: public
@@ -193,6 +193,7 @@ overviewFieldsWorkflow:
 
 names:
   - bool
+  - constrain
   - constrained
   - eid
   - isUserTable

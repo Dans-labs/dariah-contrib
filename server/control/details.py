@@ -70,6 +70,11 @@ class Details:
             The details will only be fetched if the user has permissions
             to list the detail table!
 
+        !!! caution "Workflow restrictions"
+            There might be additional restrictions on individual records
+            due to workflow. Some records may not be readable.
+            They will be filtered out.
+
         Parameters
         ----------
         dtable: string
@@ -97,7 +102,7 @@ class Details:
         drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
         self.details[dtable] = (
             dtableObj,
-            tuple(drecords),
+            tuple(drecord for drecord in drecords if dtableObj.readable(drecord)),
         )
 
     def wrap(self, readonly=False, showTable=None, showEid=None):
@@ -240,6 +245,4 @@ class Details:
             expanded state.
         """
 
-        return (
-            G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None
-        )
+        return G(kwargs, N.showEid) if G(kwargs, N.showTable) == table else None

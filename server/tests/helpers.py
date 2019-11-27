@@ -5,11 +5,11 @@ import re
 
 from flask import json
 
-
 materialRe = re.compile(
     r"""<div id=['"]material['"]>(.*?)</div>\s*</div>\s*<script""", re.S
 )
 fieldRe = re.compile("""<!-- ([^=]+)=(.*?) -->""", re.S)
+stageRe = re.compile("""<!-- stage:(.*?) -->""", re.S)
 msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
 eidRe = re.compile("""<details itemkey=['"][a-zA-Z0-9_]+/([^/'"]*)['"]""", re.S)
 userRe = re.compile(
@@ -23,9 +23,12 @@ UNDEF_VALUE = "○"
 WELCOME = "Welcome to the DARIAH contribution tool"
 EXAMPLE_TYPE = "activity - resource creation"
 EXAMPLE_TYPE_ID = "00000000cca4bbd9fe000015"
+EXAMPLE_TYPE2 = "service - processing service"
+EXAMPLE_TYPE2_ID = "00000000cca4bbd9fe00000f"
 BELGIUM_ID = "00000000e909c2d70600001b"
 CONTRIB = "contrib"
 ASSESS = "assessment"
+CRITERIA_ENTRY = "criteriaEntry"
 
 
 def fieldEditRe(eid, field):
@@ -45,6 +48,15 @@ def detailRe(dtable):
     return re.compile(
         r"""<details itemkey=['"]{dtable}/([^'"]+)['"][^>]*>(.*?)</details>""".format(
             dtable=dtable
+        ),
+        re.S,
+    )
+
+
+def warningRe(label):
+    return re.compile(
+        r"""\bclass=['"][^'"]*\bwarning\b[^'"]*['"][^>]*>{label}<""".format(
+            label=label
         ),
         re.S,
     )
@@ -129,8 +141,8 @@ def findMsg(text):
     return set(msgRe.findall(text))
 
 
-def findEid(text):
-    """Get the entity id from a response.
+def findEid(text, multiple=False):
+    """Get the entity id(s) from a response.
 
     If the response shows a record, dig out its entity id.
     Otherwise, return `None`
@@ -139,14 +151,16 @@ def findEid(text):
     ----------
     text: string
         The response text.
+    multiple: boolean
+        Whether we should return the list of all found ids or only the first one.
 
     Returns
     -------
-    string(ObjectId) | `None`
+    list of string(ObjectId) | string(ObjectId) | `None`
     """
 
     results = eidRe.findall(text)
-    return results[0] if results else None
+    return results if multiple else results[0] if results else None
 
 
 def findFields(text):
@@ -171,6 +185,42 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
+def findStages(text):
+    """Get the workflow stages from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return stageRe.findall(text)
+
+
+def checkStage(client, table, eid, stageExpected):
+    """Check whether a record has a certain workflow stage.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    eid: ObjectId | string
+    stageExpected: string
+    """
+
+    (text, fields, msgs, dummy) = findItem(client, table, eid)
+    stageFound = findStages(text)[0]
+    assert stageFound == stageExpected
+    return (text, fields, msgs, eid)
+
+
 def findDetails(text, dtable):
     """Get the details from a response, but only those in a specific table.
 
@@ -185,11 +235,16 @@ def findDetails(text, dtable):
     -------
     list of tuple of (string(id), string(html))
         The HTML for the details, chunked per detail record.
-        Each chunk consists of two parts: the entity id of that detail,
-        and the piece of HTML representing the title of the detail.
+        Each chunk consists of the following parts:
+
+        *   the entity id of that detail,
+        *   the piece of HTML representing the title of the detail.
     """
 
-    return detailRe(dtable).findall(text)
+    result = []
+    for (eid, mat) in detailRe(dtable).findall(text):
+        result.append((eid, mat))
+    return result
 
 
 def findMaterial(text):
@@ -197,6 +252,10 @@ def findMaterial(text):
 
     results = materialRe.findall(text)
     return results[0].strip() if results else None
+
+
+def checkWarning(text, label):
+    return not not warningRe(label).search(text)
 
 
 def findUsers(text):
@@ -227,11 +286,16 @@ def fieldValue(fields, field, value):
         assert value == fields[field]
 
 
-def addContrib(client):
-    """Adds a contribution on behalf of an authenticated user.
+def addItem(client, table):
+    """Adds an item to a table on behalf of an authenticated user.
 
     The response texts will be analysed into messages and fields, the eid
-    of the new contribution will be read off.
+    of the new item will be read off.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
 
     Returns
     -------
@@ -245,7 +309,7 @@ def addContrib(client):
         The id of the inserted contribution.
     """
 
-    response = client.get(f"/api/contrib/insert", follow_redirects=True)
+    response = client.get(f"/api/{table}/insert", follow_redirects=True)
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
@@ -317,7 +381,8 @@ def findItem(client, table, eid):
         The id of the item.
     """
 
-    response = client.get(f"/{table}/item/{eid}")
+    url = f"/{table}/item/{eid}"
+    response = client.get(url)
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
@@ -329,7 +394,7 @@ def startWithContrib(client):
     result = findItemEid(client, CONTRIB)
     if result[3]:
         return result
-    return addContrib(client)
+    return addItem(client, CONTRIB)
 
 
 def postJson(client, url, value):
@@ -367,6 +432,51 @@ def modifyField(client, table, eid, field, newValue):
     return (text, fields)
 
 
+def tryModifyField(client, table, eid, field, newValue, expect, mayRead=True):
+    """Try to modify a field and check the outcome.
+
+    !!! note "Read access"
+
+    The test has to reckon with the fact that the client may not even have read access
+    to the field.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    eid: ObjectId | string
+    field: string
+    mayRead: boolean, optional `True`
+    newValue: string | tuple
+        If a tuple, the first component is the modification value,
+        and the second component is the value we read back from the modified record
+    expect: boolean
+        Whether we expect the modification to succeed
+    """
+
+    if not expect:
+        (text, fields, msgs, eid) = findItem(client, table, eid)
+        oldValue = fields[field] if mayRead else None
+
+    if type(newValue) is tuple:
+        (newValue, newValueRep) = newValue
+    else:
+        newValueRep = newValue
+
+    (text, fields) = modifyField(client, table, eid, field, newValue)
+
+    if not expect:
+        assert field not in fields
+
+    (text, fields, msgs, eid) = findItem(client, table, eid)
+
+    if expect:
+        fieldValue(fields, field, newValueRep)
+    else:
+        if mayRead:
+            fieldValue(fields, field, oldValue)
+
+
 def viewField(client, table, eid, field):
     """Get the response for showing a field."""
 
@@ -387,13 +497,12 @@ def accessUrl(client, url, redirect=False):
     return (text, status, msgs)
 
 
-def getRelatedValues(client, eid, field):
+def getRelatedValues(client, table, eid, field):
     """Get an editable view on a field that represents a related value.""
 
     We check the contents.
-
     """
-    url = f"/api/contrib/item/{eid}/field/{field}?action=edit"
+    url = f"/api/{table}/item/{eid}/field/{field}?action=edit"
     response = client.get(url)
     text = response.get_data(as_text=True)
     thisRe = fieldEditRe(eid, field)
@@ -403,7 +512,7 @@ def getRelatedValues(client, eid, field):
     return valueDict
 
 
-def getValueTable(client, table, requestInfo, dest):
+def getValueTable(client, table, eid, valueTable, dest):
     """Get a mapping of values in a value table to their object ids.
 
     We obtain the mapping by asking for an edit view of a field that
@@ -418,23 +527,23 @@ def getValueTable(client, table, requestInfo, dest):
     Parameters
     ----------
     table: string
-        The name of a value table
-
-    requestInfo: dict
-        Info from the request, such as text, fields, messages, eid.
+        The name of table whose record we inspect
+    eid: dict
+        The id of the record
+    valueTable: string
+        The name of a value table which is also the name of the field in the record
 
     Returns
     -------
     dict
-        The stored value dict for this table
+        The stored value dict for this valueTable
     """
 
-    if table == "user":
+    if valueTable == "user":
         response = client.get(f"/user/list")
         text = response.get_data(as_text=True)
-        dest[table] = findUsers(text)
+        dest[valueTable] = findUsers(text)
     else:
-        eid = requestInfo["eid"]
-        valueDict = getRelatedValues(client, eid, table)
-        dest[table] = valueDict
-    return dest[table]
+        valueDict = getRelatedValues(client, table, eid, valueTable)
+        dest[valueTable] = valueDict
+    return dest[valueTable]
