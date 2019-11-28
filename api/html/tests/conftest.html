@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
 <title>conftest API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Set up testing the Contribution tool …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,110 @@
 <h1 class="title">Module <code>conftest</code></h1>
 </header>
 <section id="section-intro">
+<p>Set up testing the Contribution tool</p>
+<p>Here we set up the scene.
+By means of
+<a href="https://docs.pytest.org/en/latest/fixture.html">fixtures</a>
+we define the web-app objects
+to be tested and the web clients to exercise functions in those objects.</p>
+<p>Contents</p>
+<h3 id="set-up">Set-up</h3>
+<dl>
+<dt><a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a></dt>
+<dd>How the app is set up, difference between production and development</dd>
+</dl>
+<h3 id="contributions-filling-out">Contributions: filling out</h3>
+<dl>
+<dt><a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a></dt>
+<dd>All about users and what they can and cannot do.</dd>
+<dt><a title="test_30_contrib10" href="test_30_contrib10.html"><code>test_30_contrib10</code></a></dt>
+<dd>Getting started with contributions.</dd>
+<dt><a title="test_30_contrib20" href="test_30_contrib20.html"><code>test_30_contrib20</code></a></dt>
+<dd>Modifying contribution fields that are typed in by the user.</dd>
+<dt><a title="test_30_contrib30" href="test_30_contrib30.html"><code>test_30_contrib30</code></a></dt>
+<dd>Modifying contribution fields that have values in value tables.</dd>
+<dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
+<dd>Checking the visibility of sensitive fields.</dd>
+</dl>
+<h3 id="assessments-filling-out-submitting-and-assigning-reviewers">Assessments: filling out, submitting, and assigning reviewers</h3>
+<dl>
+<dt><a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a></dt>
+<dd>Starting an assessment, filling it out, submitting it and withdrawing it.</dd>
+<dt><code>test_40_assess20</code></dt>
+<dd>Assigning reviewers.</dd>
+</dl>
+<h3 id="reviews-filling-out-and-deciding">Reviews: filling out and deciding.</h3>
+<dl>
+<dt><code>test_50_review10</code></dt>
+<dd>Starting a review, filling it out, and deciding.</dd>
+<dt><code>test_50_assess20</code></dt>
+<dd>Revising and resubmitting assessments.</dd>
+</dl>
+<h3 id="contributions-selection">Contributions: selection.</h3>
+<dl>
+<dt><code>test_60_contrib10</code></dt>
+<dd>Selecting contributions.</dd>
+</dl>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import pytest
+<pre><code class="python">&#34;&#34;&#34;Set up testing the Contribution tool
+
+Here we set up the scene.
+By means of
+[fixtures](https://docs.pytest.org/en/latest/fixture.html)
+we define the web-app objects
+to be tested and the web clients to exercise functions in those objects.
+
+Contents
+
+### Set-up
+
+`test_10_factory10`
+:   How the app is set up, difference between production and development
+
+### Contributions: filling out
+
+`test_20_users10`
+:   All about users and what they can and cannot do.
+
+`test_30_contrib10`
+:   Getting started with contributions.
+
+`test_30_contrib20`
+:   Modifying contribution fields that are typed in by the user.
+
+`test_30_contrib30`
+:   Modifying contribution fields that have values in value tables.
+
+`test_30_contrib40`
+:   Checking the visibility of sensitive fields.
+
+### Assessments: filling out, submitting, and assigning reviewers
+
+`test_40_assess10`
+:   Starting an assessment, filling it out, submitting it and withdrawing it.
+
+`test_40_assess20`
+:   Assigning reviewers.
+
+### Reviews: filling out and deciding.
+
+`test_50_review10`
+:   Starting a review, filling it out, and deciding.
+
+`test_50_assess20`
+:   Revising and resubmitting assessments.
+
+### Contributions: selection.
+
+`test_60_contrib10`
+:   Selecting contributions.
+
+&#34;&#34;&#34;
+
+import pytest
 
 import magic  # noqa
 from control.app import appFactory
@@ -33,6 +132,34 @@ from helpers import makeClient
 
 DEBUG = False
 TEST = True
+
+USERS = set(
+    &#34;&#34;&#34;
+    public
+    auth
+    coord
+    expert
+    final
+    mycoord
+    editor
+    owner
+    office
+    system
+    root
+&#34;&#34;&#34;.strip().split()
+)
+&#34;&#34;&#34;The `eppn` attribute of all relevant test users in this suite.
+
+See `test_20_users10` where we introduce them.
+
+Here we make fixtures `clientAuth`, `clientOwner` etc. for each of them.
+These client fixtures represent a web client with the corresponding user logged in,
+ready to interact with the server (in development mode).
+
+There is also a fixture `clientPublic` for the non-authenticated user.
+
+Finally, there is a fixture `clients` that contains fixtures for all the users.
+&#34;&#34;&#34;
 
 
 @pytest.fixture
@@ -50,15 +177,15 @@ def app():
 
 
 @pytest.fixture
-def app_notest():
-    &#34;&#34;&#34;Special app: development mode, but test mode switched off.&#34;&#34;&#34;
+def appNotest():
+    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
 
     yield appFactory(&#34;development&#34;, DEBUG, False)
 
 
 @pytest.fixture
-def app_prod():
-    &#34;&#34;&#34;Production app: production mode, but test mode switched on.
+def appProd():
+    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
 
     We only use this for verifying that test users cannot log in onto
     the production app.
@@ -68,95 +195,96 @@ def app_prod():
 
 
 @pytest.fixture
-def client_prod(app_prod):
+def clientProd(appProd):
     &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
 
-    return app_prod.test_client()
+    return appProd.test_client()
+
+
+@pytest.fixture
+def clients(app):
+    &#34;&#34;&#34;A dictionary of client fixtures for each user.
+
+    Keyed by eppn, the values are corresponding client fixtures.
+
+    This comes in handy to pass to tests that want to perform the same
+    action on behalf of the different users.
+    &#34;&#34;&#34;
+
+    return {eppn: makeClient(app, eppn) for eppn in USERS}
 
 
 @pytest.fixture
 def clientPublic(app):
-    &#34;&#34;&#34;Client accessing the development app.
-
-    Unauthenticated user a.k.a. public.
-    &#34;&#34;&#34;
     return app.test_client()
 
 
 @pytest.fixture
-def clientSuzan(app):
-    &#34;&#34;&#34;Client, logged in as Suzan, accessing the development app.
-
-    A normal user from Belgium.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;suzan&#34;)
+def clientAuth(app):
+    return makeClient(app, &#34;auth&#34;)
 
 
 @pytest.fixture
-def clientBart(app):
-    &#34;&#34;&#34;Client, logged in as Bart, accessing the development app.
-
-    A normal user from an unspecified country.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;bart&#34;)
+def clientCoord(app):
+    return makeClient(app, &#34;coord&#34;)
 
 
 @pytest.fixture
-def clientMarie(app):
-    &#34;&#34;&#34;Client, logged in as Marie, accessing the development app.
-
-    National coordinator for Luxemburg initially, will be assigned
-    to Belgium later.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;marie&#34;)
+def clientExpert(app):
+    return makeClient(app, &#34;expert&#34;)
 
 
 @pytest.fixture
-def clientRachel(app):
-    &#34;&#34;&#34;Client, logged in as Rachel, accessing the development app.
-
-    National coordinator for the Netherlands.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;rachel&#34;)
+def clientFinal(app):
+    return makeClient(app, &#34;final&#34;)
 
 
 @pytest.fixture
-def clientLisa(app):
-    &#34;&#34;&#34;Client, logged in as Lisa, accessing the development app.
-
-    Office user.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;lisa&#34;)
+def clientMycoord(app):
+    return makeClient(app, &#34;mycoord&#34;)
 
 
 @pytest.fixture
-def clientCarsten(app):
-    &#34;&#34;&#34;Client, logged in as Carsten, accessing the development app.
-
-    System administrator.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;carsten&#34;)
+def clientEditor(app):
+    return makeClient(app, &#34;editor&#34;)
 
 
 @pytest.fixture
-def clientDirk(app):
-    &#34;&#34;&#34;Client, logged in as Dirk, accessing the development app.
+def clientOwner(app):
+    return makeClient(app, &#34;owner&#34;)
 
-    Root.
-    &#34;&#34;&#34;
 
-    return makeClient(app, &#34;dirk&#34;)</code></pre>
+@pytest.fixture
+def clientOffice(app):
+    return makeClient(app, &#34;office&#34;)
+
+
+@pytest.fixture
+def clientSystem(app):
+    return makeClient(app, &#34;system&#34;)
+
+
+@pytest.fixture
+def clientRoot(app):
+    return makeClient(app, &#34;root&#34;)</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="conftest.USERS"><code class="name">var <span class="ident">USERS</span></code></dt>
+<dd>
+<section class="desc"><p>The <code>eppn</code> attribute of all relevant test users in this suite.</p>
+<p>See <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a> where we introduce them.</p>
+<p>Here we make fixtures <a title="conftest.clientAuth" href="#conftest.clientAuth"><code>clientAuth()</code></a>, <a title="conftest.clientOwner" href="#conftest.clientOwner"><code>clientOwner()</code></a> etc. for each of them.
+These client fixtures represent a web client with the corresponding user logged in,
+ready to interact with the server (in development mode).</p>
+<p>There is also a fixture <a title="conftest.clientPublic" href="#conftest.clientPublic"><code>clientPublic()</code></a> for the non-authenticated user.</p>
+<p>Finally, there is a fixture <a title="conftest.clients" href="#conftest.clients"><code>clients()</code></a> that contains fixtures for all the users.</p></section>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
@@ -188,27 +316,27 @@ def app():
     yield appFactory(&#34;development&#34;, DEBUG, True)</code></pre>
 </details>
 </dd>
-<dt id="conftest.app_notest"><code class="name flex">
-<span>def <span class="ident">app_notest</span></span>(<span>)</span>
+<dt id="conftest.appNotest"><code class="name flex">
+<span>def <span class="ident">appNotest</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Special app: development mode, but test mode switched off.</p></section>
+<section class="desc"><p>Special app: development mode, but Flask test mode switched off.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def app_notest():
-    &#34;&#34;&#34;Special app: development mode, but test mode switched off.&#34;&#34;&#34;
+def appNotest():
+    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
 
     yield appFactory(&#34;development&#34;, DEBUG, False)</code></pre>
 </details>
 </dd>
-<dt id="conftest.app_prod"><code class="name flex">
-<span>def <span class="ident">app_prod</span></span>(<span>)</span>
+<dt id="conftest.appProd"><code class="name flex">
+<span>def <span class="ident">appProd</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Production app: production mode, but test mode switched on.</p>
+<section class="desc"><p>Production app: production mode, but Flask test mode switched on.</p>
 <p>We only use this for verifying that test users cannot log in onto
 the production app.</p></section>
 <details class="source">
@@ -216,8 +344,8 @@ the production app.</p></section>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def app_prod():
-    &#34;&#34;&#34;Production app: production mode, but test mode switched on.
+def appProd():
+    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
 
     We only use this for verifying that test users cannot log in onto
     the production app.
@@ -226,169 +354,120 @@ def app_prod():
     yield appFactory(&#34;production&#34;, DEBUG, False)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientBart"><code class="name flex">
-<span>def <span class="ident">clientBart</span></span>(<span>app)</span>
+<dt id="conftest.clientAuth"><code class="name flex">
+<span>def <span class="ident">clientAuth</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Bart, accessing the development app.</p>
-<p>A normal user from an unspecified country.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientBart(app):
-    &#34;&#34;&#34;Client, logged in as Bart, accessing the development app.
-
-    A normal user from an unspecified country.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;bart&#34;)</code></pre>
+def clientAuth(app):
+    return makeClient(app, &#34;auth&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientCarsten"><code class="name flex">
-<span>def <span class="ident">clientCarsten</span></span>(<span>app)</span>
+<dt id="conftest.clientCoord"><code class="name flex">
+<span>def <span class="ident">clientCoord</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Carsten, accessing the development app.</p>
-<p>System administrator.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientCarsten(app):
-    &#34;&#34;&#34;Client, logged in as Carsten, accessing the development app.
-
-    System administrator.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;carsten&#34;)</code></pre>
+def clientCoord(app):
+    return makeClient(app, &#34;coord&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientDirk"><code class="name flex">
-<span>def <span class="ident">clientDirk</span></span>(<span>app)</span>
+<dt id="conftest.clientEditor"><code class="name flex">
+<span>def <span class="ident">clientEditor</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Dirk, accessing the development app.</p>
-<p>Root.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientDirk(app):
-    &#34;&#34;&#34;Client, logged in as Dirk, accessing the development app.
-
-    Root.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;dirk&#34;)</code></pre>
+def clientEditor(app):
+    return makeClient(app, &#34;editor&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientLisa"><code class="name flex">
-<span>def <span class="ident">clientLisa</span></span>(<span>app)</span>
+<dt id="conftest.clientExpert"><code class="name flex">
+<span>def <span class="ident">clientExpert</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Lisa, accessing the development app.</p>
-<p>Office user.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientLisa(app):
-    &#34;&#34;&#34;Client, logged in as Lisa, accessing the development app.
-
-    Office user.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;lisa&#34;)</code></pre>
+def clientExpert(app):
+    return makeClient(app, &#34;expert&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientMarie"><code class="name flex">
-<span>def <span class="ident">clientMarie</span></span>(<span>app)</span>
+<dt id="conftest.clientFinal"><code class="name flex">
+<span>def <span class="ident">clientFinal</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Marie, accessing the development app.</p>
-<p>National coordinator for Luxemburg initially, will be assigned
-to Belgium later.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientMarie(app):
-    &#34;&#34;&#34;Client, logged in as Marie, accessing the development app.
-
-    National coordinator for Luxemburg initially, will be assigned
-    to Belgium later.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;marie&#34;)</code></pre>
+def clientFinal(app):
+    return makeClient(app, &#34;final&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientPublic"><code class="name flex">
-<span>def <span class="ident">clientPublic</span></span>(<span>app)</span>
+<dt id="conftest.clientMycoord"><code class="name flex">
+<span>def <span class="ident">clientMycoord</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client accessing the development app.</p>
-<p>Unauthenticated user a.k.a. public.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientPublic(app):
-    &#34;&#34;&#34;Client accessing the development app.
-
-    Unauthenticated user a.k.a. public.
-    &#34;&#34;&#34;
-    return app.test_client()</code></pre>
+def clientMycoord(app):
+    return makeClient(app, &#34;mycoord&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientRachel"><code class="name flex">
-<span>def <span class="ident">clientRachel</span></span>(<span>app)</span>
+<dt id="conftest.clientOffice"><code class="name flex">
+<span>def <span class="ident">clientOffice</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Rachel, accessing the development app.</p>
-<p>National coordinator for the Netherlands.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientRachel(app):
-    &#34;&#34;&#34;Client, logged in as Rachel, accessing the development app.
-
-    National coordinator for the Netherlands.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;rachel&#34;)</code></pre>
+def clientOffice(app):
+    return makeClient(app, &#34;office&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientSuzan"><code class="name flex">
-<span>def <span class="ident">clientSuzan</span></span>(<span>app)</span>
+<dt id="conftest.clientOwner"><code class="name flex">
+<span>def <span class="ident">clientOwner</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Client, logged in as Suzan, accessing the development app.</p>
-<p>A normal user from Belgium.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def clientSuzan(app):
-    &#34;&#34;&#34;Client, logged in as Suzan, accessing the development app.
-
-    A normal user from Belgium.
-    &#34;&#34;&#34;
-
-    return makeClient(app, &#34;suzan&#34;)</code></pre>
+def clientOwner(app):
+    return makeClient(app, &#34;owner&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.client_prod"><code class="name flex">
-<span>def <span class="ident">client_prod</span></span>(<span>app_prod)</span>
+<dt id="conftest.clientProd"><code class="name flex">
+<span>def <span class="ident">clientProd</span></span>(<span>appProd)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Client accessing the production app.</p></section>
@@ -397,10 +476,77 @@ def clientSuzan(app):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.fixture
-def client_prod(app_prod):
+def clientProd(appProd):
     &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
 
-    return app_prod.test_client()</code></pre>
+    return appProd.test_client()</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientPublic"><code class="name flex">
+<span>def <span class="ident">clientPublic</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientPublic(app):
+    return app.test_client()</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientRoot"><code class="name flex">
+<span>def <span class="ident">clientRoot</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientRoot(app):
+    return makeClient(app, &#34;root&#34;)</code></pre>
+</details>
+</dd>
+<dt id="conftest.clientSystem"><code class="name flex">
+<span>def <span class="ident">clientSystem</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientSystem(app):
+    return makeClient(app, &#34;system&#34;)</code></pre>
+</details>
+</dd>
+<dt id="conftest.clients"><code class="name flex">
+<span>def <span class="ident">clients</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A dictionary of client fixtures for each user.</p>
+<p>Keyed by eppn, the values are corresponding client fixtures.</p>
+<p>This comes in handy to pass to tests that want to perform the same
+action on behalf of the different users.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clients(app):
+    &#34;&#34;&#34;A dictionary of client fixtures for each user.
+
+    Keyed by eppn, the values are corresponding client fixtures.
+
+    This comes in handy to pass to tests that want to perform the same
+    action on behalf of the different users.
+    &#34;&#34;&#34;
+
+    return {eppn: makeClient(app, eppn) for eppn in USERS}</code></pre>
 </details>
 </dd>
 </dl>
@@ -411,23 +557,38 @@ def client_prod(app_prod):
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#set-up">Set-up</a></li>
+<li><a href="#contributions-filling-out">Contributions: filling out</a></li>
+<li><a href="#assessments-filling-out-submitting-and-assigning-reviewers">Assessments: filling out, submitting, and assigning reviewers</a></li>
+<li><a href="#reviews-filling-out-and-deciding">Reviews: filling out and deciding.</a></li>
+<li><a href="#contributions-selection">Contributions: selection.</a></li>
+</ul>
 </div>
 <ul id="index">
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="conftest.USERS" href="#conftest.USERS">USERS</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="conftest.app" href="#conftest.app">app</a></code></li>
-<li><code><a title="conftest.app_notest" href="#conftest.app_notest">app_notest</a></code></li>
-<li><code><a title="conftest.app_prod" href="#conftest.app_prod">app_prod</a></code></li>
-<li><code><a title="conftest.clientBart" href="#conftest.clientBart">clientBart</a></code></li>
-<li><code><a title="conftest.clientCarsten" href="#conftest.clientCarsten">clientCarsten</a></code></li>
-<li><code><a title="conftest.clientDirk" href="#conftest.clientDirk">clientDirk</a></code></li>
-<li><code><a title="conftest.clientLisa" href="#conftest.clientLisa">clientLisa</a></code></li>
-<li><code><a title="conftest.clientMarie" href="#conftest.clientMarie">clientMarie</a></code></li>
+<li><code><a title="conftest.appNotest" href="#conftest.appNotest">appNotest</a></code></li>
+<li><code><a title="conftest.appProd" href="#conftest.appProd">appProd</a></code></li>
+<li><code><a title="conftest.clientAuth" href="#conftest.clientAuth">clientAuth</a></code></li>
+<li><code><a title="conftest.clientCoord" href="#conftest.clientCoord">clientCoord</a></code></li>
+<li><code><a title="conftest.clientEditor" href="#conftest.clientEditor">clientEditor</a></code></li>
+<li><code><a title="conftest.clientExpert" href="#conftest.clientExpert">clientExpert</a></code></li>
+<li><code><a title="conftest.clientFinal" href="#conftest.clientFinal">clientFinal</a></code></li>
+<li><code><a title="conftest.clientMycoord" href="#conftest.clientMycoord">clientMycoord</a></code></li>
+<li><code><a title="conftest.clientOffice" href="#conftest.clientOffice">clientOffice</a></code></li>
+<li><code><a title="conftest.clientOwner" href="#conftest.clientOwner">clientOwner</a></code></li>
+<li><code><a title="conftest.clientProd" href="#conftest.clientProd">clientProd</a></code></li>
 <li><code><a title="conftest.clientPublic" href="#conftest.clientPublic">clientPublic</a></code></li>
-<li><code><a title="conftest.clientRachel" href="#conftest.clientRachel">clientRachel</a></code></li>
-<li><code><a title="conftest.clientSuzan" href="#conftest.clientSuzan">clientSuzan</a></code></li>
-<li><code><a title="conftest.client_prod" href="#conftest.client_prod">client_prod</a></code></li>
+<li><code><a title="conftest.clientRoot" href="#conftest.clientRoot">clientRoot</a></code></li>
+<li><code><a title="conftest.clientSystem" href="#conftest.clientSystem">clientSystem</a></code></li>
+<li><code><a title="conftest.clients" href="#conftest.clients">clients</a></code></li>
 </ul>
 </li>
 </ul>

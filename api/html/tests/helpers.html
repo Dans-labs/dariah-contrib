@@ -89,24 +89,136 @@ def warningRe(label):
     )
 
 
-def makeClient(app, eppn):
-    &#34;&#34;&#34;Logs in a specific user.
+def assertAddItem(client, table):
+    &#34;&#34;&#34;Adds an item to a table on behalf of an authenticated user.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new item will be read off.
 
     Parameters
     ----------
-    app: object
-    eppn: string
-        Identity of the user
+    client: fixture
+    table: string
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the inserted contribution.
     &#34;&#34;&#34;
 
-    client = app.test_client()
-    response = client.get(f&#34;/login?eppn={eppn}&#34;)
-    if response.status_code == 302:
-        return client
-    return None
+    response = client.get(f&#34;/api/{table}/insert&#34;, follow_redirects=True)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    assert &#34;item added&#34; in msgs
+    return (text, fields, msgs, eid)
 
 
-def isStatus(client, url, status):
+def assertFieldValue(fields, field, value):
+    &#34;&#34;&#34;Verify whether a field has a certain value.
+
+    If we pass value `None` we want to assert that the field is not present at all.
+
+    Parameters
+    ----------
+    fields: dict
+        The dictionary of fields and values.
+    field: string
+        The name of the specific field.
+    value:
+        The test value for this field.
+    &#34;&#34;&#34;
+
+    if value is None:
+        assert field not in fields
+    else:
+        assert field in fields
+        assert value == fields[field]
+
+
+def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True):
+    &#34;&#34;&#34;Try to modify a field and check the outcome.
+
+    !!! note &#34;Read access&#34;
+
+    The test has to reckon with the fact that the client may not even have read access
+    to the field.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    eid: ObjectId | string
+    field: string
+    mayRead: boolean, optional `True`
+    newValue: string | tuple
+        If a tuple, the first component is the modification value,
+        and the second component is the value we read back from the modified record
+    expect: boolean
+        Whether we expect the modification to succeed
+    &#34;&#34;&#34;
+
+    if not expect:
+        (text, fields, msgs, eid) = findItem(client, table, eid)
+        oldValue = fields[field] if mayRead else None
+
+    if type(newValue) is tuple:
+        (newValue, newValueRep) = newValue
+    else:
+        newValueRep = newValue
+
+    (text, fields) = modifyField(client, table, eid, field, newValue)
+
+    if not expect:
+        assert field not in fields
+
+    (text, fields, msgs, eid) = findItem(client, table, eid)
+
+    if expect:
+        assertFieldValue(fields, field, newValueRep)
+    else:
+        if mayRead:
+            assertFieldValue(fields, field, oldValue)
+
+
+def assertRight(client, url):
+    &#34;&#34;&#34;Get data and see whether that went right.
+
+    Parameters
+    ----------
+    client: function
+    url: string(url)
+        The url to retrieve from the server
+    &#34;&#34;&#34;
+
+    return assertStatus(client, url, True)
+
+
+def assertStage(client, table, eid, stageExpected):
+    &#34;&#34;&#34;Check whether a record has a certain workflow stage.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    eid: ObjectId | string
+    stageExpected: string
+    &#34;&#34;&#34;
+
+    (text, fields, msgs, dummy) = findItem(client, table, eid)
+    stageFound = findStages(text)[0]
+    assert stageFound == stageExpected
+    return (text, fields, msgs, eid)
+
+
+def assertStatus(client, url, status):
     &#34;&#34;&#34;Get data and see whether that went right or wrong.
 
     Parameters
@@ -125,7 +237,7 @@ def isStatus(client, url, status):
         assert response.status_code in {400, 303}
 
 
-def isWrong(client, url):
+def assertWrong(client, url):
     &#34;&#34;&#34;Get data and see whether that went wrong.
 
     Parameters
@@ -135,37 +247,50 @@ def isWrong(client, url):
         The url to retrieve from the server
     &#34;&#34;&#34;
 
-    return isStatus(client, url, False)
+    return assertStatus(client, url, False)
 
 
-def isRight(client, url):
-    &#34;&#34;&#34;Get data and see whether that went right.
+def makeClient(app, eppn):
+    &#34;&#34;&#34;Logs in a specific user.
 
     Parameters
     ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
+    app: object
+    eppn: string
+        Identity of the user
     &#34;&#34;&#34;
 
-    return isStatus(client, url, True)
+    client = app.test_client()
+    response = client.get(f&#34;/login?eppn={eppn}&#34;)
+    if response.status_code == 302:
+        return client
+    return None
 
 
-def findMsg(text):
-    &#34;&#34;&#34;Get flashed messages from a response.
+def findDetails(text, dtable):
+    &#34;&#34;&#34;Get the details from a response, but only those in a specific table.
 
     Parameters
     ----------
     text: string
         The response text.
+    dtail: string
+        The detail table
 
     Returns
     -------
-    set
-        All text messages found in the flash bar.
+    list of tuple of (string(id), string(html))
+        The HTML for the details, chunked per detail record.
+        Each chunk consists of the following parts:
+
+        *   the entity id of that detail,
+        *   the piece of HTML representing the title of the detail.
     &#34;&#34;&#34;
 
-    return set(msgRe.findall(text))
+    result = []
+    for (eid, mat) in detailRe(dtable).findall(text):
+        result.append((eid, mat))
+    return result
 
 
 def findEid(text, multiple=False):
@@ -212,117 +337,20 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
-def findStages(text):
-    &#34;&#34;&#34;Get the workflow stages from a response.
-
-    !!! hint
-        They are neatly packaged in comment lines!
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-
-    Returns
-    -------
-    list of string
-    &#34;&#34;&#34;
-
-    return stageRe.findall(text)
-
-
-def checkStage(client, table, eid, stageExpected):
-    &#34;&#34;&#34;Check whether a record has a certain workflow stage.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    stageExpected: string
-    &#34;&#34;&#34;
-
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
-    stageFound = findStages(text)[0]
-    assert stageFound == stageExpected
-    return (text, fields, msgs, eid)
-
-
-def findDetails(text, dtable):
-    &#34;&#34;&#34;Get the details from a response, but only those in a specific table.
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-    dtail: string
-        The detail table
-
-    Returns
-    -------
-    list of tuple of (string(id), string(html))
-        The HTML for the details, chunked per detail record.
-        Each chunk consists of the following parts:
-
-        *   the entity id of that detail,
-        *   the piece of HTML representing the title of the detail.
-    &#34;&#34;&#34;
-
-    result = []
-    for (eid, mat) in detailRe(dtable).findall(text):
-        result.append((eid, mat))
-    return result
-
-
-def findMaterial(text):
-    &#34;&#34;&#34;Get the text of the material div. &#34;&#34;&#34;
-
-    results = materialRe.findall(text)
-    return results[0].strip() if results else None
-
-
-def checkWarning(text, label):
-    return not not warningRe(label).search(text)
-
-
-def findUsers(text):
-    return {
-        name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
-    }
-
-
-def fieldValue(fields, field, value):
-    &#34;&#34;&#34;Verify whether a field has a certain value.
-
-    If we pass value `None` we want to assert that the field is not present at all.
-
-    Parameters
-    ----------
-    fields: dict
-        The dictionary of fields and values.
-    field: string
-        The name of the specific field.
-    value:
-        The test value for this field.
-    &#34;&#34;&#34;
-
-    if value is None:
-        assert field not in fields
-    else:
-        assert field in fields
-        assert value == fields[field]
-
-
-def addItem(client, table):
-    &#34;&#34;&#34;Adds an item to a table on behalf of an authenticated user.
+def findItem(client, table, eid):
+    &#34;&#34;&#34;Looks up an item directly.
 
     The response texts will be analysed into messages and fields, the eid
-    of the new item will be read off.
+    of the item will be read off.
+
+    We assume that there is still only one item in the view.
 
     Parameters
     ----------
     client: fixture
     table: string
+    action: string, optional `None`
+        The view on the table, such as `my`, `our`.
 
     Returns
     -------
@@ -333,15 +361,15 @@ def addItem(client, table):
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
     eid: str(ObjectId)
-        The id of the inserted contribution.
+        The id of the item.
     &#34;&#34;&#34;
 
-    response = client.get(f&#34;/api/{table}/insert&#34;, follow_redirects=True)
+    url = f&#34;/{table}/item/{eid}&#34;
+    response = client.get(url)
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
     eid = findEid(text)
-    assert &#34;item added&#34; in msgs
     return (text, fields, msgs, eid)
 
 
@@ -381,47 +409,64 @@ def findItemEid(client, table, action=None):
     return (text, fields, msgs, eid)
 
 
-def findItem(client, table, eid):
-    &#34;&#34;&#34;Looks up an item directly.
+def findMaterial(text):
+    &#34;&#34;&#34;Get the text of the material div. &#34;&#34;&#34;
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
+    results = materialRe.findall(text)
+    return results[0].strip() if results else None
 
-    We assume that there is still only one item in the view.
+
+def findMsg(text):
+    &#34;&#34;&#34;Get flashed messages from a response.
 
     Parameters
     ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
+    text: string
+        The response text.
 
     Returns
     -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the item.
+    set
+        All text messages found in the flash bar.
     &#34;&#34;&#34;
 
-    url = f&#34;/{table}/item/{eid}&#34;
-    response = client.get(url)
-    text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
-    eid = findEid(text)
-    return (text, fields, msgs, eid)
+    return set(msgRe.findall(text))
+
+
+def findStages(text):
+    &#34;&#34;&#34;Get the workflow stages from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return stageRe.findall(text)
+
+
+def findUsers(text):
+    return {
+        name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
+    }
+
+
+def checkWarning(text, label):
+    return not not warningRe(label).search(text)
 
 
 def startWithContrib(client):
     result = findItemEid(client, CONTRIB)
     if result[3]:
         return result
-    return addItem(client, CONTRIB)
+    return assertAddItem(client, CONTRIB)
 
 
 def postJson(client, url, value):
@@ -457,51 +502,6 @@ def modifyField(client, table, eid, field, newValue):
     )
     fields = findFields(text)
     return (text, fields)
-
-
-def tryModifyField(client, table, eid, field, newValue, expect, mayRead=True):
-    &#34;&#34;&#34;Try to modify a field and check the outcome.
-
-    !!! note &#34;Read access&#34;
-
-    The test has to reckon with the fact that the client may not even have read access
-    to the field.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    field: string
-    mayRead: boolean, optional `True`
-    newValue: string | tuple
-        If a tuple, the first component is the modification value,
-        and the second component is the value we read back from the modified record
-    expect: boolean
-        Whether we expect the modification to succeed
-    &#34;&#34;&#34;
-
-    if not expect:
-        (text, fields, msgs, eid) = findItem(client, table, eid)
-        oldValue = fields[field] if mayRead else None
-
-    if type(newValue) is tuple:
-        (newValue, newValueRep) = newValue
-    else:
-        newValueRep = newValue
-
-    (text, fields) = modifyField(client, table, eid, field, newValue)
-
-    if not expect:
-        assert field not in fields
-
-    (text, fields, msgs, eid) = findItem(client, table, eid)
-
-    if expect:
-        fieldValue(fields, field, newValueRep)
-    else:
-        if mayRead:
-            fieldValue(fields, field, oldValue)
 
 
 def viewField(client, table, eid, field):
@@ -570,6 +570,7 @@ def getValueTable(client, table, eid, valueTable, dest):
         response = client.get(f&#34;/user/list&#34;)
         text = response.get_data(as_text=True)
         dest[valueTable] = findUsers(text)
+        print(dest[valueTable])
     else:
         valueDict = getRelatedValues(client, table, eid, valueTable)
         dest[valueTable] = valueDict
@@ -602,8 +603,8 @@ def getValueTable(client, table, eid, valueTable, dest):
     return (text, status, msgs)</code></pre>
 </details>
 </dd>
-<dt id="helpers.addItem"><code class="name flex">
-<span>def <span class="ident">addItem</span></span>(<span>client, table)</span>
+<dt id="helpers.assertAddItem"><code class="name flex">
+<span>def <span class="ident">assertAddItem</span></span>(<span>client, table)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Adds an item to a table on behalf of an authenticated user.</p>
@@ -631,7 +632,7 @@ of the new item will be read off.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def addItem(client, table):
+<pre><code class="python">def assertAddItem(client, table):
     &#34;&#34;&#34;Adds an item to a table on behalf of an authenticated user.
 
     The response texts will be analysed into messages and fields, the eid
@@ -663,8 +664,155 @@ of the new item will be read off.</p>
     return (text, fields, msgs, eid)</code></pre>
 </details>
 </dd>
-<dt id="helpers.checkStage"><code class="name flex">
-<span>def <span class="ident">checkStage</span></span>(<span>client, table, eid, stageExpected)</span>
+<dt id="helpers.assertFieldValue"><code class="name flex">
+<span>def <span class="ident">assertFieldValue</span></span>(<span>fields, field, value)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Verify whether a field has a certain value.</p>
+<p>If we pass value <code>None</code> we want to assert that the field is not present at all.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The dictionary of fields and values.</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of the specific field.</dd>
+</dl>
+<p>value:
+The test value for this field.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertFieldValue(fields, field, value):
+    &#34;&#34;&#34;Verify whether a field has a certain value.
+
+    If we pass value `None` we want to assert that the field is not present at all.
+
+    Parameters
+    ----------
+    fields: dict
+        The dictionary of fields and values.
+    field: string
+        The name of the specific field.
+    value:
+        The test value for this field.
+    &#34;&#34;&#34;
+
+    if value is None:
+        assert field not in fields
+    else:
+        assert field in fields
+        assert value == fields[field]</code></pre>
+</details>
+</dd>
+<dt id="helpers.assertModifyField"><code class="name flex">
+<span>def <span class="ident">assertModifyField</span></span>(<span>client, table, eid, field, newValue, expect, mayRead=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Try to modify a field and check the outcome.</p>
+<div class="admonition note">
+<p class="admonition-title">Read access</p>
+</div>
+<p>The test has to reckon with the fact that the client may not even have read access
+to the field.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>newValue</code></strong> :&ensp;<code>string</code> | <code>tuple</code></dt>
+<dd>If a tuple, the first component is the modification value,
+and the second component is the value we read back from the modified record</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether we expect the modification to succeed</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True):
+    &#34;&#34;&#34;Try to modify a field and check the outcome.
+
+    !!! note &#34;Read access&#34;
+
+    The test has to reckon with the fact that the client may not even have read access
+    to the field.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    eid: ObjectId | string
+    field: string
+    mayRead: boolean, optional `True`
+    newValue: string | tuple
+        If a tuple, the first component is the modification value,
+        and the second component is the value we read back from the modified record
+    expect: boolean
+        Whether we expect the modification to succeed
+    &#34;&#34;&#34;
+
+    if not expect:
+        (text, fields, msgs, eid) = findItem(client, table, eid)
+        oldValue = fields[field] if mayRead else None
+
+    if type(newValue) is tuple:
+        (newValue, newValueRep) = newValue
+    else:
+        newValueRep = newValue
+
+    (text, fields) = modifyField(client, table, eid, field, newValue)
+
+    if not expect:
+        assert field not in fields
+
+    (text, fields, msgs, eid) = findItem(client, table, eid)
+
+    if expect:
+        assertFieldValue(fields, field, newValueRep)
+    else:
+        if mayRead:
+            assertFieldValue(fields, field, oldValue)</code></pre>
+</details>
+</dd>
+<dt id="helpers.assertRight"><code class="name flex">
+<span>def <span class="ident">assertRight</span></span>(<span>client, url)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get data and see whether that went right.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
+<dd>The url to retrieve from the server</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertRight(client, url):
+    &#34;&#34;&#34;Get data and see whether that went right.
+
+    Parameters
+    ----------
+    client: function
+    url: string(url)
+        The url to retrieve from the server
+    &#34;&#34;&#34;
+
+    return assertStatus(client, url, True)</code></pre>
+</details>
+</dd>
+<dt id="helpers.assertStage"><code class="name flex">
+<span>def <span class="ident">assertStage</span></span>(<span>client, table, eid, stageExpected)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Check whether a record has a certain workflow stage.</p>
@@ -683,7 +831,7 @@ of the new item will be read off.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def checkStage(client, table, eid, stageExpected):
+<pre><code class="python">def assertStage(client, table, eid, stageExpected):
     &#34;&#34;&#34;Check whether a record has a certain workflow stage.
 
     Parameters
@@ -698,6 +846,72 @@ of the new item will be read off.</p>
     stageFound = findStages(text)[0]
     assert stageFound == stageExpected
     return (text, fields, msgs, eid)</code></pre>
+</details>
+</dd>
+<dt id="helpers.assertStatus"><code class="name flex">
+<span>def <span class="ident">assertStatus</span></span>(<span>client, url, status)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get data and see whether that went right or wrong.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
+<dd>The url to retrieve from the server</dd>
+<dt><strong><code>status</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether it is expected to be successful</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertStatus(client, url, status):
+    &#34;&#34;&#34;Get data and see whether that went right or wrong.
+
+    Parameters
+    ----------
+    client: function
+    url: string(url)
+        The url to retrieve from the server
+    status: boolean
+        Whether it is expected to be successful
+    &#34;&#34;&#34;
+
+    response = client.get(url)
+    if status:
+        assert response.status_code in {200, 302}
+    else:
+        assert response.status_code in {400, 303}</code></pre>
+</details>
+</dd>
+<dt id="helpers.assertWrong"><code class="name flex">
+<span>def <span class="ident">assertWrong</span></span>(<span>client, url)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get data and see whether that went wrong.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
+<dd>The url to retrieve from the server</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertWrong(client, url):
+    &#34;&#34;&#34;Get data and see whether that went wrong.
+
+    Parameters
+    ----------
+    client: function
+    url: string(url)
+        The url to retrieve from the server
+    &#34;&#34;&#34;
+
+    return assertStatus(client, url, False)</code></pre>
 </details>
 </dd>
 <dt id="helpers.checkWarning"><code class="name flex">
@@ -751,47 +965,6 @@ of the new item will be read off.</p>
         ),
         re.S | re.X,
     )</code></pre>
-</details>
-</dd>
-<dt id="helpers.fieldValue"><code class="name flex">
-<span>def <span class="ident">fieldValue</span></span>(<span>fields, field, value)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Verify whether a field has a certain value.</p>
-<p>If we pass value <code>None</code> we want to assert that the field is not present at all.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
-<dd>The dictionary of fields and values.</dd>
-<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of the specific field.</dd>
-</dl>
-<p>value:
-The test value for this field.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def fieldValue(fields, field, value):
-    &#34;&#34;&#34;Verify whether a field has a certain value.
-
-    If we pass value `None` we want to assert that the field is not present at all.
-
-    Parameters
-    ----------
-    fields: dict
-        The dictionary of fields and values.
-    field: string
-        The name of the specific field.
-    value:
-        The test value for this field.
-    &#34;&#34;&#34;
-
-    if value is None:
-        assert field not in fields
-    else:
-        assert field in fields
-        assert value == fields[field]</code></pre>
 </details>
 </dd>
 <dt id="helpers.findDetails"><code class="name flex">
@@ -1266,105 +1439,11 @@ name of the valueTable.</p>
         response = client.get(f&#34;/user/list&#34;)
         text = response.get_data(as_text=True)
         dest[valueTable] = findUsers(text)
+        print(dest[valueTable])
     else:
         valueDict = getRelatedValues(client, table, eid, valueTable)
         dest[valueTable] = valueDict
     return dest[valueTable]</code></pre>
-</details>
-</dd>
-<dt id="helpers.isRight"><code class="name flex">
-<span>def <span class="ident">isRight</span></span>(<span>client, url)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get data and see whether that went right.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url to retrieve from the server</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def isRight(client, url):
-    &#34;&#34;&#34;Get data and see whether that went right.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    &#34;&#34;&#34;
-
-    return isStatus(client, url, True)</code></pre>
-</details>
-</dd>
-<dt id="helpers.isStatus"><code class="name flex">
-<span>def <span class="ident">isStatus</span></span>(<span>client, url, status)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get data and see whether that went right or wrong.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url to retrieve from the server</dd>
-<dt><strong><code>status</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether it is expected to be successful</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def isStatus(client, url, status):
-    &#34;&#34;&#34;Get data and see whether that went right or wrong.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    status: boolean
-        Whether it is expected to be successful
-    &#34;&#34;&#34;
-
-    response = client.get(url)
-    if status:
-        assert response.status_code in {200, 302}
-    else:
-        assert response.status_code in {400, 303}</code></pre>
-</details>
-</dd>
-<dt id="helpers.isWrong"><code class="name flex">
-<span>def <span class="ident">isWrong</span></span>(<span>client, url)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get data and see whether that went wrong.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url to retrieve from the server</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def isWrong(client, url):
-    &#34;&#34;&#34;Get data and see whether that went wrong.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    &#34;&#34;&#34;
-
-    return isStatus(client, url, False)</code></pre>
 </details>
 </dd>
 <dt id="helpers.makeClient"><code class="name flex">
@@ -1481,84 +1560,7 @@ Will be wrapped into JSON with a proper header.</dd>
     result = findItemEid(client, CONTRIB)
     if result[3]:
         return result
-    return addItem(client, CONTRIB)</code></pre>
-</details>
-</dd>
-<dt id="helpers.tryModifyField"><code class="name flex">
-<span>def <span class="ident">tryModifyField</span></span>(<span>client, table, eid, field, newValue, expect, mayRead=True)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Try to modify a field and check the outcome.</p>
-<div class="admonition note">
-<p class="admonition-title">Read access</p>
-</div>
-<p>The test has to reckon with the fact that the client may not even have read access
-to the field.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>newValue</code></strong> :&ensp;<code>string</code> | <code>tuple</code></dt>
-<dd>If a tuple, the first component is the modification value,
-and the second component is the value we read back from the modified record</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether we expect the modification to succeed</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def tryModifyField(client, table, eid, field, newValue, expect, mayRead=True):
-    &#34;&#34;&#34;Try to modify a field and check the outcome.
-
-    !!! note &#34;Read access&#34;
-
-    The test has to reckon with the fact that the client may not even have read access
-    to the field.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    field: string
-    mayRead: boolean, optional `True`
-    newValue: string | tuple
-        If a tuple, the first component is the modification value,
-        and the second component is the value we read back from the modified record
-    expect: boolean
-        Whether we expect the modification to succeed
-    &#34;&#34;&#34;
-
-    if not expect:
-        (text, fields, msgs, eid) = findItem(client, table, eid)
-        oldValue = fields[field] if mayRead else None
-
-    if type(newValue) is tuple:
-        (newValue, newValueRep) = newValue
-    else:
-        newValueRep = newValue
-
-    (text, fields) = modifyField(client, table, eid, field, newValue)
-
-    if not expect:
-        assert field not in fields
-
-    (text, fields, msgs, eid) = findItem(client, table, eid)
-
-    if expect:
-        fieldValue(fields, field, newValueRep)
-    else:
-        if mayRead:
-            fieldValue(fields, field, oldValue)</code></pre>
+    return assertAddItem(client, CONTRIB)</code></pre>
 </details>
 </dd>
 <dt id="helpers.viewField"><code class="name flex">
@@ -1612,12 +1614,16 @@ and the second component is the value we read back from the modified record</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="helpers.accessUrl" href="#helpers.accessUrl">accessUrl</a></code></li>
-<li><code><a title="helpers.addItem" href="#helpers.addItem">addItem</a></code></li>
-<li><code><a title="helpers.checkStage" href="#helpers.checkStage">checkStage</a></code></li>
+<li><code><a title="helpers.assertAddItem" href="#helpers.assertAddItem">assertAddItem</a></code></li>
+<li><code><a title="helpers.assertFieldValue" href="#helpers.assertFieldValue">assertFieldValue</a></code></li>
+<li><code><a title="helpers.assertModifyField" href="#helpers.assertModifyField">assertModifyField</a></code></li>
+<li><code><a title="helpers.assertRight" href="#helpers.assertRight">assertRight</a></code></li>
+<li><code><a title="helpers.assertStage" href="#helpers.assertStage">assertStage</a></code></li>
+<li><code><a title="helpers.assertStatus" href="#helpers.assertStatus">assertStatus</a></code></li>
+<li><code><a title="helpers.assertWrong" href="#helpers.assertWrong">assertWrong</a></code></li>
 <li><code><a title="helpers.checkWarning" href="#helpers.checkWarning">checkWarning</a></code></li>
 <li><code><a title="helpers.detailRe" href="#helpers.detailRe">detailRe</a></code></li>
 <li><code><a title="helpers.fieldEditRe" href="#helpers.fieldEditRe">fieldEditRe</a></code></li>
-<li><code><a title="helpers.fieldValue" href="#helpers.fieldValue">fieldValue</a></code></li>
 <li><code><a title="helpers.findDetails" href="#helpers.findDetails">findDetails</a></code></li>
 <li><code><a title="helpers.findEid" href="#helpers.findEid">findEid</a></code></li>
 <li><code><a title="helpers.findFields" href="#helpers.findFields">findFields</a></code></li>
@@ -1629,14 +1635,10 @@ and the second component is the value we read back from the modified record</dd>
 <li><code><a title="helpers.findUsers" href="#helpers.findUsers">findUsers</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
 <li><code><a title="helpers.getValueTable" href="#helpers.getValueTable">getValueTable</a></code></li>
-<li><code><a title="helpers.isRight" href="#helpers.isRight">isRight</a></code></li>
-<li><code><a title="helpers.isStatus" href="#helpers.isStatus">isStatus</a></code></li>
-<li><code><a title="helpers.isWrong" href="#helpers.isWrong">isWrong</a></code></li>
 <li><code><a title="helpers.makeClient" href="#helpers.makeClient">makeClient</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>
 <li><code><a title="helpers.startWithContrib" href="#helpers.startWithContrib">startWithContrib</a></code></li>
-<li><code><a title="helpers.tryModifyField" href="#helpers.tryModifyField">tryModifyField</a></code></li>
 <li><code><a title="helpers.viewField" href="#helpers.viewField">viewField</a></code></li>
 <li><code><a title="helpers.warningRe" href="#helpers.warningRe">warningRe</a></code></li>
 </ul>
