@@ -167,11 +167,10 @@ class Db:
     def mongoOpen(self):
         client = self.client
         mongo = self.mongo
-        test = self.test
 
         if not mongo:
             client = MongoClient()
-            mongo = client.dariah_clean if test else client.dariah
+            mongo = client.dariah
             self.client = client
             self.mongo = mongo
             serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)
@@ -1398,11 +1397,10 @@ as recommended in
     def mongoOpen(self):
         client = self.client
         mongo = self.mongo
-        test = self.test
 
         if not mongo:
             client = MongoClient()
-            mongo = client.dariah_clean if test else client.dariah
+            mongo = client.dariah
             self.client = client
             self.mongo = mongo
             serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)
@@ -4209,11 +4207,10 @@ The command must be listed in the mongo.yaml config file.</dd>
 <pre><code class="python">def mongoOpen(self):
     client = self.client
     mongo = self.mongo
-    test = self.test
 
     if not mongo:
         client = MongoClient()
-        mongo = client.dariah_clean if test else client.dariah
+        mongo = client.dariah
         self.client = client
         self.mongo = mongo
         serverprint(&#34;&#34;&#34;MONGO: new connection&#34;&#34;&#34;)</code></pre>

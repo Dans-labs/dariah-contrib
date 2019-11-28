@@ -365,6 +365,9 @@ class Auth:
         if user is None:
             user = self.user
 
+        if self.isDevel:
+            return G(user, N.eppn, default=G(user, N.email, default=UNKNOWN))
+
         name = G(user, N.name) or E
         if not name:
             firstName = G(user, N.firstName) or E
@@ -464,7 +467,7 @@ class Auth:
     def authenticate(self, login=False):
         """Verify the authenticated status of the current user.
 
-        This function is called for every task that requires authentication.
+        This function is called for every request that requires authentication.
         Whether a user is authenticated or not depends on whether a session for
         that user is present. And that depends on whether the identity provider
         has sent attributes (eppn and others) to the server.

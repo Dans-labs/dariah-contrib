@@ -487,7 +487,7 @@ class Table:
         return H.a(
             f"""New {itemSingle}""",
             f"""/api/{table}/{N.insert}""",
-            cls="small command info",
+            cls="small task info",
         )
 
     def mayList(self, action=None):

@@ -36,7 +36,7 @@ class ReviewT(Table):
 
         wfitem = context.getWorkflowItem(contribId)
 
-        if not wfitem.permission(N.assessment, N.startReview):
+        if not wfitem.permission(N.startReview):
             return contribId
 
         (contribType,) = wfitem.info(N.contrib, N.type)

@@ -27,24 +27,7 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
     2015-2017 into a FileMaker database. We have migrated those to a MongoDB model.
     [More ...](Workings/Content.md)
 
-## Tech
-
-??? abstract "Code base"
-    To get an impression of the kind of work behind this app, we
-    reveal
-    [how many lines of code](Tech/Stats.md)
-    have been written in which languages.
-    See also how we managed to keep the code in all those languages tidy.
-    [More ...](Tech/Codebase.md)
-
-??? abstract "API-docs"
-    The technical documentation of the Python code is largely in so-called
-    *docstrings* within the code. But you can see them nicely formatted
-    [here ...]({{docSite}}/{{docstrings}}/)
-
-??? abstract "Deploy"
-    Here are the bits and pieces you have to do in order to get a
-    working system out of this. [More ...](Tech/Deploy.md)
+## Techical
 
 ??? abstract "Model"
     The whole app is centered around data: contributions, assessments,
@@ -69,18 +52,59 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
     data that they subsequently receive, has passed a customs control.
     [More ...](Tech/Authentication.md)
 
-??? abstract "Tech index"
+??? abstract "Inventory"
     We have listed most of the technology that we have made use
     of. [More ...](Tech/Inventory.md)
 
-??? abstract "Lessons learned"
+??? abstract "Lessons"
     It has taken a lot of time to develop this app. Lots more
     than I expected from the start. [More ...](Tech/Lessons.md)
+
+## Maintenance
+
+??? abstract "Deploy"
+    Here are the bits and pieces you have to do in order to get a
+    working system out of this. [More ...](Tech/Deploy.md)
+
+??? abstract "Docstrings"
+    The technical documentation of the Python code is largely in so-called
+    *docstrings* within the code. But you can see them nicely formatted
+    [here ...]({{docSite}}/{{docstrings}}/)
+
+??? abstract "Code base"
+    A few remarks on our code and their languages.
+    See also how we managed to keep the code in all those languages tidy.
+    [More ...](Tech/Codebase.md)
+
+??? abstract "Stats"
+    To get an impression of the kind of work behind this app, we
+    reveal how many lines of code have been written in which languages.
+    [Here ...](Tech/Stats.md)
+
+??? abstract "Testing"
+    Does the app work properly? Can we develop new functions without breaking
+    one of the innumerable logical threads in it?
+    We have a test suite that covers most of the code and checks most of the logic.
+    [More ...](Tech/Testing.md)
+
+??? abstract "Results"
+    The last test results.
+    [Here ...](Tech/Tests.md)
+
+??? abstract "Tests"
+    Also the tests have been documented by docstrings.
+    [Here ...](api/html/tests/index.md)
+
+??? abstract "Coverage"
+    Do the test coverage all the code? Here you can see the source code with
+    the lines that have not been executed during tests highlighted.
+    [Here ...](api/html/tests/index.md)
 
 ## Author
 
 Dirk Roorda [DANS]({{dans}}) <mailto:dirk.roorda@dans.knaw.nl>
 
+- 2019-11-28 (Extensive test suite and documentation)
 - 2019-11-08 (Redesign from a clean slate)
 - 2019-08-06
 - 2019-07-29

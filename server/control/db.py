@@ -135,11 +135,10 @@ class Db:
     def mongoOpen(self):
         client = self.client
         mongo = self.mongo
-        test = self.test
 
         if not mongo:
             client = MongoClient()
-            mongo = client.dariah_clean if test else client.dariah
+            mongo = client.dariah
             self.client = client
             self.mongo = mongo
             serverprint("""MONGO: new connection""")

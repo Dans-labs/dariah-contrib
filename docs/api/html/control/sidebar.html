@@ -158,7 +158,7 @@ class Sidebar:
 
         return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
 
-    def makeEntry(self, label, path, withOptions=False, command=False):
+    def makeEntry(self, label, path, withOptions=False, asTask=False):
         &#34;&#34;&#34;Produce an entry.
 
         Parameters
@@ -169,8 +169,8 @@ class Sidebar:
             The destination after the entry is clicked.
         withOptions: boolean, optional `False`
             Whether to include the options widget.
-        command: boolean, optional `False`
-            Display the entry as a big workflow command button or as a modest
+        asTask: boolean, optional `False`
+            Display the entry as a big workflow task button or as a modest
             hyperlink.
 
         Returns
@@ -184,8 +184,8 @@ class Sidebar:
         options = self.options
         active = path == self.path
 
-        command = &#34;command info&#34; if command else &#34;button&#34;
-        navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+        task = &#34;task info&#34; if asTask else &#34;button&#34;
+        navClass = f&#34;{task} small nav&#34; + (&#34; active&#34; if active else E)
 
         optionsRep = (
             AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
@@ -213,7 +213,7 @@ class Sidebar:
         postfix=None,
         action=None,
         withOptions=False,
-        command=False,
+        asTask=False,
     ):
         &#34;&#34;&#34;Produce a table entry.
 
@@ -258,7 +258,7 @@ class Sidebar:
             f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
             f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
             withOptions=True,
-            command=command,
+            asTask=asTask,
         )
 
     def wrap(self):
@@ -269,7 +269,7 @@ class Sidebar:
 
         Take care that only permitted actions are presented.
 
-        Actions that belong to workflow are presented as conspicuous workflow commands.
+        Actions that belong to workflow are presented as conspicuous workflow tasks.
 
         Returns
         -------
@@ -300,7 +300,7 @@ class Sidebar:
 
         subEntries = []
 
-        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, asTask=True))
 
         subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
 
@@ -356,7 +356,7 @@ class Sidebar:
                     action=N.select,
                     item=&#34;Contributions&#34;,
                     postfix=&#34;to be selected&#34;,
-                    command=True,
+                    asTask=True,
                 )
             )
         # - my unfinished assessments
@@ -367,7 +367,7 @@ class Sidebar:
                 action=N.assess,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;I am assessing&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -381,7 +381,7 @@ class Sidebar:
                     action=N.assign,
                     item=&#34;Assessments&#34;,
                     postfix=&#34;needing reviewers&#34;,
-                    command=True,
+                    asTask=True,
                 )
             )
 
@@ -393,7 +393,7 @@ class Sidebar:
                 action=N.review,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;in review by me&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -405,7 +405,7 @@ class Sidebar:
                 action=N.reviewdone,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;reviewed by me&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -425,7 +425,7 @@ class Sidebar:
         subEntries = []
         if isSuperUser:
             for table in OFFICE_TABLES:
-                subEntries.append(self.tableEntry(table, command=table == N.user))
+                subEntries.append(self.tableEntry(table, asTask=table == N.user))
             entries.append(
                 self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
             )
@@ -435,7 +435,7 @@ class Sidebar:
         subEntries = []
         if isSysAdmin:
             subEntries.append(
-                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, command=True)
+                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, asTask=True)
             )
             for table in SYSTEM_TABLES:
                 subEntries.append(self.tableEntry(table))
@@ -574,7 +574,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
 
         return [(&#34;XXX&#34;, rep) for rep in filterRep + optionsRep]
 
-    def makeEntry(self, label, path, withOptions=False, command=False):
+    def makeEntry(self, label, path, withOptions=False, asTask=False):
         &#34;&#34;&#34;Produce an entry.
 
         Parameters
@@ -585,8 +585,8 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             The destination after the entry is clicked.
         withOptions: boolean, optional `False`
             Whether to include the options widget.
-        command: boolean, optional `False`
-            Display the entry as a big workflow command button or as a modest
+        asTask: boolean, optional `False`
+            Display the entry as a big workflow task button or as a modest
             hyperlink.
 
         Returns
@@ -600,8 +600,8 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         options = self.options
         active = path == self.path
 
-        command = &#34;command info&#34; if command else &#34;button&#34;
-        navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+        task = &#34;task info&#34; if asTask else &#34;button&#34;
+        navClass = f&#34;{task} small nav&#34; + (&#34; active&#34; if active else E)
 
         optionsRep = (
             AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
@@ -629,7 +629,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         postfix=None,
         action=None,
         withOptions=False,
-        command=False,
+        asTask=False,
     ):
         &#34;&#34;&#34;Produce a table entry.
 
@@ -674,7 +674,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
             f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
             f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
             withOptions=True,
-            command=command,
+            asTask=asTask,
         )
 
     def wrap(self):
@@ -685,7 +685,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
 
         Take care that only permitted actions are presented.
 
-        Actions that belong to workflow are presented as conspicuous workflow commands.
+        Actions that belong to workflow are presented as conspicuous workflow tasks.
 
         Returns
         -------
@@ -716,7 +716,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
 
         subEntries = []
 
-        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, asTask=True))
 
         subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
 
@@ -772,7 +772,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
                     action=N.select,
                     item=&#34;Contributions&#34;,
                     postfix=&#34;to be selected&#34;,
-                    command=True,
+                    asTask=True,
                 )
             )
         # - my unfinished assessments
@@ -783,7 +783,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
                 action=N.assess,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;I am assessing&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -797,7 +797,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
                     action=N.assign,
                     item=&#34;Assessments&#34;,
                     postfix=&#34;needing reviewers&#34;,
-                    command=True,
+                    asTask=True,
                 )
             )
 
@@ -809,7 +809,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
                 action=N.review,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;in review by me&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -821,7 +821,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
                 action=N.reviewdone,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;reviewed by me&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -841,7 +841,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         subEntries = []
         if isSuperUser:
             for table in OFFICE_TABLES:
-                subEntries.append(self.tableEntry(table, command=table == N.user))
+                subEntries.append(self.tableEntry(table, asTask=table == N.user))
             entries.append(
                 self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
             )
@@ -851,7 +851,7 @@ items, so that they can be highlighted by means of a navigation CSS class.</p>
         subEntries = []
         if isSysAdmin:
             subEntries.append(
-                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, command=True)
+                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, asTask=True)
             )
             for table in SYSTEM_TABLES:
                 subEntries.append(self.tableEntry(table))
@@ -940,7 +940,7 @@ the string is the formatted html of the entry.</dd>
 </details>
 </dd>
 <dt id="control.sidebar.Sidebar.makeEntry"><code class="name flex">
-<span>def <span class="ident">makeEntry</span></span>(<span>self, label, path, withOptions=False, command=False)</span>
+<span>def <span class="ident">makeEntry</span></span>(<span>self, label, path, withOptions=False, asTask=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Produce an entry.</p>
@@ -952,8 +952,8 @@ the string is the formatted html of the entry.</dd>
 <dd>The destination after the entry is clicked.</dd>
 <dt><strong><code>withOptions</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>Whether to include the options widget.</dd>
-<dt><strong><code>command</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
-<dd>Display the entry as a big workflow command button or as a modest
+<dt><strong><code>asTask</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Display the entry as a big workflow task button or as a modest
 hyperlink.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -967,7 +967,7 @@ hyperlink.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def makeEntry(self, label, path, withOptions=False, command=False):
+<pre><code class="python">def makeEntry(self, label, path, withOptions=False, asTask=False):
     &#34;&#34;&#34;Produce an entry.
 
     Parameters
@@ -978,8 +978,8 @@ hyperlink.</dd>
         The destination after the entry is clicked.
     withOptions: boolean, optional `False`
         Whether to include the options widget.
-    command: boolean, optional `False`
-        Display the entry as a big workflow command button or as a modest
+    asTask: boolean, optional `False`
+        Display the entry as a big workflow task button or as a modest
         hyperlink.
 
     Returns
@@ -993,8 +993,8 @@ hyperlink.</dd>
     options = self.options
     active = path == self.path
 
-    command = &#34;command info&#34; if command else &#34;button&#34;
-    navClass = f&#34;{command} small nav&#34; + (&#34; active&#34; if active else E)
+    task = &#34;task info&#34; if asTask else &#34;button&#34;
+    navClass = f&#34;{task} small nav&#34; + (&#34; active&#34; if active else E)
 
     optionsRep = (
         AMP.join(f&#34;&#34;&#34;{name}={value}&#34;&#34;&#34; for (name, value) in options.items())
@@ -1048,7 +1048,7 @@ hyperlink.</dd>
 </details>
 </dd>
 <dt id="control.sidebar.Sidebar.tableEntry"><code class="name flex">
-<span>def <span class="ident">tableEntry</span></span>(<span>self, table, prefix=None, item=None, postfix=None, action=None, withOptions=False, command=False)</span>
+<span>def <span class="ident">tableEntry</span></span>(<span>self, table, prefix=None, item=None, postfix=None, action=None, withOptions=False, asTask=False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Produce a table entry.</p>
@@ -1090,7 +1090,7 @@ to list the detail table!</p>
     postfix=None,
     action=None,
     withOptions=False,
-    command=False,
+    asTask=False,
 ):
     &#34;&#34;&#34;Produce a table entry.
 
@@ -1135,7 +1135,7 @@ to list the detail table!</p>
         f&#34;&#34;&#34;{prefixRep}{item}{postfixRep}&#34;&#34;&#34;,
         f&#34;&#34;&#34;/{table}/{N.list}{actionRep}&#34;&#34;&#34;,
         withOptions=True,
-        command=command,
+        asTask=asTask,
     )</code></pre>
 </details>
 </dd>
@@ -1163,7 +1163,7 @@ to list the detail table!</p>
 <p>Produce a list geared to the current user, with actions that make sense
 to him/her.</p>
 <p>Take care that only permitted actions are presented.</p>
-<p>Actions that belong to workflow are presented as conspicuous workflow commands.</p>
+<p>Actions that belong to workflow are presented as conspicuous workflow tasks.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>string</code>(<code>html</code>)</dt>
@@ -1181,7 +1181,7 @@ to him/her.</p>
 
     Take care that only permitted actions are presented.
 
-    Actions that belong to workflow are presented as conspicuous workflow commands.
+    Actions that belong to workflow are presented as conspicuous workflow tasks.
 
     Returns
     -------
@@ -1212,7 +1212,7 @@ to him/her.</p>
 
     subEntries = []
 
-    subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+    subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, asTask=True))
 
     subEntries.append(self.tableEntry(N.contrib, prefix=&#34;All&#34;, withOptions=True))
 
@@ -1268,7 +1268,7 @@ to him/her.</p>
                 action=N.select,
                 item=&#34;Contributions&#34;,
                 postfix=&#34;to be selected&#34;,
-                command=True,
+                asTask=True,
             )
         )
     # - my unfinished assessments
@@ -1279,7 +1279,7 @@ to him/her.</p>
             action=N.assess,
             item=&#34;Contributions&#34;,
             postfix=&#34;I am assessing&#34;,
-            command=True,
+            asTask=True,
         )
     )
 
@@ -1293,7 +1293,7 @@ to him/her.</p>
                 action=N.assign,
                 item=&#34;Assessments&#34;,
                 postfix=&#34;needing reviewers&#34;,
-                command=True,
+                asTask=True,
             )
         )
 
@@ -1305,7 +1305,7 @@ to him/her.</p>
             action=N.review,
             item=&#34;Assessments&#34;,
             postfix=&#34;in review by me&#34;,
-            command=True,
+            asTask=True,
         )
     )
 
@@ -1317,7 +1317,7 @@ to him/her.</p>
             action=N.reviewdone,
             item=&#34;Assessments&#34;,
             postfix=&#34;reviewed by me&#34;,
-            command=True,
+            asTask=True,
         )
     )
 
@@ -1337,7 +1337,7 @@ to him/her.</p>
     subEntries = []
     if isSuperUser:
         for table in OFFICE_TABLES:
-            subEntries.append(self.tableEntry(table, command=table == N.user))
+            subEntries.append(self.tableEntry(table, asTask=table == N.user))
         entries.append(
             self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
         )
@@ -1347,7 +1347,7 @@ to him/her.</p>
     subEntries = []
     if isSysAdmin:
         subEntries.append(
-            self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, command=True)
+            self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, asTask=True)
         )
         for table in SYSTEM_TABLES:
             subEntries.append(self.tableEntry(table))

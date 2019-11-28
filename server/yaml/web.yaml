@@ -12,7 +12,7 @@ wrongType:
 messages:
   forbidden: Forbidden
   noPage: Page not found
-  noCommand: No command execution
+  noTask: No task execution
   noTable: No table
   noRecord: No suitable record in
   noField: No field

@@ -23,7 +23,7 @@ class CriteriaR(Record):
 
     def wrapHelp(self):
         info = H.join(
-            self.field(field, readonly=False).wrap(action=N.view)
+            self.field(field, readonly=True).wrap(action=N.view)
             for field in [N.typeContribution, N.remarks]
             if field != N.typeContribution
         )

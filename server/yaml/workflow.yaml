@@ -89,145 +89,157 @@ statusRep:
   locked: Locked
   done: Finished
 
-commands:
-  contrib:
-    selectContrib:
-      msg: Select as national contribution to DARIAH
-      acro: select contribution
-      cls: good
-      operator: set
-      field: selected
-      date: dateDecided
-      delay: 48
-      value: "1"
-    deselectContrib:
-      msg: Discard as national contribution to DARIAH
-      acro: discard contribution
-      cls: error
-      operator: set
-      field: selected
-      date: dateDecided
-      delay: 48
-      value: "-1"
-    unselectContrib:
-      msg: Revoke selection decision for this contribution
-      acro: unselect contribution
-      cls: warning
-      operator: set
-      field: selected
-      date: dateDecided
-      delay: 48
-      value: "0"
-    startAssessment:
-      msg: Start a self-assessment for this contribution
-      acro: start assessment
-      cls: info
-      operator: add
-      table: assessment
-  assessment:
-    submitAssessment:
-      msg: Submit assessment
-      acro: submit assessment
-      cls: info
-      operator: set
-      field: submitted
-      date: dateSubmitted
-      delay: 1
-      value: "1"
-    resubmitAssessment:
-      msg: Resubmit assessment
-      acro: resubmit assessment
-      cls: info
-      operator: set
-      field: submitted
-      date: dateSubmitted
-      delay: 1
-      value: "1"
-    submitRevised:
-      msg: Submit revised assessment
-      acro: resubmit revision
-      cls: info
-      operator: set
-      field: dateSubmitted
-      date: dateSubmitted
-      delay: 1
-      value: "now"
-    withdrawAssessment:
-      msg: Withdraw assessment from review
-      acro: unsubmit assessment
-      cls: error
-      operator: set
-      field: submitted
-      date: dateWithdrawn
-      delay: 1
-      value: "0"
-    startReview:
-      msg: Start a review of this assessment
-      acro: start review
-      cls: info
-      operator: add
-      table: review
-  review:
-    expertReviewRevise:
-      kind: expert
-      msg: Advise revision
-      acro: advise revision
-      cls: warning
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 2
-      value: Revise
-    expertReviewAccept:
-      kind: expert
-      msg: Advise to accept
-      acro: advise accept
-      cls: good
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 2
-      value: Accept
-    expertReviewReject:
-      kind: expert
-      msg: Advise to reject
-      acro: advise reject
-      cls: error
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 2
-      value: Reject
-    finalReviewRevise:
-      kind: final
-      msg: Require revision
-      acro: require revision
-      cls: warning
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 24
-      value: Revise
-    finalReviewAccept:
-      kind: final
-      msg: Accept
-      acro: accept
-      cls: good
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 24
-      value: Accept
-    finalReviewReject:
-      kind: final
-      msg: Reject
-      acro: reject
-      cls: error
-      operator: set
-      field: decision
-      date: dateDecided
-      delay: 24
-      value: Reject
+tasks:
+  selectContrib:
+    msg: Select as national contribution to DARIAH
+    acro: select contribution
+    cls: good
+    operator: set
+    table: contrib
+    field: selected
+    date: dateDecided
+    delay: 48
+    value: "1"
+  deselectContrib:
+    msg: Discard as national contribution to DARIAH
+    acro: discard contribution
+    cls: error
+    operator: set
+    table: contrib
+    field: selected
+    date: dateDecided
+    delay: 48
+    value: "-1"
+  unselectContrib:
+    msg: Revoke selection decision for this contribution
+    acro: unselect contribution
+    cls: warning
+    operator: set
+    table: contrib
+    field: selected
+    date: dateDecided
+    delay: 48
+    value: "0"
+  startAssessment:
+    msg: Start a self-assessment for this contribution
+    acro: start assessment
+    cls: info
+    operator: add
+    table: contrib
+    detail: assessment
+  submitAssessment:
+    msg: Submit assessment
+    acro: submit assessment
+    cls: info
+    operator: set
+    table: assessment
+    field: submitted
+    date: dateSubmitted
+    delay: 1
+    value: "1"
+  resubmitAssessment:
+    msg: Resubmit assessment
+    acro: resubmit assessment
+    cls: info
+    operator: set
+    table: assessment
+    field: submitted
+    date: dateSubmitted
+    delay: 1
+    value: "1"
+  submitRevised:
+    msg: Submit revised assessment
+    acro: resubmit revision
+    cls: info
+    operator: set
+    table: assessment
+    field: dateSubmitted
+    date: dateSubmitted
+    delay: 1
+    value: "now"
+  withdrawAssessment:
+    msg: Withdraw assessment from review
+    acro: withdraw assessment
+    cls: error
+    operator: set
+    table: assessment
+    field: submitted
+    date: dateWithdrawn
+    delay: 1
+    value: "0"
+  startReview:
+    msg: Start a review of this assessment
+    acro: start review
+    cls: info
+    operator: add
+    table: assessment
+    detail: review
+  expertReviewRevise:
+    kind: expert
+    msg: Advise revision
+    acro: advise revision
+    cls: warning
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 2
+    value: Revise
+  expertReviewAccept:
+    kind: expert
+    msg: Advise to accept
+    acro: advise accept
+    cls: good
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 2
+    value: Accept
+  expertReviewReject:
+    kind: expert
+    msg: Advise to reject
+    acro: advise reject
+    cls: error
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 2
+    value: Reject
+  finalReviewRevise:
+    kind: final
+    msg: Require revision
+    acro: require revision
+    cls: warning
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 24
+    value: Revise
+  finalReviewAccept:
+    kind: final
+    msg: Accept
+    acro: accept
+    cls: good
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 24
+    value: Accept
+  finalReviewReject:
+    kind: final
+    msg: Reject
+    acro: reject
+    cls: error
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 24
+    value: Reject
 
 workflow:
   - complete
@@ -258,8 +270,8 @@ decisionDelay: 3600
 
 names:
   - actual
-  - commandFields
   - expert
   - final
   - orphaned
+  - taskFields
   - wfitem

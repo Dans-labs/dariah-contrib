@@ -51,7 +51,7 @@ const widgets = {
       targets.each((i, elem) => {
         const el = $(elem)
         const options = el.find('[lab]')
-        el.find('.button,.command')
+        el.find('.button,.task')
           .off('click')
           .click(e => {
             const me = $(e.currentTarget)

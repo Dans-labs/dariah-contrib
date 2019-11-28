@@ -1,3 +1,58 @@
+"""Set up testing the Contribution tool
+
+Here we set up the scene.
+By means of
+[fixtures](https://docs.pytest.org/en/latest/fixture.html)
+we define the web-app objects
+to be tested and the web clients to exercise functions in those objects.
+
+Contents
+
+### Set-up
+
+`test_10_factory10`
+:   How the app is set up, difference between production and development
+
+### Contributions: filling out
+
+`test_20_users10`
+:   All about users and what they can and cannot do.
+
+`test_30_contrib10`
+:   Getting started with contributions.
+
+`test_30_contrib20`
+:   Modifying contribution fields that are typed in by the user.
+
+`test_30_contrib30`
+:   Modifying contribution fields that have values in value tables.
+
+`test_30_contrib40`
+:   Checking the visibility of sensitive fields.
+
+### Assessments: filling out, submitting, and assigning reviewers
+
+`test_40_assess10`
+:   Starting an assessment, filling it out, submitting it and withdrawing it.
+
+`test_40_assess20`
+:   Assigning reviewers.
+
+### Reviews: filling out and deciding.
+
+`test_50_review10`
+:   Starting a review, filling it out, and deciding.
+
+`test_50_assess20`
+:   Revising and resubmitting assessments.
+
+### Contributions: selection.
+
+`test_60_contrib10`
+:   Selecting contributions.
+
+"""
+
 import pytest
 
 import magic  # noqa
@@ -7,6 +62,34 @@ from helpers import makeClient
 
 DEBUG = False
 TEST = True
+
+USERS = set(
+    """
+    public
+    auth
+    coord
+    expert
+    final
+    mycoord
+    editor
+    owner
+    office
+    system
+    root
+""".strip().split()
+)
+"""The `eppn` attribute of all relevant test users in this suite.
+
+See `test_20_users10` where we introduce them.
+
+Here we make fixtures `clientAuth`, `clientOwner` etc. for each of them.
+These client fixtures represent a web client with the corresponding user logged in,
+ready to interact with the server (in development mode).
+
+There is also a fixture `clientPublic` for the non-authenticated user.
+
+Finally, there is a fixture `clients` that contains fixtures for all the users.
+"""
 
 
 @pytest.fixture
@@ -24,15 +107,15 @@ def app():
 
 
 @pytest.fixture
-def app_notest():
-    """Special app: development mode, but test mode switched off."""
+def appNotest():
+    """Special app: development mode, but Flask test mode switched off."""
 
     yield appFactory("development", DEBUG, False)
 
 
 @pytest.fixture
-def app_prod():
-    """Production app: production mode, but test mode switched on.
+def appProd():
+    """Production app: production mode, but Flask test mode switched on.
 
     We only use this for verifying that test users cannot log in onto
     the production app.
@@ -42,87 +125,75 @@ def app_prod():
 
 
 @pytest.fixture
-def client_prod(app_prod):
+def clientProd(appProd):
     """Client accessing the production app."""
 
-    return app_prod.test_client()
+    return appProd.test_client()
+
+
+@pytest.fixture
+def clients(app):
+    """A dictionary of client fixtures for each user.
+
+    Keyed by eppn, the values are corresponding client fixtures.
+
+    This comes in handy to pass to tests that want to perform the same
+    action on behalf of the different users.
+    """
+
+    return {eppn: makeClient(app, eppn) for eppn in USERS}
 
 
 @pytest.fixture
 def clientPublic(app):
-    """Client accessing the development app.
-
-    Unauthenticated user a.k.a. public.
-    """
     return app.test_client()
 
 
 @pytest.fixture
-def clientSuzan(app):
-    """Client, logged in as Suzan, accessing the development app.
-
-    A normal user from Belgium.
-    """
-
-    return makeClient(app, "suzan")
+def clientAuth(app):
+    return makeClient(app, "auth")
 
 
 @pytest.fixture
-def clientBart(app):
-    """Client, logged in as Bart, accessing the development app.
-
-    A normal user from an unspecified country.
-    """
-
-    return makeClient(app, "bart")
+def clientCoord(app):
+    return makeClient(app, "coord")
 
 
 @pytest.fixture
-def clientMarie(app):
-    """Client, logged in as Marie, accessing the development app.
-
-    National coordinator for Luxemburg initially, will be assigned
-    to Belgium later.
-    """
-
-    return makeClient(app, "marie")
+def clientExpert(app):
+    return makeClient(app, "expert")
 
 
 @pytest.fixture
-def clientRachel(app):
-    """Client, logged in as Rachel, accessing the development app.
-
-    National coordinator for the Netherlands.
-    """
-
-    return makeClient(app, "rachel")
+def clientFinal(app):
+    return makeClient(app, "final")
 
 
 @pytest.fixture
-def clientLisa(app):
-    """Client, logged in as Lisa, accessing the development app.
-
-    Office user.
-    """
-
-    return makeClient(app, "lisa")
+def clientMycoord(app):
+    return makeClient(app, "mycoord")
 
 
 @pytest.fixture
-def clientCarsten(app):
-    """Client, logged in as Carsten, accessing the development app.
-
-    System administrator.
-    """
-
-    return makeClient(app, "carsten")
+def clientEditor(app):
+    return makeClient(app, "editor")
 
 
 @pytest.fixture
-def clientDirk(app):
-    """Client, logged in as Dirk, accessing the development app.
+def clientOwner(app):
+    return makeClient(app, "owner")
 
-    Root.
-    """
 
-    return makeClient(app, "dirk")
+@pytest.fixture
+def clientOffice(app):
+    return makeClient(app, "office")
+
+
+@pytest.fixture
+def clientSystem(app):
+    return makeClient(app, "system")
+
+
+@pytest.fixture
+def clientRoot(app):
+    return makeClient(app, "root")

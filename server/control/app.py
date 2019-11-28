@@ -17,6 +17,7 @@ from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.db import Db
 from control.workflow.compute import Workflow
+from control.workflow.apply import execute
 from control.perm import checkTable
 from control.auth import Auth
 from control.context import Context
@@ -62,7 +63,7 @@ SLOGOUT = URLS[N.slogout][N.url]
 WORKFLOW = URLS[N.workflow][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
-NO_COMMAND = MESSAGES[N.noCommand]
+NO_TASK = MESSAGES[N.noTask]
 NO_TABLE = MESSAGES[N.noTable]
 NO_RECORD = MESSAGES[N.noRecord]
 NO_FIELD = MESSAGES[N.noField]
@@ -210,6 +211,17 @@ def appFactory(regime, debug, test, **kwargs):
         else:
             flash("workflow not recomputed", "error")
         return redirectResult(START, nWf >= 0)
+
+    # WORKFLOW TASKS
+
+    @app.route(f"""/api/task/<string:task>/<string:eid>""")
+    def serveTask(task, eid):
+        context = getContext()
+        auth.authenticate()
+        (good, newPath) = execute(context, task, eid)
+        if not good and newPath is None:
+            newPath = START
+        return redirectResult(newPath, good)
 
     # INSERT RECORD IN TABLE
 
@@ -444,17 +456,6 @@ def appFactory(regime, debug, test, **kwargs):
             return noTable(table)
         return noAction(action)
 
-    # COMMANDS
-
-    @app.route(f"""/api/command/<string:command>/<string:table>/<string:eid>""")
-    def serveCommand(command, table, eid):
-        context = getContext()
-        auth.authenticate()
-        if table in ALL_TABLES and tablePerm(table):
-            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
-            return redirectResult(newPath, good)
-        return noCommand(table, command)
-
     # FALL-BACK
 
     @app.route(f"""/<path:anything>""")
@@ -462,7 +463,7 @@ def appFactory(regime, debug, test, **kwargs):
         flash(f"Cannot find {anything}", "error")
         return redirectResult(START, False)
 
-    def noCommand(table, command):
+    def noTask(table, task):
         return abort(400)
 
     def noTable(table):

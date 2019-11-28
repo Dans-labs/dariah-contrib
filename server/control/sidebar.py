@@ -128,7 +128,7 @@ class Sidebar:
 
         return [("XXX", rep) for rep in filterRep + optionsRep]
 
-    def makeEntry(self, label, path, withOptions=False, command=False):
+    def makeEntry(self, label, path, withOptions=False, asTask=False):
         """Produce an entry.
 
         Parameters
@@ -139,8 +139,8 @@ class Sidebar:
             The destination after the entry is clicked.
         withOptions: boolean, optional `False`
             Whether to include the options widget.
-        command: boolean, optional `False`
-            Display the entry as a big workflow command button or as a modest
+        asTask: boolean, optional `False`
+            Display the entry as a big workflow task button or as a modest
             hyperlink.
 
         Returns
@@ -154,8 +154,8 @@ class Sidebar:
         options = self.options
         active = path == self.path
 
-        command = "command info" if command else "button"
-        navClass = f"{command} small nav" + (" active" if active else E)
+        task = "task info" if asTask else "button"
+        navClass = f"{task} small nav" + (" active" if active else E)
 
         optionsRep = (
             AMP.join(f"""{name}={value}""" for (name, value) in options.items())
@@ -183,7 +183,7 @@ class Sidebar:
         postfix=None,
         action=None,
         withOptions=False,
-        command=False,
+        asTask=False,
     ):
         """Produce a table entry.
 
@@ -228,7 +228,7 @@ class Sidebar:
             f"""{prefixRep}{item}{postfixRep}""",
             f"""/{table}/{N.list}{actionRep}""",
             withOptions=True,
-            command=command,
+            asTask=asTask,
         )
 
     def wrap(self):
@@ -239,7 +239,7 @@ class Sidebar:
 
         Take care that only permitted actions are presented.
 
-        Actions that belong to workflow are presented as conspicuous workflow commands.
+        Actions that belong to workflow are presented as conspicuous workflow tasks.
 
         Returns
         -------
@@ -270,7 +270,7 @@ class Sidebar:
 
         subEntries = []
 
-        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, command=True))
+        subEntries.append(self.makeEntry(cap1(N.overview), path=OVERVIEW, asTask=True))
 
         subEntries.append(self.tableEntry(N.contrib, prefix="All", withOptions=True))
 
@@ -326,7 +326,7 @@ class Sidebar:
                     action=N.select,
                     item="Contributions",
                     postfix="to be selected",
-                    command=True,
+                    asTask=True,
                 )
             )
         # - my unfinished assessments
@@ -337,7 +337,7 @@ class Sidebar:
                 action=N.assess,
                 item="Contributions",
                 postfix="I am assessing",
-                command=True,
+                asTask=True,
             )
         )
 
@@ -351,7 +351,7 @@ class Sidebar:
                     action=N.assign,
                     item="Assessments",
                     postfix="needing reviewers",
-                    command=True,
+                    asTask=True,
                 )
             )
 
@@ -363,7 +363,7 @@ class Sidebar:
                 action=N.review,
                 item="Assessments",
                 postfix="in review by me",
-                command=True,
+                asTask=True,
             )
         )
 
@@ -375,7 +375,7 @@ class Sidebar:
                 action=N.reviewdone,
                 item="Assessments",
                 postfix="reviewed by me",
-                command=True,
+                asTask=True,
             )
         )
 
@@ -395,7 +395,7 @@ class Sidebar:
         subEntries = []
         if isSuperUser:
             for table in OFFICE_TABLES:
-                subEntries.append(self.tableEntry(table, command=table == N.user))
+                subEntries.append(self.tableEntry(table, asTask=table == N.user))
             entries.append(
                 self.makeCaption(G(CAPTIONS, N.office), subEntries, rule=True)
             )
@@ -405,7 +405,7 @@ class Sidebar:
         subEntries = []
         if isSysAdmin:
             subEntries.append(
-                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, command=True)
+                self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, asTask=True)
             )
             for table in SYSTEM_TABLES:
                 subEntries.append(self.tableEntry(table))

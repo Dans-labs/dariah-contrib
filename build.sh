@@ -6,7 +6,7 @@ apidocbase='docs/api/html'
 function codestats {
     xd=".git,images,fonts,favicons"
     xdx=",tests"
-    xdt=",dariah_clean,.pytest_cache,.coverage"
+    xdt=",.pytest_cache,.coverage"
     xf="cloc_exclude.lst"
     rf="docs/Tech/Stats.md"
     rft="docs/Tech/StatsTest.md"
@@ -29,7 +29,13 @@ function setvars {
 
 function dataimport {
     cd import
-    python3 mongoFromFm.py development
+    if [[ "$1" == "dev" ]]; then
+        python3 mongoFromFm.py development
+    elif [[ "$1" == "test" ]]; then
+        python3 mongoFromFm.py test
+    else
+        python3 mongoFromFm.py
+    fi
     cd ..
 }
 
@@ -100,7 +106,7 @@ function runtest {
         echo "Unknown test mode: '$1'"
         exit
     fi
-    cleandb
+    dataimport test
     cd server
     dest="../docs"
     destTestTmp="$dest/Tech/Tests.tmp"
@@ -142,14 +148,6 @@ function runtest {
     cd ..
 }
 
-function cleandb {
-    cd server/tests
-    echo "RESET THE TEST DATABASE"
-    mongorestore --quiet --drop --db=dariah_clean dariah_clean
-    python3 cleandb.py
-    cd ../..
-}
-
 function workflow {
     cd server
     python3 workflow.py
@@ -163,9 +161,9 @@ function ship {
         return
     fi
     docs "deploy"
-    # git add --all .
-    # git commit -m "ship: $*"
-    # git push origin master
+    git add --all .
+    git commit -m "ship: $*"
+    git push origin master
 }
 
 function shipdocs {
@@ -178,7 +176,8 @@ function shipdocs {
 if [[ "$1" == "mongo" ]]; then
     mongod -f /usr/local/etc/mongod.conf
 elif [[ "$1" == "data" ]]; then
-    dataimport
+    shift
+    dataimport "$1"
 elif [[ "$1" == "workflow" ]]; then
     workflow
 elif [[ "$1" == "serve" ]]; then
@@ -193,8 +192,6 @@ elif [[ "$1" == "docs" ]]; then
     docs "serve"
 elif [[ "$1" == "pdoc" ]]; then
     apidocs
-elif [[ "$1" == "cleandb" ]]; then
-    cleandb
 elif [[ "$1" == "test" ]]; then
     shift
     runtest plain "$@"
@@ -215,14 +212,14 @@ else
     echo "    where <task> is one of:"
 #    echo "python      : activate the version of python used for this app"
     echo "mongo       : start mongo db daemon"
-    echo "data        : convert legacy FileMaker data and import it into MongoDB"
+    echo "data dev    : convert legacy FileMaker data and import it into MongoDB"
+    echo "data test   : convert legacy FileMaker and trim it into a clean test db in Mongo"
     echo "workflow    : (re)initialize the workflow table"
     echo "serve prod  : start serving with flask server; 'prod': development mode is off"
     echo "gserve      : start serving with gunicorn"
     echo "stats       : collect codebase statistics"
     echo "docs        : build and serve github pages documentation"
     echo "pdoc        : generate api docs from docstrings, also in tests"
-    echo "cleandb     : clean the test database"
     echo "test        : run all tests"
     echo "testx       : run all tests, verbose"
     echo "testc       : run all tests with coverage"

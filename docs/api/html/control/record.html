@@ -325,10 +325,10 @@ class Record:
             if update:
                 self.wfitem = context.getWorkflowItem(contribId, requireFresh=True)
 
-    def command(self, command):
-        &#34;&#34;&#34;Perform a workflow command.
+    def task(self, task):
+        &#34;&#34;&#34;Perform a workflow task.
 
-        See `control.workflow.apply.WorkflowItem.doCommand`.
+        See `control.workflow.apply.WorkflowItem.doTask`.
         &#34;&#34;&#34;
 
         wfitem = self.wfitem
@@ -337,7 +337,7 @@ class Record:
         good = False
 
         if wfitem:
-            url = wfitem.doCommand(command, self)
+            url = wfitem.doTask(task, self)
 
         if url is None:
             table = self.table
@@ -360,7 +360,7 @@ class Record:
             Such fields are not shown and edited in the normal way,
             hence they will be set to unreadable and uneditable.
             The manipulation of such fields is under control of workflow.
-            See `control.workflow.apply.WorkflowItem.isCommand`.
+            See `control.workflow.apply.WorkflowItem.isTask`.
 
         !!! caution
             The name of the field must be one for which field specs are defined
@@ -383,13 +383,15 @@ class Record:
         table = self.table
         wfitem = self.wfitem
 
+        forceEdit = G(kwargs, N.mayEdit)
+
         if wfitem:
             fixed = wfitem.checkFixed(self, field=fieldName)
             if fixed:
                 kwargs[N.mayEdit] = False
-            if wfitem.isCommand(table, fieldName):
+            if wfitem.isTask(table, fieldName):
                 kwargs[N.mayRead] = False
-                kwargs[N.mayEdit] = not fixed
+                kwargs[N.mayEdit] = forceEdit or not fixed
         return Field(self, fieldName, **kwargs)
 
     def delete(self):
@@ -1099,10 +1101,10 @@ that spawns a record object.</p>
             if update:
                 self.wfitem = context.getWorkflowItem(contribId, requireFresh=True)
 
-    def command(self, command):
-        &#34;&#34;&#34;Perform a workflow command.
+    def task(self, task):
+        &#34;&#34;&#34;Perform a workflow task.
 
-        See `control.workflow.apply.WorkflowItem.doCommand`.
+        See `control.workflow.apply.WorkflowItem.doTask`.
         &#34;&#34;&#34;
 
         wfitem = self.wfitem
@@ -1111,7 +1113,7 @@ that spawns a record object.</p>
         good = False
 
         if wfitem:
-            url = wfitem.doCommand(command, self)
+            url = wfitem.doTask(task, self)
 
         if url is None:
             table = self.table
@@ -1134,7 +1136,7 @@ that spawns a record object.</p>
             Such fields are not shown and edited in the normal way,
             hence they will be set to unreadable and uneditable.
             The manipulation of such fields is under control of workflow.
-            See `control.workflow.apply.WorkflowItem.isCommand`.
+            See `control.workflow.apply.WorkflowItem.isTask`.
 
         !!! caution
             The name of the field must be one for which field specs are defined
@@ -1157,13 +1159,15 @@ that spawns a record object.</p>
         table = self.table
         wfitem = self.wfitem
 
+        forceEdit = G(kwargs, N.mayEdit)
+
         if wfitem:
             fixed = wfitem.checkFixed(self, field=fieldName)
             if fixed:
                 kwargs[N.mayEdit] = False
-            if wfitem.isCommand(table, fieldName):
+            if wfitem.isTask(table, fieldName):
                 kwargs[N.mayRead] = False
-                kwargs[N.mayEdit] = not fixed
+                kwargs[N.mayEdit] = forceEdit or not fixed
         return Field(self, fieldName, **kwargs)
 
     def delete(self):
@@ -1896,39 +1900,6 @@ the detail records.</p>
     )</code></pre>
 </details>
 </dd>
-<dt id="control.record.Record.command"><code class="name flex">
-<span>def <span class="ident">command</span></span>(<span>self, command)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Perform a workflow command.</p>
-<p>See <a title="control.workflow.apply.WorkflowItem.doCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doCommand"><code>WorkflowItem.doCommand()</code></a>.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def command(self, command):
-    &#34;&#34;&#34;Perform a workflow command.
-
-    See `control.workflow.apply.WorkflowItem.doCommand`.
-    &#34;&#34;&#34;
-
-    wfitem = self.wfitem
-
-    url = None
-    good = False
-
-    if wfitem:
-        url = wfitem.doCommand(command, self)
-
-    if url is None:
-        table = self.table
-        eid = self.eid
-        url = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
-    else:
-        good = True
-    return (good, url)</code></pre>
-</details>
-</dd>
 <dt id="control.record.Record.delete"><code class="name flex">
 <span>def <span class="ident">delete</span></span>(<span>self)</span>
 </code></dt>
@@ -2135,7 +2106,7 @@ to make it uneditable.</p>
 Such fields are not shown and edited in the normal way,
 hence they will be set to unreadable and uneditable.
 The manipulation of such fields is under control of workflow.
-See <a title="control.workflow.apply.WorkflowItem.isCommand" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isCommand"><code>WorkflowItem.isCommand()</code></a>.</p>
+See <a title="control.workflow.apply.WorkflowItem.isTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isTask"><code>WorkflowItem.isTask()</code></a>.</p>
 </div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
@@ -2169,7 +2140,7 @@ in the yaml file for the table.</p>
         Such fields are not shown and edited in the normal way,
         hence they will be set to unreadable and uneditable.
         The manipulation of such fields is under control of workflow.
-        See `control.workflow.apply.WorkflowItem.isCommand`.
+        See `control.workflow.apply.WorkflowItem.isTask`.
 
     !!! caution
         The name of the field must be one for which field specs are defined
@@ -2192,13 +2163,15 @@ in the yaml file for the table.</p>
     table = self.table
     wfitem = self.wfitem
 
+    forceEdit = G(kwargs, N.mayEdit)
+
     if wfitem:
         fixed = wfitem.checkFixed(self, field=fieldName)
         if fixed:
             kwargs[N.mayEdit] = False
-        if wfitem.isCommand(table, fieldName):
+        if wfitem.isTask(table, fieldName):
             kwargs[N.mayRead] = False
-            kwargs[N.mayEdit] = not fixed
+            kwargs[N.mayEdit] = forceEdit or not fixed
     return Field(self, fieldName, **kwargs)</code></pre>
 </details>
 </dd>
@@ -2415,6 +2388,39 @@ or if there is no workflow item found,
         self.wfitem = None
 
     self.valid = valid</code></pre>
+</details>
+</dd>
+<dt id="control.record.Record.task"><code class="name flex">
+<span>def <span class="ident">task</span></span>(<span>self, task)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Perform a workflow task.</p>
+<p>See <a title="control.workflow.apply.WorkflowItem.doTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doTask"><code>WorkflowItem.doTask()</code></a>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def task(self, task):
+    &#34;&#34;&#34;Perform a workflow task.
+
+    See `control.workflow.apply.WorkflowItem.doTask`.
+    &#34;&#34;&#34;
+
+    wfitem = self.wfitem
+
+    url = None
+    good = False
+
+    if wfitem:
+        url = wfitem.doTask(task, self)
+
+    if url is None:
+        table = self.table
+        eid = self.eid
+        url = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+    else:
+        good = True
+    return (good, url)</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.title"><code class="name flex">
@@ -2743,7 +2749,6 @@ master record.</dd>
 <li><code><a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.bodyMethod" href="#control.record.Record.bodyMethod">bodyMethod</a></code></li>
-<li><code><a title="control.record.Record.command" href="#control.record.Record.command">command</a></code></li>
 <li><code><a title="control.record.Record.delete" href="#control.record.Record.delete">delete</a></code></li>
 <li><code><a title="control.record.Record.deleteButton" href="#control.record.Record.deleteButton">deleteButton</a></code></li>
 <li><code><a title="control.record.Record.deleteDetails" href="#control.record.Record.deleteDetails">deleteDetails</a></code></li>
@@ -2759,6 +2764,7 @@ master record.</dd>
 <li><code><a title="control.record.Record.setPerm" href="#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="#control.record.Record.setWorkflow">setWorkflow</a></code></li>
 <li><code><a title="control.record.Record.tableObj" href="#control.record.Record.tableObj">tableObj</a></code></li>
+<li><code><a title="control.record.Record.task" href="#control.record.Record.task">task</a></code></li>
 <li><code><a title="control.record.Record.title" href="#control.record.Record.title">title</a></code></li>
 <li><code><a title="control.record.Record.titleRaw" href="#control.record.Record.titleRaw">titleRaw</a></code></li>
 <li><code><a title="control.record.Record.withDetails" href="#control.record.Record.withDetails">withDetails</a></code></li>

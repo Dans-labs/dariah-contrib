@@ -210,7 +210,7 @@
 <p id="t44" class="pln"><span class="str">        eid: ObjectId, optional, `None`</span><span class="strut">&nbsp;</span></p>
 <p id="t45" class="pln"><span class="str">        markup: boolean, optional, `False`</span><span class="strut">&nbsp;</span></p>
 <p id="t46" class="pln"><span class="str">        clickable: boolean, optional, `False`</span><span class="strut">&nbsp;</span></p>
-<p id="t47" class="pln"><span class="str">            If `True`, the title will be represented as a workflow command,</span><span class="strut">&nbsp;</span></p>
+<p id="t47" class="pln"><span class="str">            If `True`, the title will be represented as a workflow task,</span><span class="strut">&nbsp;</span></p>
 <p id="t48" class="pln"><span class="str">            otherwise as a workflow stage.</span><span class="strut">&nbsp;</span></p>
 <p id="t49" class="pln"><span class="str">        active: string, optional, `None`</span><span class="strut">&nbsp;</span></p>
 <p id="t50" class="pln"><span class="str">        **kwargs: dict</span><span class="strut">&nbsp;</span></p>
@@ -239,7 +239,7 @@
 <p id="t73" class="stm mis">                <span class="nam">eid</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">_id</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t74" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t75" class="stm mis">            <span class="nam">isActive</span> <span class="op">=</span> <span class="nam">eid</span> <span class="op">==</span> <span class="nam">active</span><span class="strut">&nbsp;</span></p>
-<p id="t76" class="stm mis">            <span class="nam">baseCls</span> <span class="op">=</span> <span class="str">"command"</span> <span class="key">if</span> <span class="nam">clickable</span> <span class="key">else</span> <span class="str">"status"</span><span class="strut">&nbsp;</span></p>
+<p id="t76" class="stm mis">            <span class="nam">baseCls</span> <span class="op">=</span> <span class="str">"task"</span> <span class="key">if</span> <span class="nam">clickable</span> <span class="key">else</span> <span class="str">"status"</span><span class="strut">&nbsp;</span></p>
 <p id="t77" class="stm mis">            <span class="nam">activeCls</span> <span class="op">=</span> <span class="str">"active "</span> <span class="key">if</span> <span class="nam">isActive</span> <span class="key">else</span> <span class="nam">E</span><span class="strut">&nbsp;</span></p>
 <p id="t78" class="stm mis">            <span class="nam">extraCls</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">acro</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t79" class="stm mis">            <span class="nam">actualCls</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">actualCls</span><span class="op">(</span><span class="nam">record</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
@@ -266,7 +266,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-11-27 22:35
+            created at 2019-11-28 22:03
         </p>
     </div>
 </div>

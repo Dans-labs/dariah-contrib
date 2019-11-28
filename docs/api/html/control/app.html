@@ -44,6 +44,7 @@ from config import Config as C, Names as N
 from control.utils import pick as G, E
 from control.db import Db
 from control.workflow.compute import Workflow
+from control.workflow.apply import execute
 from control.perm import checkTable
 from control.auth import Auth
 from control.context import Context
@@ -89,7 +90,7 @@ SLOGOUT = URLS[N.slogout][N.url]
 WORKFLOW = URLS[N.workflow][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
-NO_COMMAND = MESSAGES[N.noCommand]
+NO_TASK = MESSAGES[N.noTask]
 NO_TABLE = MESSAGES[N.noTable]
 NO_RECORD = MESSAGES[N.noRecord]
 NO_FIELD = MESSAGES[N.noField]
@@ -237,6 +238,17 @@ def appFactory(regime, debug, test, **kwargs):
         else:
             flash(&#34;workflow not recomputed&#34;, &#34;error&#34;)
         return redirectResult(START, nWf &gt;= 0)
+
+    # WORKFLOW TASKS
+
+    @app.route(f&#34;&#34;&#34;/api/task/&lt;string:task&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveTask(task, eid):
+        context = getContext()
+        auth.authenticate()
+        (good, newPath) = execute(context, task, eid)
+        if not good and newPath is None:
+            newPath = START
+        return redirectResult(newPath, good)
 
     # INSERT RECORD IN TABLE
 
@@ -471,17 +483,6 @@ def appFactory(regime, debug, test, **kwargs):
             return noTable(table)
         return noAction(action)
 
-    # COMMANDS
-
-    @app.route(f&#34;&#34;&#34;/api/command/&lt;string:command&gt;/&lt;string:table&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
-    def serveCommand(command, table, eid):
-        context = getContext()
-        auth.authenticate()
-        if table in ALL_TABLES and tablePerm(table):
-            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
-            return redirectResult(newPath, good)
-        return noCommand(table, command)
-
     # FALL-BACK
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
@@ -489,7 +490,7 @@ def appFactory(regime, debug, test, **kwargs):
         flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
         return redirectResult(START, False)
 
-    def noCommand(table, command):
+    def noTask(table, task):
         return abort(400)
 
     def noTable(table):
@@ -699,6 +700,17 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             flash(&#34;workflow not recomputed&#34;, &#34;error&#34;)
         return redirectResult(START, nWf &gt;= 0)
 
+    # WORKFLOW TASKS
+
+    @app.route(f&#34;&#34;&#34;/api/task/&lt;string:task&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
+    def serveTask(task, eid):
+        context = getContext()
+        auth.authenticate()
+        (good, newPath) = execute(context, task, eid)
+        if not good and newPath is None:
+            newPath = START
+        return redirectResult(newPath, good)
+
     # INSERT RECORD IN TABLE
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
@@ -932,17 +944,6 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
             return noTable(table)
         return noAction(action)
 
-    # COMMANDS
-
-    @app.route(f&#34;&#34;&#34;/api/command/&lt;string:command&gt;/&lt;string:table&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
-    def serveCommand(command, table, eid):
-        context = getContext()
-        auth.authenticate()
-        if table in ALL_TABLES and tablePerm(table):
-            (good, newPath) = mkTable(context, table).record(eid=eid).command(command)
-            return redirectResult(newPath, good)
-        return noCommand(table, command)
-
     # FALL-BACK
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
@@ -950,7 +951,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
         return redirectResult(START, False)
 
-    def noCommand(table, command):
+    def noTask(table, task):
         return abort(400)
 
     def noTable(table):

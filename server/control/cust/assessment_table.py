@@ -35,7 +35,7 @@ class AssessmentT(Table):
 
         wfitem = context.getWorkflowItem(masterOid)
 
-        if not wfitem.permission(N.contrib, N.startAssessment):
+        if not wfitem.permission(N.startAssessment):
             return None
 
         (contribType, contribTitle) = wfitem.info(N.contrib, N.type, N.title)

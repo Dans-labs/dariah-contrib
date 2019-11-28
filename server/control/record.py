@@ -293,10 +293,10 @@ class Record:
             if update:
                 self.wfitem = context.getWorkflowItem(contribId, requireFresh=True)
 
-    def command(self, command):
-        """Perform a workflow command.
+    def task(self, task):
+        """Perform a workflow task.
 
-        See `control.workflow.apply.WorkflowItem.doCommand`.
+        See `control.workflow.apply.WorkflowItem.doTask`.
         """
 
         wfitem = self.wfitem
@@ -305,7 +305,7 @@ class Record:
         good = False
 
         if wfitem:
-            url = wfitem.doCommand(command, self)
+            url = wfitem.doTask(task, self)
 
         if url is None:
             table = self.table
@@ -328,7 +328,7 @@ class Record:
             Such fields are not shown and edited in the normal way,
             hence they will be set to unreadable and uneditable.
             The manipulation of such fields is under control of workflow.
-            See `control.workflow.apply.WorkflowItem.isCommand`.
+            See `control.workflow.apply.WorkflowItem.isTask`.
 
         !!! caution
             The name of the field must be one for which field specs are defined
@@ -351,13 +351,15 @@ class Record:
         table = self.table
         wfitem = self.wfitem
 
+        forceEdit = G(kwargs, N.mayEdit)
+
         if wfitem:
             fixed = wfitem.checkFixed(self, field=fieldName)
             if fixed:
                 kwargs[N.mayEdit] = False
-            if wfitem.isCommand(table, fieldName):
+            if wfitem.isTask(table, fieldName):
                 kwargs[N.mayRead] = False
-                kwargs[N.mayEdit] = not fixed
+                kwargs[N.mayEdit] = forceEdit or not fixed
         return Field(self, fieldName, **kwargs)
 
     def delete(self):

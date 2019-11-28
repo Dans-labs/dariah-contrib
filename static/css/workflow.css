@@ -1,4 +1,4 @@
-.command,
+.task,
 .status {
   font-weight: bold;
   padding: 0.5rem;
@@ -23,7 +23,7 @@
   margin: 0.2rem;
   border-radius: 0.1rem;
 }
-.command {
+.task {
   border-width: 0.3rem;
   border-style: outset;
   cursor: pointer;
@@ -51,33 +51,33 @@
   background-color: var(--status-error-back);
   border-color: var(--status-error-border);
 }
-.command.info {
-  color: var(--command-info-fore);
-  background-color: var(--command-info-back);
-  border-color: var(--command-info-border);
+.task.info {
+  color: var(--task-info-fore);
+  background-color: var(--task-info-back);
+  border-color: var(--task-info-border);
 }
-.command.good {
-  color: var(--command-good-fore);
-  background-color: var(--command-good-back);
-  border-color: var(--command-good-border);
+.task.good {
+  color: var(--task-good-fore);
+  background-color: var(--task-good-back);
+  border-color: var(--task-good-border);
 }
-.command.warning {
-  color: var(--command-warning-fore);
-  background-color: var(--command-warning-back);
-  border-color: var(--command-warning-border);
+.task.warning {
+  color: var(--task-warning-fore);
+  background-color: var(--task-warning-back);
+  border-color: var(--task-warning-border);
 }
-.command.error {
-  color: var(--command-error-fore);
-  background-color: var(--command-error-back);
-  border-color: var(--command-error-border);
+.task.error {
+  color: var(--task-error-fore);
+  background-color: var(--task-error-back);
+  border-color: var(--task-error-border);
 }
-.command.info.active,
-.command.good.active,
-.command.warning.active,
-.command.error.active {
-  color: var(--command-active-fore);
-  background-color: var(--command-active-back);
-  border-color: var(--command-active-border);
+.task.info.active,
+.task.good.active,
+.task.warning.active,
+.task.error.active {
+  color: var(--task-active-fore);
+  background-color: var(--task-active-back);
+  border-color: var(--task-active-border);
 }
 .ass-score-box {
   background-color: var(--score-back);

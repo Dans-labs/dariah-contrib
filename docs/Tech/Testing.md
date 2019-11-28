@@ -10,6 +10,6 @@ After running the tests, we generate a reports for the
 [test results](Tests.txt).
 
 We show the coverage by means of an
-[annotated copy](../{{coverage}}/index.html)
+[annotated copy](../coverage/index.html)
 of the code in which
 the unreached lines of code are highlighted.

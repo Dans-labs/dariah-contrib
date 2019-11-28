@@ -39,6 +39,10 @@ with an ✗.
     *   [bash]({{bash}}) shell scripting
     *   [iso8601]({{iso8601}}) date and time format
 
+???+ abstract "Testing"
+    *   [pytest]({{pytest}}) test framework for python, well-suited to Flask
+    *   [coverage]({{coverage}}) making sure that the tests cover the whole code base
+
 ???+ abstract "Documentation"
     *   [mkdocs]({{mkdocs}}) Static page generator in Python
     *   [pdoc3]({{pdoc3}}) API-doc generator from Python docstrings

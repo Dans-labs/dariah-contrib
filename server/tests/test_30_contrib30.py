@@ -1,10 +1,61 @@
 """Test scenario for contributions.
 
-These tests follow `tests.test_contrib1`.
+About modifying fields by selecting values from value tables.
+
+## Domain
+
+*   Clean slate: see `test_10_factory10`.
+*   We work with the contribution table only
+
+## Players
+
+*   As introduced in `test_20_users10`.
 
 ## Acts
 
-*   **Suzan** finds her contribution and continues filling it out.
+`test_start`
+:   **owner** looks for his contribution, but if it is not there, creates a new one.
+    So this batch can also be run in isolation.
+
+`test_valueEdit`
+:   **owner**  opens an edit view for all value fields.
+
+`test_modifyVcc`
+:   **owner** enters multiple values in vcc field.
+
+`test_modifyVccWrong`
+:   **owner** cannot enter a value from an other value table in the vcc field.
+
+`test_modifyVccError`
+:   **owner** cannot enter something that is not a value in a value table.
+
+`test_modifyTypeEx1`
+:   **owner** enters a single value in the typeContribution field.
+
+`test_modifyTypeMult`
+:   **owner** cannot enter multiple values in the typeContribution field.
+
+`test_modifyTypeEx2`
+:   **owner** enters the same single value in the typeContribution field again.
+
+`test_modifyTypeWrong`
+:   **owner** cannot enter a value from an other value table in the
+    typeContribution field.
+
+`test_modifyTypeTypo`
+:   **owner** cannot enter a value in a field with a mis-spelled way.
+    The user could do so with `curl`, he cannot do so in the web-interface.
+
+`test_modifyMeta`
+:   **owner** enters multiple values in all metadata fields.
+
+`test_addMetaWrong`
+:   **owner** cannot enter new values in metadata fields that do not allow new values.
+
+`test_addMetaRight`
+:   **owner** can new values in metadata fields that allow new values.
+
+*   **owner** finds her contribution and continues filling it out.
 *   During this filling-out, several checks will be performed.
 
 Here we focus on the fields that have values in other tables, the valueTables.
@@ -16,10 +67,10 @@ import pytest
 
 import magic  # noqa
 from helpers import (
+    assertModifyField,
     CONTRIB,
-    modifyField,
-    tryModifyField,
     getValueTable,
+    modifyField,
     startWithContrib,
 )
 
@@ -229,19 +280,14 @@ def modifyType(client, eid):
     types = valueTables["typeContribution"]
     field = "typeContribution"
     newValue = EXAMPLE["typeContribution"][-2]
-    tryModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
+    assertModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
 
 
 # TESTS
 
 
-def test_start(clientSuzan):
-    """Can we find or make an item in a list of contributions?
-
-    Yes.
-    """
-
-    (text, fields, msgs, eid) = startWithContrib(clientSuzan)
+def test_start(clientOwner):
+    (text, fields, msgs, eid) = startWithContrib(clientOwner)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
@@ -262,10 +308,8 @@ def test_start(clientSuzan):
         ("keyword",),
     ),
 )
-def test_value_edit(clientSuzan, field):
-    """Can we get an edit view of a field with values in a valueTable?
-
-    Yes.
+def test_valueEdit(clientOwner, field):
+    """NB.
 
     !!! hint "Stored for later use"
         By using `getValueTable` we store the dict of values in the global
@@ -273,108 +317,70 @@ def test_value_edit(clientSuzan, field):
     """
 
     eid = contribInfo["eid"]
-    values = getValueTable(clientSuzan, CONTRIB, eid, field, valueTables)
+    values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values
 
 
-def test_modify_vcc(clientSuzan):
-    """Can we update the vcc with a multiple value?
-
-    Yes.
-    """
-
+def test_modifyVcc(clientOwner):
     field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
     vcc12 = [vccs["VCC1"], vccs["VCC2"]]
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (vcc12, VCC12), True)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (vcc12, VCC12), True)
 
 
-def test_modify_vcc_wrong(clientSuzan):
-    """Can we update the vcc with a nonsense value?
-
-    No
-    """
-
+def test_modifyVccWrong(clientOwner):
     field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
     wrongValue = list(valueTables["tadirahObject"].values())[0]
     vccVal = [wrongValue, vccs["VCC2"]]
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
 
 
-def test_modify_vcc_error(clientSuzan):
-    """Can we update the vcc with a value that is not even an ObjectId?
-
-    No.
-    The error will be caught.
-    """
-
+def test_modifyVccError(clientOwner):
     field = "vcc"
     eid = contribInfo["eid"]
     vccs = valueTables["vcc"]
     vccVal = ["monkey", vccs["VCC2"]]
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (vccVal, None), False)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
 
 
-def test_modify_type_ex1(clientSuzan):
-    """Can we update the type with a single value?
-
-    Yes.
-    """
-
+def test_modifyTypeEx1(clientOwner):
     eid = contribInfo["eid"]
-    modifyType(clientSuzan, eid)
+    modifyType(clientOwner, eid)
 
 
-def test_modify_type_mult(clientSuzan):
-    """Can we update the type with multiple values?
-
-    No.
-    """
-
+def test_modifyTypeMult(clientOwner):
     eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
     field = "typeContribution"
     oldValue = EXAMPLE["typeContribution"][-2]
     otherValue = "service - data hosting"
     newValue = (types[oldValue], types[otherValue])
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (newValue, None), False)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (newValue, None), False)
 
 
-def test_modify_type_ex2(clientSuzan):
-    """Restore the type to the example value. """
-
+def test_modifyTypeEx2(clientOwner):
     eid = contribInfo["eid"]
-    modifyType(clientSuzan, eid)
+    modifyType(clientOwner, eid)
 
 
-def test_modify_type_wrong(clientSuzan):
-    """Can we update the type with a nonsense value?
-
-    No.
-    """
-
+def test_modifyTypeWrong(clientOwner):
     eid = contribInfo["eid"]
     field = "typeContribution"
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    tryModifyField(clientSuzan, CONTRIB, eid, field, wrongValue, False)
+    assertModifyField(clientOwner, CONTRIB, eid, field, wrongValue, False)
 
 
-def test_modify_type_typo(clientSuzan):
-    """Can we update a field if we mis-spell the name?
-
-    No.
-    """
-
+def test_modifyTypeTypo(clientOwner):
     eid = contribInfo["eid"]
     types = valueTables["typeContribution"]
     fieldx = "xxxContribution"
     newValue = "activity - resource creation"
-    (text, fields) = modifyField(clientSuzan, CONTRIB, eid, fieldx, types[newValue])
+    (text, fields) = modifyField(clientOwner, CONTRIB, eid, fieldx, types[newValue])
     assert text == f"No field {CONTRIB}:{fieldx}"
 
 
@@ -388,18 +394,15 @@ def test_modify_type_typo(clientSuzan):
         ("keyword",),
     ),
 )
-def test_modify_meta(clientSuzan, field):
-    """Can we update the meta fields with a multiple value?
-
-    Yes.
-    """
-
+def test_modifyMeta(clientOwner, field):
     eid = contribInfo["eid"]
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
     updateValues = tuple(meta[ex] for ex in checkValues)
 
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, ",".join(checkValues)), True)
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (updateValues, ",".join(checkValues)), True
+    )
 
 
 @pytest.mark.parametrize(
@@ -412,27 +415,17 @@ def test_modify_meta(clientSuzan, field):
         ("tadirahTechnique",),
     ),
 )
-def test_add_meta_wrong(clientSuzan, field):
-    """Can we add an extra vcc or type or tadirah characteristic?
-
-    No.
-    """
-
+def test_addMetaWrong(clientOwner, field):
     eid = contribInfo["eid"]
     updateValues = [["xxx"]]
 
-    tryModifyField(clientSuzan, CONTRIB, eid, field, updateValues, False)
+    assertModifyField(clientOwner, CONTRIB, eid, field, updateValues, False)
 
 
 @pytest.mark.parametrize(
     ("field", "value"), (("discipline", "ddd"), ("keyword", "kkk"),),
 )
-def test_add_meta_right(clientSuzan, field, value):
-    """Can we add an extra discipline or keyword?
-
-    Yes.
-    """
-
+def test_addMetaRight(clientOwner, field, value):
     eid = contribInfo["eid"]
     updateValues = ((value,),)
-    tryModifyField(clientSuzan, CONTRIB, eid, field, (updateValues, value), True)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (updateValues, value), True)

@@ -2,8 +2,83 @@
 
 *   Compute workflow permissions
 *   Show workflow state
-*   Perform workflow commands
+*   Perform workflow tasks
 *   Enforce workflow constraints
+
+## Workflow tasks
+
+The heart of the tool consists of a set of workflow tasks
+that can be executed safely by a workflow engine.
+
+A task is is triggered by a url:
+
+`/api/task/`*taskName*`/`*eid*
+
+Here the *eid* is the id of the central record of the task, e.g. a particular
+contribution, assessment, or review.
+
+Workflow tasks are listed in workflow.yaml, under `tasks`.
+Every task name is associated with properties,
+which are used in determining the permissions of a task.
+They also steer the execution of the task.
+
+### Properties of workflow tasks
+
+Here is a list that explains the task properties.
+
+operator
+:   There are two kinds of operator: `add` and `set`.
+
+    The effect of `add` is the insertion of a new record in a
+    table given in the `detail` property.
+
+    The effect of `set` is the setting of specific fields in a record in
+    the table inndicated by the `table` property.
+    The fields are indicated in the `field` and `date` properties.
+
+table
+:   The table in which the record resides that is central to the task.
+
+detail
+:   The detail table in case the operator is `add`: it will add a detail
+    record of the central record into this table.
+
+kind
+:   In case the task operates on reviews: whether the task is relevant for
+    an `expert` review or a `final` review.
+
+field
+:   In case the operator is `set`: the field in the central record that will be changed.
+
+value
+:   In case the operator is `set`: the new value for the field in the central
+    record that will be changed.
+
+date
+:   In case the operator is `set`: the name of the field that will receive the
+    timestamp.
+
+delay
+:   All `set` tasks are not meant to be revoked. But there is some leeway:
+    Within the amount of hours specified here, the user can revoke the task.
+
+msg
+:   How the task is called on the interface.
+
+acro
+:   An acronym of the task to be used in flash messages.
+
+cls
+:   A CSS class that determines the color of the workflow button, usually
+    `info`, `good`, `warning`, `error`. `info` is the neutral color.
+
+## Workflow stages
+
+Workflow stages are listed in workflow.yaml, under `stageAtts`.
+
+The stage of a record is stored in the workflow attribute `stage`,
+so the only thing needed is to ask for that attribute with
+`control.workflow.apply.WorkflowItem.info`.
 """
 
 from datetime import timedelta
@@ -20,6 +95,8 @@ from control.cust.factory_table import make as mkTable
 CT = C.tables
 CF = C.workflow
 
+ALL_TABLES = CT.all
+
 USER_TABLES_LIST = CT.userTables
 MAIN_TABLE = USER_TABLES_LIST[0]
 USER_ENTRY_TABLES = set(CT.userEntryTables)
@@ -27,12 +104,43 @@ USER_TABLES = set(USER_TABLES_LIST)
 SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
 
 STAGE_ATTS = CF.stageAtts
-COMMANDS = CF.commands
-COMMAND_FIELDS = CF.commandFields
+TASKS = CF.tasks
+TASK_FIELDS = CF.taskFields
 STATUS_REP = CF.statusRep
 DECISION_DELAY = CF.decisionDelay
 
 datetime = Datetime()
+
+
+def execute(context, task, eid):
+    """Executes a workflow task.
+
+    First a table object is constructed, based on the `table` property
+    of the task, using `context`.
+
+    Then a record object is constructed in that table, based on the `eid`
+    parameter.
+
+    If that all succeeds, all information is at hand to verify permissions
+    and perform the task.
+
+    Parameters
+    ----------
+    context: object
+        A `control.context.Context` singleton
+    task: string
+        The name of the task
+    eid: string(objectId)
+        The id of the relevant record
+    """
+
+    taskInfo = G(TASKS, task)
+    acro = G(taskInfo, N.acro)
+    table = G(taskInfo, N.table)
+    if table not in ALL_TABLES:
+        flash(f"""Workflow {acro} operates on wrong table: "{table or E}""", "error")
+        return (False, None)
+    return mkTable(context, table).record(eid=eid).task(task)
 
 
 class WorkflowItem:
@@ -43,7 +151,7 @@ class WorkflowItem:
 
     *   address selected pieces of that information;
     *   compute permissions for workflow actions and database actions;
-    *   determine the workflow stage (see workflow.yaml) the contribution is in.
+    *   determine the workflow stage the contribution is in.
 
     Attributes
     ----------
@@ -379,32 +487,31 @@ class WorkflowItem:
 
         return True
 
-    def permission(self, table, command, kind=None):
-        """Checks whether a workflow command is permitted.
+    def permission(self, task, kind=None):
+        """Checks whether a workflow task is permitted.
 
-        Note that the commands are listed per kind of record they apply to:
+        Note that the tasks are listed per kind of record they apply to:
         contrib, assessment, review.
         They are typically triggered by big workflow buttons on the interface.
 
-        When the request to execute such a command reachees the server, it will
-        check whether the current user is allowed to execute this command
+        When the request to execute such a task reachees the server, it will
+        check whether the current user is allowed to execute this task
         on the records in question.
 
         !!! hint
-            Workflow commands are listed in workflow.yaml, under `commands`.
+            See above for explanation of the properties of the tasks.
 
         !!! note
-            If you try to run a command on a kind of record that it is not
+            If you try to run a task on a kind of record that it is not
             designed for, it will be detected and no permission will be given.
 
         Parameters
         ----------
         table: string
             In order to check permissions, we must specify the kind of record that
-            the command acts on: contrib, assessment, or review.
-        command: string
-            An string consisting of the name of a command as listed in
-            workflow.yaml under `commands`.
+            the task acts on: contrib, assessment, or review.
+        task: string
+            An string consisting of the name of a task.
         kind: string {`expert`, `final`}, optional `None`
             Only if we want review attributes
 
@@ -415,9 +522,11 @@ class WorkflowItem:
         auth = self.auth
         uid = self.uid
 
-        allowedCommands = G(COMMANDS, table, default={})
-        if command not in allowedCommands:
+        if task not in TASKS:
             return False
+
+        taskInfo = TASKS[task]
+        table = G(taskInfo, N.table)
 
         if uid is None or table not in USER_TABLES:
             return False
@@ -451,8 +560,7 @@ class WorkflowItem:
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
-        commandInfo = allowedCommands[command]
-        decisionDelay = G(commandInfo, N.delay)
+        decisionDelay = G(taskInfo, N.delay)
         if decisionDelay:
             decisionDelay = timedelta(hours=decisionDelay)
 
@@ -460,8 +568,10 @@ class WorkflowItem:
         remaining = False
         if decisionDelay and stageDate:
             remaining = stageDate + decisionDelay - justNow
-            if remaining <= timedelta(hours=0):
-                remaining = False
+            if remaining >= timedelta(hours=0):
+                remaining = True
+
+        print("RRR", task, remaining)
 
         if frozen and not remaining:
             return False
@@ -470,7 +580,7 @@ class WorkflowItem:
             if uid not in creators and not isCoord and not isSuper:
                 return False
 
-            if command == N.startAssessment:
+            if task == N.startAssessment:
                 return mayAdd and not frozen and not done
 
             if not isCoord:
@@ -478,13 +588,13 @@ class WorkflowItem:
 
             answer = not frozen or remaining
 
-            if command == N.selectContrib:
+            if task == N.selectContrib:
                 return stage != N.selectYes and answer
 
-            if command == N.deselectContrib:
+            if task == N.deselectContrib:
                 return stage != N.selectNo and answer
 
-            if command == N.unselectContrib:
+            if task == N.unselectContrib:
                 return stage != N.selectNone and answer
 
             return False
@@ -493,7 +603,7 @@ class WorkflowItem:
             return False
 
         if table == N.assessment:
-            if command == N.startReview:
+            if task == N.startReview:
                 return G(mayAdd, myKind)
 
             if uid not in creators:
@@ -503,16 +613,17 @@ class WorkflowItem:
             if not answer:
                 return False
 
-            if command == N.submitAssessment:
+            if task == N.submitAssessment:
                 return stage == N.complete
 
-            if command == N.resubmitAssessment:
+            if task == N.resubmitAssessment:
                 return stage == N.completeWithdrawn
 
-            if command == N.submitRevised:
+            if task == N.submitRevised:
                 return stage == N.completeRevised
 
-            if command == N.withdrawAssessment:
+            if task == N.withdrawAssessment:
+                print('XXX', task, stage)
                 return stage in {N.submitted, N.submittedRevised} and stage not in {
                     N.incompleteWithdrawn,
                     N.completeWithdrawn,
@@ -521,23 +632,22 @@ class WorkflowItem:
             return False
 
         if table == N.review:
-            commandInfo = G(allowedCommands, command)
-            commandKind = G(commandInfo, N.kind)
-            if not kind or kind != commandKind or kind != myKind:
+            taskKind = G(taskInfo, N.kind)
+            if not kind or kind != taskKind or kind != myKind:
                 return False
 
             answer = not locked or remaining
             if not answer:
                 return False
 
-            if command in {
+            if task in {
                 N.expertReviewRevise,
                 N.expertReviewAccept,
                 N.expertReviewReject,
             }:
                 return kind == N.expert
 
-            if command in {
+            if task in {
                 N.finalReviewRevise,
                 N.finalReviewAccept,
                 N.finalReviewReject,
@@ -552,11 +662,8 @@ class WorkflowItem:
     def stage(self, table, kind=None):
         """Find the workflow stage that a record is in.
 
-        Workflow stages are listed in workflow.yaml, under `stageAtts`.
-
-        The stage of a record is stored in the workflow attribute `stage`,
-        so the only thing needed is to ask for that attribute with
-        `control.workflow.apply.WorkflowItem.info`.
+        !!! hint
+            See above for a description of the stages.
 
         Parameters
         ----------
@@ -569,7 +676,7 @@ class WorkflowItem:
         Returns
         -------
         string {`selectYes`, `submittedRevised`, `reviewAccept`, ...}
-            See workflow.yaml for the complete list.
+            See above for the complete list.
         """
 
         return list(self.info(table, N.stage, kind=kind))[0]
@@ -598,25 +705,25 @@ class WorkflowItem:
             [
                 rButton,
                 self.statusOverview(table, kind=kind),
-                self.commands(table, kind=kind),
+                self.tasks(table, kind=kind),
             ],
             cls=f"workflow",
         )
 
     @staticmethod
-    def isCommand(table, field):
-        """Whether a field in a record is involved in a workflow command.
+    def isTask(table, field):
+        """Whether a field in a record is involved in a workflow task.
 
-        Fields that are involved in workflow commands can not be read or edited
+        Fields that are involved in workflow tasks can not be read or edited
         directly:
 
         *   they are represented as workflow status, not as a value
             (see `control.workflow.apply.WorkflowItem.status`);
-        *   they only change as a result of a  workflow command
-            (see `control.workflow.apply.WorkflowItem.doCommand`).
+        *   they only change as a result of a  workflow task
+            (see `control.workflow.apply.WorkflowItem.doTask`).
 
         !!! hint
-            Workflow commands are listed in workflow.yaml, under `commands`.
+            Workflow tasks are described above.
 
         !!! caution
             If a record is not a valid part of a workflow, then all its fields
@@ -634,16 +741,16 @@ class WorkflowItem:
         boolean
         """
 
-        commandFields = G(COMMAND_FIELDS, table, default=set())
-        return field in commandFields
+        taskFields = G(TASK_FIELDS, table, default=set())
+        return field in taskFields
 
-    def doCommand(self, command, recordObj):
-        """Execute a workflow command on a record.
+    def doTask(self, task, recordObj):
+        """Execute a workflow task on a record.
 
-        The permission to execute the command will be checked first.
+        The permission to execute the task will be checked first.
 
         !!! hint
-            Workflow commands are listed in workflow.yaml, under `commands`.
+            Workflow tasks are described above.
 
         Parameters
         ----------
@@ -661,26 +768,27 @@ class WorkflowItem:
         table = recordObj.table
         eid = recordObj.eid
         kind = recordObj.kind
-        commands = G(COMMANDS, table)
         (contribId,) = self.info(N.contrib, N._id)
-        commandInfo = commands[command]
-        acro = G(commandInfo, N.acro)
+
+        taskInfo = G(TASKS, task)
+        acro = G(taskInfo, N.acro)
 
         urlExtra = E
 
         done = False
-        if self.permission(table, command, kind=kind):
-            operator = G(commandInfo, N.operator)
+        if self.permission(task, kind=kind):
+            print("PPP", task, "permitted")
+            operator = G(taskInfo, N.operator)
             if operator == N.add:
-                oTable = G(commandInfo, N.table)
-                tableObj = mkTable(context, oTable)
-                oeid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
-                if oeid:
-                    urlExtra = f"""/{N.open}/{oTable}/{oeid}"""
+                dtable = G(taskInfo, N.detail)
+                tableObj = mkTable(context, dtable)
+                deid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
+                if deid:
+                    urlExtra = f"""/{N.open}/{dtable}/{deid}"""
                     done = True
             elif operator == N.set:
-                field = G(commandInfo, N.field)
-                value = G(commandInfo, N.value)
+                field = G(taskInfo, N.field)
+                value = G(taskInfo, N.value)
                 if recordObj.field(field, mayEdit=True).save(value):
                     done = True
             if done:
@@ -761,14 +869,14 @@ class WorkflowItem:
 
         return H.div([statusRep, scorePart], cls="workflow-line")
 
-    def commands(self, table, kind=None):
-        """Present the currently available commands as buttons on the interface.
+    def tasks(self, table, kind=None):
+        """Present the currently available tasks as buttons on the interface.
 
         Parameters
         ----------
         table: string
-            We must specify the kind of record for which we want to present the
-            commands: contrib, assessment, or review.
+            We must specify the table for which we want to present the
+            tasks: contrib, assessment, or review.
         kind: string {`expert`, `final`}, optional `None`
             Only if we want review attributes
 
@@ -783,32 +891,36 @@ class WorkflowItem:
             return E
 
         eid = list(self.info(table, N._id, kind=kind))[0]
-        commandParts = []
+        taskParts = []
 
-        allowedCommands = G(COMMANDS, table, default={})
+        allowedTasks = sorted(
+            (task, taskInfo)
+            for (task, taskInfo) in TASKS.items()
+            if G(taskInfo, N.table) == table
+        )
         justNow = now()
 
-        for (command, commandInfo) in sorted(allowedCommands.items()):
-            permitted = self.permission(table, command, kind=kind)
+        for (task, taskInfo) in allowedTasks:
+            permitted = self.permission(task, kind=kind)
             if not permitted:
                 continue
 
             remaining = type(permitted) is timedelta and permitted
-            commandUntil = E
+            taskUntil = E
             if remaining:
                 remainingRep = datetime.toDisplay(justNow + remaining)
-                commandUntil = H.span(f""" before {remainingRep}""", cls="datex")
-            commandMsg = G(commandInfo, N.msg)
-            commandCls = G(commandInfo, N.cls)
+                taskUntil = H.span(f""" before {remainingRep}""", cls="datex")
+            taskMsg = G(taskInfo, N.msg)
+            taskCls = G(taskInfo, N.cls)
 
-            commandPart = H.a(
-                [commandMsg, commandUntil],
-                f"""/api/command/{command}/{table}/{eid}""",
-                cls=f"large command {commandCls}",
+            taskPart = H.a(
+                [taskMsg, taskUntil],
+                f"""/api/task/{task}/{eid}""",
+                cls=f"large task {taskCls}",
             )
-            commandParts.append(commandPart)
+            taskParts.append(taskPart)
 
-        return H.join(commandParts)
+        return H.join(taskParts)
 
     def getWf(self, table, kind=None):
         """Select a source of attributes within a workflow item.

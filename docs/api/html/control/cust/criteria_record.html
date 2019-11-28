@@ -49,7 +49,7 @@ class CriteriaR(Record):
 
     def wrapHelp(self):
         info = H.join(
-            self.field(field, readonly=False).wrap(action=N.view)
+            self.field(field, readonly=True).wrap(action=N.view)
             for field in [N.typeContribution, N.remarks]
             if field != N.typeContribution
         )
@@ -111,7 +111,7 @@ that spawns a record object.</p>
 
     def wrapHelp(self):
         info = H.join(
-            self.field(field, readonly=False).wrap(action=N.view)
+            self.field(field, readonly=True).wrap(action=N.view)
             for field in [N.typeContribution, N.remarks]
             if field != N.typeContribution
         )
@@ -145,7 +145,7 @@ that spawns a record object.</p>
 </summary>
 <pre><code class="python">def wrapHelp(self):
     info = H.join(
-        self.field(field, readonly=False).wrap(action=N.view)
+        self.field(field, readonly=True).wrap(action=N.view)
         for field in [N.typeContribution, N.remarks]
         if field != N.typeContribution
     )
@@ -173,7 +173,6 @@ that spawns a record object.</p>
 <li><code><a title="control.record.Record.adjustWorkflow" href="../record.html#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="../record.html#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.bodyMethod" href="../record.html#control.record.Record.bodyMethod">bodyMethod</a></code></li>
-<li><code><a title="control.record.Record.command" href="../record.html#control.record.Record.command">command</a></code></li>
 <li><code><a title="control.record.Record.delete" href="../record.html#control.record.Record.delete">delete</a></code></li>
 <li><code><a title="control.record.Record.deleteButton" href="../record.html#control.record.Record.deleteButton">deleteButton</a></code></li>
 <li><code><a title="control.record.Record.deleteDetails" href="../record.html#control.record.Record.deleteDetails">deleteDetails</a></code></li>
@@ -189,6 +188,7 @@ that spawns a record object.</p>
 <li><code><a title="control.record.Record.setPerm" href="../record.html#control.record.Record.setPerm">setPerm</a></code></li>
 <li><code><a title="control.record.Record.setWorkflow" href="../record.html#control.record.Record.setWorkflow">setWorkflow</a></code></li>
 <li><code><a title="control.record.Record.tableObj" href="../record.html#control.record.Record.tableObj">tableObj</a></code></li>
+<li><code><a title="control.record.Record.task" href="../record.html#control.record.Record.task">task</a></code></li>
 <li><code><a title="control.record.Record.title" href="../record.html#control.record.Record.title">title</a></code></li>
 <li><code><a title="control.record.Record.titleRaw" href="../record.html#control.record.Record.titleRaw">titleRaw</a></code></li>
 <li><code><a title="control.record.Record.withDetails" href="../record.html#control.record.Record.withDetails">withDetails</a></code></li>

@@ -70,7 +70,7 @@ class Decision(Value):
         eid: ObjectId, optional, `None`
         markup: boolean, optional, `False`
         clickable: boolean, optional, `False`
-            If `True`, the title will be represented as a workflow command,
+            If `True`, the title will be represented as a workflow task,
             otherwise as a workflow stage.
         active: string, optional, `None`
         **kwargs: dict
@@ -99,7 +99,7 @@ class Decision(Value):
                 eid = G(record, N._id)
 
             isActive = eid == active
-            baseCls = &#34;command&#34; if clickable else &#34;status&#34;
+            baseCls = &#34;task&#34; if clickable else &#34;status&#34;
             activeCls = &#34;active &#34; if isActive else E
             extraCls = G(record, N.acro)
             actualCls = self.actualCls(record)
@@ -176,7 +176,7 @@ class Decision(Value):
         eid: ObjectId, optional, `None`
         markup: boolean, optional, `False`
         clickable: boolean, optional, `False`
-            If `True`, the title will be represented as a workflow command,
+            If `True`, the title will be represented as a workflow task,
             otherwise as a workflow stage.
         active: string, optional, `None`
         **kwargs: dict
@@ -205,7 +205,7 @@ class Decision(Value):
                 eid = G(record, N._id)
 
             isActive = eid == active
-            baseCls = &#34;command&#34; if clickable else &#34;status&#34;
+            baseCls = &#34;task&#34; if clickable else &#34;status&#34;
             activeCls = &#34;active &#34; if isActive else E
             extraCls = G(record, N.acro)
             actualCls = self.actualCls(record)
@@ -245,7 +245,7 @@ class Decision(Value):
 <dt><strong><code>markup</code></strong> :&ensp;<code>boolean</code>, optional, <code>False</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>clickable</code></strong> :&ensp;<code>boolean</code>, optional, <code>False</code></dt>
-<dd>If <code>True</code>, the title will be represented as a workflow command,
+<dd>If <code>True</code>, the title will be represented as a workflow task,
 otherwise as a workflow stage.</dd>
 <dt><strong><code>active</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
 <dd>&nbsp;</dd>
@@ -279,7 +279,7 @@ relevant for this class.</dd>
     eid: ObjectId, optional, `None`
     markup: boolean, optional, `False`
     clickable: boolean, optional, `False`
-        If `True`, the title will be represented as a workflow command,
+        If `True`, the title will be represented as a workflow task,
         otherwise as a workflow stage.
     active: string, optional, `None`
     **kwargs: dict
@@ -308,7 +308,7 @@ relevant for this class.</dd>
             eid = G(record, N._id)
 
         isActive = eid == active
-        baseCls = &#34;command&#34; if clickable else &#34;status&#34;
+        baseCls = &#34;task&#34; if clickable else &#34;status&#34;
         activeCls = &#34;active &#34; if isActive else E
         extraCls = G(record, N.acro)
         actualCls = self.actualCls(record)

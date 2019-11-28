@@ -271,16 +271,16 @@ setattr(Tables, N.constrained, constrained)
 
 CF = C.workflow
 
-COMMANDS = CF.commands
+TASKS = CF.tasks
 
-commandFields = {}
+taskFields = {}
 
-for (table, tableActions) in COMMANDS.items():
-    for commandInfo in tableActions.values():
-        if G(commandInfo, N.operator) == N.set:
-            commandFields.setdefault(table, set()).add(G(commandInfo, N.field))
-            dateField = G(commandInfo, N.date)
-            if dateField:
-                commandFields[table].add(dateField)
+for taskInfo in TASKS.values():
+    if G(taskInfo, N.operator) == N.set:
+        table = G(taskInfo, N.table)
+        taskFields.setdefault(table, set()).add(G(taskInfo, N.field))
+        dateField = G(taskInfo, N.date)
+        if dateField:
+            taskFields[table].add(dateField)
 
-setattr(Workflow, N.commandFields, commandFields)
+setattr(Workflow, N.taskFields, taskFields)

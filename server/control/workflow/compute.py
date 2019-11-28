@@ -52,24 +52,24 @@ class Workflow:
     :   permananently fixed due to a selection decision on the contrib.
 
         *   extends from contribs to assessments and reviews.
-        *   workflow commands: all forbidden
+        *   workflow tasks: all forbidden
 
     done
     :   permanently fixed due to a final review decision.
 
         *   extends from review to assessment to contrib
-        *   workflow commands: only selection decisions allowed
+        *   workflow tasks: only selection decisions allowed
 
     locked
     :   temporarily fixed due to review in progress.
 
         *   extends from assessment to contrib.
-        *   workflow commands: all allowed as far as they make sense
+        *   workflow tasks: all allowed as far as they make sense
         *   also used to let final reviewer wait for expert reviewe
 
     Any record that carries one of these fixity attributes cannot be edited
     or deleted, except for the fields that get modified when an allowed
-    workflow command is executed.
+    workflow task is executed.
     """
 
     def __init__(self, db):
