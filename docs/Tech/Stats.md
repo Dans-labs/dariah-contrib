@@ -1,4 +1,4 @@
-cloc|github.com/AlDanial/cloc v 1.82  T=3.55 s (32.6 files/s, 5818.3 lines/s)
+cloc|github.com/AlDanial/cloc v 1.82  T=1.95 s (59.3 files/s, 10576.9 lines/s)
 --- | ---
 
 Language|files|blank|comment|code
@@ -16,7 +16,7 @@ SUM:|116|3443|3761|13473
 
 TESTS
 
-cloc|github.com/AlDanial/cloc v 1.82  T=0.09 s (127.5 files/s, 27923.5 lines/s)
+cloc|github.com/AlDanial/cloc v 1.82  T=0.07 s (161.9 files/s, 35476.7 lines/s)
 --- | ---
 
 Language|files|blank|comment|code

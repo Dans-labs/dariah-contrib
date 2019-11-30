@@ -193,7 +193,7 @@ function docsmk {
 function docs {
     codestats
     apidocs
-    docsmk
+    docsmk "$1"
 }
 
 function runtest {
