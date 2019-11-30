@@ -312,7 +312,7 @@ class Db:
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
-        and if needed, recollections will be done before the actual request processing.
+        and if needed, recollections will be done before the request processing.
 
         There is a table `collect`, with records having fields `table` and
         `dateCollected`. After each (re)collect of a table, the `dateCollected` of
@@ -1542,7 +1542,7 @@ as recommended in
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
-        and if needed, recollections will be done before the actual request processing.
+        and if needed, recollections will be done before the request processing.
 
         There is a table `collect`, with records having fields `table` and
         `dateCollected`. After each (re)collect of a table, the `dateCollected` of
@@ -4236,7 +4236,7 @@ in some way that other workers also have to recollect this table.</p>
 <p>Whenever we recollect a value table, we insert the time of recollection
 in a record in the MongoDb.</p>
 <p>Somewhere at the start of each request, these records will be checked,
-and if needed, recollections will be done before the actual request processing.</p>
+and if needed, recollections will be done before the request processing.</p>
 <p>There is a table <code>collect</code>, with records having fields <code>table</code> and
 <code>dateCollected</code>. After each (re)collect of a table, the <code>dateCollected</code> of
 the appropriate record will be set to the current time.</p>
@@ -4284,7 +4284,7 @@ so that other workers can pick it up.</dd>
     in a record in the MongoDb.
 
     Somewhere at the start of each request, these records will be checked,
-    and if needed, recollections will be done before the actual request processing.
+    and if needed, recollections will be done before the request processing.
 
     There is a table `collect`, with records having fields `table` and
     `dateCollected`. After each (re)collect of a table, the `dateCollected` of

@@ -2,14 +2,16 @@
 platform darwin -- Python 3.7.2, pytest-3.10.0, py-1.7.0, pluggy-0.8.0
 rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile: pytest.ini
 plugins: ordering-0.6
-collected 118 items
+collected 116 items
 
-tests/test_10_factory10.py ....                                       [  4/118]
-tests/test_20_users10.py ..                                           [  6/118]
-tests/test_30_contrib10.py ................                           [ 22/118]
-tests/test_30_contrib20.py ...................................        [ 57/118]
-tests/test_30_contrib30.py ..............................             [ 87/118]
-tests/test_30_contrib40.py ....                                       [ 91/118]
-tests/test_40_assess10.py ...........................                 [118/118]
+tests/test_10_factory10.py ....                                       [  4/116]
+tests/test_20_users10.py ..                                           [  6/116]
+tests/test_30_contrib10.py ...........                                [ 17/116]
+tests/test_30_contrib20.py ....................................       [ 53/116]
+tests/test_30_contrib30.py ..............................             [ 83/116]
+tests/test_30_contrib40.py ...                                        [ 86/116]
+tests/test_40_assess10.py ............                                [ 98/116]
+tests/test_40_assess20.py ...                                         [101/116]
+tests/test_40_assess30.py ...............                             [116/116]
 
-========================= 118 passed in 16.15 seconds ==========================
+========================= 116 passed in 21.29 seconds ==========================

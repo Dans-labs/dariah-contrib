@@ -147,7 +147,7 @@
 <p id="t26" class="pln"><span class="str">"""</span><span class="strut">&nbsp;</span></p>
 <p id="t27" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t28" class="stm run hide_run"><span class="key">import</span> <span class="nam">magic</span>  <span class="com"># noqa</span><span class="strut">&nbsp;</span></p>
-<p id="t29" class="stm run hide_run"><span class="key">from</span> <span class="nam">helpers</span> <span class="key">import</span> <span class="nam">assertRight</span><span class="op">,</span> <span class="nam">assertWrong</span><span class="strut">&nbsp;</span></p>
+<p id="t29" class="stm run hide_run"><span class="key">from</span> <span class="nam">helpers</span> <span class="key">import</span> <span class="nam">assertStatus</span><span class="strut">&nbsp;</span></p>
 <p id="t30" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t31" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t32" class="stm run hide_run"><span class="key">def</span> <span class="nam">test_test</span><span class="op">(</span><span class="nam">app</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
@@ -159,13 +159,13 @@
 <p id="t38" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t39" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t40" class="stm run hide_run"><span class="key">def</span> <span class="nam">test_loginProd</span><span class="op">(</span><span class="nam">clientProd</span><span class="op">,</span> <span class="nam">clients</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t41" class="stm run hide_run">    <span class="key">for</span> <span class="nam">eppn</span> <span class="key">in</span> <span class="nam">clients</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t42" class="stm run hide_run">        <span class="nam">assertWrong</span><span class="op">(</span><span class="nam">clientProd</span><span class="op">,</span> <span class="str">f"/login?eppn={eppn}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t41" class="stm run hide_run">    <span class="key">for</span> <span class="nam">user</span> <span class="key">in</span> <span class="nam">clients</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t42" class="stm run hide_run">        <span class="nam">assertStatus</span><span class="op">(</span><span class="nam">clientProd</span><span class="op">,</span> <span class="str">f"/login?eppn={user}"</span><span class="op">,</span> <span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t43" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t44" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t45" class="stm run hide_run"><span class="key">def</span> <span class="nam">test_login</span><span class="op">(</span><span class="nam">clientPublic</span><span class="op">,</span> <span class="nam">clients</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t46" class="stm run hide_run">    <span class="key">for</span> <span class="nam">eppn</span> <span class="key">in</span> <span class="nam">clients</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t47" class="stm run hide_run">        <span class="nam">assertRight</span><span class="op">(</span><span class="nam">clientPublic</span><span class="op">,</span> <span class="str">f"/login?eppn={eppn}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t46" class="stm run hide_run">    <span class="key">for</span> <span class="nam">user</span> <span class="key">in</span> <span class="nam">clients</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t47" class="stm run hide_run">        <span class="nam">assertStatus</span><span class="op">(</span><span class="nam">clientPublic</span><span class="op">,</span> <span class="str">f"/login?eppn={user}"</span><span class="op">,</span> <span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 
             </td>
         </tr>
@@ -176,7 +176,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-11-28 22:03
+            created at 2019-11-30 22:52
         </p>
     </div>
 </div>

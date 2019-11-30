@@ -33,106 +33,58 @@
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
-<dt><a title="test_40_assess10.test_start" href="#test_40_assess10.test_start"><code>test_start()</code></a></dt>
-<dd><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
-So this batch can also be run in isolation.</dd>
-<dt><a title="test_40_assess10.test_tryStart" href="#test_40_assess10.test_tryStart"><code>test_tryStart()</code></a></dt>
+<dt><code>test_startAll</code></dt>
+<dd>
+<p><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
+So this batch can also be run in isolation.</p>
+<p>Additionally:</p>
+<ul>
+<li>the type of contribution is not yet filled in.</li>
+<li><strong>editor</strong> is added to the editors field.</li>
+</ul>
+</dd>
+<dt><a title="test_40_assess10.test_tryStartAll" href="#test_40_assess10.test_tryStartAll"><code>test_tryStartAll()</code></a></dt>
 <dd>
 <p>We start with a contribution without type. Then we cannot start an assessment.
-All users try the following:</p>
+All users cannot perform out a wrongly shaped task:</p>
 <ul>
 <li>a nonsense task: a typo of <code>startAssessment</code></li>
-<li>the task <code>startAssessment</code> but without specifying a contribution</li>
-<li>the task <code>startAssessment</code> but specifying something else than a contribution</li>
-<li>the task <code>startAssessment</code> but with a nonexisting contribution</li>
-<li>the task <code>startAssessment</code> with the proper contribution</li>
+<li>without specifying a contribution</li>
+<li>specifying something else than a contribution</li>
+<li>with a nonexisting contribution</li>
 </ul>
+<p>All users cannot perform the proper task either, because the contribution
+does not have a type yet.</p>
 </dd>
-<dt><a title="test_40_assess10.test_tryStartAgain" href="#test_40_assess10.test_tryStartAgain"><code>test_tryStartAgain()</code></a></dt>
+<dt><a title="test_40_assess10.test_tryStartAgainAll" href="#test_40_assess10.test_tryStartAgainAll"><code>test_tryStartAgainAll()</code></a></dt>
 <dd>
 <p>We assign a type to the contribution.
-All users try the following:</p>
-<ul>
-<li>the task <code>startAssessment</code> with the proper contribution</li>
-</ul>
-<p>Only the last action is successful, only when done by <strong>owner</strong>.</p>
+All users try the task <code>startAssessment</code> with the proper contribution.
+Only the owner and editor succeed, and they deletes the assessment again.</p>
+<p>!!!
+caution
+The power users are not allowed to start an assessment of a contribution
+of which they are not owner or editor.</p>
 </dd>
+<dt><a title="test_40_assess10.test_tryStartAgainOwner" href="#test_40_assess10.test_tryStartAgainOwner"><code>test_tryStartAgainOwner()</code></a></dt>
+<dd><strong>owner</strong> performs the task <code>startAssessment</code> with the proper contribution.</dd>
+<dt><a title="test_40_assess10.test_mylistAll" href="#test_40_assess10.test_mylistAll"><code>test_mylistAll()</code></a></dt>
+<dd>All users try to see the <code>my</code> list of assessments.
+All except <strong>public</strong> succeed, only <strong>owner</strong> sees the assessment.
+Then we add <strong>editor</strong> to the editors of the assessment,
+and then <strong>editor</strong> also sees it in mylist.</dd>
+<dt><a title="test_40_assess10.test_inspectTitleAll" href="#test_40_assess10.test_inspectTitleAll"><code>test_inspectTitleAll()</code></a></dt>
+<dd>All users try to check the prefilled title of the assessment.</dd>
+<dt><a title="test_40_assess10.test_inspectTypeAll" href="#test_40_assess10.test_inspectTypeAll"><code>test_inspectTypeAll()</code></a></dt>
+<dd>All users try to check whether the type of the assessment is the same as the one
+for the contribution.</dd>
+<dt><a title="test_40_assess10.test_modifyTypeAll" href="#test_40_assess10.test_modifyTypeAll"><code>test_modifyTypeAll()</code></a></dt>
+<dd>All users cannot change the type of the assessment. The assessment type
+is fixed after creation.</dd>
+<dt><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll"><code>test_modifyTitleAll()</code></a></dt>
+<dd>All users try to change the title of the assessment. Only some succeed.
+They change it back.</dd>
 </dl>
-<p><a title="test_40_assess10.test_mylistAssessment" href="#test_40_assess10.test_mylistAssessment"><code>test_mylistAssessment()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_inspectTitle" href="#test_40_assess10.test_inspectTitle"><code>test_inspectTitle()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_inspectType" href="#test_40_assess10.test_inspectType"><code>test_inspectType()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_modifyTitle" href="#test_40_assess10.test_modifyTitle"><code>test_modifyTitle()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_modifyType" href="#test_40_assess10.test_modifyType"><code>test_modifyType()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_addAssessment" href="#test_40_assess10.test_addAssessment"><code>test_addAssessment()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_criteriaEntries" href="#test_40_assess10.test_criteriaEntries"><code>test_criteriaEntries()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_modifyTypeContrib" href="#test_40_assess10.test_modifyTypeContrib"><code>test_modifyTypeContrib()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_addAssessment2" href="#test_40_assess10.test_addAssessment2"><code>test_addAssessment2()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_fillCriteriaEntries" href="#test_40_assess10.test_fillCriteriaEntries"><code>test_fillCriteriaEntries()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_fillScore" href="#test_40_assess10.test_fillScore"><code>test_fillScore()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_fillScoreWrong" href="#test_40_assess10.test_fillScoreWrong"><code>test_fillScoreWrong()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_submitAssessment" href="#test_40_assess10.test_submitAssessment"><code>test_submitAssessment()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_complete" href="#test_40_assess10.test_complete"><code>test_complete()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_withdrawAssessment" href="#test_40_assess10.test_withdrawAssessment"><code>test_withdrawAssessment()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_inspectTitle2" href="#test_40_assess10.test_inspectTitle2"><code>test_inspectTitle2()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_resubmitAssessment" href="#test_40_assess10.test_resubmitAssessment"><code>test_resubmitAssessment()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_submitAssessmentRevised" href="#test_40_assess10.test_submitAssessmentRevised"><code>test_submitAssessmentRevised()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_submitAssessment2" href="#test_40_assess10.test_submitAssessment2"><code>test_submitAssessment2()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_withdrawAssessment2" href="#test_40_assess10.test_withdrawAssessment2"><code>test_withdrawAssessment2()</code></a>
-:</p>
-<p><a title="test_40_assess10.test_inspectTitle3" href="#test_40_assess10.test_inspectTitle3"><code>test_inspectTitle3()</code></a>
-:</p>
-<ul>
-<li>Is the title filled in? <strong>public</strong>, <strong>editor</strong> and <strong>owner</strong> all check,
-but <strong>owner</strong> is the only one that can see the fields in the assessment.</li>
-<li>Does the assessment type match the contribution type? <strong>owner</strong> checks.</li>
-<li>Do we have exactly 4 criteria entries in a good state?</li>
-<li><strong>owner</strong> changes the type of the contribution, which invalidates her assessment.</li>
-<li>Then she adds a new assessment, ad checks whether she has now two assessments,
-of which one is invalid.</li>
-<li>Then she removes the new assessment.</li>
-<li>She changes the contribution type back to the original value, and checks
-whether her first assessment is valid again.</li>
-<li>The workflow stage of the assessment should now be <code>incomplete</code></li>
-<li><strong>owner</strong> tries to submit the assessment, unsuccessfully, because it is not
-complete.</li>
-<li><strong>owner</strong> tries to fill out a score that belongs to another criterion.</li>
-<li><strong>owner</strong> fills out the criteria.
-If not all fields are filled in, the status remains <code>incomplete</code>,
-and at the end the status is complete.</li>
-<li><strong>owner</strong> tries to withdraw the assessment, unsuccessfully, because it has not
-been submitted.</li>
-<li>We check of the assessment is still private to <strong>owner</strong>.</li>
-<li><strong>owner</strong> tries to re-submit the assessment, unsuccessfully, because it has not
-been submitted.</li>
-<li><strong>owner</strong> tries to submit the assessment as revision, unsuccessfully.
-been submitted.</li>
-<li><strong>owner</strong> tries to submit the assessment, successfully.</li>
-<li><strong>owner</strong> tries to submit the assessment, unsuccessfully, because it has already
-been submitted.</li>
-<li><strong>owner</strong> tries to withdraw the assessment, successfully.</li>
-<li><strong>owner</strong> tries to submit the assessment as revision, unsuccessfully.</li>
-<li><strong>owner</strong> tries to resubmit the assessment successfully.</li>
-<li>We check of the assessment is still private to <strong>owner</strong>.</li>
-</ul>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -152,225 +104,118 @@ been submitted.</li>
 ## Acts
 
 
-`test_start`
+`test_startAll`
 :   **owner** looks for his contribution, but if it is not there, creates a new one.
     So this batch can also be run in isolation.
 
-`test_tryStart`
+    Additionally:
+
+    *   the type of contribution is not yet filled in.
+    *   **editor** is added to the editors field.
+
+`test_tryStartAll`
 :   We start with a contribution without type. Then we cannot start an assessment.
-    All users try the following:
+    All users cannot perform out a wrongly shaped task:
 
     *   a nonsense task: a typo of `startAssessment`
-    *   the task `startAssessment` but without specifying a contribution
-    *   the task `startAssessment` but specifying something else than a contribution
-    *   the task `startAssessment` but with a nonexisting contribution
-    *   the task `startAssessment` with the proper contribution
+    *   without specifying a contribution
+    *   specifying something else than a contribution
+    *   with a nonexisting contribution
 
-`test_tryStartAgain`
+    All users cannot perform the proper task either, because the contribution
+    does not have a type yet.
+
+`test_tryStartAgainAll`
 :   We assign a type to the contribution.
-    All users try the following:
+    All users try the task `startAssessment` with the proper contribution.
+    Only the owner and editor succeed, and they deletes the assessment again.
 
-    *   the task `startAssessment` with the proper contribution
+    !!!  caution
+        The power users are not allowed to start an assessment of a contribution
+        of which they are not owner or editor.
 
-    Only the last action is successful, only when done by **owner**.
+`test_tryStartAgainOwner`
+:   **owner** performs the task `startAssessment` with the proper contribution.
 
-`test_mylistAssessment`
-:
+`test_mylistAll`
+:   All users try to see the `my` list of assessments.
+    All except **public** succeed, only **owner** sees the assessment.
+    Then we add **editor** to the editors of the assessment,
+    and then **editor** also sees it in mylist.
 
-`test_inspectTitle`
-:
+`test_inspectTitleAll`
+:   All users try to check the prefilled title of the assessment.
 
-`test_inspectType`
-:
+`test_inspectTypeAll`
+:   All users try to check whether the type of the assessment is the same as the one
+    for the contribution.
 
-`test_modifyTitle`
-:
+`test_modifyTypeAll`
+:   All users cannot change the type of the assessment. The assessment type
+    is fixed after creation.
 
-`test_modifyType`
-:
-
-`test_addAssessment`
-:
-
-`test_criteriaEntries`
-:
-
-`test_modifyTypeContrib`
-:
-
-`test_addAssessment2`
-:
-
-`test_fillCriteriaEntries`
-:
-
-`test_fillScore`
-:
-
-`test_fillScoreWrong`
-:
-
-`test_submitAssessment`
-:
-
-`test_complete`
-:
-
-`test_withdrawAssessment`
-:
-
-`test_inspectTitle2`
-:
-
-`test_resubmitAssessment`
-:
-
-`test_submitAssessmentRevised`
-:
-
-`test_submitAssessment2`
-:
-
-`test_withdrawAssessment2`
-:
-
-`test_inspectTitle3`
-:
-
-*   Is the title filled in? **public**, **editor** and **owner** all check,
-    but **owner** is the only one that can see the fields in the assessment.
-*   Does the assessment type match the contribution type? **owner** checks.
-*   Do we have exactly 4 criteria entries in a good state?
-*   **owner** changes the type of the contribution, which invalidates her assessment.
-*   Then she adds a new assessment, ad checks whether she has now two assessments,
-    of which one is invalid.
-*   Then she removes the new assessment.
-*   She changes the contribution type back to the original value, and checks
-    whether her first assessment is valid again.
-*   The workflow stage of the assessment should now be `incomplete`
-*   **owner** tries to submit the assessment, unsuccessfully, because it is not
-    complete.
-*   **owner** tries to fill out a score that belongs to another criterion.
-*   **owner** fills out the criteria.
-    If not all fields are filled in, the status remains `incomplete`,
-    and at the end the status is complete.
-*   **owner** tries to withdraw the assessment, unsuccessfully, because it has not
-    been submitted.
-*   We check of the assessment is still private to **owner**.
-*   **owner** tries to re-submit the assessment, unsuccessfully, because it has not
-    been submitted.
-*   **owner** tries to submit the assessment as revision, unsuccessfully.
-    been submitted.
-*   **owner** tries to submit the assessment, successfully.
-*   **owner** tries to submit the assessment, unsuccessfully, because it has already
-    been submitted.
-*   **owner** tries to withdraw the assessment, successfully.
-*   **owner** tries to submit the assessment as revision, unsuccessfully.
-*   **owner** tries to resubmit the assessment successfully.
-*   We check of the assessment is still private to **owner**.
+`test_modifyTitleAll`
+:   All users try to change the title of the assessment. Only some succeed.
+    They change it back.
 
 &#34;&#34;&#34;
 
 import pytest
 
 import magic  # noqa
+from control.utils import pick as G
+from conftest import USERS, RIGHTFUL_USERS
 from helpers import (
+    assertDelItem,
+    assertEditor,
     assertFieldValue,
     assertModifyField,
-    assertRight,
-    assertStage,
+    assertMylist,
+    assertStartAssessment,
     assertStatus,
-    assertWrong,
     UNDEF_VALUE,
-    WELCOME,
     CONTRIB,
     ASSESS,
-    CRITERIA_ENTRY,
-    BELGIUM_ID,
+    DUMMY_ID,
     EXAMPLE_TYPE,
-    EXAMPLE_TYPE_ID,
     EXAMPLE_TYPE2,
-    EXAMPLE_TYPE2_ID,
-    accessUrl,
-    checkWarning,
-    findDetails,
-    findEid,
-    findItem,
-    findMaterial,
-    getRelatedValues,
+    NEW_A_TITLE,
+    forall,
+    getValueTable,
+    inspectTitleAll,
     startWithContrib,
 )
 
+ATITLE = &#34;assessment of {cTitle}&#34;
+
 contribInfo = {}
 assessInfo = {}
+valueTables = {}
+
 cIds = []
-
-NEW_A_TITLE = &#34;My contribution assessed&#34;
-
-
-# HELPERS
+ids = {}
 
 
-def inspectTitle(
-    clientPublic, expPublic, clientEditor, expEditor, clientOwner, expOwner, title=None
-):
-    &#34;&#34;&#34;Check the assessment title.
-
-    Only Owner can see the assessment, even after completion.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    expPublic, expEditor, expOwner: boolean
-        Whether the corresponding clients are expected to see the title
-    title: string, optional, `None`
-        The expected title.
-        If no title is passed, the standard title will be used.
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-
-    def doIt(cl, own):
-        (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
-        if own:
-            if title is None:
-                cTitle = contribInfo[&#34;fields&#34;][field]
-                aTitle = f&#34;assessment of {cTitle}&#34;
-            else:
-                aTitle = title
-
-            assertFieldValue(fields, field, aTitle)
-        else:
-            assertFieldValue(fields, field, None)
-
-    doIt(clientPublic, expPublic)
-    doIt(clientEditor, expEditor)
-    doIt(clientOwner, expOwner)
-
-
-# TESTS
-
-
-def test_start(clientOwner):
-    &#34;&#34;&#34;Can we find or make an item in a list of contributions?
-
-    We also make sure that the type of contribution is not yet filled in.
-    Yes.
-    &#34;&#34;&#34;
-
+def test_start(clientOwner, clientOffice):
+    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
     (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    (text, fields, msgs, eid) = findItem(clientOwner, CONTRIB, eid)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
     contribInfo[&#34;eid&#34;] = eid
-
-    assert eid is not None
+    cTitle = G(fields, &#34;title&#34;)
+    contribInfo[&#34;title&#34;] = cTitle
 
     assertModifyField(
         clientOwner, CONTRIB, eid, &#34;typeContribution&#34;, (None, UNDEF_VALUE), True
     )
+    getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
+    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
+    types = valueTables[&#34;typeContribution&#34;]
+    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
+    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
+
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
 @pytest.mark.parametrize(
@@ -378,523 +223,116 @@ def test_start(clientOwner):
     (
         (&#34;/api/task/startAssessmentXXX&#34;,),
         (&#34;/api/task/startAssessment&#34;,),
-        (f&#34;/api/task/startAssessment/{BELGIUM_ID}&#34;,),
+        (f&#34;/api/task/startAssessment/{DUMMY_ID}&#34;,),
         (f&#34;/api/task/startAssessment/{{eid}}&#34;,),
     ),
 )
-def test_tryStart(clientPublic, clientEditor, clientOwner, url):
-    &#34;&#34;&#34;Try to start an assessment.
-
-    We try out a few wrongly shaped tasks, which should not succeed.
-
-    Then the right task.
-    But also this should not succeed, since the contribution type is not filled in.
-    Yet we let a bunch of users try it.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    url: string(url)
-        The url that is supposed to trigger the `startAssessment` task.
-    &#34;&#34;&#34;
-
-    def doIt(cl):
-        eid = contribInfo[&#34;eid&#34;]
-        theUrl = url.format(eid=eid)
-        assertWrong(cl, theUrl)
-
-    doIt(clientPublic)
-    doIt(clientEditor)
-    doIt(clientOwner)
-
-
-@pytest.mark.parametrize(
-    (&#34;url&#34;,), ((f&#34;/api/task/startAssessment/{{eid}}&#34;,),),
-)
-def test_tryStartAgain(
-    clientPublic, clientEditor, clientOwner, url,
-):
-    &#34;&#34;&#34;Try to start an assessment again.
-
-    First we let Owner fill out the contribution type.
-    Then we let a bunch of users issue the right task.
-    Only Owner should succeed.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    url: string(url)
-        The url that triggers the `startAssessment` task.
-    &#34;&#34;&#34;
-
+def test_tryStartAll(clients, url):
     eid = contribInfo[&#34;eid&#34;]
+    theUrl = url.format(eid=eid)
 
-    def doIt(cl, expect):
-        theUrl = url.format(eid=eid)
-        assertStatus(cl, theUrl, expect)
+    def assertIt(cl, exp):
+        assertStatus(cl, theUrl, exp)
 
+    expect = {user: False for user in USERS}
+    forall(clients, expect, assertIt)
+
+
+def test_tryStartAgainAll(clients):
+    eid = contribInfo[&#34;eid&#34;]
     field = &#34;typeContribution&#34;
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (EXAMPLE_TYPE_ID, EXAMPLE_TYPE), True
+        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
     )
 
-    doIt(clientPublic, False)
-    doIt(clientEditor, False)
-    doIt(clientOwner, True)
-
-
-def test_mylistAssessment(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Produce a list of my assessments.
-
-    Owner has one, Editor has none, and the public is not allowed to ask for
-    `my` items.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    def doIt(cl, own, auth):
-        url = f&#34;/{ASSESS}/list?action=my&#34;
-        assertStatus(cl, url, auth)
-        (text, status, msgs) = accessUrl(cl, url, redirect=True)
-        material = findMaterial(text)
-        aId = findEid(text)
-        if auth:
-            if own:
-                assert aId is not None
-                assessInfo[&#34;eid&#34;] = aId
-            else:
-                assert &#34;0 assessments&#34; in material
+    def assertIt(cl, exp):
+        aIds = assertStartAssessment(cl, eid, exp)
+        if exp:
+            assert len(aIds) == 1
+            assertDelItem(cl, ASSESS, aIds[0], True)
         else:
-            assert material == WELCOME
+            assert len(aIds) == 0
 
-    doIt(clientPublic, False, False)
-    doIt(clientEditor, False, True)
-    doIt(clientOwner, True, True)
-
-
-def test_inspectTitle(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title.
-
-    It is related to the contribution title.
-
-    Only Owner can see the assessment.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(clientPublic, False, clientEditor, False, clientOwner, True)
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, editor=True))
+    forall(clients, expect, assertIt)
 
 
-def test_inspectType(clientOwner):
-    &#34;&#34;&#34;Check the assessment type.
-
-    It is equal to the contribution type.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    field = &#34;assessmentType&#34;
-
-    (text, fields, msgs, aId) = findItem(clientOwner, ASSESS, aId)
-    assertFieldValue(fields, field, EXAMPLE_TYPE)
+def test_tryStartAgainOwner(clientOwner):
+    eid = contribInfo[&#34;eid&#34;]
+    aIds = assertStartAssessment(clientOwner, eid, True)
+    assert len(aIds) == 1
+    assessInfo[&#34;eid&#34;] = aIds[0]
 
 
-def test_modifyTitle(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Try to modify the assessment title.
+def test_mylistAll(clients):
+    eid = assessInfo[&#34;eid&#34;]
 
-    This should succeed if Owner does it.
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
+    def assertIt(cl, exp):
+        assertMylist(cl, ASSESS, eid, &#34;assessments&#34;, exp)
 
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), public=(False, False)))
+    forall(clients, expect, assertIt)
+
+    assertEditor(clients[&#34;owner&#34;], ASSESS, eid, valueTables, True)
+
+    expect.update(dict(editor=(True, True)))
+    forall(clients, expect, assertIt)
+
+
+def test_inspectTitleAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;title&#34;
-
-    def doIt(cl, own):
-        assertModifyField(cl, ASSESS, aId, field, NEW_A_TITLE, own, mayRead=own)
-
-    doIt(clientPublic, False)
-    doIt(clientEditor, False)
-    doIt(clientOwner, True)
+    cTitle = contribInfo[field]
+    aTitle = ATITLE.format(cTitle=cTitle)
+    expect = {user: None for user in USERS}
+    expect.update({user: aTitle for user in RIGHTFUL_USERS})
+    inspectTitleAll(clients, aId, expect)
 
 
-def test_modifyType(clientOwner):
-    &#34;&#34;&#34;Try to modify the assessment type.
-
-    Once an assessment is created, its type is fixed.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
+def test_inspectTypeAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;assessmentType&#34;
-    newValue = EXAMPLE_TYPE2_ID
-    assertModifyField(clientOwner, ASSESS, aId, field, (newValue, None), False)
+
+    def assertIt(cl, exp):
+        assertFieldValue((cl, ASSESS, aId), field, exp)
+
+    expect = {user: None for user in USERS}
+    expect.update({user: EXAMPLE_TYPE for user in RIGHTFUL_USERS})
+    forall(clients, expect, assertIt)
 
 
-def test_addAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can add an assessment.
-
-    But there is already an assessment in the workflow, so it should fail.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/startAssessment/{eid}&#34;
-    assertWrong(clientOwner, url)
-
-
-def test_criteriaEntries(clientOwner):
-    &#34;&#34;&#34;Count the number of criteria entries for this assessment.
-
-    The criteria entry records have been generated when the assessment was created.
-    For every relevant criterion, there is a corresponding criteria entry record.
-
-    The relevant criteria depend on the contribution type.
-    For this type, there are 4 criteria.
-    They should be in an opened state.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
+def test_modifyTypeAll(clients):
     aId = assessInfo[&#34;eid&#34;]
-    ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
+    field = &#34;assessmentType&#34;
+    newValue = ids[&#34;EXAMPLE_TYPE2&#34;]
 
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
 
-    dtable = &#34;criteriaEntry&#34;
-    criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
-    for (cId, material) in criteriaEntries:
-        assert ellips in material
+    expect = {user: False for user in USERS}
+    forall(clients, expect, assertIt)
 
 
-def test_modifyTypeContrib(clientOwner):
-    &#34;&#34;&#34;Try to modify the contribution type.
-
-    This will invalidate the current assessment.
-    We check that.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
+def test_modifyTitleAll(clients):
     aId = assessInfo[&#34;eid&#34;]
-    cId = contribInfo[&#34;eid&#34;]
-    field = &#34;typeContribution&#34;
-    assertModifyField(
-        clientOwner, CONTRIB, cId, field, (EXAMPLE_TYPE2_ID, EXAMPLE_TYPE2), True
-    )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
-    assert checkWarning(text, NEW_A_TITLE)
-
-
-def test_addAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can add an assessment.
-
-    But there is already an assessment in the workflow, but that is not
-    a valid one anymore, so it should succeed.
-
-    Afterwards, we delete that assessment.
-    And we set the contribution type back to its original value.
-
-    Then the original assessment is valid again.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/startAssessment/{eid}&#34;
-    assertRight(clientOwner, url)
-
-    url = f&#34;/{ASSESS}/list?action=my&#34;
-    (text, status, msgs) = accessUrl(clientOwner, url, redirect=True)
-    aIds = findEid(text, multiple=True)
-    assert len(aIds) == 2
-
-    aId = assessInfo[&#34;eid&#34;]
-    otherAid = [i for i in aIds if i != aId][0]
-    assertRight(clientOwner, f&#34;/api/{ASSESS}/delete/{otherAid}&#34;)
-
-    url = f&#34;/{ASSESS}/list?action=my&#34;
-    (text, status, msgs) = accessUrl(clientOwner, url, redirect=True)
-    aIds = findEid(text, multiple=True)
-    assert len(aIds) == 1
-    assert aIds[0] == aId
-
-    cId = contribInfo[&#34;eid&#34;]
-    field = &#34;typeContribution&#34;
-    assertModifyField(
-        clientOwner, CONTRIB, cId, field, (EXAMPLE_TYPE_ID, EXAMPLE_TYPE), True
-    )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
-    assert not checkWarning(text, NEW_A_TITLE)
-
-
-def test_fillCriteriaEntries(clientOwner):
-    &#34;&#34;&#34;Fill out the criteria entries.
-
-    Start with checking the stage,
-
-    Before filling out the last field of the last criterion,
-    check the stage.
-    After completion, check the stage again.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
-
-    (text, fields, msgs, dummy) = assertStage(clientOwner, ASSESS, aId, &#34;incomplete&#34;)
-
-    dtable = &#34;criteriaEntry&#34;
-    criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
-
-    for (i, (cId, material)) in enumerate(criteriaEntries):
-        assert ellips in material
-        theEvidence = [f&#34;evidence for {i + 1}&#34;, &#34;see the internet&#34;]
-        theEvidenceRep = &#34;,&#34;.join(theEvidence)
-        field = &#34;evidence&#34;
-        assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (theEvidence, theEvidenceRep), True
-        )
-        cIds.append(cId)
-
-
-def test_fillScore(clientOwner):
-    &#34;&#34;&#34;Fill out the score for the first criterion.
-
-    We collect the possible values and pick one to fill in and check
-    whether it has arrived.
-    &#34;&#34;&#34;
-
-    cId = cIds[0]
-    field = &#34;score&#34;
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
-    (scoreValue, scoreId) = sorted(scores.items())[0]
-    assertModifyField(clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True)
-
-
-def test_fillScoreWrong(clientOwner):
-    &#34;&#34;&#34;Try to fill out the score for the first criterion, but with a wrong score value.
-
-    We pick a score that does not belong to this criterion, but to another one.
-
-    This should fail.
-
-    !!! note &#34;Not tested beofre&#34;
-        This is the first time that we use a value table where the possible
-        values are constrained by another constraint:
-
-        Only those scores are eligible that have the same `criteria` master as
-        the `criteriaEntry` record.
-    &#34;&#34;&#34;
-
-    cId = cIds[0]
-    cIdx = cIds[1]
-    field = &#34;score&#34;
-
-    (text, fields, msgs, eid) = findItem(clientOwner, CRITERIA_ENTRY, cId)
-
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, field)
-    (scoreValue, scoreId) = sorted(scores.items())[0]
-    assertModifyField(
-        clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), False
-    )
-
-
-def test_submitAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment.
-
-    But the assessment is not yet complete, so it should fail.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)
-
-
-def test_complete(clientOwner):
-    &#34;&#34;&#34;Fill out all scores.
-
-    Before filling out the last one, check if the status is still incomplete.
-    After filling out all scores, check if the status is complete.
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    field = &#34;score&#34;
-    nCId = len(cIds)
-
-    for (i, cId) in enumerate(cIds):
-        scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
-        (scoreValue, scoreId) = sorted(scores.items())[1]
-        if i == nCId - 1:
-            assertStage(clientOwner, ASSESS, aId, &#34;incomplete&#34;)
-
-        assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True
-        )
-    assertStage(clientOwner, ASSESS, aId, &#34;complete&#34;)
-
-
-def test_withdrawAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can withdraw this assessment.
-
-    But the assessment is not yet submitted, so it should fail.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/withdrawAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)
-
-
-def test_inspectTitle2(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title (again).
-
-    Only Owner can see the assessment, even after completion.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(
-        clientPublic, False, clientEditor, False, clientOwner, True, title=NEW_A_TITLE
-    )
-
-
-def test_resubmitAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can re-submit this assessment.
-
-    The assessment is complete, but has not yet been submitted,
-    so it cannot be resubmitted.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/resubmitAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)
-
-
-def test_submitAssessmentRevised(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment as a revision.
-
-    The assessment is complete, but it is not a revision,
-    so it cannot be submitted as a revision.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
-    assertWrong(clientOwner, url)
-
-
-def test_submitAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment.
-
-    The assessment is complete, so it should succeed.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitAssessment/{aId}&#34;
-    assertRight(clientOwner, url)
-
-
-def test_withdrawAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can withdraw this assessment.
-
-    Yes.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/withdrawAssessment/{aId}&#34;
-    assertRight(clientOwner, url)
-
-
-def Xest_submitAssessmentRevised2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment as a revision.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
-    assertWrong(clientOwner, url)
-
-
-def Xtest_resubmitAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can re-submit this assessment.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/resubmitAssessment/{aId}&#34;
-    assertRight(clientOwner, url)
-
-
-def test_inspectTitle3(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title (again).
-
-    Only Owner can see the assessment, even after submission.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(
-        clientPublic, False, clientEditor, False, clientOwner, True, title=NEW_A_TITLE
-    )</code></pre>
+    field = &#34;title&#34;
+    cTitle = contribInfo[field]
+    aTitle = ATITLE.format(cTitle=cTitle)
+    newValue = NEW_A_TITLE
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, newValue, exp)
+        if exp:
+            assertModifyField(cl, ASSESS, aId, field, aTitle, exp)
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in RIGHTFUL_USERS})
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </section>
 <section>
@@ -904,860 +342,202 @@ def test_inspectTitle3(clientPublic, clientEditor, clientOwner):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_40_assess10.Xest_submitAssessmentRevised2"><code class="name flex">
-<span>def <span class="ident">Xest_submitAssessmentRevised2</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_inspectTitleAll"><code class="name flex">
+<span>def <span class="ident">test_inspectTitleAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether Owner can submit this assessment as a revision.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def Xest_submitAssessmentRevised2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment as a revision.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
-    assertWrong(clientOwner, url)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.Xtest_resubmitAssessment2"><code class="name flex">
-<span>def <span class="ident">Xtest_resubmitAssessment2</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether Owner can re-submit this assessment.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def Xtest_resubmitAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can re-submit this assessment.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/resubmitAssessment/{aId}&#34;
-    assertRight(clientOwner, url)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.inspectTitle"><code class="name flex">
-<span>def <span class="ident">inspectTitle</span></span>(<span>clientPublic, expPublic, clientEditor, expEditor, clientOwner, expOwner, title=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check the assessment title.</p>
-<p>Only Owner can see the assessment, even after completion.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>expPublic</code></strong>, <strong><code>expEditor</code></strong>, <strong><code>expOwner</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether the corresponding clients are expected to see the title</dd>
-<dt><strong><code>title</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
-<dd>The expected title.
-If no title is passed, the standard title will be used.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def inspectTitle(
-    clientPublic, expPublic, clientEditor, expEditor, clientOwner, expOwner, title=None
-):
-    &#34;&#34;&#34;Check the assessment title.
-
-    Only Owner can see the assessment, even after completion.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    expPublic, expEditor, expOwner: boolean
-        Whether the corresponding clients are expected to see the title
-    title: string, optional, `None`
-        The expected title.
-        If no title is passed, the standard title will be used.
-    &#34;&#34;&#34;
-
+<pre><code class="python">def test_inspectTitleAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;title&#34;
-
-    def doIt(cl, own):
-        (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
-        if own:
-            if title is None:
-                cTitle = contribInfo[&#34;fields&#34;][field]
-                aTitle = f&#34;assessment of {cTitle}&#34;
-            else:
-                aTitle = title
-
-            assertFieldValue(fields, field, aTitle)
-        else:
-            assertFieldValue(fields, field, None)
-
-    doIt(clientPublic, expPublic)
-    doIt(clientEditor, expEditor)
-    doIt(clientOwner, expOwner)</code></pre>
+    cTitle = contribInfo[field]
+    aTitle = ATITLE.format(cTitle=cTitle)
+    expect = {user: None for user in USERS}
+    expect.update({user: aTitle for user in RIGHTFUL_USERS})
+    inspectTitleAll(clients, aId, expect)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_addAssessment"><code class="name flex">
-<span>def <span class="ident">test_addAssessment</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_inspectTypeAll"><code class="name flex">
+<span>def <span class="ident">test_inspectTypeAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether Owner can add an assessment.</p>
-<p>But there is already an assessment in the workflow, so it should fail.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_addAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can add an assessment.
-
-    But there is already an assessment in the workflow, so it should fail.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/startAssessment/{eid}&#34;
-    assertWrong(clientOwner, url)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_addAssessment2"><code class="name flex">
-<span>def <span class="ident">test_addAssessment2</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether Owner can add an assessment.</p>
-<p>But there is already an assessment in the workflow, but that is not
-a valid one anymore, so it should succeed.</p>
-<p>Afterwards, we delete that assessment.
-And we set the contribution type back to its original value.</p>
-<p>Then the original assessment is valid again.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_addAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can add an assessment.
-
-    But there is already an assessment in the workflow, but that is not
-    a valid one anymore, so it should succeed.
-
-    Afterwards, we delete that assessment.
-    And we set the contribution type back to its original value.
-
-    Then the original assessment is valid again.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    eid = contribInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/startAssessment/{eid}&#34;
-    assertRight(clientOwner, url)
-
-    url = f&#34;/{ASSESS}/list?action=my&#34;
-    (text, status, msgs) = accessUrl(clientOwner, url, redirect=True)
-    aIds = findEid(text, multiple=True)
-    assert len(aIds) == 2
-
-    aId = assessInfo[&#34;eid&#34;]
-    otherAid = [i for i in aIds if i != aId][0]
-    assertRight(clientOwner, f&#34;/api/{ASSESS}/delete/{otherAid}&#34;)
-
-    url = f&#34;/{ASSESS}/list?action=my&#34;
-    (text, status, msgs) = accessUrl(clientOwner, url, redirect=True)
-    aIds = findEid(text, multiple=True)
-    assert len(aIds) == 1
-    assert aIds[0] == aId
-
-    cId = contribInfo[&#34;eid&#34;]
-    field = &#34;typeContribution&#34;
-    assertModifyField(
-        clientOwner, CONTRIB, cId, field, (EXAMPLE_TYPE_ID, EXAMPLE_TYPE), True
-    )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
-    assert not checkWarning(text, NEW_A_TITLE)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_complete"><code class="name flex">
-<span>def <span class="ident">test_complete</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Fill out all scores.</p>
-<p>Before filling out the last one, check if the status is still incomplete.
-After filling out all scores, check if the status is complete.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_complete(clientOwner):
-    &#34;&#34;&#34;Fill out all scores.
-
-    Before filling out the last one, check if the status is still incomplete.
-    After filling out all scores, check if the status is complete.
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    field = &#34;score&#34;
-    nCId = len(cIds)
-
-    for (i, cId) in enumerate(cIds):
-        scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
-        (scoreValue, scoreId) = sorted(scores.items())[1]
-        if i == nCId - 1:
-            assertStage(clientOwner, ASSESS, aId, &#34;incomplete&#34;)
-
-        assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True
-        )
-    assertStage(clientOwner, ASSESS, aId, &#34;complete&#34;)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_criteriaEntries"><code class="name flex">
-<span>def <span class="ident">test_criteriaEntries</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Count the number of criteria entries for this assessment.</p>
-<p>The criteria entry records have been generated when the assessment was created.
-For every relevant criterion, there is a corresponding criteria entry record.</p>
-<p>The relevant criteria depend on the contribution type.
-For this type, there are 4 criteria.
-They should be in an opened state.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_criteriaEntries(clientOwner):
-    &#34;&#34;&#34;Count the number of criteria entries for this assessment.
-
-    The criteria entry records have been generated when the assessment was created.
-    For every relevant criterion, there is a corresponding criteria entry record.
-
-    The relevant criteria depend on the contribution type.
-    For this type, there are 4 criteria.
-    They should be in an opened state.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
-
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
-
-    dtable = &#34;criteriaEntry&#34;
-    criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
-    for (cId, material) in criteriaEntries:
-        assert ellips in material</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_fillCriteriaEntries"><code class="name flex">
-<span>def <span class="ident">test_fillCriteriaEntries</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Fill out the criteria entries.</p>
-<p>Start with checking the stage,</p>
-<p>Before filling out the last field of the last criterion,
-check the stage.
-After completion, check the stage again.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_fillCriteriaEntries(clientOwner):
-    &#34;&#34;&#34;Fill out the criteria entries.
-
-    Start with checking the stage,
-
-    Before filling out the last field of the last criterion,
-    check the stage.
-    After completion, check the stage again.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
-
-    (text, fields, msgs, dummy) = assertStage(clientOwner, ASSESS, aId, &#34;incomplete&#34;)
-
-    dtable = &#34;criteriaEntry&#34;
-    criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
-
-    for (i, (cId, material)) in enumerate(criteriaEntries):
-        assert ellips in material
-        theEvidence = [f&#34;evidence for {i + 1}&#34;, &#34;see the internet&#34;]
-        theEvidenceRep = &#34;,&#34;.join(theEvidence)
-        field = &#34;evidence&#34;
-        assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (theEvidence, theEvidenceRep), True
-        )
-        cIds.append(cId)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_fillScore"><code class="name flex">
-<span>def <span class="ident">test_fillScore</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Fill out the score for the first criterion.</p>
-<p>We collect the possible values and pick one to fill in and check
-whether it has arrived.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_fillScore(clientOwner):
-    &#34;&#34;&#34;Fill out the score for the first criterion.
-
-    We collect the possible values and pick one to fill in and check
-    whether it has arrived.
-    &#34;&#34;&#34;
-
-    cId = cIds[0]
-    field = &#34;score&#34;
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
-    (scoreValue, scoreId) = sorted(scores.items())[0]
-    assertModifyField(clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_fillScoreWrong"><code class="name flex">
-<span>def <span class="ident">test_fillScoreWrong</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Try to fill out the score for the first criterion, but with a wrong score value.</p>
-<p>We pick a score that does not belong to this criterion, but to another one.</p>
-<p>This should fail.</p>
-<div class="admonition note">
-<p class="admonition-title">Not tested beofre</p>
-<p>This is the first time that we use a value table where the possible
-values are constrained by another constraint:</p>
-<p>Only those scores are eligible that have the same <code>criteria</code> master as
-the <code>criteriaEntry</code> record.</p>
-</div></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_fillScoreWrong(clientOwner):
-    &#34;&#34;&#34;Try to fill out the score for the first criterion, but with a wrong score value.
-
-    We pick a score that does not belong to this criterion, but to another one.
-
-    This should fail.
-
-    !!! note &#34;Not tested beofre&#34;
-        This is the first time that we use a value table where the possible
-        values are constrained by another constraint:
-
-        Only those scores are eligible that have the same `criteria` master as
-        the `criteriaEntry` record.
-    &#34;&#34;&#34;
-
-    cId = cIds[0]
-    cIdx = cIds[1]
-    field = &#34;score&#34;
-
-    (text, fields, msgs, eid) = findItem(clientOwner, CRITERIA_ENTRY, cId)
-
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, field)
-    (scoreValue, scoreId) = sorted(scores.items())[0]
-    assertModifyField(
-        clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), False
-    )</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_inspectTitle"><code class="name flex">
-<span>def <span class="ident">test_inspectTitle</span></span>(<span>clientPublic, clientEditor, clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check the assessment title.</p>
-<p>It is related to the contribution title.</p>
-<p>Only Owner can see the assessment.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_inspectTitle(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title.
-
-    It is related to the contribution title.
-
-    Only Owner can see the assessment.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(clientPublic, False, clientEditor, False, clientOwner, True)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_inspectTitle2"><code class="name flex">
-<span>def <span class="ident">test_inspectTitle2</span></span>(<span>clientPublic, clientEditor, clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check the assessment title (again).</p>
-<p>Only Owner can see the assessment, even after completion.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_inspectTitle2(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title (again).
-
-    Only Owner can see the assessment, even after completion.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(
-        clientPublic, False, clientEditor, False, clientOwner, True, title=NEW_A_TITLE
-    )</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_inspectTitle3"><code class="name flex">
-<span>def <span class="ident">test_inspectTitle3</span></span>(<span>clientPublic, clientEditor, clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check the assessment title (again).</p>
-<p>Only Owner can see the assessment, even after submission.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_inspectTitle3(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Check the assessment title (again).
-
-    Only Owner can see the assessment, even after submission.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    inspectTitle(
-        clientPublic, False, clientEditor, False, clientOwner, True, title=NEW_A_TITLE
-    )</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_inspectType"><code class="name flex">
-<span>def <span class="ident">test_inspectType</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check the assessment type.</p>
-<p>It is equal to the contribution type.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_inspectType(clientOwner):
-    &#34;&#34;&#34;Check the assessment type.
-
-    It is equal to the contribution type.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
+<pre><code class="python">def test_inspectTypeAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;assessmentType&#34;
 
-    (text, fields, msgs, aId) = findItem(clientOwner, ASSESS, aId)
-    assertFieldValue(fields, field, EXAMPLE_TYPE)</code></pre>
+    def assertIt(cl, exp):
+        assertFieldValue((cl, ASSESS, aId), field, exp)
+
+    expect = {user: None for user in USERS}
+    expect.update({user: EXAMPLE_TYPE for user in RIGHTFUL_USERS})
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_modifyTitle"><code class="name flex">
-<span>def <span class="ident">test_modifyTitle</span></span>(<span>clientPublic, clientEditor, clientOwner)</span>
+<dt id="test_40_assess10.test_modifyTitleAll"><code class="name flex">
+<span>def <span class="ident">test_modifyTitleAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Try to modify the assessment title.</p>
-<p>This should succeed if Owner does it.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyTitle(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Try to modify the assessment title.
-
-    This should succeed if Owner does it.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
+<pre><code class="python">def test_modifyTitleAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;title&#34;
+    cTitle = contribInfo[field]
+    aTitle = ATITLE.format(cTitle=cTitle)
+    newValue = NEW_A_TITLE
 
-    def doIt(cl, own):
-        assertModifyField(cl, ASSESS, aId, field, NEW_A_TITLE, own, mayRead=own)
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, newValue, exp)
+        if exp:
+            assertModifyField(cl, ASSESS, aId, field, aTitle, exp)
 
-    doIt(clientPublic, False)
-    doIt(clientEditor, False)
-    doIt(clientOwner, True)</code></pre>
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in RIGHTFUL_USERS})
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_modifyType"><code class="name flex">
-<span>def <span class="ident">test_modifyType</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_modifyTypeAll"><code class="name flex">
+<span>def <span class="ident">test_modifyTypeAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Try to modify the assessment type.</p>
-<p>Once an assessment is created, its type is fixed.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyType(clientOwner):
-    &#34;&#34;&#34;Try to modify the assessment type.
-
-    Once an assessment is created, its type is fixed.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
+<pre><code class="python">def test_modifyTypeAll(clients):
     aId = assessInfo[&#34;eid&#34;]
     field = &#34;assessmentType&#34;
-    newValue = EXAMPLE_TYPE2_ID
-    assertModifyField(clientOwner, ASSESS, aId, field, (newValue, None), False)</code></pre>
+    newValue = ids[&#34;EXAMPLE_TYPE2&#34;]
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
+
+    expect = {user: False for user in USERS}
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_modifyTypeContrib"><code class="name flex">
-<span>def <span class="ident">test_modifyTypeContrib</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_mylistAll"><code class="name flex">
+<span>def <span class="ident">test_mylistAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Try to modify the contribution type.</p>
-<p>This will invalidate the current assessment.
-We check that.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyTypeContrib(clientOwner):
-    &#34;&#34;&#34;Try to modify the contribution type.
+<pre><code class="python">def test_mylistAll(clients):
+    eid = assessInfo[&#34;eid&#34;]
 
-    This will invalidate the current assessment.
-    We check that.
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
+    def assertIt(cl, exp):
+        assertMylist(cl, ASSESS, eid, &#34;assessments&#34;, exp)
 
-    aId = assessInfo[&#34;eid&#34;]
-    cId = contribInfo[&#34;eid&#34;]
-    field = &#34;typeContribution&#34;
-    assertModifyField(
-        clientOwner, CONTRIB, cId, field, (EXAMPLE_TYPE2_ID, EXAMPLE_TYPE2), True
-    )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
-    assert checkWarning(text, NEW_A_TITLE)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_mylistAssessment"><code class="name flex">
-<span>def <span class="ident">test_mylistAssessment</span></span>(<span>clientPublic, clientEditor, clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Produce a list of my assessments.</p>
-<p>Owner has one, Editor has none, and the public is not allowed to ask for
-<code>my</code> items.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_mylistAssessment(clientPublic, clientEditor, clientOwner):
-    &#34;&#34;&#34;Produce a list of my assessments.
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), public=(False, False)))
+    forall(clients, expect, assertIt)
 
-    Owner has one, Editor has none, and the public is not allowed to ask for
-    `my` items.
+    assertEditor(clients[&#34;owner&#34;], ASSESS, eid, valueTables, True)
 
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    &#34;&#34;&#34;
-
-    def doIt(cl, own, auth):
-        url = f&#34;/{ASSESS}/list?action=my&#34;
-        assertStatus(cl, url, auth)
-        (text, status, msgs) = accessUrl(cl, url, redirect=True)
-        material = findMaterial(text)
-        aId = findEid(text)
-        if auth:
-            if own:
-                assert aId is not None
-                assessInfo[&#34;eid&#34;] = aId
-            else:
-                assert &#34;0 assessments&#34; in material
-        else:
-            assert material == WELCOME
-
-    doIt(clientPublic, False, False)
-    doIt(clientEditor, False, True)
-    doIt(clientOwner, True, True)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_resubmitAssessment"><code class="name flex">
-<span>def <span class="ident">test_resubmitAssessment</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether Owner can re-submit this assessment.</p>
-<p>The assessment is complete, but has not yet been submitted,
-so it cannot be resubmitted.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_resubmitAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can re-submit this assessment.
-
-    The assessment is complete, but has not yet been submitted,
-    so it cannot be resubmitted.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/resubmitAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)</code></pre>
+    expect.update(dict(editor=(True, True)))
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess10.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clientOwner)</span>
+<span>def <span class="ident">test_start</span></span>(<span>clientOwner, clientOffice)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Can we find or make an item in a list of contributions?</p>
-<p>We also make sure that the type of contribution is not yet filled in.
-Yes.</p></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOwner):
-    &#34;&#34;&#34;Can we find or make an item in a list of contributions?
-
-    We also make sure that the type of contribution is not yet filled in.
-    Yes.
-    &#34;&#34;&#34;
-
+<pre><code class="python">def test_start(clientOwner, clientOffice):
+    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
     (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    (text, fields, msgs, eid) = findItem(clientOwner, CONTRIB, eid)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
     contribInfo[&#34;eid&#34;] = eid
-
-    assert eid is not None
+    cTitle = G(fields, &#34;title&#34;)
+    contribInfo[&#34;title&#34;] = cTitle
 
     assertModifyField(
         clientOwner, CONTRIB, eid, &#34;typeContribution&#34;, (None, UNDEF_VALUE), True
-    )</code></pre>
+    )
+    getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
+    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
+    types = valueTables[&#34;typeContribution&#34;]
+    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
+    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
+
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_submitAssessment"><code class="name flex">
-<span>def <span class="ident">test_submitAssessment</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_tryStartAgainAll"><code class="name flex">
+<span>def <span class="ident">test_tryStartAgainAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether Owner can submit this assessment.</p>
-<p>But the assessment is not yet complete, so it should fail.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_submitAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment.
+<pre><code class="python">def test_tryStartAgainAll(clients):
+    eid = contribInfo[&#34;eid&#34;]
+    field = &#34;typeContribution&#34;
+    assertModifyField(
+        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+    )
 
-    But the assessment is not yet complete, so it should fail.
+    def assertIt(cl, exp):
+        aIds = assertStartAssessment(cl, eid, exp)
+        if exp:
+            assert len(aIds) == 1
+            assertDelItem(cl, ASSESS, aIds[0], True)
+        else:
+            assert len(aIds) == 0
 
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)</code></pre>
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, editor=True))
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_submitAssessment2"><code class="name flex">
-<span>def <span class="ident">test_submitAssessment2</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_tryStartAgainOwner"><code class="name flex">
+<span>def <span class="ident">test_tryStartAgainOwner</span></span>(<span>clientOwner)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether Owner can submit this assessment.</p>
-<p>The assessment is complete, so it should succeed.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_submitAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment.
-
-    The assessment is complete, so it should succeed.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitAssessment/{aId}&#34;
-    assertRight(clientOwner, url)</code></pre>
+<pre><code class="python">def test_tryStartAgainOwner(clientOwner):
+    eid = contribInfo[&#34;eid&#34;]
+    aIds = assertStartAssessment(clientOwner, eid, True)
+    assert len(aIds) == 1
+    assessInfo[&#34;eid&#34;] = aIds[0]</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_submitAssessmentRevised"><code class="name flex">
-<span>def <span class="ident">test_submitAssessmentRevised</span></span>(<span>clientOwner)</span>
+<dt id="test_40_assess10.test_tryStartAll"><code class="name flex">
+<span>def <span class="ident">test_tryStartAll</span></span>(<span>clients, url)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether Owner can submit this assessment as a revision.</p>
-<p>The assessment is complete, but it is not a revision,
-so it cannot be submitted as a revision.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_submitAssessmentRevised(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can submit this assessment as a revision.
-
-    The assessment is complete, but it is not a revision,
-    so it cannot be submitted as a revision.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
-    assertWrong(clientOwner, url)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_tryStart"><code class="name flex">
-<span>def <span class="ident">test_tryStart</span></span>(<span>clientPublic, clientEditor, clientOwner, url)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Try to start an assessment.</p>
-<p>We try out a few wrongly shaped tasks, which should not succeed.</p>
-<p>Then the right task.
-But also this should not succeed, since the contribution type is not filled in.
-Yet we let a bunch of users try it.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url that is supposed to trigger the <code>startAssessment</code> task.</dd>
-</dl></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1767,148 +547,19 @@ Yet we let a bunch of users try it.</p>
     (
         (&#34;/api/task/startAssessmentXXX&#34;,),
         (&#34;/api/task/startAssessment&#34;,),
-        (f&#34;/api/task/startAssessment/{BELGIUM_ID}&#34;,),
+        (f&#34;/api/task/startAssessment/{DUMMY_ID}&#34;,),
         (f&#34;/api/task/startAssessment/{{eid}}&#34;,),
     ),
 )
-def test_tryStart(clientPublic, clientEditor, clientOwner, url):
-    &#34;&#34;&#34;Try to start an assessment.
-
-    We try out a few wrongly shaped tasks, which should not succeed.
-
-    Then the right task.
-    But also this should not succeed, since the contribution type is not filled in.
-    Yet we let a bunch of users try it.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    url: string(url)
-        The url that is supposed to trigger the `startAssessment` task.
-    &#34;&#34;&#34;
-
-    def doIt(cl):
-        eid = contribInfo[&#34;eid&#34;]
-        theUrl = url.format(eid=eid)
-        assertWrong(cl, theUrl)
-
-    doIt(clientPublic)
-    doIt(clientEditor)
-    doIt(clientOwner)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_tryStartAgain"><code class="name flex">
-<span>def <span class="ident">test_tryStartAgain</span></span>(<span>clientPublic, clientEditor, clientOwner, url)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Try to start an assessment again.</p>
-<p>First we let Owner fill out the contribution type.
-Then we let a bunch of users issue the right task.
-Only Owner should succeed.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientPublic</code></strong>, <strong><code>clientEditor</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url that triggers the <code>startAssessment</code> task.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.mark.parametrize(
-    (&#34;url&#34;,), ((f&#34;/api/task/startAssessment/{{eid}}&#34;,),),
-)
-def test_tryStartAgain(
-    clientPublic, clientEditor, clientOwner, url,
-):
-    &#34;&#34;&#34;Try to start an assessment again.
-
-    First we let Owner fill out the contribution type.
-    Then we let a bunch of users issue the right task.
-    Only Owner should succeed.
-
-    Parameters
-    ----------
-    clientPublic, clientEditor, clientOwner: fixture
-    url: string(url)
-        The url that triggers the `startAssessment` task.
-    &#34;&#34;&#34;
-
+def test_tryStartAll(clients, url):
     eid = contribInfo[&#34;eid&#34;]
+    theUrl = url.format(eid=eid)
 
-    def doIt(cl, expect):
-        theUrl = url.format(eid=eid)
-        assertStatus(cl, theUrl, expect)
+    def assertIt(cl, exp):
+        assertStatus(cl, theUrl, exp)
 
-    field = &#34;typeContribution&#34;
-    assertModifyField(
-        clientOwner, CONTRIB, eid, field, (EXAMPLE_TYPE_ID, EXAMPLE_TYPE), True
-    )
-
-    doIt(clientPublic, False)
-    doIt(clientEditor, False)
-    doIt(clientOwner, True)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_withdrawAssessment"><code class="name flex">
-<span>def <span class="ident">test_withdrawAssessment</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether Owner can withdraw this assessment.</p>
-<p>But the assessment is not yet submitted, so it should fail.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_withdrawAssessment(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can withdraw this assessment.
-
-    But the assessment is not yet submitted, so it should fail.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/withdrawAssessment/{aId}&#34;
-    assertWrong(clientOwner, url)</code></pre>
-</details>
-</dd>
-<dt id="test_40_assess10.test_withdrawAssessment2"><code class="name flex">
-<span>def <span class="ident">test_withdrawAssessment2</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether Owner can withdraw this assessment.</p>
-<p>Yes.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_withdrawAssessment2(clientOwner):
-    &#34;&#34;&#34;Check whether Owner can withdraw this assessment.
-
-    Yes.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    &#34;&#34;&#34;
-
-    aId = assessInfo[&#34;eid&#34;]
-    url = f&#34;/api/task/withdrawAssessment/{aId}&#34;
-    assertRight(clientOwner, url)</code></pre>
+    expect = {user: False for user in USERS}
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1928,33 +579,15 @@ def test_tryStartAgain(
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="test_40_assess10.Xest_submitAssessmentRevised2" href="#test_40_assess10.Xest_submitAssessmentRevised2">Xest_submitAssessmentRevised2</a></code></li>
-<li><code><a title="test_40_assess10.Xtest_resubmitAssessment2" href="#test_40_assess10.Xtest_resubmitAssessment2">Xtest_resubmitAssessment2</a></code></li>
-<li><code><a title="test_40_assess10.inspectTitle" href="#test_40_assess10.inspectTitle">inspectTitle</a></code></li>
-<li><code><a title="test_40_assess10.test_addAssessment" href="#test_40_assess10.test_addAssessment">test_addAssessment</a></code></li>
-<li><code><a title="test_40_assess10.test_addAssessment2" href="#test_40_assess10.test_addAssessment2">test_addAssessment2</a></code></li>
-<li><code><a title="test_40_assess10.test_complete" href="#test_40_assess10.test_complete">test_complete</a></code></li>
-<li><code><a title="test_40_assess10.test_criteriaEntries" href="#test_40_assess10.test_criteriaEntries">test_criteriaEntries</a></code></li>
-<li><code><a title="test_40_assess10.test_fillCriteriaEntries" href="#test_40_assess10.test_fillCriteriaEntries">test_fillCriteriaEntries</a></code></li>
-<li><code><a title="test_40_assess10.test_fillScore" href="#test_40_assess10.test_fillScore">test_fillScore</a></code></li>
-<li><code><a title="test_40_assess10.test_fillScoreWrong" href="#test_40_assess10.test_fillScoreWrong">test_fillScoreWrong</a></code></li>
-<li><code><a title="test_40_assess10.test_inspectTitle" href="#test_40_assess10.test_inspectTitle">test_inspectTitle</a></code></li>
-<li><code><a title="test_40_assess10.test_inspectTitle2" href="#test_40_assess10.test_inspectTitle2">test_inspectTitle2</a></code></li>
-<li><code><a title="test_40_assess10.test_inspectTitle3" href="#test_40_assess10.test_inspectTitle3">test_inspectTitle3</a></code></li>
-<li><code><a title="test_40_assess10.test_inspectType" href="#test_40_assess10.test_inspectType">test_inspectType</a></code></li>
-<li><code><a title="test_40_assess10.test_modifyTitle" href="#test_40_assess10.test_modifyTitle">test_modifyTitle</a></code></li>
-<li><code><a title="test_40_assess10.test_modifyType" href="#test_40_assess10.test_modifyType">test_modifyType</a></code></li>
-<li><code><a title="test_40_assess10.test_modifyTypeContrib" href="#test_40_assess10.test_modifyTypeContrib">test_modifyTypeContrib</a></code></li>
-<li><code><a title="test_40_assess10.test_mylistAssessment" href="#test_40_assess10.test_mylistAssessment">test_mylistAssessment</a></code></li>
-<li><code><a title="test_40_assess10.test_resubmitAssessment" href="#test_40_assess10.test_resubmitAssessment">test_resubmitAssessment</a></code></li>
+<li><code><a title="test_40_assess10.test_inspectTitleAll" href="#test_40_assess10.test_inspectTitleAll">test_inspectTitleAll</a></code></li>
+<li><code><a title="test_40_assess10.test_inspectTypeAll" href="#test_40_assess10.test_inspectTypeAll">test_inspectTypeAll</a></code></li>
+<li><code><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll">test_modifyTitleAll</a></code></li>
+<li><code><a title="test_40_assess10.test_modifyTypeAll" href="#test_40_assess10.test_modifyTypeAll">test_modifyTypeAll</a></code></li>
+<li><code><a title="test_40_assess10.test_mylistAll" href="#test_40_assess10.test_mylistAll">test_mylistAll</a></code></li>
 <li><code><a title="test_40_assess10.test_start" href="#test_40_assess10.test_start">test_start</a></code></li>
-<li><code><a title="test_40_assess10.test_submitAssessment" href="#test_40_assess10.test_submitAssessment">test_submitAssessment</a></code></li>
-<li><code><a title="test_40_assess10.test_submitAssessment2" href="#test_40_assess10.test_submitAssessment2">test_submitAssessment2</a></code></li>
-<li><code><a title="test_40_assess10.test_submitAssessmentRevised" href="#test_40_assess10.test_submitAssessmentRevised">test_submitAssessmentRevised</a></code></li>
-<li><code><a title="test_40_assess10.test_tryStart" href="#test_40_assess10.test_tryStart">test_tryStart</a></code></li>
-<li><code><a title="test_40_assess10.test_tryStartAgain" href="#test_40_assess10.test_tryStartAgain">test_tryStartAgain</a></code></li>
-<li><code><a title="test_40_assess10.test_withdrawAssessment" href="#test_40_assess10.test_withdrawAssessment">test_withdrawAssessment</a></code></li>
-<li><code><a title="test_40_assess10.test_withdrawAssessment2" href="#test_40_assess10.test_withdrawAssessment2">test_withdrawAssessment2</a></code></li>
+<li><code><a title="test_40_assess10.test_tryStartAgainAll" href="#test_40_assess10.test_tryStartAgainAll">test_tryStartAgainAll</a></code></li>
+<li><code><a title="test_40_assess10.test_tryStartAgainOwner" href="#test_40_assess10.test_tryStartAgainOwner">test_tryStartAgainOwner</a></code></li>
+<li><code><a title="test_40_assess10.test_tryStartAll" href="#test_40_assess10.test_tryStartAll">test_tryStartAll</a></code></li>
 </ul>
 </li>
 </ul>

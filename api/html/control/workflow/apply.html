@@ -297,6 +297,12 @@ class WorkflowItem:
             The eppn is the user identifying attribute from the identity provider.
         &#34;&#34;&#34;
 
+        self.isSuperuser = auth.superuser()
+        &#34;&#34;&#34;*boolean* Whether the current user is a superuser.
+
+        See `control.auth.Auth.superuser`.
+        &#34;&#34;&#34;
+
         self.data = data
         &#34;&#34;&#34;*dict* The  workflow attributes.
         &#34;&#34;&#34;
@@ -433,6 +439,8 @@ class WorkflowItem:
 
         !!! note
             It also depends on the current user.
+            Power users will not be prevented to read records because of
+            workflow conditions.
 
         Here are the rules:
 
@@ -484,6 +492,10 @@ class WorkflowItem:
         -------
         boolean | `None`
         &#34;&#34;&#34;
+
+        isSuperuser = self.isSuperuser
+        if isSuperuser:
+            return None
 
         table = recordObj.table
         if table not in SENSITIVE_TABLES:
@@ -645,6 +657,7 @@ class WorkflowItem:
 
         (contribId,) = self.info(N.contrib, N._id)
 
+        isOwn = uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
@@ -659,17 +672,15 @@ class WorkflowItem:
             if remaining &gt;= timedelta(hours=0):
                 remaining = True
 
-        print(&#34;RRR&#34;, task, remaining)
-
         if frozen and not remaining:
             return False
 
         if table == N.contrib:
-            if uid not in creators and not isCoord and not isSuper:
+            if not isOwn and not isCoord and not isSuper:
                 return False
 
             if task == N.startAssessment:
-                return mayAdd and not frozen and not done
+                return isOwn and mayAdd and not frozen and not done
 
             if not isCoord:
                 return False
@@ -711,7 +722,6 @@ class WorkflowItem:
                 return stage == N.completeRevised
 
             if task == N.withdrawAssessment:
-                print(&#39;XXX&#39;, task, stage)
                 return stage in {N.submitted, N.submittedRevised} and stage not in {
                     N.incompleteWithdrawn,
                     N.completeWithdrawn,
@@ -865,7 +875,6 @@ class WorkflowItem:
 
         done = False
         if self.permission(task, kind=kind):
-            print(&#34;PPP&#34;, task, &#34;permitted&#34;)
             operator = G(taskInfo, N.operator)
             if operator == N.add:
                 dtable = G(taskInfo, N.detail)
@@ -1252,6 +1261,12 @@ details of the current user can be read off.</dd>
             The eppn is the user identifying attribute from the identity provider.
         &#34;&#34;&#34;
 
+        self.isSuperuser = auth.superuser()
+        &#34;&#34;&#34;*boolean* Whether the current user is a superuser.
+
+        See `control.auth.Auth.superuser`.
+        &#34;&#34;&#34;
+
         self.data = data
         &#34;&#34;&#34;*dict* The  workflow attributes.
         &#34;&#34;&#34;
@@ -1388,6 +1403,8 @@ details of the current user can be read off.</dd>
 
         !!! note
             It also depends on the current user.
+            Power users will not be prevented to read records because of
+            workflow conditions.
 
         Here are the rules:
 
@@ -1439,6 +1456,10 @@ details of the current user can be read off.</dd>
         -------
         boolean | `None`
         &#34;&#34;&#34;
+
+        isSuperuser = self.isSuperuser
+        if isSuperuser:
+            return None
 
         table = recordObj.table
         if table not in SENSITIVE_TABLES:
@@ -1600,6 +1621,7 @@ details of the current user can be read off.</dd>
 
         (contribId,) = self.info(N.contrib, N._id)
 
+        isOwn = uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
@@ -1614,17 +1636,15 @@ details of the current user can be read off.</dd>
             if remaining &gt;= timedelta(hours=0):
                 remaining = True
 
-        print(&#34;RRR&#34;, task, remaining)
-
         if frozen and not remaining:
             return False
 
         if table == N.contrib:
-            if uid not in creators and not isCoord and not isSuper:
+            if not isOwn and not isCoord and not isSuper:
                 return False
 
             if task == N.startAssessment:
-                return mayAdd and not frozen and not done
+                return isOwn and mayAdd and not frozen and not done
 
             if not isCoord:
                 return False
@@ -1666,7 +1686,6 @@ details of the current user can be read off.</dd>
                 return stage == N.completeRevised
 
             if task == N.withdrawAssessment:
-                print(&#39;XXX&#39;, task, stage)
                 return stage in {N.submitted, N.submittedRevised} and stage not in {
                     N.incompleteWithdrawn,
                     N.completeWithdrawn,
@@ -1820,7 +1839,6 @@ details of the current user can be read off.</dd>
 
         done = False
         if self.permission(task, kind=kind):
-            print(&#34;PPP&#34;, task, &#34;permitted&#34;)
             operator = G(taskInfo, N.operator)
             if operator == N.add:
                 dtable = G(taskInfo, N.detail)
@@ -2123,6 +2141,11 @@ workflow attributes.</p></section>
 <p>The eppn is the user identifying attribute from the identity provider.</p>
 </div></section>
 </dd>
+<dt id="control.workflow.apply.WorkflowItem.isSuperuser"><code class="name">var <span class="ident">isSuperuser</span></code></dt>
+<dd>
+<section class="desc"><p><em>boolean</em> Whether the current user is a superuser.</p>
+<p>See <a title="control.auth.Auth.superuser" href="../auth.html#control.auth.Auth.superuser"><code>Auth.superuser()</code></a>.</p></section>
+</dd>
 <dt id="control.workflow.apply.WorkflowItem.myKind"><code class="name">var <span class="ident">myKind</span></code></dt>
 <dd>
 <section class="desc"><p><em>dict</em> The kind of reviewer that the current user is.</p>
@@ -2233,7 +2256,9 @@ the public.</p>
 the normal permission rules applay.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>It also depends on the current user.</p>
+<p>It also depends on the current user.
+Power users will not be prevented to read records because of
+workflow conditions.</p>
 </div>
 <p>Here are the rules:</p>
 <h4 id="assessment-criteria-entry">Assessment, Criteria Entry</h4>
@@ -2298,6 +2323,8 @@ Otherwise, we check for the readability of this field in the record.</dd>
 
     !!! note
         It also depends on the current user.
+        Power users will not be prevented to read records because of
+        workflow conditions.
 
     Here are the rules:
 
@@ -2349,6 +2376,10 @@ Otherwise, we check for the readability of this field in the record.</dd>
     -------
     boolean | `None`
     &#34;&#34;&#34;
+
+    isSuperuser = self.isSuperuser
+    if isSuperuser:
+        return None
 
     table = recordObj.table
     if table not in SENSITIVE_TABLES:
@@ -2448,7 +2479,6 @@ If the action has not been performed, <code>None</code> is returned.</p></sectio
 
     done = False
     if self.permission(task, kind=kind):
-        print(&#34;PPP&#34;, task, &#34;permitted&#34;)
         operator = G(taskInfo, N.operator)
         if operator == N.add:
             dtable = G(taskInfo, N.detail)
@@ -2887,6 +2917,7 @@ the task acts on: contrib, assessment, or review.</dd>
 
     (contribId,) = self.info(N.contrib, N._id)
 
+    isOwn = uid in creators
     isCoord = countryId and auth.coordinator(countryId=countryId)
     isSuper = auth.superuser()
 
@@ -2901,17 +2932,15 @@ the task acts on: contrib, assessment, or review.</dd>
         if remaining &gt;= timedelta(hours=0):
             remaining = True
 
-    print(&#34;RRR&#34;, task, remaining)
-
     if frozen and not remaining:
         return False
 
     if table == N.contrib:
-        if uid not in creators and not isCoord and not isSuper:
+        if not isOwn and not isCoord and not isSuper:
             return False
 
         if task == N.startAssessment:
-            return mayAdd and not frozen and not done
+            return isOwn and mayAdd and not frozen and not done
 
         if not isCoord:
             return False
@@ -2953,7 +2982,6 @@ the task acts on: contrib, assessment, or review.</dd>
             return stage == N.completeRevised
 
         if task == N.withdrawAssessment:
-            print(&#39;XXX&#39;, task, stage)
             return stage in {N.submitted, N.submittedRevised} and stage not in {
                 N.incompleteWithdrawn,
                 N.completeWithdrawn,
@@ -3298,6 +3326,7 @@ tasks: contrib, assessment, or review.</dd>
 <li><code><a title="control.workflow.apply.WorkflowItem.getKind" href="#control.workflow.apply.WorkflowItem.getKind">getKind</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.getWf" href="#control.workflow.apply.WorkflowItem.getWf">getWf</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.info" href="#control.workflow.apply.WorkflowItem.info">info</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.isSuperuser" href="#control.workflow.apply.WorkflowItem.isSuperuser">isSuperuser</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.isTask" href="#control.workflow.apply.WorkflowItem.isTask">isTask</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.isValid" href="#control.workflow.apply.WorkflowItem.isValid">isValid</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.myKind" href="#control.workflow.apply.WorkflowItem.myKind">myKind</a></code></li>

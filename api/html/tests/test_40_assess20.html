@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>test_30_contrib40 API documentation</title>
-<meta name="description" content="Test scenario for contributions …" />
+<title>test_40_assess20 API documentation</title>
+<meta name="description" content="Test scenario for assessments …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,15 +17,15 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>test_30_contrib40</code></h1>
+<h1 class="title">Module <code>test_40_assess20</code></h1>
 </header>
 <section id="section-intro">
-<p>Test scenario for contributions.</p>
-<p>About the visibility of sensitive fields.</p>
+<p>Test scenario for assessments.</p>
 <h2 id="domain">Domain</h2>
 <ul>
 <li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the contribution table only</li>
+<li>We work with one contribution and one assessment, see <a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a>.</li>
+<li>The assessment has the original title.</li>
 </ul>
 <h2 id="players">Players</h2>
 <ul>
@@ -33,25 +33,25 @@
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
-<dt><a title="test_30_contrib40.test_start" href="#test_30_contrib40.test_start"><code>test_start()</code></a></dt>
-<dd><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
-So this batch can also be run in isolation.</dd>
-<dt><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost"><code>test_viewCost()</code></a></dt>
-<dd>all users try to look at the costTotal and costDescription fields,
-but only some succeed.</dd>
+<dt><a title="test_40_assess20.test_addAssessment" href="#test_40_assess20.test_addAssessment"><code>test_addAssessment()</code></a></dt>
+<dd><strong>owner</strong> cannot add another assessment.</dd>
+<dt><a title="test_40_assess20.test_addAssessment2" href="#test_40_assess20.test_addAssessment2"><code>test_addAssessment2()</code></a></dt>
+<dd><strong>owner</strong> modifies type of contribution, which invalidates the assessment,
+then adds a new assessment, and deletes it afterwards.
+Also sets the contribution type back to the old value, which validates the
+assessment.</dd>
 </dl>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Test scenario for contributions.
-
-About the visibility of sensitive fields.
+<pre><code class="python">&#34;&#34;&#34;Test scenario for assessments.
 
 ## Domain
 
 *   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
+*   We work with one contribution and one assessment, see `test_40_assess10`.
+*   The assessment has the original title.
 
 ## Players
 
@@ -59,44 +59,41 @@ About the visibility of sensitive fields.
 
 ## Acts
 
-`test_start`
-:   **owner** looks for his contribution, but if it is not there, creates a new one.
-    So this batch can also be run in isolation.
 
-`test_viewCost`
-:   all users try to look at the costTotal and costDescription fields,
-    but only some succeed.
+`test_addAssessment`
+:   **owner** cannot add another assessment.
 
+`test_addAssessment2`
+:   **owner** modifies type of contribution, which invalidates the assessment,
+    then adds a new assessment, and deletes it afterwards.
+    Also sets the contribution type back to the old value, which validates the
+    assessment.
 &#34;&#34;&#34;
 
-import pytest
-
 import magic  # noqa
-from control.utils import EURO
-from conftest import USERS, RIGHTFUL_USERS
+from control.utils import pick as G
 from helpers import (
+    assertDelItem,
     assertEditor,
-    assertFieldValue,
     assertModifyField,
+    assertStartAssessment,
     CONTRIB,
-    forall,
+    ASSESS,
+    EXAMPLE_TYPE,
+    EXAMPLE_TYPE2,
+    checkWarning,
+    findItem,
     getValueTable,
     startWithContrib,
+    startWithAssessment,
 )
-from test_30_contrib20 import EXAMPLE
-
-COST = dict(
-    costBare=&#34;103.456&#34;,
-    costTotal=f&#34;{EURO} 103.456&#34;,
-    costDescription=EXAMPLE[&#34;costDescription&#34;][0],
-)
-
 
 contribInfo = {}
+assessInfo = {}
 valueTables = {}
 
-
-# TESTS
+cIds = []
+ids = {}
 
 
 def test_start(clientOwner, clientOffice):
@@ -106,34 +103,57 @@ def test_start(clientOwner, clientOffice):
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
     contribInfo[&#34;eid&#34;] = eid
+    cTitle = G(fields, &#34;title&#34;)
+    contribInfo[&#34;title&#34;] = cTitle
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
-    field = &#34;costTotal&#34;
-    value = COST[&#34;costBare&#34;]
-    expect = COST[&#34;costTotal&#34;]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
+    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
+    types = valueTables[&#34;typeContribution&#34;]
+    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
+    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
+    assertModifyField(
+        clientOwner,
+        CONTRIB,
+        eid,
+        &#34;typeContribution&#34;,
+        (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE),
+        True,
+    )
+    aIds = startWithAssessment(clientOwner, eid)
+    assert len(aIds) == 1
+    aId = aIds[0]
+    assessInfo[&#34;eid&#34;] = aId
+    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
+    assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;
 
-    field = &#34;costDescription&#34;
-    value = COST[&#34;costDescription&#34;]
-    expect = COST[&#34;costDescription&#34;].strip()
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
-
-@pytest.mark.parametrize(
-    (&#34;field&#34;,), ((&#34;costTotal&#34;,), (&#34;costDescription&#34;,),),
-)
-def test_viewCost(clients, field):
+def test_addAssessment(clientOwner):
     eid = contribInfo[&#34;eid&#34;]
-    value = COST[field]
-    valueStrip = value.strip()
+    assertStartAssessment(clientOwner, eid, False)
 
-    def assertIt(cl, exp):
-        assertFieldValue((cl, CONTRIB, eid), field, exp)
 
-    expect = {user: None for user in USERS}
-    expect.update({user: valueStrip for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=valueStrip))
-    forall(clients, expect, assertIt)</code></pre>
+def test_addAssessment2(clientOwner):
+    eid = contribInfo[&#34;eid&#34;]
+    aId = assessInfo[&#34;eid&#34;]
+    aTitle = assessInfo[&#34;title&#34;]
+    field = &#34;typeContribution&#34;
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE2&#34;], EXAMPLE_TYPE2), True
+    )
+    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    assert checkWarning(text, aTitle)
+
+    aIds = assertStartAssessment(clientOwner, eid, True)
+    assert len(aIds) == 2
+
+    otherAid = [i for i in aIds if i != aId][0]
+    assertDelItem(clientOwner, ASSESS, otherAid, True)
+
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+    )
+    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    assert not checkWarning(text, aTitle)</code></pre>
 </details>
 </section>
 <section>
@@ -143,7 +163,54 @@ def test_viewCost(clients, field):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_30_contrib40.test_start"><code class="name flex">
+<dt id="test_40_assess20.test_addAssessment"><code class="name flex">
+<span>def <span class="ident">test_addAssessment</span></span>(<span>clientOwner)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_addAssessment(clientOwner):
+    eid = contribInfo[&#34;eid&#34;]
+    assertStartAssessment(clientOwner, eid, False)</code></pre>
+</details>
+</dd>
+<dt id="test_40_assess20.test_addAssessment2"><code class="name flex">
+<span>def <span class="ident">test_addAssessment2</span></span>(<span>clientOwner)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_addAssessment2(clientOwner):
+    eid = contribInfo[&#34;eid&#34;]
+    aId = assessInfo[&#34;eid&#34;]
+    aTitle = assessInfo[&#34;title&#34;]
+    field = &#34;typeContribution&#34;
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE2&#34;], EXAMPLE_TYPE2), True
+    )
+    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    assert checkWarning(text, aTitle)
+
+    aIds = assertStartAssessment(clientOwner, eid, True)
+    assert len(aIds) == 2
+
+    otherAid = [i for i in aIds if i != aId][0]
+    assertDelItem(clientOwner, ASSESS, otherAid, True)
+
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+    )
+    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    assert not checkWarning(text, aTitle)</code></pre>
+</details>
+</dd>
+<dt id="test_40_assess20.test_start"><code class="name flex">
 <span>def <span class="ident">test_start</span></span>(<span>clientOwner, clientOffice)</span>
 </code></dt>
 <dd>
@@ -159,43 +226,28 @@ def test_viewCost(clients, field):
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
     contribInfo[&#34;eid&#34;] = eid
+    cTitle = G(fields, &#34;title&#34;)
+    contribInfo[&#34;title&#34;] = cTitle
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
-    field = &#34;costTotal&#34;
-    value = COST[&#34;costBare&#34;]
-    expect = COST[&#34;costTotal&#34;]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
-
-    field = &#34;costDescription&#34;
-    value = COST[&#34;costDescription&#34;]
-    expect = COST[&#34;costDescription&#34;].strip()
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib40.test_viewCost"><code class="name flex">
-<span>def <span class="ident">test_viewCost</span></span>(<span>clients, field)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.mark.parametrize(
-    (&#34;field&#34;,), ((&#34;costTotal&#34;,), (&#34;costDescription&#34;,),),
-)
-def test_viewCost(clients, field):
-    eid = contribInfo[&#34;eid&#34;]
-    value = COST[field]
-    valueStrip = value.strip()
-
-    def assertIt(cl, exp):
-        assertFieldValue((cl, CONTRIB, eid), field, exp)
-
-    expect = {user: None for user in USERS}
-    expect.update({user: valueStrip for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=valueStrip))
-    forall(clients, expect, assertIt)</code></pre>
+    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
+    types = valueTables[&#34;typeContribution&#34;]
+    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
+    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
+    assertModifyField(
+        clientOwner,
+        CONTRIB,
+        eid,
+        &#34;typeContribution&#34;,
+        (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE),
+        True,
+    )
+    aIds = startWithAssessment(clientOwner, eid)
+    assert len(aIds) == 1
+    aId = aIds[0]
+    assessInfo[&#34;eid&#34;] = aId
+    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
+    assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;</code></pre>
 </details>
 </dd>
 </dl>
@@ -215,8 +267,9 @@ def test_viewCost(clients, field):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="test_30_contrib40.test_start" href="#test_30_contrib40.test_start">test_start</a></code></li>
-<li><code><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost">test_viewCost</a></code></li>
+<li><code><a title="test_40_assess20.test_addAssessment" href="#test_40_assess20.test_addAssessment">test_addAssessment</a></code></li>
+<li><code><a title="test_40_assess20.test_addAssessment2" href="#test_40_assess20.test_addAssessment2">test_addAssessment2</a></code></li>
+<li><code><a title="test_40_assess20.test_start" href="#test_40_assess20.test_start">test_start</a></code></li>
 </ul>
 </li>
 </ul>

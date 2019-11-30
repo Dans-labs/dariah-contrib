@@ -35,30 +35,23 @@
 <dl>
 <dt><a title="test_30_contrib10.test_start" href="#test_30_contrib10.test_start"><code>test_start()</code></a></dt>
 <dd><strong>office</strong> consults the list of users.</dd>
-<dt><a title="test_30_contrib10.test_addPublic" href="#test_30_contrib10.test_addPublic"><code>test_addPublic()</code></a></dt>
-<dd><strong>public</strong> cannot add a contribution.</dd>
+<dt><a title="test_30_contrib10.test_addDelAll" href="#test_30_contrib10.test_addDelAll"><code>test_addDelAll()</code></a></dt>
+<dd>All users try to add a contribution. Only some succeed, and they delete it again.</dd>
 <dt><a title="test_30_contrib10.test_addOwner" href="#test_30_contrib10.test_addOwner"><code>test_addOwner()</code></a></dt>
-<dd><strong>owner</strong> adds a new contribution.</dd>
+<dd><strong>owner</strong> adds contribution and stores details for later tests.</dd>
 <dt><a title="test_30_contrib10.test_fields" href="#test_30_contrib10.test_fields"><code>test_fields()</code></a></dt>
 <dd><strong>owner</strong> sees that year, country and some
 other fields are pre-filled with appropriate values</dd>
-<dt><a title="test_30_contrib10.test_modifyOwner" href="#test_30_contrib10.test_modifyOwner"><code>test_modifyOwner()</code></a></dt>
-<dd><strong>owner</strong> modifies the title of the new contribution.</dd>
-<dt><a title="test_30_contrib10.test_modifyPublic" href="#test_30_contrib10.test_modifyPublic"><code>test_modifyPublic()</code></a></dt>
-<dd><strong>public</strong> cannot modify the title of the contribution.</dd>
-<dt><a title="test_30_contrib10.test_modifyEditor" href="#test_30_contrib10.test_modifyEditor"><code>test_modifyEditor()</code></a></dt>
-<dd><strong>editor</strong> cannot yet change the title, because he is not yet editor of
-that record.</dd>
-<dt><a title="test_30_contrib10.test_modifyOffice" href="#test_30_contrib10.test_modifyOffice"><code>test_modifyOffice()</code></a></dt>
-<dd><strong>office</strong> changes the title.</dd>
-<dt><a title="test_30_contrib10.test_addEditor" href="#test_30_contrib10.test_addEditor"><code>test_addEditor()</code></a></dt>
-<dd><strong>office</strong> adds <strong>editor</strong> as an editor to the contribution.</dd>
-<dt><a title="test_30_contrib10.test_modifyEditor2" href="#test_30_contrib10.test_modifyEditor2"><code>test_modifyEditor2()</code></a></dt>
-<dd><strong>editor</strong> changes the title.</dd>
-<dt><a title="test_30_contrib10.test_delPublic" href="#test_30_contrib10.test_delPublic"><code>test_delPublic()</code></a></dt>
-<dd><strong>public</strong> cannot delete the contribution.</dd>
-<dt><a title="test_30_contrib10.test_delEditor" href="#test_30_contrib10.test_delEditor"><code>test_delEditor()</code></a></dt>
-<dd><strong>editor</strong> deletes the contribution.</dd>
+</dl>
+<p><a title="test_30_contrib10.test_makeEditorAll" href="#test_30_contrib10.test_makeEditorAll"><code>test_makeEditorAll()</code></a>
+All users try to make <strong>editor</strong> editor of this contribution.
+Only some succeed, and remove <strong>editor</strong> again.</p>
+<p><a title="test_30_contrib10.test_makeEditorOwner" href="#test_30_contrib10.test_makeEditorOwner"><code>test_makeEditorOwner()</code></a>
+<strong>owner</strong> makes <strong>editor</strong> editor of this contribution.</p>
+<dl>
+<dt><a title="test_30_contrib10.test_mylistAll" href="#test_30_contrib10.test_mylistAll"><code>test_mylistAll()</code></a></dt>
+<dd>All users try to see the <code>my</code> list of contributions.
+Some succeed, and some see the new contribution there.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -82,40 +75,26 @@ About adding and deleting contributions and some light editing.
 `test_start`
 :   **office** consults the list of users.
 
-`test_addPublic`
-:   **public** cannot add a contribution.
+`test_addDelAll`
+:   All users try to add a contribution. Only some succeed, and they delete it again.
 
 `test_addOwner`
-:   **owner** adds a new contribution.
+:   **owner** adds contribution and stores details for later tests.
 
 `test_fields`
 :   **owner** sees that year, country and some
     other fields are pre-filled with appropriate values
 
-`test_modifyOwner`
-:   **owner** modifies the title of the new contribution.
+`test_makeEditorAll`
+    All users try to make **editor** editor of this contribution.
+    Only some succeed, and remove **editor** again.
 
-`test_modifyPublic`
-:   **public** cannot modify the title of the contribution.
+`test_makeEditorOwner`
+    **owner** makes **editor** editor of this contribution.
 
-`test_modifyEditor`
-:   **editor** cannot yet change the title, because he is not yet editor of
-    that record.
-
-`test_modifyOffice`
-:   **office** changes the title.
-
-`test_addEditor`
-:   **office** adds **editor** as an editor to the contribution.
-
-`test_modifyEditor2`
-:   **editor** changes the title.
-
-`test_delPublic`
-:   **public** cannot delete the contribution.
-
-`test_delEditor`
-:   **editor** deletes the contribution.
+`test_mylistAll`
+:   All users try to see the `my` list of contributions.
+    Some succeed, and some see the new contribution there.
 
 &#34;&#34;&#34;
 
@@ -123,32 +102,41 @@ import pytest
 
 import magic  # noqa
 from control.utils import pick as G, now
+from conftest import USERS
 from helpers import (
-    assertWrong,
-    assertRight,
-    assertModifyField,
     assertAddItem,
+    assertDelItem,
+    assertEditor,
+    assertMylist,
     CONTRIB,
+    forall,
     getValueTable,
-    findFields,
-    postJson,
 )
 
 
 contribInfo = {}
 valueTables = {}
 
+TITLE = &#34;No Title Yet&#34;
+
 
 def test_start(clientOffice):
     getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
 
 
-def test_addPublic(clientPublic):
-    assertWrong(clientPublic, f&#34;/api/{CONTRIB}/insert&#34;)
+def test_addDelAll(clients):
+    def assertIt(cl, exp):
+        (text, fields, msgs, eid) = assertAddItem(cl, CONTRIB, exp)
+        if exp:
+            assertDelItem(cl, CONTRIB, eid, True)
+
+    expect = {user: True for user in USERS}
+    expect[&#34;public&#34;] = False
+    forall(clients, expect, assertIt)
 
 
 def test_addOwner(clientOwner):
-    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB)
+    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
@@ -158,7 +146,7 @@ def test_addOwner(clientOwner):
 @pytest.mark.parametrize(
     (&#34;field&#34;, &#34;value&#34;),
     (
-        (&#34;title&#34;, &#34;No Title Yet&#34;),
+        (&#34;title&#34;, TITLE),
         (&#34;year&#34;, str(now().year)),
         (&#34;country&#34;, &#34;BE🇧🇪&#34;),
         (&#34;contactPersonName&#34;, &#34;Owner of Contribution&#34;),
@@ -170,60 +158,36 @@ def test_fields(field, value):
     assert G(fields, field) == value
 
 
-def test_modifyOwner(clientOwner):
+def test_makeEditorAll(clients):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;Contribution (Owner)&#34;
-    assertModifyField(clientOwner, CONTRIB, eid, field, newValue, True)
+
+    def assertIt(cl, exp):
+        assertEditor(cl, CONTRIB, eid, valueTables, exp)
+        if exp:
+            assertEditor(cl, CONTRIB, eid, valueTables, exp, clear=True)
+
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, office=True, system=True, root=True))
+    forall(clients, expect, assertIt)
 
 
-def test_modifyPublic(clientPublic):
+def test_makeEditorOwner(clientOwner):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (public)&#34;
-    assertModifyField(clientPublic, CONTRIB, eid, field, newValue, False)
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
-def test_modifyEditor(clientEditor):
+def test_mylistAll(clients):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Editor)&#34;
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, False)
 
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
-def test_modifyOffice(clientOffice):
-    eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Office)&#34;
-    assertModifyField(clientOffice, CONTRIB, eid, field, newValue, True)
+    def assertIt(cl, exp):
+        assertMylist(cl, CONTRIB, eid, &#34;contributions&#34;, exp)
 
-
-def test_addEditor(clientOffice):
-    eid = contribInfo[&#34;eid&#34;]
-    users = valueTables[&#34;user&#34;]
-    (editorId, editorName) = users[&#34;editor&#34;]
-    text = postJson(
-        clientOffice, f&#34;/api/{CONTRIB}/item/{eid}/field/editors?action=view&#34;, [editorId],
-    )
-    fields = findFields(text)
-    assert G(fields, &#34;editors&#34;) == editorName
-
-
-def test_modifyEditor2(clientEditor):
-    eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Editor)&#34;
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, True)
-
-
-def test_delPublic(clientPublic):
-    eid = contribInfo[&#34;eid&#34;]
-    assertWrong(clientPublic, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)
-
-
-def test_delEditor(clientEditor):
-    eid = contribInfo[&#34;eid&#34;]
-    assertRight(clientEditor, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </section>
 <section>
@@ -233,8 +197,8 @@ def test_delEditor(clientEditor):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_30_contrib10.test_addEditor"><code class="name flex">
-<span>def <span class="ident">test_addEditor</span></span>(<span>clientOffice)</span>
+<dt id="test_30_contrib10.test_addDelAll"><code class="name flex">
+<span>def <span class="ident">test_addDelAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -242,15 +206,15 @@ def test_delEditor(clientEditor):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_addEditor(clientOffice):
-    eid = contribInfo[&#34;eid&#34;]
-    users = valueTables[&#34;user&#34;]
-    (editorId, editorName) = users[&#34;editor&#34;]
-    text = postJson(
-        clientOffice, f&#34;/api/{CONTRIB}/item/{eid}/field/editors?action=view&#34;, [editorId],
-    )
-    fields = findFields(text)
-    assert G(fields, &#34;editors&#34;) == editorName</code></pre>
+<pre><code class="python">def test_addDelAll(clients):
+    def assertIt(cl, exp):
+        (text, fields, msgs, eid) = assertAddItem(cl, CONTRIB, exp)
+        if exp:
+            assertDelItem(cl, CONTRIB, eid, True)
+
+    expect = {user: True for user in USERS}
+    expect[&#34;public&#34;] = False
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib10.test_addOwner"><code class="name flex">
@@ -263,52 +227,11 @@ def test_delEditor(clientEditor):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_addOwner(clientOwner):
-    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB)
+    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
     contribInfo[&#34;eid&#34;] = eid</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib10.test_addPublic"><code class="name flex">
-<span>def <span class="ident">test_addPublic</span></span>(<span>clientPublic)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_addPublic(clientPublic):
-    assertWrong(clientPublic, f&#34;/api/{CONTRIB}/insert&#34;)</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib10.test_delEditor"><code class="name flex">
-<span>def <span class="ident">test_delEditor</span></span>(<span>clientEditor)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_delEditor(clientEditor):
-    eid = contribInfo[&#34;eid&#34;]
-    assertRight(clientEditor, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib10.test_delPublic"><code class="name flex">
-<span>def <span class="ident">test_delPublic</span></span>(<span>clientPublic)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_delPublic(clientPublic):
-    eid = contribInfo[&#34;eid&#34;]
-    assertWrong(clientPublic, f&#34;/api/{CONTRIB}/delete/{eid}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib10.test_fields"><code class="name flex">
@@ -323,7 +246,7 @@ def test_delEditor(clientEditor):
 <pre><code class="python">@pytest.mark.parametrize(
     (&#34;field&#34;, &#34;value&#34;),
     (
-        (&#34;title&#34;, &#34;No Title Yet&#34;),
+        (&#34;title&#34;, TITLE),
         (&#34;year&#34;, str(now().year)),
         (&#34;country&#34;, &#34;BE🇧🇪&#34;),
         (&#34;contactPersonName&#34;, &#34;Owner of Contribution&#34;),
@@ -335,8 +258,8 @@ def test_fields(field, value):
     assert G(fields, field) == value</code></pre>
 </details>
 </dd>
-<dt id="test_30_contrib10.test_modifyEditor"><code class="name flex">
-<span>def <span class="ident">test_modifyEditor</span></span>(<span>clientEditor)</span>
+<dt id="test_30_contrib10.test_makeEditorAll"><code class="name flex">
+<span>def <span class="ident">test_makeEditorAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -344,15 +267,21 @@ def test_fields(field, value):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyEditor(clientEditor):
+<pre><code class="python">def test_makeEditorAll(clients):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Editor)&#34;
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, False)</code></pre>
+
+    def assertIt(cl, exp):
+        assertEditor(cl, CONTRIB, eid, valueTables, exp)
+        if exp:
+            assertEditor(cl, CONTRIB, eid, valueTables, exp, clear=True)
+
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, office=True, system=True, root=True))
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_30_contrib10.test_modifyEditor2"><code class="name flex">
-<span>def <span class="ident">test_modifyEditor2</span></span>(<span>clientEditor)</span>
+<dt id="test_30_contrib10.test_makeEditorOwner"><code class="name flex">
+<span>def <span class="ident">test_makeEditorOwner</span></span>(<span>clientOwner)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -360,15 +289,13 @@ def test_fields(field, value):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyEditor2(clientEditor):
+<pre><code class="python">def test_makeEditorOwner(clientOwner):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Editor)&#34;
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, True)</code></pre>
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)</code></pre>
 </details>
 </dd>
-<dt id="test_30_contrib10.test_modifyOffice"><code class="name flex">
-<span>def <span class="ident">test_modifyOffice</span></span>(<span>clientOffice)</span>
+<dt id="test_30_contrib10.test_mylistAll"><code class="name flex">
+<span>def <span class="ident">test_mylistAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -376,43 +303,18 @@ def test_fields(field, value):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_modifyOffice(clientOffice):
+<pre><code class="python">def test_mylistAll(clients):
     eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (Office)&#34;
-    assertModifyField(clientOffice, CONTRIB, eid, field, newValue, True)</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib10.test_modifyOwner"><code class="name flex">
-<span>def <span class="ident">test_modifyOwner</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_modifyOwner(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;Contribution (Owner)&#34;
-    assertModifyField(clientOwner, CONTRIB, eid, field, newValue, True)</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib10.test_modifyPublic"><code class="name flex">
-<span>def <span class="ident">test_modifyPublic</span></span>(<span>clientPublic)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_modifyPublic(clientPublic):
-    eid = contribInfo[&#34;eid&#34;]
-    field = &#34;title&#34;
-    newValue = &#34;My contribution (public)&#34;
-    assertModifyField(clientPublic, CONTRIB, eid, field, newValue, False)</code></pre>
+
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
+
+    def assertIt(cl, exp):
+        assertMylist(cl, CONTRIB, eid, &#34;contributions&#34;, exp)
+
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib10.test_start"><code class="name flex">
@@ -444,18 +346,13 @@ def test_fields(field, value):
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="test_30_contrib10.test_addEditor" href="#test_30_contrib10.test_addEditor">test_addEditor</a></code></li>
+<ul class="">
+<li><code><a title="test_30_contrib10.test_addDelAll" href="#test_30_contrib10.test_addDelAll">test_addDelAll</a></code></li>
 <li><code><a title="test_30_contrib10.test_addOwner" href="#test_30_contrib10.test_addOwner">test_addOwner</a></code></li>
-<li><code><a title="test_30_contrib10.test_addPublic" href="#test_30_contrib10.test_addPublic">test_addPublic</a></code></li>
-<li><code><a title="test_30_contrib10.test_delEditor" href="#test_30_contrib10.test_delEditor">test_delEditor</a></code></li>
-<li><code><a title="test_30_contrib10.test_delPublic" href="#test_30_contrib10.test_delPublic">test_delPublic</a></code></li>
 <li><code><a title="test_30_contrib10.test_fields" href="#test_30_contrib10.test_fields">test_fields</a></code></li>
-<li><code><a title="test_30_contrib10.test_modifyEditor" href="#test_30_contrib10.test_modifyEditor">test_modifyEditor</a></code></li>
-<li><code><a title="test_30_contrib10.test_modifyEditor2" href="#test_30_contrib10.test_modifyEditor2">test_modifyEditor2</a></code></li>
-<li><code><a title="test_30_contrib10.test_modifyOffice" href="#test_30_contrib10.test_modifyOffice">test_modifyOffice</a></code></li>
-<li><code><a title="test_30_contrib10.test_modifyOwner" href="#test_30_contrib10.test_modifyOwner">test_modifyOwner</a></code></li>
-<li><code><a title="test_30_contrib10.test_modifyPublic" href="#test_30_contrib10.test_modifyPublic">test_modifyPublic</a></code></li>
+<li><code><a title="test_30_contrib10.test_makeEditorAll" href="#test_30_contrib10.test_makeEditorAll">test_makeEditorAll</a></code></li>
+<li><code><a title="test_30_contrib10.test_makeEditorOwner" href="#test_30_contrib10.test_makeEditorOwner">test_makeEditorOwner</a></code></li>
+<li><code><a title="test_30_contrib10.test_mylistAll" href="#test_30_contrib10.test_mylistAll">test_mylistAll</a></code></li>
 <li><code><a title="test_30_contrib10.test_start" href="#test_30_contrib10.test_start">test_start</a></code></li>
 </ul>
 </li>

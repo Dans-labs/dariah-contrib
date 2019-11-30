@@ -81,7 +81,7 @@
 <h2 id="acts">Acts</h2>
 <dl>
 <dt><a title="test_20_users10.test_start" href="#test_20_users10.test_start"><code>test_start()</code></a></dt>
-<dd><strong>office</strong> consults the list of users</dd>
+<dd><strong>office</strong> retrieves the list of users</dd>
 <dt><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail"><code>test_readEmail()</code></a></dt>
 <dd>All users try to read the email address of <strong>auth</strong>, but only some succeed</dd>
 </dl>
@@ -112,13 +112,14 @@ public | public | any unauthenticated user
 ## Acts
 
 `test_start`
-:   **office** consults the list of users
+:   **office** retrieves the list of users
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed
 &#34;&#34;&#34;
 
 import magic  # noqa
+from conftest import USERS, POWER_USERS
 from helpers import (
     assertFieldValue,
     getValueTable,
@@ -129,17 +130,16 @@ from helpers import (
 valueTables = {}
 
 
-def test_start(clients):
-    client = clients[&#34;office&#34;]
-    users = getValueTable(client, None, None, &#34;user&#34;, valueTables)
+def test_start(clientOffice):
+    users = getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
 
-    assert len(clients) == 11
+    assert len(USERS) == 11
 
-    for eppn in clients:
-        if eppn == &#34;public&#34;:
-            assert eppn not in users
+    for user in USERS:
+        if user == &#34;public&#34;:
+            assert user not in users
         else:
-            assert eppn in users
+            assert user in users
 
 
 def test_readEmail(clients):
@@ -147,15 +147,11 @@ def test_readEmail(clients):
     field = &#34;email&#34;
     entity = &#34;auth&#34;
     eid = valueTables[table][entity][0]
-    expected = f&#34;auth@test.eu&#34;
-    for (eppn, client) in clients.items():
+    expect = f&#34;auth@test.eu&#34;
+    for (user, client) in clients.items():
         (text, fields) = viewField(client, table, eid, field)
-        print(eppn)
-        print(eid)
-        print(text)
-        print(fields)
-        if eppn in {&#34;office&#34;, &#34;system&#34;, &#34;root&#34;}:
-            assertFieldValue(fields, field, expected)
+        if user in POWER_USERS:
+            assertFieldValue(fields, field, expect)
         else:
             assertFieldValue(fields, field, None)</code></pre>
 </details>
@@ -181,21 +177,17 @@ def test_readEmail(clients):
     field = &#34;email&#34;
     entity = &#34;auth&#34;
     eid = valueTables[table][entity][0]
-    expected = f&#34;auth@test.eu&#34;
-    for (eppn, client) in clients.items():
+    expect = f&#34;auth@test.eu&#34;
+    for (user, client) in clients.items():
         (text, fields) = viewField(client, table, eid, field)
-        print(eppn)
-        print(eid)
-        print(text)
-        print(fields)
-        if eppn in {&#34;office&#34;, &#34;system&#34;, &#34;root&#34;}:
-            assertFieldValue(fields, field, expected)
+        if user in POWER_USERS:
+            assertFieldValue(fields, field, expect)
         else:
             assertFieldValue(fields, field, None)</code></pre>
 </details>
 </dd>
 <dt id="test_20_users10.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clients)</span>
+<span>def <span class="ident">test_start</span></span>(<span>clientOffice)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -203,17 +195,16 @@ def test_readEmail(clients):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clients):
-    client = clients[&#34;office&#34;]
-    users = getValueTable(client, None, None, &#34;user&#34;, valueTables)
+<pre><code class="python">def test_start(clientOffice):
+    users = getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
 
-    assert len(clients) == 11
+    assert len(USERS) == 11
 
-    for eppn in clients:
-        if eppn == &#34;public&#34;:
-            assert eppn not in users
+    for user in USERS:
+        if user == &#34;public&#34;:
+            assert user not in users
         else:
-            assert eppn in users</code></pre>
+            assert user in users</code></pre>
 </details>
 </dd>
 </dl>
