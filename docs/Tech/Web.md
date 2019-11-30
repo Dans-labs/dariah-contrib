@@ -7,7 +7,7 @@ informed by yaml configuration files
 which are read when the web server starts.
 
 To see how all the controllers are specified, consult the
-[docstrings](../{{docstrings}})
+[docstrings](../{{apidocs}})
 
 ## Client
 

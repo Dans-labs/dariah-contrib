@@ -70,8 +70,9 @@ extra:
   repo: https://github.com/Dans-labs/dariah-contrib
   docSite: https://dans-labs.github.io/dariah-contrib
   docSiteOrig: https://dans-labs.github.io/dariah
-  docstrings: api/html/control
-  docstringtests: api/html/tests
+  apidocs: api/html/control
+  apidoctests: api/html/tests
+  apidoctestcov: api/html/coverage
   coverage: api/html/coverage
 
   # DARIAH

@@ -13,11 +13,15 @@ About modifying fields by typing values.
 
 ## Acts
 
-`test_add`
-:   **owner** adds a new contribution.
+`test_start`
+:   **owner** adds a new contribution and adds **editor** to the editors.
 
-`test_modifyTitle`
-:   **owner** modifies the title.
+`test_changeUserCountry`
+:   All power users change the country of **mycoord** and back.
+
+`test_modifyTitleAll`
+:   All users try to modify the title of the new contribution.
+    Only some succeed, and change it back.
 
 `test_modifyDescription`
 :   **owner** modifies the description and costDescription.
@@ -40,14 +44,23 @@ import pytest
 
 import magic  # noqa
 from control.utils import EURO
+from conftest import USERS, POWER_USERS
 from helpers import (
-    assertAddItem,
+    assertEditor,
+    assertFieldValue,
     assertModifyField,
+    BELGIUM,
     CONTRIB,
+    LUXEMBURG,
+    forall,
+    getValueTable,
+    startWithContrib,
 )
 
 
 contribInfo = {}
+
+TITLE = "No Title Yet"
 
 DESCRIPTION_CHECKS = (
     "<h1>Resource creation.</h1>",
@@ -89,20 +102,58 @@ There are costs.
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
 
+valueTables = {}
 
-def test_add(clientOwner):
-    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB)
+
+def test_start(clientOffice, clientOwner):
+    getValueTable(clientOffice, None, None, "user", valueTables)
+    (text, fields, msgs, eid) = startWithContrib(clientOwner)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
     contribInfo["eid"] = eid
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
-def test_modifyTitle(clientOwner):
+def test_changeUserCountry(clientsPower):
+    eid = contribInfo["eid"]
+    users = valueTables["user"]
+    countries = getValueTable(
+        clientsPower["office"], CONTRIB, eid, "country", valueTables
+    )
+
+    assert "mycoord" in users
+    assert BELGIUM in countries
+    assert LUXEMBURG in countries
+
+    mycoord = users["mycoord"][0]
+    belgium = countries[BELGIUM]
+    luxemburg = countries[LUXEMBURG]
+    field = "country"
+
+    def assertIt(cl, exp):
+        assertFieldValue((cl, "user", mycoord), field, BELGIUM)
+
+        assertModifyField(cl, "user", mycoord, field, (luxemburg, LUXEMBURG), exp)
+        assertModifyField(cl, "user", mycoord, field, (belgium, BELGIUM), exp)
+
+    expect = {user: True for user in POWER_USERS}
+    forall(clientsPower, expect, assertIt)
+
+
+def test_modifyTitleAll(clients):
     eid = contribInfo["eid"]
     field = "title"
-    newValue = "Resource creator"
-    assertModifyField(clientOwner, CONTRIB, eid, field, newValue, True)
+    newValue = "Contribution (Modified)"
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, field, newValue, exp)
+        if exp:
+            assertModifyField(cl, CONTRIB, eid, field, TITLE, exp)
+
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, editor=True, office=True, system=True, root=True))
+    forall(clients, expect, assertIt)
 
 
 @pytest.mark.parametrize(
@@ -112,9 +163,14 @@ def test_modifyTitle(clientOwner):
         ("costDescription", EXAMPLE["costDescription"][0]),
     ),
 )
-def test_modifyDescription(clientOwner, field, value):
+def test_modifyDescription(clientsMy, field, value):
     eid = contribInfo["eid"]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, value.strip()), True)
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, field, (value, value.strip()), exp)
+
+    expect = dict(owner=True, editor=True)
+    forall(clientsMy, expect, assertIt)
 
 
 @pytest.mark.parametrize(
@@ -124,16 +180,21 @@ def test_modifyDescription(clientOwner, field, value):
         ("costDescription", COST_DESCRIPTION_CHECKS),
     ),
 )
-def test_descriptionMarkdown(clientOwner, field, checks):
+def test_descriptionMarkdown(clientsMy, field, checks):
     eid = contribInfo["eid"]
-    response = clientOwner.get(f"/api/{CONTRIB}/item/{eid}/field/{field}?action=view")
-    text = response.get_data(as_text=True)
-    for check in checks:
-        assert check in text
+
+    def assertIt(cl, exp):
+        response = cl.get(f"/api/{CONTRIB}/item/{eid}/field/{field}?action=view")
+        text = response.get_data(as_text=True)
+        for check in checks:
+            assert check in text
+
+    expect = dict(owner=True, editor=True)
+    forall(clientsMy, expect, assertIt)
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
+    ("value", "expectVal"),
     (
         ("103", f"{EURO} 103.0"),
         ("103.0", f"{EURO} 103.0"),
@@ -142,14 +203,19 @@ def test_descriptionMarkdown(clientOwner, field, checks):
         ("103.456", f"{EURO} 103.456"),
     ),
 )
-def test_modifyCost(clientOwner, value, expected):
+def test_modifyCost(clientsMy, value, expectVal):
     eid = contribInfo["eid"]
     field = "costTotal"
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expected), True)
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
+
+    expect = dict(owner=True, editor=True)
+    forall(clientsMy, expect, assertIt)
 
 
 @pytest.mark.parametrize(
-    ("value", "expected"),
+    ("value", "expectVal"),
     (
         (["owner"], "owner"),
         ([], ""),
@@ -158,14 +224,19 @@ def test_modifyCost(clientOwner, value, expected):
         (["owner@a.b", "owner@d.e"], "owner@a.b,owner@d.e"),
     ),
 )
-def test_modifyEmail(clientOwner, value, expected):
+def test_modifyEmail(clientsMy, value, expectVal):
     eid = contribInfo["eid"]
     field = "contactPersonEmail"
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expected), True)
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
+
+    expect = dict(owner=True, editor=True)
+    forall(clientsMy, expect, assertIt)
 
 
 @pytest.mark.parametrize(
-    ("field", "value", "expected"),
+    ("field", "value", "expectVal"),
     (
         (URL_C, ["owner"], "https://owner.org"),
         (URL_C, ["https://owner"], "https://owner.org"),
@@ -196,6 +267,11 @@ def test_modifyEmail(clientOwner, value, expected):
         ),
     ),
 )
-def test_modifyUrl(clientOwner, field, value, expected):
+def test_modifyUrl(clientsMy, field, value, expectVal):
     eid = contribInfo["eid"]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expected), True)
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
+
+    expect = dict(owner=True, editor=True)
+    forall(clientsMy, expect, assertIt)

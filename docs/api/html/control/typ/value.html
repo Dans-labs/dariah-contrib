@@ -92,15 +92,15 @@ class Value(Related):
         db = context.db
         table = self.name
 
-        valuesInv = (
-            getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-            if constrain is None
-            else db.getValueInv(table, constrain)
-        )
         valType = type(editVal)
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
+                valuesInv = (
+                    getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+                    if constrain is None
+                    else db.getValueInv(table, constrain)
+                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible
@@ -311,15 +311,15 @@ class Value(Related):
         db = context.db
         table = self.name
 
-        valuesInv = (
-            getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-            if constrain is None
-            else db.getValueInv(table, constrain)
-        )
         valType = type(editVal)
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
+                valuesInv = (
+                    getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+                    if constrain is None
+                    else db.getValueInv(table, constrain)
+                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible
@@ -517,15 +517,15 @@ See <a title="control.db.Db.getValueRecords" href="../db.html#control.db.Db.getV
     db = context.db
     table = self.name
 
-    valuesInv = (
-        getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-        if constrain is None
-        else db.getValueInv(table, constrain)
-    )
     valType = type(editVal)
     if valType is list or valType is tuple:
         if extensible and editVal:
             editVal = editVal[0]
+            valuesInv = (
+                getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+                if constrain is None
+                else db.getValueInv(table, constrain)
+            )
             if editVal in valuesInv:
                 return valuesInv[editVal]
             fieldName = N.rep if extensible is True else extensible

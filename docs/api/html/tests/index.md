@@ -17,3 +17,7 @@
 [test_30_contrib40](test_30_contrib40.html)
 
 [test_40_assess10](test_40_assess10.html)
+
+[test_40_assess20](test_40_assess20.html)
+
+[test_40_assess30](test_40_assess30.html)

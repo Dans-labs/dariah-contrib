@@ -16,40 +16,26 @@ About adding and deleting contributions and some light editing.
 `test_start`
 :   **office** consults the list of users.
 
-`test_addPublic`
-:   **public** cannot add a contribution.
+`test_addDelAll`
+:   All users try to add a contribution. Only some succeed, and they delete it again.
 
 `test_addOwner`
-:   **owner** adds a new contribution.
+:   **owner** adds contribution and stores details for later tests.
 
 `test_fields`
 :   **owner** sees that year, country and some
     other fields are pre-filled with appropriate values
 
-`test_modifyOwner`
-:   **owner** modifies the title of the new contribution.
+`test_makeEditorAll`
+    All users try to make **editor** editor of this contribution.
+    Only some succeed, and remove **editor** again.
 
-`test_modifyPublic`
-:   **public** cannot modify the title of the contribution.
+`test_makeEditorOwner`
+    **owner** makes **editor** editor of this contribution.
 
-`test_modifyEditor`
-:   **editor** cannot yet change the title, because he is not yet editor of
-    that record.
-
-`test_modifyOffice`
-:   **office** changes the title.
-
-`test_addEditor`
-:   **office** adds **editor** as an editor to the contribution.
-
-`test_modifyEditor2`
-:   **editor** changes the title.
-
-`test_delPublic`
-:   **public** cannot delete the contribution.
-
-`test_delEditor`
-:   **editor** deletes the contribution.
+`test_mylistAll`
+:   All users try to see the `my` list of contributions.
+    Some succeed, and some see the new contribution there.
 
 """
 
@@ -57,32 +43,41 @@ import pytest
 
 import magic  # noqa
 from control.utils import pick as G, now
+from conftest import USERS
 from helpers import (
-    assertWrong,
-    assertRight,
-    assertModifyField,
     assertAddItem,
+    assertDelItem,
+    assertEditor,
+    assertMylist,
     CONTRIB,
+    forall,
     getValueTable,
-    findFields,
-    postJson,
 )
 
 
 contribInfo = {}
 valueTables = {}
 
+TITLE = "No Title Yet"
+
 
 def test_start(clientOffice):
     getValueTable(clientOffice, None, None, "user", valueTables)
 
 
-def test_addPublic(clientPublic):
-    assertWrong(clientPublic, f"/api/{CONTRIB}/insert")
+def test_addDelAll(clients):
+    def assertIt(cl, exp):
+        (text, fields, msgs, eid) = assertAddItem(cl, CONTRIB, exp)
+        if exp:
+            assertDelItem(cl, CONTRIB, eid, True)
+
+    expect = {user: True for user in USERS}
+    expect["public"] = False
+    forall(clients, expect, assertIt)
 
 
 def test_addOwner(clientOwner):
-    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB)
+    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
@@ -92,7 +87,7 @@ def test_addOwner(clientOwner):
 @pytest.mark.parametrize(
     ("field", "value"),
     (
-        ("title", "No Title Yet"),
+        ("title", TITLE),
         ("year", str(now().year)),
         ("country", "BE🇧🇪"),
         ("contactPersonName", "Owner of Contribution"),
@@ -104,57 +99,33 @@ def test_fields(field, value):
     assert G(fields, field) == value
 
 
-def test_modifyOwner(clientOwner):
+def test_makeEditorAll(clients):
     eid = contribInfo["eid"]
-    field = "title"
-    newValue = "Contribution (Owner)"
-    assertModifyField(clientOwner, CONTRIB, eid, field, newValue, True)
+
+    def assertIt(cl, exp):
+        assertEditor(cl, CONTRIB, eid, valueTables, exp)
+        if exp:
+            assertEditor(cl, CONTRIB, eid, valueTables, exp, clear=True)
+
+    expect = {user: False for user in USERS}
+    expect.update(dict(owner=True, office=True, system=True, root=True))
+    forall(clients, expect, assertIt)
 
 
-def test_modifyPublic(clientPublic):
+def test_makeEditorOwner(clientOwner):
     eid = contribInfo["eid"]
-    field = "title"
-    newValue = "My contribution (public)"
-    assertModifyField(clientPublic, CONTRIB, eid, field, newValue, False)
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
-def test_modifyEditor(clientEditor):
+def test_mylistAll(clients):
     eid = contribInfo["eid"]
-    field = "title"
-    newValue = "My contribution (Editor)"
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, False)
 
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
-def test_modifyOffice(clientOffice):
-    eid = contribInfo["eid"]
-    field = "title"
-    newValue = "My contribution (Office)"
-    assertModifyField(clientOffice, CONTRIB, eid, field, newValue, True)
+    def assertIt(cl, exp):
+        assertMylist(cl, CONTRIB, eid, "contributions", exp)
 
-
-def test_addEditor(clientOffice):
-    eid = contribInfo["eid"]
-    users = valueTables["user"]
-    (editorId, editorName) = users["editor"]
-    text = postJson(
-        clientOffice, f"/api/{CONTRIB}/item/{eid}/field/editors?action=view", [editorId],
-    )
-    fields = findFields(text)
-    assert G(fields, "editors") == editorName
-
-
-def test_modifyEditor2(clientEditor):
-    eid = contribInfo["eid"]
-    field = "title"
-    newValue = "My contribution (Editor)"
-    assertModifyField(clientEditor, CONTRIB, eid, field, newValue, True)
-
-
-def test_delPublic(clientPublic):
-    eid = contribInfo["eid"]
-    assertWrong(clientPublic, f"/api/{CONTRIB}/delete/{eid}")
-
-
-def test_delEditor(clientEditor):
-    eid = contribInfo["eid"]
-    assertRight(clientEditor, f"/api/{CONTRIB}/delete/{eid}")
+    expect = {user: (True, False) for user in USERS}
+    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
+    forall(clients, expect, assertIt)

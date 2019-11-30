@@ -16,4 +16,4 @@ the following happens with the workflow attributes:
 *   the server updates the workflow attributes after any insert/update/delete
     action.
 
-See more in the [docstrings](../{{docstrings}}/workflow)
+See more in the [docstrings](../{{apidocs}}/workflow)

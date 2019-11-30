@@ -209,6 +209,12 @@ class WorkflowItem:
             The eppn is the user identifying attribute from the identity provider.
         """
 
+        self.isSuperuser = auth.superuser()
+        """*boolean* Whether the current user is a superuser.
+
+        See `control.auth.Auth.superuser`.
+        """
+
         self.data = data
         """*dict* The  workflow attributes.
         """
@@ -345,6 +351,8 @@ class WorkflowItem:
 
         !!! note
             It also depends on the current user.
+            Power users will not be prevented to read records because of
+            workflow conditions.
 
         Here are the rules:
 
@@ -396,6 +404,10 @@ class WorkflowItem:
         -------
         boolean | `None`
         """
+
+        isSuperuser = self.isSuperuser
+        if isSuperuser:
+            return None
 
         table = recordObj.table
         if table not in SENSITIVE_TABLES:
@@ -557,6 +569,7 @@ class WorkflowItem:
 
         (contribId,) = self.info(N.contrib, N._id)
 
+        isOwn = uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
@@ -571,17 +584,15 @@ class WorkflowItem:
             if remaining >= timedelta(hours=0):
                 remaining = True
 
-        print("RRR", task, remaining)
-
         if frozen and not remaining:
             return False
 
         if table == N.contrib:
-            if uid not in creators and not isCoord and not isSuper:
+            if not isOwn and not isCoord and not isSuper:
                 return False
 
             if task == N.startAssessment:
-                return mayAdd and not frozen and not done
+                return isOwn and mayAdd and not frozen and not done
 
             if not isCoord:
                 return False
@@ -623,7 +634,6 @@ class WorkflowItem:
                 return stage == N.completeRevised
 
             if task == N.withdrawAssessment:
-                print('XXX', task, stage)
                 return stage in {N.submitted, N.submittedRevised} and stage not in {
                     N.incompleteWithdrawn,
                     N.completeWithdrawn,
@@ -777,7 +787,6 @@ class WorkflowItem:
 
         done = False
         if self.permission(task, kind=kind):
-            print("PPP", task, "permitted")
             operator = G(taskInfo, N.operator)
             if operator == N.add:
                 dtable = G(taskInfo, N.detail)

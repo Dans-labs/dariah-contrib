@@ -4,6 +4,8 @@
 import re
 
 from flask import json
+from control.utils import serverprint
+
 
 materialRe = re.compile(
     r"""<div id=['"]material['"]>(.*?)</div>\s*</div>\s*<script""", re.S
@@ -21,14 +23,37 @@ valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
 UNDEF_VALUE = "○"
 
 WELCOME = "Welcome to the DARIAH contribution tool"
+DUMMY_ID = "00000000ffa4bbd9fe000f15"
 EXAMPLE_TYPE = "activity - resource creation"
-EXAMPLE_TYPE_ID = "00000000cca4bbd9fe000015"
 EXAMPLE_TYPE2 = "service - processing service"
-EXAMPLE_TYPE2_ID = "00000000cca4bbd9fe00000f"
-BELGIUM_ID = "00000000e909c2d70600001b"
-CONTRIB = "contrib"
 ASSESS = "assessment"
 CRITERIA_ENTRY = "criteriaEntry"
+NEW_A_TITLE = "My contribution assessed"
+BELGIUM = "BE🇧🇪"
+LUXEMBURG = "LU🇱🇺"
+CONTRIB = "contrib"
+
+
+def forall(cls, expect, assertFunc, *args):
+    """Executes an assert function for a subset of all clients.
+
+    The subset is determined by `expect`, which holds expected outcomes
+    for the clients.
+
+    Parameters
+    ----------
+    cls: fixture
+        Contains a dict of all clients: `conftest.clients`
+    assertFunc: function
+        The function to be applied for each client.
+        It will be passed all the `args` and a relevant part of `expect`
+    expect: dict
+        Keyed by user (eppn), contains the expected value for that user.
+    """
+
+    for (user, exp) in expect.items():
+        serverprint(f"USER {user} EXPECTS {exp}")
+        assertFunc(cls[user], *args, exp)
 
 
 def fieldEditRe(eid, field):
@@ -62,8 +87,8 @@ def warningRe(label):
     )
 
 
-def assertAddItem(client, table):
-    """Adds an item to a table on behalf of an authenticated user.
+def assertAddItem(client, table, expect):
+    """Adds an item to a table.
 
     The response texts will be analysed into messages and fields, the eid
     of the new item will be read off.
@@ -72,6 +97,7 @@ def assertAddItem(client, table):
     ----------
     client: fixture
     table: string
+    expect: boolean
 
     Returns
     -------
@@ -82,7 +108,7 @@ def assertAddItem(client, table):
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
     eid: str(ObjectId)
-        The id of the inserted contribution.
+        The id of the inserted item.
     """
 
     response = client.get(f"/api/{table}/insert", follow_redirects=True)
@@ -90,39 +116,85 @@ def assertAddItem(client, table):
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
     eid = findEid(text)
-    assert "item added" in msgs
+    if expect:
+        assert "item added" in msgs
+    else:
+        assert "item added" not in msgs
     return (text, fields, msgs, eid)
 
 
-def assertFieldValue(fields, field, value):
-    """Verify whether a field has a certain value.
-
-    If we pass value `None` we want to assert that the field is not present at all.
+def assertDelItem(client, table, eid, expect):
+    """Deletes an item from a table.
 
     Parameters
     ----------
-    fields: dict
-        The dictionary of fields and values.
-    field: string
-        The name of the specific field.
-    value:
-        The test value for this field.
+    client: fixture
+    table: string
+    eid: string(ObjectId)
+    expect: boolean
     """
 
-    if value is None:
+    assertStatus(client, f"/api/{table}/delete/{eid}", expect)
+
+
+def assertEditor(client, table, eid, valueTables, expect, clear=False):
+    """Sets the `editors` of an item to **editor**, or clears the `editors` field.
+
+    Parameters
+    ----------
+    table: string
+    eid: string(ObjectId)
+    valueTables: the store for the value tables
+    expect: boolean
+    clear: boolean, optional `False`
+        If True, clears the editors field.
+    """
+
+    if clear:
+        value = ([], "")
+    else:
+        users = valueTables["user"]
+        (editorId, editorName) = users["editor"]
+        value = ([editorId], editorName)
+    assertModifyField(client, table, eid, "editors", value, expect)
+
+
+def assertFieldValue(source, field, expect):
+    """Verify whether a field has a certain expected value.
+
+    If we pass expect `None` we want to assert that the field is not present at all.
+
+    Parameters
+    ----------
+    source: dict | (client: fixture, table: string, eid: string)
+        The dictionary of fields and values of a retrieved response.
+        If it is a tuple, the dictionary will be retrieved by looking up
+        the item specified by `table` and `eid`.
+    field: string
+        The name of the specific field.
+    expect:
+        The expected value for this field.
+    """
+
+    if type(source) is tuple:
+        (client, table, eid) = source
+        (text, fields, msgs, dummy) = findItem(client, table, eid)
+    else:
+        fields = source
+
+    if expect is None:
         assert field not in fields
     else:
         assert field in fields
-        assert value == fields[field]
+        assert expect == fields[field]
 
 
-def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True):
+def assertModifyField(client, table, eid, field, newValue, expect):
     """Try to modify a field and check the outcome.
 
     !!! note "Read access"
-
-    The test has to reckon with the fact that the client may not even have read access
-    to the field.
+        The test has to reckon with the fact that the client may not even have
+        read access to the field.
 
     Parameters
     ----------
@@ -130,7 +202,6 @@ def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True)
     table: string
     eid: ObjectId | string
     field: string
-    mayRead: boolean, optional `True`
     newValue: string | tuple
         If a tuple, the first component is the modification value,
         and the second component is the value we read back from the modified record
@@ -139,8 +210,8 @@ def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True)
     """
 
     if not expect:
-        (text, fields, msgs, eid) = findItem(client, table, eid)
-        oldValue = fields[field] if mayRead else None
+        fields = findItem(client, table, eid)[1]
+        oldValue = fields[field] if field in fields else None
 
     if type(newValue) is tuple:
         (newValue, newValueRep) = newValue
@@ -157,24 +228,42 @@ def assertModifyField(client, table, eid, field, newValue, expect, mayRead=True)
     if expect:
         assertFieldValue(fields, field, newValueRep)
     else:
-        if mayRead:
+        if field in fields:
             assertFieldValue(fields, field, oldValue)
 
 
-def assertRight(client, url):
-    """Get data and see whether that went right.
+def assertMylist(client, table, eid, label, expect):
+    """Verify whether the client can see mylist on table.
+
+    Mylist is retrieved, and if successful, it is also verified either that
+    a record with id `eid` is in it or that the list is empty.
 
     Parameters
     ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
+    client: fixture
+    table: string
+    eid: string(objectId)
+    label: string
+        How a record of this table is called on the interface, in the plural
+    expect: (mayList: boolean, showsUp: boolean)
+        mayList means: we expect to be able to see mylist
+        showsUp means: we expect the record to show up. Otherwise mylist should be
+        empty.
     """
+    url = f"/{table}/list?action=my"
+    (mayList, canSee) = expect
+    assertStatus(client, url, mayList)
+    if mayList:
+        (text, status, msgs) = accessUrl(client, url, redirect=True)
+        material = findMaterial(text)
+        theId = findEid(text)
+        if canSee:
+            assert eid == theId
+        else:
+            assert f"0 {label}" in material
 
-    return assertStatus(client, url, True)
 
-
-def assertStage(client, table, eid, stageExpected):
+def assertStage(client, table, eid, expect):
     """Check whether a record has a certain workflow stage.
 
     Parameters
@@ -182,16 +271,43 @@ def assertStage(client, table, eid, stageExpected):
     client: fixture
     table: string
     eid: ObjectId | string
-    stageExpected: string
+    expect: string
     """
 
     (text, fields, msgs, dummy) = findItem(client, table, eid)
     stageFound = findStages(text)[0]
-    assert stageFound == stageExpected
+    assert stageFound == expect
     return (text, fields, msgs, eid)
 
 
-def assertStatus(client, url, status):
+def assertStartAssessment(client, cId, expect):
+    """Issues the startAssessment workflow command.
+
+    The response texts will be analysed into messages and fields, the aId
+    of the new assessment will be read off.
+
+    Parameters
+    ----------
+    client: fixture
+    cId: string(ObjectId)
+        The contribution id for which the assessment must be started.
+    expect: boolean
+
+    Returns
+    -------
+    aIds: list of str(ObjectId)
+        The ids of all assessments of the contribution after the act.
+    """
+
+    assertStatus(client, f"/api/task/startAssessment/{cId}", expect)
+    if expect:
+        aIds = getAid(client, multiple=True)
+    else:
+        aIds = []
+    return aIds
+
+
+def assertStatus(client, url, expect):
     """Get data and see whether that went right or wrong.
 
     Parameters
@@ -199,45 +315,15 @@ def assertStatus(client, url, status):
     client: function
     url: string(url)
         The url to retrieve from the server
-    status: boolean
+    expect: boolean
         Whether it is expected to be successful
     """
 
     response = client.get(url)
-    if status:
+    if expect:
         assert response.status_code in {200, 302}
     else:
         assert response.status_code in {400, 303}
-
-
-def assertWrong(client, url):
-    """Get data and see whether that went wrong.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    """
-
-    return assertStatus(client, url, False)
-
-
-def makeClient(app, eppn):
-    """Logs in a specific user.
-
-    Parameters
-    ----------
-    app: object
-    eppn: string
-        Identity of the user
-    """
-
-    client = app.test_client()
-    response = client.get(f"/login?eppn={eppn}")
-    if response.status_code == 302:
-        return client
-    return None
 
 
 def findDetails(text, dtable):
@@ -363,12 +449,6 @@ def findItemEid(client, table, action=None):
 
     Returns
     -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
     eid: str(ObjectId)
         The id of the item.
     """
@@ -376,10 +456,8 @@ def findItemEid(client, table, action=None):
     actionStr = "" if action is None else f"?action={action}"
     response = client.get(f"/{table}/list{actionStr}")
     text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
     eid = findEid(text)
-    return (text, fields, msgs, eid)
+    return eid
 
 
 def findMaterial(text):
@@ -431,15 +509,40 @@ def findUsers(text):
     }
 
 
+def getAid(cl, multiple=False):
+    """Gets the id(s) of the assessment(s) in the mylist view."""
+
+    url = f"/{ASSESS}/list?action=my"
+    (text, status, msgs) = accessUrl(cl, url, redirect=True)
+    return findEid(text, multiple=multiple)
+
+
+def inspectTitleAll(clients, eid, expect):
+    field = "title"
+
+    def assertIt(cl, exp):
+        assertFieldValue((cl, ASSESS, eid), field, exp)
+
+    forall(clients, expect, assertIt)
+
+
 def checkWarning(text, label):
     return not not warningRe(label).search(text)
 
 
 def startWithContrib(client):
-    result = findItemEid(client, CONTRIB)
-    if result[3]:
+    eid = findItemEid(client, CONTRIB)
+    if eid:
+        result = findItem(client, CONTRIB, eid)
         return result
-    return assertAddItem(client, CONTRIB)
+    return assertAddItem(client, CONTRIB, True)
+
+
+def startWithAssessment(client, cId):
+    aId = findItemEid(client, ASSESS)
+    if aId:
+        return [aId]
+    return assertStartAssessment(client, cId, True)
 
 
 def postJson(client, url, value):
@@ -470,9 +573,8 @@ def postJson(client, url, value):
 def modifyField(client, table, eid, field, newValue):
     """Post data to update a field and analyse the response for the effect."""
 
-    text = postJson(
-        client, f"/api/{table}/item/{eid}/field/{field}?action=view", newValue
-    )
+    url = f"/api/{table}/item/{eid}/field/{field}?action=view"
+    text = postJson(client, url, newValue)
     fields = findFields(text)
     return (text, fields)
 
@@ -543,7 +645,6 @@ def getValueTable(client, table, eid, valueTable, dest):
         response = client.get(f"/user/list")
         text = response.get_data(as_text=True)
         dest[valueTable] = findUsers(text)
-        print(dest[valueTable])
     else:
         valueDict = getRelatedValues(client, table, eid, valueTable)
         dest[valueTable] = valueDict

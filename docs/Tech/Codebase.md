@@ -83,7 +83,7 @@ A general purpose scripting language with excellent data processing facilities.
     a light-weight framework for handling http(s) requests.
 
     We have added a set of
-    [controllers](../{{docstrings}})
+    [controllers](../{{apidocs}})
     .
 
 ### CSS

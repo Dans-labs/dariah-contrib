@@ -21,13 +21,14 @@ public | public | any unauthenticated user
 ## Acts
 
 `test_start`
-:   **office** consults the list of users
+:   **office** retrieves the list of users
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed
 """
 
 import magic  # noqa
+from conftest import USERS, POWER_USERS
 from helpers import (
     assertFieldValue,
     getValueTable,
@@ -38,17 +39,16 @@ from helpers import (
 valueTables = {}
 
 
-def test_start(clients):
-    client = clients["office"]
-    users = getValueTable(client, None, None, "user", valueTables)
+def test_start(clientOffice):
+    users = getValueTable(clientOffice, None, None, "user", valueTables)
 
-    assert len(clients) == 11
+    assert len(USERS) == 11
 
-    for eppn in clients:
-        if eppn == "public":
-            assert eppn not in users
+    for user in USERS:
+        if user == "public":
+            assert user not in users
         else:
-            assert eppn in users
+            assert user in users
 
 
 def test_readEmail(clients):
@@ -56,14 +56,10 @@ def test_readEmail(clients):
     field = "email"
     entity = "auth"
     eid = valueTables[table][entity][0]
-    expected = f"auth@test.eu"
-    for (eppn, client) in clients.items():
+    expect = f"auth@test.eu"
+    for (user, client) in clients.items():
         (text, fields) = viewField(client, table, eid, field)
-        print(eppn)
-        print(eid)
-        print(text)
-        print(fields)
-        if eppn in {"office", "system", "root"}:
-            assertFieldValue(fields, field, expected)
+        if user in POWER_USERS:
+            assertFieldValue(fields, field, expect)
         else:
             assertFieldValue(fields, field, None)

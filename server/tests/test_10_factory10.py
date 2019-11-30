@@ -26,7 +26,7 @@ Are we sure we are in development or in production?
 """
 
 import magic  # noqa
-from helpers import assertRight, assertWrong
+from helpers import assertStatus
 
 
 def test_test(app):
@@ -38,10 +38,10 @@ def test_notest(appNotest):
 
 
 def test_loginProd(clientProd, clients):
-    for eppn in clients:
-        assertWrong(clientProd, f"/login?eppn={eppn}")
+    for user in clients:
+        assertStatus(clientProd, f"/login?eppn={user}", False)
 
 
 def test_login(clientPublic, clients):
-    for eppn in clients:
-        assertRight(clientPublic, f"/login?eppn={eppn}")
+    for user in clients:
+        assertStatus(clientPublic, f"/login?eppn={user}", True)

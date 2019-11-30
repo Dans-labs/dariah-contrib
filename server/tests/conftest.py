@@ -57,27 +57,24 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
-from helpers import makeClient
 
 
 DEBUG = False
 TEST = True
 
-USERS = set(
-    """
+USERS = """
     public
     auth
     coord
+    mycoord
     expert
     final
-    mycoord
     editor
     owner
     office
     system
     root
 """.strip().split()
-)
 """The `eppn` attribute of all relevant test users in this suite.
 
 See `test_20_users10` where we introduce them.
@@ -90,6 +87,24 @@ There is also a fixture `clientPublic` for the non-authenticated user.
 
 Finally, there is a fixture `clients` that contains fixtures for all the users.
 """
+
+
+RIGHTFUL_USERS = """
+    editor
+    owner
+    office
+    system
+    root
+""".strip().split()
+"""The users that have normally access to an item. """
+
+
+POWER_USERS = """
+    office
+    system
+    root
+""".strip().split()
+"""The power users."""
 
 
 @pytest.fixture
@@ -131,17 +146,57 @@ def clientProd(appProd):
     return appProd.test_client()
 
 
+def makeClient(app, user):
+    """Logs in a specific user.
+
+    Parameters
+    ----------
+    app: object
+    user: string
+        Identity of the user (eppn)
+    """
+
+    client = app.test_client()
+    if user == "public":
+        return client
+
+    response = client.get(f"/login?eppn={user}")
+    if response.status_code == 302:
+        return client
+    return None
+
+
 @pytest.fixture
 def clients(app):
     """A dictionary of client fixtures for each user.
 
-    Keyed by eppn, the values are corresponding client fixtures.
+    Keyed by user (eppn), the values are corresponding client fixtures.
 
     This comes in handy to pass to tests that want to perform the same
     action on behalf of the different users.
     """
 
-    return {eppn: makeClient(app, eppn) for eppn in USERS}
+    return {user: makeClient(app, user) for user in USERS}
+
+
+@pytest.fixture
+def clientsMy(app):
+    """A dictionary of client fixtures for the owner/editor users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    """
+
+    return {user: makeClient(app, user) for user in ("owner", "editor")}
+
+
+@pytest.fixture
+def clientsPower(app):
+    """A dictionary of client fixtures for the power users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    """
+
+    return {user: makeClient(app, user) for user in POWER_USERS}
 
 
 @pytest.fixture

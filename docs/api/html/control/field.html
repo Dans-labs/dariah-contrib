@@ -54,6 +54,7 @@ DEFAULT_TYPE = CT.defaultType
 CONSTRAINED = CT.constrained
 WITH_NOW = CT.withNow
 WORKFLOW_TABLES = set(CT.userTables) | set(CT.userEntryTables)
+CASCADE_SPECS = CT.cascade
 
 WORKFLOW_FIELDS = CF.fields
 
@@ -251,6 +252,11 @@ class Field:
 
         After saving, workflow information will be adjusted.
 
+        !!! caution
+            If the `editors` field of an assessment or review is modified,
+            the same value should be put in the detail records, the
+            `criteriaEntry` and `reviewEntry` records respectively.
+
         Parameters
         ----------
         data: mixed
@@ -327,10 +333,28 @@ class Field:
         perm = self.perm
         (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
 
+        good = True
+        if field == N.editors and table in CASCADE_SPECS:
+            for dtable in CASCADE_SPECS[table]:
+                drecords = db.getDetails(dtable, table, eid)
+                for drecord in drecords:
+                    deid = G(drecord, N._id)
+                    result = db.updateField(
+                        dtable,
+                        deid,
+                        N.editors,
+                        data,
+                        eppn,
+                        modified,
+                        nowFields=nowFields,
+                    )
+                    if not result:
+                        good = False
+
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
 
-        return True
+        return good
 
     def isEmpty(self):
         &#34;&#34;&#34;Whether the value(s) is/are empty.
@@ -884,6 +908,11 @@ passing values for them here.</p>
 
         After saving, workflow information will be adjusted.
 
+        !!! caution
+            If the `editors` field of an assessment or review is modified,
+            the same value should be put in the detail records, the
+            `criteriaEntry` and `reviewEntry` records respectively.
+
         Parameters
         ----------
         data: mixed
@@ -960,10 +989,28 @@ passing values for them here.</p>
         perm = self.perm
         (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
 
+        good = True
+        if field == N.editors and table in CASCADE_SPECS:
+            for dtable in CASCADE_SPECS[table]:
+                drecords = db.getDetails(dtable, table, eid)
+                for drecord in drecords:
+                    deid = G(drecord, N._id)
+                    result = db.updateField(
+                        dtable,
+                        deid,
+                        N.editors,
+                        data,
+                        eppn,
+                        modified,
+                        nowFields=nowFields,
+                    )
+                    if not result:
+                        good = False
+
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
 
-        return True
+        return good
 
     def isEmpty(self):
         &#34;&#34;&#34;Whether the value(s) is/are empty.
@@ -1438,6 +1485,12 @@ component values are blank.</p>
 <section class="desc"><p>Save a new value for this field to MongoDb.</p>
 <p>Before saving, permissions and workflow conditions will be checked.</p>
 <p>After saving, workflow information will be adjusted.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>If the <code>editors</code> field of an assessment or review is modified,
+the same value should be put in the detail records, the
+<code>criteriaEntry</code> and <code>reviewEntry</code> records respectively.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>data</code></strong> :&ensp;<code>mixed</code></dt>
@@ -1455,6 +1508,11 @@ Python/MongoDb values</dd>
     Before saving, permissions and workflow conditions will be checked.
 
     After saving, workflow information will be adjusted.
+
+    !!! caution
+        If the `editors` field of an assessment or review is modified,
+        the same value should be put in the detail records, the
+        `criteriaEntry` and `reviewEntry` records respectively.
 
     Parameters
     ----------
@@ -1532,10 +1590,28 @@ Python/MongoDb values</dd>
     perm = self.perm
     (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
 
+    good = True
+    if field == N.editors and table in CASCADE_SPECS:
+        for dtable in CASCADE_SPECS[table]:
+            drecords = db.getDetails(dtable, table, eid)
+            for drecord in drecords:
+                deid = G(drecord, N._id)
+                result = db.updateField(
+                    dtable,
+                    deid,
+                    N.editors,
+                    data,
+                    eppn,
+                    modified,
+                    nowFields=nowFields,
+                )
+                if not result:
+                    good = False
+
     if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
         recordObj.adjustWorkflow()
 
-    return True</code></pre>
+    return good</code></pre>
 </details>
 </dd>
 <dt id="control.field.Field.wrap"><code class="name flex">

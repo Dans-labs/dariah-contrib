@@ -65,15 +65,15 @@ class Value(Related):
         db = context.db
         table = self.name
 
-        valuesInv = (
-            getattr(db, f"""{table}Inv""", {})
-            if constrain is None
-            else db.getValueInv(table, constrain)
-        )
         valType = type(editVal)
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
+                valuesInv = (
+                    getattr(db, f"""{table}Inv""", {})
+                    if constrain is None
+                    else db.getValueInv(table, constrain)
+                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible

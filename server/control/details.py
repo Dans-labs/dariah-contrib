@@ -99,7 +99,7 @@ class Details:
         eid = self.eid
 
         dtableObj = mkTable(context, dtable)
-        drecords = db.getDetails(dtable, table, eid, sortKey=sortKey,)
+        drecords = db.getDetails(dtable, table, eid, sortKey=sortKey)
         self.details[dtable] = (
             dtableObj,
             tuple(drecord for drecord in drecords if dtableObj.readable(drecord)),

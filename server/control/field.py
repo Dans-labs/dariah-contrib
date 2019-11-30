@@ -22,6 +22,7 @@ DEFAULT_TYPE = CT.defaultType
 CONSTRAINED = CT.constrained
 WITH_NOW = CT.withNow
 WORKFLOW_TABLES = set(CT.userTables) | set(CT.userEntryTables)
+CASCADE_SPECS = CT.cascade
 
 WORKFLOW_FIELDS = CF.fields
 
@@ -219,6 +220,11 @@ class Field:
 
         After saving, workflow information will be adjusted.
 
+        !!! caution
+            If the `editors` field of an assessment or review is modified,
+            the same value should be put in the detail records, the
+            `criteriaEntry` and `reviewEntry` records respectively.
+
         Parameters
         ----------
         data: mixed
@@ -295,10 +301,28 @@ class Field:
         perm = self.perm
         (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
 
+        good = True
+        if field == N.editors and table in CASCADE_SPECS:
+            for dtable in CASCADE_SPECS[table]:
+                drecords = db.getDetails(dtable, table, eid)
+                for drecord in drecords:
+                    deid = G(drecord, N._id)
+                    result = db.updateField(
+                        dtable,
+                        deid,
+                        N.editors,
+                        data,
+                        eppn,
+                        modified,
+                        nowFields=nowFields,
+                    )
+                    if not result:
+                        good = False
+
         if table in WORKFLOW_TABLES and field in WORKFLOW_FIELDS:
             recordObj.adjustWorkflow()
 
-        return True
+        return good
 
     def isEmpty(self):
         """Whether the value(s) is/are empty.

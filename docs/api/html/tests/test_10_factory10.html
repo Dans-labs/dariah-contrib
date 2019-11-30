@@ -70,7 +70,7 @@ Are we sure we are in development or in production?
 &#34;&#34;&#34;
 
 import magic  # noqa
-from helpers import assertRight, assertWrong
+from helpers import assertStatus
 
 
 def test_test(app):
@@ -82,13 +82,13 @@ def test_notest(appNotest):
 
 
 def test_loginProd(clientProd, clients):
-    for eppn in clients:
-        assertWrong(clientProd, f&#34;/login?eppn={eppn}&#34;)
+    for user in clients:
+        assertStatus(clientProd, f&#34;/login?eppn={user}&#34;, False)
 
 
 def test_login(clientPublic, clients):
-    for eppn in clients:
-        assertRight(clientPublic, f&#34;/login?eppn={eppn}&#34;)</code></pre>
+    for user in clients:
+        assertStatus(clientPublic, f&#34;/login?eppn={user}&#34;, True)</code></pre>
 </details>
 </section>
 <section>
@@ -108,8 +108,8 @@ def test_login(clientPublic, clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_login(clientPublic, clients):
-    for eppn in clients:
-        assertRight(clientPublic, f&#34;/login?eppn={eppn}&#34;)</code></pre>
+    for user in clients:
+        assertStatus(clientPublic, f&#34;/login?eppn={user}&#34;, True)</code></pre>
 </details>
 </dd>
 <dt id="test_10_factory10.test_loginProd"><code class="name flex">
@@ -122,8 +122,8 @@ def test_login(clientPublic, clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_loginProd(clientProd, clients):
-    for eppn in clients:
-        assertWrong(clientProd, f&#34;/login?eppn={eppn}&#34;)</code></pre>
+    for user in clients:
+        assertStatus(clientProd, f&#34;/login?eppn={user}&#34;, False)</code></pre>
 </details>
 </dd>
 <dt id="test_10_factory10.test_notest"><code class="name flex">

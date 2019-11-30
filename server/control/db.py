@@ -280,7 +280,7 @@ class Db:
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
-        and if needed, recollections will be done before the actual request processing.
+        and if needed, recollections will be done before the request processing.
 
         There is a table `collect`, with records having fields `table` and
         `dateCollected`. After each (re)collect of a table, the `dateCollected` of

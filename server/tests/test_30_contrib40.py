@@ -17,9 +17,6 @@ About the visibility of sensitive fields.
 :   **owner** looks for his contribution, but if it is not there, creates a new one.
     So this batch can also be run in isolation.
 
-`test_changeUserCountry`
-:   **office** changes the country of **mycoord** and back.
-
 `test_viewCost`
 :   all users try to look at the costTotal and costDescription fields,
     but only some succeed.
@@ -30,12 +27,14 @@ import pytest
 
 import magic  # noqa
 from control.utils import EURO
+from conftest import USERS, RIGHTFUL_USERS
 from helpers import (
+    assertEditor,
     assertFieldValue,
     assertModifyField,
     CONTRIB,
+    forall,
     getValueTable,
-    viewField,
     startWithContrib,
 )
 from test_30_contrib20 import EXAMPLE
@@ -50,76 +49,42 @@ COST = dict(
 contribInfo = {}
 valueTables = {}
 
-MYCOORD = "mycoord"
-BELGIUM = "BE🇧🇪"
-LUXEMBURG = "LU🇱🇺"
-
 
 # TESTS
 
 
-def test_start(clientOwner):
+def test_start(clientOwner, clientOffice):
+    getValueTable(clientOffice, None, None, "user", valueTables)
     (text, fields, msgs, eid) = startWithContrib(clientOwner)
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
     contribInfo["eid"] = eid
-
-    assert eid is not None
+    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
     field = "costTotal"
     value = COST["costBare"]
-    expected = COST["costTotal"]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expected), True)
+    expect = COST["costTotal"]
+    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
     field = "costDescription"
     value = COST["costDescription"]
-    expected = COST["costDescription"].strip()
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expected), True)
-
-
-def test_changeUserCountry(clientOffice):
-    eid = contribInfo["eid"]
-    users = getValueTable(clientOffice, CONTRIB, None, "user", valueTables)
-    countries = getValueTable(clientOffice, CONTRIB, eid, "country", valueTables)
-
-    assert MYCOORD in users
-    assert BELGIUM in countries
-    assert LUXEMBURG in countries
-
-    mycoord = users[MYCOORD][0]
-    belgium = countries[BELGIUM]
-    luxemburg = countries[LUXEMBURG]
-
-    field = "country"
-    (text, fields) = viewField(clientOffice, "user", mycoord, field)
-    assertFieldValue(fields, field, BELGIUM)
-
-    assertModifyField(clientOffice, "user", mycoord, field, (luxemburg, LUXEMBURG), True)
-    assertModifyField(clientOffice, "user", mycoord, field, (belgium, BELGIUM), True)
+    expect = COST["costDescription"].strip()
+    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
 
 @pytest.mark.parametrize(
     ("field",), (("costTotal",), ("costDescription",),),
 )
-def test_viewCost(
-    clientEditor, clientOwner, clientCoord, clientMycoord, clientOffice, clientPublic, field,
-):
-    def viewCostField(cl, expectOk):
-        eid = contribInfo["eid"]
-        value = COST[field]
+def test_viewCost(clients, field):
+    eid = contribInfo["eid"]
+    value = COST[field]
+    valueStrip = value.strip()
 
-        (text, fields) = viewField(cl, CONTRIB, eid, field)
-        if expectOk:
-            valueStrip = value.strip()
-            assertFieldValue(fields, field, valueStrip)
-        else:
-            assert fields == {}
-            assert text == ""
+    def assertIt(cl, exp):
+        assertFieldValue((cl, CONTRIB, eid), field, exp)
 
-    viewCostField(clientMycoord, True)
-    viewCostField(clientCoord, False)
-    viewCostField(clientOffice, True)
-    viewCostField(clientOwner, True)
-    viewCostField(clientEditor, False)
-    viewCostField(clientPublic, False)
+    expect = {user: None for user in USERS}
+    expect.update({user: valueStrip for user in RIGHTFUL_USERS})
+    expect.update(dict(mycoord=valueStrip))
+    forall(clients, expect, assertIt)
