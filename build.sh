@@ -13,6 +13,7 @@ function givehelp {
     echo "    where <task> is one of:"
 #    echo "python      : activate the version of python used for this app"
     echo "mongo       : start mongo db daemon"
+    echo "mongostop   : start mongo db daemon"
     echo "data dev    : convert legacy FileMaker data and import it into MongoDB"
     echo "data test   : convert legacy FileMaker and trim it into a clean test db in Mongo"
     echo "workflow    : (re)initialize the workflow table"
@@ -37,6 +38,25 @@ function setvars {
     fi
 }
 
+# MONGO
+
+function startmongo {
+    if [[ `ps aux | grep -v grep | grep mongod` ]]; then
+        echo "mongo daemon already running"
+    else
+        mongod -f /usr/local/etc/mongod.conf --fork
+    fi
+}
+
+function stopmongo {
+    pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
+    if [[ "$pid" == "" ]]; then
+        echo "mongo daemon already stopped"
+    else
+        kill $pid
+        echo "mongo daemon stopped"
+    fi
+}
 
 # SETTING THE DIRECTORY AND LOCAL VARS
 
@@ -52,6 +72,7 @@ apidocbase='docs/api/html'
 
 function workflow {
     cd $root/server
+    startmongo
     python3 workflow.py
 }
 
@@ -80,6 +101,7 @@ function codestats {
 
 function runtestmode {
     cd $root/server
+    startmongo
     testmode="$1"
     shift
     dest="../docs"
@@ -123,6 +145,7 @@ function runtestmode {
 
 function dataimport {
     cd $root/import
+    startmongo
     if [[ "$1" == "dev" ]]; then
         python3 mongoFromFm.py development
     elif [[ "$1" == "test" ]]; then
@@ -134,11 +157,13 @@ function dataimport {
 
 function serve {
     cd $root/server
+    startmongo
     setvars "$1"; python3 -m flask run
 }
 
 function gserve {
     cd $root/server
+    startmongo
     if [[ "$1" == "dev" ]]; then
         mode="dev"
     else
@@ -227,13 +252,14 @@ function shipdocs {
     gitsave "docs update: $*"
 }
 
-
 # MAIN
 #   does not do any explicit cd
 #   parses arguments and calls level 2 functions or gives help
 
 if [[ "$1" == "mongo" ]]; then
-    mongod -f /usr/local/etc/mongod.conf
+    startmongo
+elif [[ "$1" == "mongostop" ]]; then
+    stopmongo
 elif [[ "$1" == "data" ]]; then
     shift
     dataimport "$1"

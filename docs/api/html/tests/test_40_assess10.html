@@ -23,16 +23,17 @@
 <p>Test scenario for assessments.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with one contribution and its assessments.</li>
-<li>The contribution starts out without a type.</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
+<li>The country table</li>
+<li>The contribution type table</li>
+<li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
+<dt><a title="test_40_assess10.test_resetType" href="#test_40_assess10.test_resetType"><code>test_resetType()</code></a></dt>
+<dd><strong>owner</strong> resets the contribution type to undefined.</dd>
 <dt><code>test_startAll</code></dt>
 <dd>
 <p><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
@@ -93,16 +94,17 @@ They change it back.</dd>
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with one contribution and its assessments.
-*   The contribution starts out without a type.
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   The contribution type table
+*   One contribution record
 
 ## Acts
 
+`test_resetType`
+:   **owner** resets the contribution type to undefined.
 
 `test_startAll`
 :   **owner** looks for his contribution, but if it is not there, creates a new one.
@@ -165,7 +167,21 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
+from example import (
+    CONTRIB,
+    ASSESS,
+    UNDEF_VALUE,
+    DUMMY_ID,
+    TYPE,
+    NEW_A_TITLE,
+)
 from helpers import (
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertDelItem,
     assertEditor,
     assertFieldValue,
@@ -173,49 +189,37 @@ from helpers import (
     assertMylist,
     assertStartAssessment,
     assertStatus,
-    UNDEF_VALUE,
-    CONTRIB,
-    ASSESS,
-    DUMMY_ID,
-    EXAMPLE_TYPE,
-    EXAMPLE_TYPE2,
-    NEW_A_TITLE,
-    forall,
-    getValueTable,
     inspectTitleAll,
-    startWithContrib,
 )
 
 ATITLE = &#34;assessment of {cTitle}&#34;
 
-contribInfo = {}
-assessInfo = {}
+recordInfo = {}
 valueTables = {}
 
 cIds = []
 ids = {}
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    cTitle = G(fields, &#34;title&#34;)
-    contribInfo[&#34;title&#34;] = cTitle
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        types=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
+    )
 
+
+def test_resetType(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertModifyField(
         clientOwner, CONTRIB, eid, &#34;typeContribution&#34;, (None, UNDEF_VALUE), True
     )
-    getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
-    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
-    types = valueTables[&#34;typeContribution&#34;]
-    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
-    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
-
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
 @pytest.mark.parametrize(
@@ -228,7 +232,7 @@ def test_start(clientOwner, clientOffice):
     ),
 )
 def test_tryStartAll(clients, url):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     theUrl = url.format(eid=eid)
 
     def assertIt(cl, exp):
@@ -239,10 +243,10 @@ def test_tryStartAll(clients, url):
 
 
 def test_tryStartAgainAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;typeContribution&#34;
     assertModifyField(
-        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
     )
 
     def assertIt(cl, exp):
@@ -259,35 +263,36 @@ def test_tryStartAgainAll(clients):
 
 
 def test_tryStartAgainOwner(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     aIds = assertStartAssessment(clientOwner, eid, True)
     assert len(aIds) == 1
+    assessInfo = recordInfo.setdefault(ASSESS, {})
     assessInfo[&#34;eid&#34;] = aIds[0]
 
 
 def test_mylistAll(clients):
-    eid = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
     def assertIt(cl, exp):
-        assertMylist(cl, ASSESS, eid, &#34;assessments&#34;, exp)
+        assertMylist(cl, ASSESS, aId, &#34;assessments&#34;, exp)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), public=(False, False)))
     forall(clients, expect, assertIt)
 
-    assertEditor(clients[&#34;owner&#34;], ASSESS, eid, valueTables, True)
+    assertEditor(clients[&#34;owner&#34;], ASSESS, aId, valueTables, True)
 
     expect.update(dict(editor=(True, True)))
     forall(clients, expect, assertIt)
 
 
 def test_inspectTitleAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;title&#34;
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
@@ -295,21 +300,21 @@ def test_inspectTitleAll(clients):
 
 
 def test_inspectTypeAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;assessmentType&#34;
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, aId), field, exp)
 
     expect = {user: None for user in USERS}
-    expect.update({user: EXAMPLE_TYPE for user in RIGHTFUL_USERS})
+    expect.update({user: TYPE for user in RIGHTFUL_USERS})
     forall(clients, expect, assertIt)
 
 
 def test_modifyTypeAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;assessmentType&#34;
-    newValue = ids[&#34;EXAMPLE_TYPE2&#34;]
+    newValue = ids[&#34;TYPE2&#34;]
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
@@ -319,9 +324,9 @@ def test_modifyTypeAll(clients):
 
 
 def test_modifyTitleAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;title&#34;
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     newValue = NEW_A_TITLE
 
@@ -352,9 +357,9 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_inspectTitleAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;title&#34;
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
@@ -371,14 +376,14 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_inspectTypeAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;assessmentType&#34;
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, aId), field, exp)
 
     expect = {user: None for user in USERS}
-    expect.update({user: EXAMPLE_TYPE for user in RIGHTFUL_USERS})
+    expect.update({user: TYPE for user in RIGHTFUL_USERS})
     forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
@@ -392,9 +397,9 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTitleAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;title&#34;
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     newValue = NEW_A_TITLE
 
@@ -418,9 +423,9 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeAll(clients):
-    aId = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     field = &#34;assessmentType&#34;
-    newValue = ids[&#34;EXAMPLE_TYPE2&#34;]
+    newValue = ids[&#34;TYPE2&#34;]
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
@@ -439,26 +444,26 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_mylistAll(clients):
-    eid = assessInfo[&#34;eid&#34;]
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
     def assertIt(cl, exp):
-        assertMylist(cl, ASSESS, eid, &#34;assessments&#34;, exp)
+        assertMylist(cl, ASSESS, aId, &#34;assessments&#34;, exp)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), public=(False, False)))
     forall(clients, expect, assertIt)
 
-    assertEditor(clients[&#34;owner&#34;], ASSESS, eid, valueTables, True)
+    assertEditor(clients[&#34;owner&#34;], ASSESS, aId, valueTables, True)
 
     expect.update(dict(editor=(True, True)))
     forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess10.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clientOwner, clientOffice)</span>
+<dt id="test_40_assess10.test_resetType"><code class="name flex">
+<span>def <span class="ident">test_resetType</span></span>(<span>clientOwner, clientOffice)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -466,26 +471,34 @@ def test_modifyTitleAll(clients):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    cTitle = G(fields, &#34;title&#34;)
-    contribInfo[&#34;title&#34;] = cTitle
-
+<pre><code class="python">def test_resetType(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertModifyField(
         clientOwner, CONTRIB, eid, &#34;typeContribution&#34;, (None, UNDEF_VALUE), True
-    )
-    getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
-    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
-    types = valueTables[&#34;typeContribution&#34;]
-    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
-    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
-
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)</code></pre>
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_40_assess10.test_start"><code class="name flex">
+<span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        types=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess10.test_tryStartAgainAll"><code class="name flex">
@@ -498,10 +511,10 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_tryStartAgainAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;typeContribution&#34;
     assertModifyField(
-        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+        clients[&#34;owner&#34;], CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
     )
 
     def assertIt(cl, exp):
@@ -527,9 +540,10 @@ def test_modifyTitleAll(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_tryStartAgainOwner(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     aIds = assertStartAssessment(clientOwner, eid, True)
     assert len(aIds) == 1
+    assessInfo = recordInfo.setdefault(ASSESS, {})
     assessInfo[&#34;eid&#34;] = aIds[0]</code></pre>
 </details>
 </dd>
@@ -552,7 +566,7 @@ def test_modifyTitleAll(clients):
     ),
 )
 def test_tryStartAll(clients, url):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     theUrl = url.format(eid=eid)
 
     def assertIt(cl, exp):
@@ -572,7 +586,6 @@ def test_tryStartAll(clients, url):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>
@@ -584,6 +597,7 @@ def test_tryStartAll(clients, url):
 <li><code><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll">test_modifyTitleAll</a></code></li>
 <li><code><a title="test_40_assess10.test_modifyTypeAll" href="#test_40_assess10.test_modifyTypeAll">test_modifyTypeAll</a></code></li>
 <li><code><a title="test_40_assess10.test_mylistAll" href="#test_40_assess10.test_mylistAll">test_mylistAll</a></code></li>
+<li><code><a title="test_40_assess10.test_resetType" href="#test_40_assess10.test_resetType">test_resetType</a></code></li>
 <li><code><a title="test_40_assess10.test_start" href="#test_40_assess10.test_start">test_start</a></code></li>
 <li><code><a title="test_40_assess10.test_tryStartAgainAll" href="#test_40_assess10.test_tryStartAgainAll">test_tryStartAgainAll</a></code></li>
 <li><code><a title="test_40_assess10.test_tryStartAgainOwner" href="#test_40_assess10.test_tryStartAgainOwner">test_tryStartAgainOwner</a></code></li>

@@ -24,12 +24,9 @@
 <p>About adding and deleting contributions and some light editing.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the contribution table only</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
@@ -63,12 +60,9 @@ About adding and deleting contributions and some light editing.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
 
 ## Acts
 
@@ -103,25 +97,31 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G, now
 from conftest import USERS
+from example import (
+    CONTRIB,
+)
 from helpers import (
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertAddItem,
     assertDelItem,
     assertEditor,
     assertMylist,
-    CONTRIB,
-    forall,
-    getValueTable,
 )
 
 
-contribInfo = {}
+recordInfo = {}
 valueTables = {}
 
 TITLE = &#34;No Title Yet&#34;
 
 
 def test_start(clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
+    start(clientOffice=clientOffice, users=True, valueTables=valueTables)
 
 
 def test_addDelAll(clients):
@@ -137,6 +137,7 @@ def test_addDelAll(clients):
 
 def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
+    contribInfo = recordInfo.setdefault(CONTRIB, {})
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
@@ -154,12 +155,12 @@ def test_addOwner(clientOwner):
     ),
 )
 def test_fields(field, value):
-    fields = contribInfo[&#34;fields&#34;]
+    fields = G(G(recordInfo, CONTRIB), &#34;fields&#34;)
     assert G(fields, field) == value
 
 
 def test_makeEditorAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertEditor(cl, CONTRIB, eid, valueTables, exp)
@@ -172,12 +173,12 @@ def test_makeEditorAll(clients):
 
 
 def test_makeEditorOwner(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
 def test_mylistAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
@@ -228,6 +229,7 @@ def test_mylistAll(clients):
 </summary>
 <pre><code class="python">def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
+    contribInfo = recordInfo.setdefault(CONTRIB, {})
     contribInfo[&#34;text&#34;] = text
     contribInfo[&#34;fields&#34;] = fields
     contribInfo[&#34;msgs&#34;] = msgs
@@ -254,7 +256,7 @@ def test_mylistAll(clients):
     ),
 )
 def test_fields(field, value):
-    fields = contribInfo[&#34;fields&#34;]
+    fields = G(G(recordInfo, CONTRIB), &#34;fields&#34;)
     assert G(fields, field) == value</code></pre>
 </details>
 </dd>
@@ -268,7 +270,7 @@ def test_fields(field, value):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_makeEditorAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertEditor(cl, CONTRIB, eid, valueTables, exp)
@@ -290,7 +292,7 @@ def test_fields(field, value):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_makeEditorOwner(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)</code></pre>
 </details>
 </dd>
@@ -304,7 +306,7 @@ def test_fields(field, value):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_mylistAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
@@ -327,7 +329,7 @@ def test_fields(field, value):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_start(clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)</code></pre>
+    start(clientOffice=clientOffice, users=True, valueTables=valueTables)</code></pre>
 </details>
 </dd>
 </dl>
@@ -340,7 +342,6 @@ def test_fields(field, value):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>

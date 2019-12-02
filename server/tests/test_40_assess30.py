@@ -2,16 +2,14 @@
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with one contribution and one assessment, see `test_40_assess10`.
-*   The assessment has the original title.
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
+*   One assessment record
 
 ## Acts
-
 
 `test_CriteriaEntries`
 :   All users try to see the criteria entries. Only **owner** and **editor** succeed.
@@ -77,65 +75,48 @@
 import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
-from helpers import (
-    assertEditor,
-    assertModifyField,
-    assertStage,
-    assertStatus,
-    CONTRIB,
+from example import (
     ASSESS,
     CRITERIA_ENTRY,
-    EXAMPLE_TYPE,
+)
+from helpers import (
     findDetails,
     findItem,
     forall,
     getRelatedValues,
-    getValueTable,
+)
+from starters import (
+    start,
+)
+from subtest import (
+    assertModifyField,
+    assertStage,
+    assertStatus,
     inspectTitleAll,
-    startWithContrib,
-    startWithAssessment,
 )
 
-contribInfo = {}
-assessInfo = {}
+recordInfo = {}
 valueTables = {}
 
 cIds = []
 ids = {}
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, "user", valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo["text"] = text
-    contribInfo["fields"] = fields
-    contribInfo["msgs"] = msgs
-    contribInfo["eid"] = eid
-    cTitle = G(fields, "title")
-    contribInfo["title"] = cTitle
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
-    getValueTable(clientOffice, CONTRIB, eid, "typeContribution", valueTables)
-    types = valueTables["typeContribution"]
-    ids["EXAMPLE_TYPE"] = types[EXAMPLE_TYPE]
-    assertModifyField(
-        clientOwner,
-        CONTRIB,
-        eid,
-        "typeContribution",
-        (ids["EXAMPLE_TYPE"], EXAMPLE_TYPE),
-        True,
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        assessment=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
     )
-    aIds = startWithAssessment(clientOwner, eid)
-    assert len(aIds) == 1
-    aId = aIds[0]
-    assessInfo["eid"] = aId
-    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
-    assessInfo["title"] = f"assessment of {cTitle}"
 
 
 def test_criteriaEntries(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     ellips = "<div>...</div>"
     dtable = "criteriaEntry"
 
@@ -156,7 +137,7 @@ def test_criteriaEntries(clients):
 
 
 def test_fillEvidenceAll(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     dtable = "criteriaEntry"
     field = "evidence"
     clientOwner = clients["owner"]
@@ -177,7 +158,7 @@ def test_fillEvidenceAll(clients):
 
 
 def test_fillEvidenceOwner(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     ellips = "<div>...</div>"
 
     (text, fields, msgs, dummy) = assertStage(clientOwner, ASSESS, aId, "incomplete")
@@ -220,13 +201,13 @@ def test_fillScoreWrong(clientOwner):
 
 
 def test_submitAssessment(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/submitAssessment/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_complete(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     field = "score"
     nCId = len(cIds)
 
@@ -243,40 +224,40 @@ def test_complete(clientOwner):
 
 
 def test_withdrawAssessment(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/withdrawAssessment/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_inspectTitleAll2(clients):
-    aId = assessInfo["eid"]
-    aTitle = assessInfo["title"]
+    aId = G(G(recordInfo, ASSESS), "eid")
+    aTitle = G(G(recordInfo, ASSESS), "title")
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     inspectTitleAll(clients, aId, expect)
 
 
 def test_resubmitAssessment(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/resubmitAssessment/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_submitAssessmentRevised(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/submitRevised/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_submitAssessment2(clientOwner):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/submitAssessment/{aId}"
     assertStatus(clientOwner, url, True)
 
 
 def test_inspectTitleAll3(clients):
-    aId = assessInfo["eid"]
-    aTitle = assessInfo["title"]
+    aId = G(G(recordInfo, ASSESS), "eid")
+    aTitle = G(G(recordInfo, ASSESS), "title")
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update(dict(mycoord=aTitle))
@@ -284,16 +265,7 @@ def test_inspectTitleAll3(clients):
 
 
 def test_withdrawAssessment2(clientOwner):
-    """Check whether Owner can withdraw this assessment.
-
-    Yes.
-
-    Parameters
-    ----------
-    clientOwner: fixture
-    """
-
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/withdrawAssessment/{aId}"
     assertStatus(clientOwner, url, True)
 
@@ -306,7 +278,7 @@ def Xest_submitAssessmentRevised2(clientOwner):
     clientOwner: fixture
     """
 
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/submitRevised/{aId}"
     assertStatus(clientOwner, url, False)
 
@@ -319,6 +291,6 @@ def Xtest_resubmitAssessment2(clientOwner):
     clientOwner: fixture
     """
 
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/resubmitAssessment/{aId}"
     assertStatus(clientOwner, url, True)

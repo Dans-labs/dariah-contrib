@@ -4,18 +4,16 @@ About the visibility of sensitive fields.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
 
 ## Acts
 
-`test_start`
-:   **owner** looks for his contribution, but if it is not there, creates a new one.
-    So this batch can also be run in isolation.
+`test_modifyCost`
+:   **owner** sets the cost field to an example value.
 
 `test_viewCost`
 :   all users try to look at the costTotal and costDescription fields,
@@ -26,50 +24,53 @@ About the visibility of sensitive fields.
 import pytest
 
 import magic  # noqa
-from control.utils import EURO
+from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
+from example import (
+    CONTRIB,
+    EXAMPLE,
+)
 from helpers import (
-    assertEditor,
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertFieldValue,
     assertModifyField,
-    CONTRIB,
-    forall,
-    getValueTable,
-    startWithContrib,
-)
-from test_30_contrib20 import EXAMPLE
-
-COST = dict(
-    costBare="103.456",
-    costTotal=f"{EURO} 103.456",
-    costDescription=EXAMPLE["costDescription"][0],
 )
 
 
-contribInfo = {}
+recordInfo = {}
 valueTables = {}
 
 
 # TESTS
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, "user", valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo["text"] = text
-    contribInfo["fields"] = fields
-    contribInfo["msgs"] = msgs
-    contribInfo["eid"] = eid
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )
 
+
+def test_modifyCost(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), "eid")
     field = "costTotal"
-    value = COST["costBare"]
-    expect = COST["costTotal"]
+    value = EXAMPLE["costBare"]
+    expect = EXAMPLE["costTotal"]
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
     field = "costDescription"
-    value = COST["costDescription"]
-    expect = COST["costDescription"].strip()
+    value = EXAMPLE["costDescription"][0]
+    expect = value.strip()
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
 
@@ -77,8 +78,10 @@ def test_start(clientOwner, clientOffice):
     ("field",), (("costTotal",), ("costDescription",),),
 )
 def test_viewCost(clients, field):
-    eid = contribInfo["eid"]
-    value = COST[field]
+    eid = G(G(recordInfo, CONTRIB), "eid")
+    value = EXAMPLE[field]
+    if field == "costDescription":
+        value = value[0]
     valueStrip = value.strip()
 
     def assertIt(cl, exp):

@@ -2,10 +2,7 @@
 
 ## Domain
 
-We start with a clean database, i.e. a database with
-all the value tables fully filled, with a set of test users,
-with packages, criteria, and types, but not with user-contributed content,
-such as contributions, assessments, and reviews.
+*   Clean slate, see `starters`.
 
 ## Acts
 
@@ -14,7 +11,7 @@ Are we sure we are in development or in production?
 `test_test`
 :   In development the `testing` attribute of the Flask app is False.
 
-`test_notest`
+`test_noTest`
 :   In production the `testing` attribute of the Flask app is True.
 
 `test_loginProd`
@@ -26,14 +23,19 @@ Are we sure we are in development or in production?
 """
 
 import magic  # noqa
-from helpers import assertStatus
+from starters import start
+from subtest import assertStatus
+
+
+def test_start():
+    start()
 
 
 def test_test(app):
     assert app.testing
 
 
-def test_notest(appNotest):
+def test_noTest(appNotest):
     assert not appNotest.testing
 
 

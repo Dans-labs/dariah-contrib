@@ -24,18 +24,16 @@
 <p>About the visibility of sensitive fields.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the contribution table only</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
+<li>The country table</li>
+<li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
-<dt><a title="test_30_contrib40.test_start" href="#test_30_contrib40.test_start"><code>test_start()</code></a></dt>
-<dd><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
-So this batch can also be run in isolation.</dd>
+<dt><a title="test_30_contrib40.test_modifyCost" href="#test_30_contrib40.test_modifyCost"><code>test_modifyCost()</code></a></dt>
+<dd><strong>owner</strong> sets the cost field to an example value.</dd>
 <dt><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost"><code>test_viewCost()</code></a></dt>
 <dd>all users try to look at the costTotal and costDescription fields,
 but only some succeed.</dd>
@@ -50,18 +48,16 @@ About the visibility of sensitive fields.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
 
 ## Acts
 
-`test_start`
-:   **owner** looks for his contribution, but if it is not there, creates a new one.
-    So this batch can also be run in isolation.
+`test_modifyCost`
+:   **owner** sets the cost field to an example value.
 
 `test_viewCost`
 :   all users try to look at the costTotal and costDescription fields,
@@ -72,50 +68,53 @@ About the visibility of sensitive fields.
 import pytest
 
 import magic  # noqa
-from control.utils import EURO
+from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
+from example import (
+    CONTRIB,
+    EXAMPLE,
+)
 from helpers import (
-    assertEditor,
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertFieldValue,
     assertModifyField,
-    CONTRIB,
-    forall,
-    getValueTable,
-    startWithContrib,
-)
-from test_30_contrib20 import EXAMPLE
-
-COST = dict(
-    costBare=&#34;103.456&#34;,
-    costTotal=f&#34;{EURO} 103.456&#34;,
-    costDescription=EXAMPLE[&#34;costDescription&#34;][0],
 )
 
 
-contribInfo = {}
+recordInfo = {}
 valueTables = {}
 
 
 # TESTS
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )
 
+
+def test_modifyCost(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;costTotal&#34;
-    value = COST[&#34;costBare&#34;]
-    expect = COST[&#34;costTotal&#34;]
+    value = EXAMPLE[&#34;costBare&#34;]
+    expect = EXAMPLE[&#34;costTotal&#34;]
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
     field = &#34;costDescription&#34;
-    value = COST[&#34;costDescription&#34;]
-    expect = COST[&#34;costDescription&#34;].strip()
+    value = EXAMPLE[&#34;costDescription&#34;][0]
+    expect = value.strip()
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
 
@@ -123,8 +122,10 @@ def test_start(clientOwner, clientOffice):
     (&#34;field&#34;,), ((&#34;costTotal&#34;,), (&#34;costDescription&#34;,),),
 )
 def test_viewCost(clients, field):
-    eid = contribInfo[&#34;eid&#34;]
-    value = COST[field]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    value = EXAMPLE[field]
+    if field == &#34;costDescription&#34;:
+        value = value[0]
     valueStrip = value.strip()
 
     def assertIt(cl, exp):
@@ -143,8 +144,8 @@ def test_viewCost(clients, field):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_30_contrib40.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clientOwner, clientOffice)</span>
+<dt id="test_30_contrib40.test_modifyCost"><code class="name flex">
+<span>def <span class="ident">test_modifyCost</span></span>(<span>clientOwner, clientOffice)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -152,24 +153,38 @@ def test_viewCost(clients, field):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
+<pre><code class="python">def test_modifyCost(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;costTotal&#34;
-    value = COST[&#34;costBare&#34;]
-    expect = COST[&#34;costTotal&#34;]
+    value = EXAMPLE[&#34;costBare&#34;]
+    expect = EXAMPLE[&#34;costTotal&#34;]
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
 
     field = &#34;costDescription&#34;
-    value = COST[&#34;costDescription&#34;]
-    expect = COST[&#34;costDescription&#34;].strip()
+    value = EXAMPLE[&#34;costDescription&#34;][0]
+    expect = value.strip()
     assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)</code></pre>
+</details>
+</dd>
+<dt id="test_30_contrib40.test_start"><code class="name flex">
+<span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib40.test_viewCost"><code class="name flex">
@@ -185,8 +200,10 @@ def test_viewCost(clients, field):
     (&#34;field&#34;,), ((&#34;costTotal&#34;,), (&#34;costDescription&#34;,),),
 )
 def test_viewCost(clients, field):
-    eid = contribInfo[&#34;eid&#34;]
-    value = COST[field]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    value = EXAMPLE[field]
+    if field == &#34;costDescription&#34;:
+        value = value[0]
     valueStrip = value.strip()
 
     def assertIt(cl, exp):
@@ -208,13 +225,13 @@ def test_viewCost(clients, field):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_30_contrib40.test_modifyCost" href="#test_30_contrib40.test_modifyCost">test_modifyCost</a></code></li>
 <li><code><a title="test_30_contrib40.test_start" href="#test_30_contrib40.test_start">test_start</a></code></li>
 <li><code><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost">test_viewCost</a></code></li>
 </ul>

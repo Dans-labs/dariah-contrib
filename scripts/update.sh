@@ -14,12 +14,15 @@
 
 APP="dariah-contrib"
 
-if [ "$HOSTNAME" == "tclarin11.dans.knaw.nl" ]; then
-        ON_CLARIN=1
-        ADIR="/opt/web-apps"
+HOST_TEST="tclarin11.dans.knaw.nl"
+HOST_PROD="clarin11.dans.knaw.nl"
+
+if [ "$HOSTNAME" == "HOST_TEST"  | "$HOSTNAME" == "HOST_PROD" ]; then
+    ON_DANS=1
+    ADIR="/opt/web-apps"
 fi
 
-if [ $ON_CLARIN ]; then
+if [ $ON_DANS ]; then
     echo "UPDATE.SH: stopping the web server"
     service httpd stop
     echo "UPDATE.SH: web server stopped"
@@ -39,7 +42,7 @@ echo "UPDATE.SH: Python byte-compiling server code"
 python3 -m compileall server
 echo "UPDATE.SH: Server code python byte-compiled"
 
-if [ $ON_CLARIN ]; then
+if [ $ON_DANS ]; then
     echo "UPDATE.SH: starting the web server"
     service httpd start
     echo "UPDATE.SH: web server started"

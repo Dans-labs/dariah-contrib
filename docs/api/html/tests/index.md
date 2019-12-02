@@ -1,8 +1,14 @@
 [conftest](conftest.html)
 
+[example](example.html)
+
 [helpers](helpers.html)
 
 [magic](magic.html)
+
+[starters](starters.html)
+
+[subtest](subtest.html)
 
 [test_10_factory10](test_10_factory10.html)
 

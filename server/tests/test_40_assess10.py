@@ -2,16 +2,17 @@
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with one contribution and its assessments.
-*   The contribution starts out without a type.
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   The contribution type table
+*   One contribution record
 
 ## Acts
 
+`test_resetType`
+:   **owner** resets the contribution type to undefined.
 
 `test_startAll`
 :   **owner** looks for his contribution, but if it is not there, creates a new one.
@@ -74,7 +75,21 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
+from example import (
+    CONTRIB,
+    ASSESS,
+    UNDEF_VALUE,
+    DUMMY_ID,
+    TYPE,
+    NEW_A_TITLE,
+)
 from helpers import (
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertDelItem,
     assertEditor,
     assertFieldValue,
@@ -82,49 +97,37 @@ from helpers import (
     assertMylist,
     assertStartAssessment,
     assertStatus,
-    UNDEF_VALUE,
-    CONTRIB,
-    ASSESS,
-    DUMMY_ID,
-    EXAMPLE_TYPE,
-    EXAMPLE_TYPE2,
-    NEW_A_TITLE,
-    forall,
-    getValueTable,
     inspectTitleAll,
-    startWithContrib,
 )
 
 ATITLE = "assessment of {cTitle}"
 
-contribInfo = {}
-assessInfo = {}
+recordInfo = {}
 valueTables = {}
 
 cIds = []
 ids = {}
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, "user", valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo["text"] = text
-    contribInfo["fields"] = fields
-    contribInfo["msgs"] = msgs
-    contribInfo["eid"] = eid
-    cTitle = G(fields, "title")
-    contribInfo["title"] = cTitle
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        types=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
+    )
 
+
+def test_resetType(clientOwner, clientOffice):
+    eid = G(G(recordInfo, CONTRIB), "eid")
     assertModifyField(
         clientOwner, CONTRIB, eid, "typeContribution", (None, UNDEF_VALUE), True
     )
-    getValueTable(clientOffice, CONTRIB, eid, "country", valueTables)
-    getValueTable(clientOffice, CONTRIB, eid, "typeContribution", valueTables)
-    types = valueTables["typeContribution"]
-    ids["EXAMPLE_TYPE"] = types[EXAMPLE_TYPE]
-    ids["EXAMPLE_TYPE2"] = types[EXAMPLE_TYPE2]
-
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
 @pytest.mark.parametrize(
@@ -137,7 +140,7 @@ def test_start(clientOwner, clientOffice):
     ),
 )
 def test_tryStartAll(clients, url):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
     theUrl = url.format(eid=eid)
 
     def assertIt(cl, exp):
@@ -148,10 +151,10 @@ def test_tryStartAll(clients, url):
 
 
 def test_tryStartAgainAll(clients):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
     field = "typeContribution"
     assertModifyField(
-        clients["owner"], CONTRIB, eid, field, (ids["EXAMPLE_TYPE"], EXAMPLE_TYPE), True
+        clients["owner"], CONTRIB, eid, field, (ids["TYPE"], TYPE), True
     )
 
     def assertIt(cl, exp):
@@ -168,35 +171,36 @@ def test_tryStartAgainAll(clients):
 
 
 def test_tryStartAgainOwner(clientOwner):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
     aIds = assertStartAssessment(clientOwner, eid, True)
     assert len(aIds) == 1
+    assessInfo = recordInfo.setdefault(ASSESS, {})
     assessInfo["eid"] = aIds[0]
 
 
 def test_mylistAll(clients):
-    eid = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
     def assertIt(cl, exp):
-        assertMylist(cl, ASSESS, eid, "assessments", exp)
+        assertMylist(cl, ASSESS, aId, "assessments", exp)
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), public=(False, False)))
     forall(clients, expect, assertIt)
 
-    assertEditor(clients["owner"], ASSESS, eid, valueTables, True)
+    assertEditor(clients["owner"], ASSESS, aId, valueTables, True)
 
     expect.update(dict(editor=(True, True)))
     forall(clients, expect, assertIt)
 
 
 def test_inspectTitleAll(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     field = "title"
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
@@ -204,21 +208,21 @@ def test_inspectTitleAll(clients):
 
 
 def test_inspectTypeAll(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     field = "assessmentType"
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, aId), field, exp)
 
     expect = {user: None for user in USERS}
-    expect.update({user: EXAMPLE_TYPE for user in RIGHTFUL_USERS})
+    expect.update({user: TYPE for user in RIGHTFUL_USERS})
     forall(clients, expect, assertIt)
 
 
 def test_modifyTypeAll(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     field = "assessmentType"
-    newValue = ids["EXAMPLE_TYPE2"]
+    newValue = ids["TYPE2"]
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
@@ -228,9 +232,9 @@ def test_modifyTypeAll(clients):
 
 
 def test_modifyTitleAll(clients):
-    aId = assessInfo["eid"]
+    aId = G(G(recordInfo, ASSESS), "eid")
     field = "title"
-    cTitle = contribInfo[field]
+    cTitle = G(G(recordInfo, CONTRIB), field)
     aTitle = ATITLE.format(cTitle=cTitle)
     newValue = NEW_A_TITLE
 

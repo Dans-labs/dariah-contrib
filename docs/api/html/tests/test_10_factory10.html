@@ -22,16 +22,15 @@
 <section id="section-intro">
 <p>Test the set-up of the Flask app.</p>
 <h2 id="domain">Domain</h2>
-<p>We start with a clean database, i.e. a database with
-all the value tables fully filled, with a set of test users,
-with packages, criteria, and types, but not with user-contributed content,
-such as contributions, assessments, and reviews.</p>
+<ul>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+</ul>
 <h2 id="acts">Acts</h2>
 <p>Are we sure we are in development or in production?</p>
 <dl>
 <dt><a title="test_10_factory10.test_test" href="#test_10_factory10.test_test"><code>test_test()</code></a></dt>
 <dd>In development the <code>testing</code> attribute of the Flask app is False.</dd>
-<dt><a title="test_10_factory10.test_notest" href="#test_10_factory10.test_notest"><code>test_notest()</code></a></dt>
+<dt><a title="test_10_factory10.test_noTest" href="#test_10_factory10.test_noTest"><code>test_noTest()</code></a></dt>
 <dd>In production the <code>testing</code> attribute of the Flask app is True.</dd>
 <dt><a title="test_10_factory10.test_loginProd" href="#test_10_factory10.test_loginProd"><code>test_loginProd()</code></a></dt>
 <dd>In production we cannot login any of the test users.</dd>
@@ -46,10 +45,7 @@ such as contributions, assessments, and reviews.</p>
 
 ## Domain
 
-We start with a clean database, i.e. a database with
-all the value tables fully filled, with a set of test users,
-with packages, criteria, and types, but not with user-contributed content,
-such as contributions, assessments, and reviews.
+*   Clean slate, see `starters`.
 
 ## Acts
 
@@ -58,7 +54,7 @@ Are we sure we are in development or in production?
 `test_test`
 :   In development the `testing` attribute of the Flask app is False.
 
-`test_notest`
+`test_noTest`
 :   In production the `testing` attribute of the Flask app is True.
 
 `test_loginProd`
@@ -70,14 +66,19 @@ Are we sure we are in development or in production?
 &#34;&#34;&#34;
 
 import magic  # noqa
-from helpers import assertStatus
+from starters import start
+from subtest import assertStatus
+
+
+def test_start():
+    start()
 
 
 def test_test(app):
     assert app.testing
 
 
-def test_notest(appNotest):
+def test_noTest(appNotest):
     assert not appNotest.testing
 
 
@@ -126,8 +127,8 @@ def test_login(clientPublic, clients):
         assertStatus(clientProd, f&#34;/login?eppn={user}&#34;, False)</code></pre>
 </details>
 </dd>
-<dt id="test_10_factory10.test_notest"><code class="name flex">
-<span>def <span class="ident">test_notest</span></span>(<span>appNotest)</span>
+<dt id="test_10_factory10.test_noTest"><code class="name flex">
+<span>def <span class="ident">test_noTest</span></span>(<span>appNotest)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -135,8 +136,21 @@ def test_login(clientPublic, clients):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_notest(appNotest):
+<pre><code class="python">def test_noTest(appNotest):
     assert not appNotest.testing</code></pre>
+</details>
+</dd>
+<dt id="test_10_factory10.test_start"><code class="name flex">
+<span>def <span class="ident">test_start</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_start():
+    start()</code></pre>
 </details>
 </dd>
 <dt id="test_10_factory10.test_test"><code class="name flex">
@@ -170,7 +184,8 @@ def test_login(clientPublic, clients):
 <ul class="">
 <li><code><a title="test_10_factory10.test_login" href="#test_10_factory10.test_login">test_login</a></code></li>
 <li><code><a title="test_10_factory10.test_loginProd" href="#test_10_factory10.test_loginProd">test_loginProd</a></code></li>
-<li><code><a title="test_10_factory10.test_notest" href="#test_10_factory10.test_notest">test_notest</a></code></li>
+<li><code><a title="test_10_factory10.test_noTest" href="#test_10_factory10.test_noTest">test_noTest</a></code></li>
+<li><code><a title="test_10_factory10.test_start" href="#test_10_factory10.test_start">test_start</a></code></li>
 <li><code><a title="test_10_factory10.test_test" href="#test_10_factory10.test_test">test_test</a></code></li>
 </ul>
 </li>

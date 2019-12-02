@@ -1,3 +1,5 @@
+"""Change the sys path so that `test` modules can import `control` modules."""
+
 import sys
 import os
 

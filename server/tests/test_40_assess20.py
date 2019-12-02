@@ -2,16 +2,14 @@
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with one contribution and one assessment, see `test_40_assess10`.
-*   The assessment has the original title.
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
+*   One assessment record
 
 ## Acts
-
 
 `test_addAssessment`
 :   **owner** cannot add another assessment.
@@ -25,73 +23,57 @@
 
 import magic  # noqa
 from control.utils import pick as G
-from helpers import (
-    assertDelItem,
-    assertEditor,
-    assertModifyField,
-    assertStartAssessment,
+from example import (
     CONTRIB,
     ASSESS,
-    EXAMPLE_TYPE,
-    EXAMPLE_TYPE2,
+    TYPE,
+    TYPE2,
+)
+from helpers import (
     checkWarning,
     findItem,
-    getValueTable,
-    startWithContrib,
-    startWithAssessment,
+)
+from starters import (
+    start,
+)
+from subtest import (
+    assertDelItem,
+    assertModifyField,
+    assertStartAssessment,
 )
 
-contribInfo = {}
-assessInfo = {}
+recordInfo = {}
 valueTables = {}
 
 cIds = []
 ids = {}
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, "user", valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo["text"] = text
-    contribInfo["fields"] = fields
-    contribInfo["msgs"] = msgs
-    contribInfo["eid"] = eid
-    cTitle = G(fields, "title")
-    contribInfo["title"] = cTitle
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
-    getValueTable(clientOffice, CONTRIB, eid, "typeContribution", valueTables)
-    types = valueTables["typeContribution"]
-    ids["EXAMPLE_TYPE"] = types[EXAMPLE_TYPE]
-    ids["EXAMPLE_TYPE2"] = types[EXAMPLE_TYPE2]
-    assertModifyField(
-        clientOwner,
-        CONTRIB,
-        eid,
-        "typeContribution",
-        (ids["EXAMPLE_TYPE"], EXAMPLE_TYPE),
-        True,
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        assessment=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
     )
-    aIds = startWithAssessment(clientOwner, eid)
-    assert len(aIds) == 1
-    aId = aIds[0]
-    assessInfo["eid"] = aId
-    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
-    assessInfo["title"] = f"assessment of {cTitle}"
 
 
 def test_addAssessment(clientOwner):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
     assertStartAssessment(clientOwner, eid, False)
 
 
 def test_addAssessment2(clientOwner):
-    eid = contribInfo["eid"]
-    aId = assessInfo["eid"]
-    aTitle = assessInfo["title"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
+    aId = G(G(recordInfo, ASSESS), "eid")
+    aTitle = G(G(recordInfo, ASSESS), "title")
     field = "typeContribution"
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids["EXAMPLE_TYPE2"], EXAMPLE_TYPE2), True
+        clientOwner, CONTRIB, eid, field, (ids["TYPE2"], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -103,7 +85,7 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids["EXAMPLE_TYPE"], EXAMPLE_TYPE), True
+        clientOwner, CONTRIB, eid, field, (ids["TYPE"], TYPE), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)

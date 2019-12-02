@@ -24,12 +24,10 @@
 <p>About modifying fields by selecting values from value tables.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the contribution table only</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
+<li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
@@ -79,12 +77,10 @@ About modifying fields by selecting values from value tables.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   One contribution record
 
 ## Acts
 
@@ -141,209 +137,27 @@ Here we focus on the fields that have values in other tables, the valueTables.
 import pytest
 
 import magic  # noqa
-from helpers import (
-    assertModifyField,
+from control.utils import pick as G
+from example import (
     CONTRIB,
-    getValueTable,
+    VCC12,
+    EXAMPLE,
+)
+from helpers import (
     modifyField,
-    startWithContrib,
+)
+from starters import (
+    start,
+    getValueTable,
+)
+from subtest import (
+    assertModifyField,
 )
 
 
-contribInfo = {}
+recordInfo = {}
 valueTables = {}
 
-EXAMPLE = dict(
-    year=tuple(str(yr) for yr in range(2010, 2030)),
-    country=&#34;&#34;&#34;
-AT🇦🇹
-BE🇧🇪
-HR🇭🇷
-CY🇨🇾
-DK🇩🇰
-FR🇫🇷
-DE🇩🇪
-GR🇬🇷
-IE🇮🇪
-IT🇮🇹
-LU🇱🇺
-MT🇲🇹
-NL🇳🇱
-PT🇵🇹
-RS🇷🇸
-SI🇸🇮
-PL🇵🇱
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    vcc=&#34;&#34;&#34;
-Coordination
-VCC1
-VCC2
-VCC3
-VCC4
-Working Group
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    typeContribution=&#34;&#34;&#34;
-service - data hosting
-service - processing service
-service - support service
-service - access to resources
-activity - event
-activity - consulting
-activity - DARIAH coordination
-activity - resource creation
-activity - software development
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    tadirahObject=&#34;&#34;&#34;
-Artifacts
-Bibliographic Listings
-Code
-Computers
-Curricula
-Data
-Digital Humanities
-File
-Images
-Images (3D)
-Infrastructure
-Interaction
-Language
-Link
-Literature
-Manuscript
-Map
-Metadata
-Methods
-Multimedia
-Multimodal
-Named Entities
-Persons
-Projects
-Research
-Research Process
-Research Results
-Sheet Music
-Software
-Sound
-Standards
-Text
-Text Bearing Objects
-Tools
-VREs
-Video
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    tadirahActivity=&#34;&#34;&#34;
-Analysis
-Capture
-Creation
-Dissemination
-Enrichment
-Interpretation
-Meta-Activities
-Storage
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    tadirahTechnique=&#34;&#34;&#34;
-Bit Stream Preservation &gt; Storage-Preservation
-Brainstorming
-Browsing
-Cluster Analysis &gt; Analysis-Stylistic Analysis
-Collocation Analysis &gt; Analysis- Structural Analysis
-Concordancing &gt; Analysis-Structural Analysis
-Debugging
-Distance Measures &gt; Analysis-Stylistic Analysis
-Durable Persistent Media &gt; Storage-Preservation
-Emulation &gt; Storage-Preservation
-Encoding
-Gamification &gt; Dissemination-Crowdsourcing
-Georeferencing &gt; Enrichment-Annotation
-Information Retrieval &gt; Analysis-Content Analysis
-Linked open data &gt; Enrichment-Annotation; Dissemination-Publishing
-Machine Learning &gt; Analysis-Structural Analysis; Analysis-Stylistic Analysis; Analysis-Content Analysis
-Mapping
-Migration &gt; Storage-Preservation
-Named Entity Recognition &gt; Enrichment-Annotation; Analysis-Content Analysis
-Open Archival Information Systems &gt; Storage-Preservation
-POS-Tagging &gt; Analysis-Structural Analysis
-Pattern Recognition &gt; Analysis-Relational Analysis
-Photography
-Preservation Metadata &gt; Storage-Preservation
-Principal Component Analysis &gt; Analysis-Stylistic Analysis
-Replication &gt; Storage-Preservation
-Scanning
-Searching
-Sentiment Analysis &gt; Analysis-Content Analysis
-Sequence Alignment &gt; Analysis-Relational Analysis
-Technology Preservation &gt; Storage-Preservation
-Topic Modeling &gt; Analysis-Content Analysis
-Versioning &gt; Storage-Preservation
-Web Crawling &gt; Capture-Gathering
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    discipline=&#34;&#34;&#34;
-Archaeology and Prehistory
-Architecture, space management
-Art and art history
-Biological anthropology
-Classical studies
-Communication sciences
-Cultural heritage and museology
-Demography
-Economies and finances
-Education
-Environmental studies
-Gender studies
-Geography
-History
-History, Philosophy and Sociology of Sciences
-Law
-Linguistics
-Literature
-Management
-Media studies
-Methods and statistics
-Musicology and performing arts
-Philosophy
-Political science
-Psychology
-Religions
-Social Anthropology and ethnology
-Sociology
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-    keyword=&#34;&#34;&#34;
-(socio-)linguistic analyses
-1795-2015
-3D modeling
-3D scanning
-Analyse quantitative
-Analysis-Stylistic Analysis
-Architecture
-Archives
-Arts
-Arts and Humanities
-Augmented reality
-Belgian justice
-Belgium
-Browsing
-Brussels
-Cœur du Hainaut
-&#34;&#34;&#34;.strip().split(
-        &#34;\n&#34;
-    ),
-)
-
-VCC12 = &#34;VCC1,VCC2&#34;
 
 # SPECIFIC HELPERS
 
@@ -361,12 +175,15 @@ def modifyType(client, eid):
 # TESTS
 
 
-def test_start(clientOwner):
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )
 
 
 @pytest.mark.parametrize(
@@ -391,7 +208,7 @@ def test_valueEdit(clientOwner, field):
         `valueTables`.
     &#34;&#34;&#34;
 
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
@@ -400,7 +217,7 @@ def test_valueEdit(clientOwner, field):
 
 def test_modifyVcc(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     vcc12 = [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vcc12, VCC12), True)
@@ -408,7 +225,7 @@ def test_modifyVcc(clientOwner):
 
 def test_modifyVccWrong(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
     vccVal = [wrongValue, vccs[&#34;VCC2&#34;]]
@@ -417,19 +234,19 @@ def test_modifyVccWrong(clientOwner):
 
 def test_modifyVccError(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     vccVal = [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
 
 
 def test_modifyTypeEx1(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     modifyType(clientOwner, eid)
 
 
 def test_modifyTypeMult(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     types = valueTables[&#34;typeContribution&#34;]
     field = &#34;typeContribution&#34;
     oldValue = EXAMPLE[&#34;typeContribution&#34;][-2]
@@ -439,19 +256,19 @@ def test_modifyTypeMult(clientOwner):
 
 
 def test_modifyTypeEx2(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     modifyType(clientOwner, eid)
 
 
 def test_modifyTypeWrong(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;typeContribution&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
     assertModifyField(clientOwner, CONTRIB, eid, field, wrongValue, False)
 
 
 def test_modifyTypeTypo(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     types = valueTables[&#34;typeContribution&#34;]
     fieldx = &#34;xxxContribution&#34;
     newValue = &#34;activity - resource creation&#34;
@@ -470,7 +287,7 @@ def test_modifyTypeTypo(clientOwner):
     ),
 )
 def test_modifyMeta(clientOwner, field):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
     updateValues = tuple(meta[ex] for ex in checkValues)
@@ -491,7 +308,7 @@ def test_modifyMeta(clientOwner, field):
     ),
 )
 def test_addMetaWrong(clientOwner, field):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     updateValues = [[&#34;xxx&#34;]]
 
     assertModifyField(clientOwner, CONTRIB, eid, field, updateValues, False)
@@ -501,7 +318,7 @@ def test_addMetaWrong(clientOwner, field):
     (&#34;field&#34;, &#34;value&#34;), ((&#34;discipline&#34;, &#34;ddd&#34;), (&#34;keyword&#34;, &#34;kkk&#34;),),
 )
 def test_addMetaRight(clientOwner, field, value):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     updateValues = ((value,),)
     assertModifyField(clientOwner, CONTRIB, eid, field, (updateValues, value), True)</code></pre>
 </details>
@@ -545,7 +362,7 @@ def test_addMetaRight(clientOwner, field, value):
     (&#34;field&#34;, &#34;value&#34;), ((&#34;discipline&#34;, &#34;ddd&#34;), (&#34;keyword&#34;, &#34;kkk&#34;),),
 )
 def test_addMetaRight(clientOwner, field, value):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     updateValues = ((value,),)
     assertModifyField(clientOwner, CONTRIB, eid, field, (updateValues, value), True)</code></pre>
 </details>
@@ -570,7 +387,7 @@ def test_addMetaRight(clientOwner, field, value):
     ),
 )
 def test_addMetaWrong(clientOwner, field):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     updateValues = [[&#34;xxx&#34;]]
 
     assertModifyField(clientOwner, CONTRIB, eid, field, updateValues, False)</code></pre>
@@ -596,7 +413,7 @@ def test_addMetaWrong(clientOwner, field):
     ),
 )
 def test_modifyMeta(clientOwner, field):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
     updateValues = tuple(meta[ex] for ex in checkValues)
@@ -616,7 +433,7 @@ def test_modifyMeta(clientOwner, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeEx1(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     modifyType(clientOwner, eid)</code></pre>
 </details>
 </dd>
@@ -630,7 +447,7 @@ def test_modifyMeta(clientOwner, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeEx2(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     modifyType(clientOwner, eid)</code></pre>
 </details>
 </dd>
@@ -644,7 +461,7 @@ def test_modifyMeta(clientOwner, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeMult(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     types = valueTables[&#34;typeContribution&#34;]
     field = &#34;typeContribution&#34;
     oldValue = EXAMPLE[&#34;typeContribution&#34;][-2]
@@ -663,7 +480,7 @@ def test_modifyMeta(clientOwner, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeTypo(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     types = valueTables[&#34;typeContribution&#34;]
     fieldx = &#34;xxxContribution&#34;
     newValue = &#34;activity - resource creation&#34;
@@ -681,7 +498,7 @@ def test_modifyMeta(clientOwner, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeWrong(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;typeContribution&#34;
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
     assertModifyField(clientOwner, CONTRIB, eid, field, wrongValue, False)</code></pre>
@@ -698,7 +515,7 @@ def test_modifyMeta(clientOwner, field):
 </summary>
 <pre><code class="python">def test_modifyVcc(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     vcc12 = [vccs[&#34;VCC1&#34;], vccs[&#34;VCC2&#34;]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vcc12, VCC12), True)</code></pre>
@@ -715,7 +532,7 @@ def test_modifyMeta(clientOwner, field):
 </summary>
 <pre><code class="python">def test_modifyVccError(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     vccVal = [&#34;monkey&#34;, vccs[&#34;VCC2&#34;]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)</code></pre>
@@ -732,7 +549,7 @@ def test_modifyMeta(clientOwner, field):
 </summary>
 <pre><code class="python">def test_modifyVccWrong(clientOwner):
     field = &#34;vcc&#34;
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     vccs = valueTables[&#34;vcc&#34;]
     wrongValue = list(valueTables[&#34;tadirahObject&#34;].values())[0]
     vccVal = [wrongValue, vccs[&#34;VCC2&#34;]]
@@ -740,7 +557,7 @@ def test_modifyMeta(clientOwner, field):
 </details>
 </dd>
 <dt id="test_30_contrib30.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clientOwner)</span>
+<span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -748,12 +565,15 @@ def test_modifyMeta(clientOwner, field):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOwner):
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid</code></pre>
+<pre><code class="python">def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib30.test_valueEdit"><code class="name flex">
@@ -792,7 +612,7 @@ def test_valueEdit(clientOwner, field):
         `valueTables`.
     &#34;&#34;&#34;
 
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
     for exampleValue in EXAMPLE[field]:
@@ -809,7 +629,6 @@ def test_valueEdit(clientOwner, field):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>

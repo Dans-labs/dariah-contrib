@@ -23,65 +23,14 @@
 <p>Test the users.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the user table and some value tables</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a></li>
+<li>The user table</li>
 </ul>
-<h2 id="players">Players</h2>
-<table>
-<thead>
-<tr>
-<th>name</th>
-<th>role</th>
-<th>remarks</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>owner</td>
-<td>auth</td>
-<td>authenticated user from Belgium, creates and assesses a contribution</td>
-</tr>
-<tr>
-<td>editor</td>
-<td>auth</td>
-<td>authenticated user, added as editor of the above contribution</td>
-</tr>
-<tr>
-<td>mycoord</td>
-<td>coord</td>
-<td>the national coordinator of Belgium</td>
-</tr>
-<tr>
-<td>coord</td>
-<td>coord</td>
-<td>any national coordinator, not from Belgium, in this case: Luxemburg</td>
-</tr>
-<tr>
-<td>expert</td>
-<td>auth</td>
-<td>authenticated user, expert reviewer for the above contribution</td>
-</tr>
-<tr>
-<td>final</td>
-<td>auth</td>
-<td>authenticated user, final reviewer for the above contribution</td>
-</tr>
-<tr>
-<td>auth</td>
-<td>auth</td>
-<td>any authenticated user without special rights</td>
-</tr>
-<tr>
-<td>public</td>
-<td>public</td>
-<td>any unauthenticated user</td>
-</tr>
-</tbody>
-</table>
 <h2 id="acts">Acts</h2>
 <dl>
-<dt><a title="test_20_users10.test_start" href="#test_20_users10.test_start"><code>test_start()</code></a></dt>
-<dd><strong>office</strong> retrieves the list of users</dd>
+<dt><a title="test_20_users10.test_users" href="#test_20_users10.test_users"><code>test_users()</code></a></dt>
+<dd><strong>office</strong> checks whether all users can login, except <strong>public</strong>.</dd>
 <dt><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail"><code>test_readEmail()</code></a></dt>
 <dd>All users try to read the email address of <strong>auth</strong>, but only some succeed</dd>
 </dl>
@@ -93,26 +42,14 @@
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the user table and some value tables
-
-## Players
-
-name | role | remarks
---- | --- | ---
-owner | auth | authenticated user from Belgium, creates and assesses a contribution
-editor | auth | authenticated user, added as editor of the above contribution
-mycoord | coord | the national coordinator of Belgium
-coord | coord | any national coordinator, not from Belgium, in this case: Luxemburg
-expert | auth | authenticated user, expert reviewer for the above contribution
-final | auth | authenticated user, final reviewer for the above contribution
-auth | auth | any authenticated user without special rights
-public | public | any unauthenticated user
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`
+*   The user table
 
 ## Acts
 
-`test_start`
-:   **office** retrieves the list of users
+`test_users`
+:   **office** checks whether all users can login, except **public**.
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed
@@ -121,9 +58,13 @@ public | public | any unauthenticated user
 import magic  # noqa
 from conftest import USERS, POWER_USERS
 from helpers import (
-    assertFieldValue,
-    getValueTable,
     viewField
+)
+from starters import (
+    start,
+)
+from subtest import (
+    assertFieldValue,
 )
 
 
@@ -131,10 +72,12 @@ valueTables = {}
 
 
 def test_start(clientOffice):
-    users = getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
+    start(clientOffice=clientOffice, users=True, valueTables=valueTables)
 
+
+def test_users(clientOffice):
     assert len(USERS) == 11
-
+    users = valueTables[&#34;user&#34;]
     for user in USERS:
         if user == &#34;public&#34;:
             assert user not in users
@@ -196,10 +139,21 @@ def test_readEmail(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_start(clientOffice):
-    users = getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-
+    start(clientOffice=clientOffice, users=True, valueTables=valueTables)</code></pre>
+</details>
+</dd>
+<dt id="test_20_users10.test_users"><code class="name flex">
+<span>def <span class="ident">test_users</span></span>(<span>clientOffice)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_users(clientOffice):
     assert len(USERS) == 11
-
+    users = valueTables[&#34;user&#34;]
     for user in USERS:
         if user == &#34;public&#34;:
             assert user not in users
@@ -217,7 +171,6 @@ def test_readEmail(clients):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>
@@ -226,6 +179,7 @@ def test_readEmail(clients):
 <ul class="">
 <li><code><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail">test_readEmail</a></code></li>
 <li><code><a title="test_20_users10.test_start" href="#test_20_users10.test_start">test_start</a></code></li>
+<li><code><a title="test_20_users10.test_users" href="#test_20_users10.test_users">test_users</a></code></li>
 </ul>
 </li>
 </ul>

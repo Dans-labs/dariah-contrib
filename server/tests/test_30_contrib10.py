@@ -4,12 +4,9 @@ About adding and deleting contributions and some light editing.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
 
 ## Acts
 
@@ -44,25 +41,31 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G, now
 from conftest import USERS
+from example import (
+    CONTRIB,
+)
 from helpers import (
+    forall,
+)
+from starters import (
+    start,
+)
+from subtest import (
     assertAddItem,
     assertDelItem,
     assertEditor,
     assertMylist,
-    CONTRIB,
-    forall,
-    getValueTable,
 )
 
 
-contribInfo = {}
+recordInfo = {}
 valueTables = {}
 
 TITLE = "No Title Yet"
 
 
 def test_start(clientOffice):
-    getValueTable(clientOffice, None, None, "user", valueTables)
+    start(clientOffice=clientOffice, users=True, valueTables=valueTables)
 
 
 def test_addDelAll(clients):
@@ -78,6 +81,7 @@ def test_addDelAll(clients):
 
 def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
+    contribInfo = recordInfo.setdefault(CONTRIB, {})
     contribInfo["text"] = text
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
@@ -95,12 +99,12 @@ def test_addOwner(clientOwner):
     ),
 )
 def test_fields(field, value):
-    fields = contribInfo["fields"]
+    fields = G(G(recordInfo, CONTRIB), "fields")
     assert G(fields, field) == value
 
 
 def test_makeEditorAll(clients):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
 
     def assertIt(cl, exp):
         assertEditor(cl, CONTRIB, eid, valueTables, exp)
@@ -113,12 +117,12 @@ def test_makeEditorAll(clients):
 
 
 def test_makeEditorOwner(clientOwner):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
 def test_mylistAll(clients):
-    eid = contribInfo["eid"]
+    eid = G(G(recordInfo, CONTRIB), "eid")
 
     expect = {user: (True, False) for user in USERS}
     expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))

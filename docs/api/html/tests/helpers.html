@@ -32,6 +32,7 @@ import re
 
 from flask import json
 from control.utils import serverprint
+from example import ASSESS
 
 
 materialRe = re.compile(
@@ -46,19 +47,6 @@ userRe = re.compile(
     re.S,
 )
 valueRe = re.compile(&#34;&#34;&#34;eid=[&#39;&#34;](.*?)[&#39;&#34;][^&gt;]*&gt;(.*?)(?:&amp;#xa;)?&lt;&#34;&#34;&#34;, re.S)
-
-UNDEF_VALUE = &#34;○&#34;
-
-WELCOME = &#34;Welcome to the DARIAH contribution tool&#34;
-DUMMY_ID = &#34;00000000ffa4bbd9fe000f15&#34;
-EXAMPLE_TYPE = &#34;activity - resource creation&#34;
-EXAMPLE_TYPE2 = &#34;service - processing service&#34;
-ASSESS = &#34;assessment&#34;
-CRITERIA_ENTRY = &#34;criteriaEntry&#34;
-NEW_A_TITLE = &#34;My contribution assessed&#34;
-BELGIUM = &#34;BE🇧🇪&#34;
-LUXEMBURG = &#34;LU🇱🇺&#34;
-CONTRIB = &#34;contrib&#34;
 
 
 def forall(cls, expect, assertFunc, *args):
@@ -84,6 +72,15 @@ def forall(cls, expect, assertFunc, *args):
 
 
 def fieldEditRe(eid, field):
+    &#34;&#34;&#34;Given a field name, return a `re` that looks for the value of that field.
+
+    Parameters
+    ----------
+    eid: string(ObjectId)
+        The id of the record whose field data we are searching
+    field: string
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;
     &lt;span\ [^&gt;]*?eid=[&#39;&#34;]{eid}[&#39;&#34;]\s+field=[&#39;&#34;]{field}[&#39;&#34;].*?
@@ -97,6 +94,13 @@ def fieldEditRe(eid, field):
 
 
 def detailRe(dtable):
+    &#34;&#34;&#34;Given a detail table name, return a `re` that looks for the detail records.
+
+    Parameters
+    ----------
+    dtable: string
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{dtable}/([^&#39;&#34;]+)[&#39;&#34;][^&gt;]*&gt;(.*?)&lt;/details&gt;&#34;&#34;&#34;.format(
             dtable=dtable
@@ -106,251 +110,22 @@ def detailRe(dtable):
 
 
 def warningRe(label):
+    &#34;&#34;&#34;Given a label, return a `re` that looks for warned items with that label.
+
+    A warned item is an item with a CSS class `warning` in it.
+
+    Parameters
+    ----------
+    label: string
+        Usually the title of an item
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;\bclass=[&#39;&#34;][^&#39;&#34;]*\bwarning\b[^&#39;&#34;]*[&#39;&#34;][^&gt;]*&gt;{label}&lt;&#34;&#34;&#34;.format(
             label=label
         ),
         re.S,
     )
-
-
-def assertAddItem(client, table, expect):
-    &#34;&#34;&#34;Adds an item to a table.
-
-    The response texts will be analysed into messages and fields, the eid
-    of the new item will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    expect: boolean
-
-    Returns
-    -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the inserted item.
-    &#34;&#34;&#34;
-
-    response = client.get(f&#34;/api/{table}/insert&#34;, follow_redirects=True)
-    text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
-    eid = findEid(text)
-    if expect:
-        assert &#34;item added&#34; in msgs
-    else:
-        assert &#34;item added&#34; not in msgs
-    return (text, fields, msgs, eid)
-
-
-def assertDelItem(client, table, eid, expect):
-    &#34;&#34;&#34;Deletes an item from a table.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(ObjectId)
-    expect: boolean
-    &#34;&#34;&#34;
-
-    assertStatus(client, f&#34;/api/{table}/delete/{eid}&#34;, expect)
-
-
-def assertEditor(client, table, eid, valueTables, expect, clear=False):
-    &#34;&#34;&#34;Sets the `editors` of an item to **editor**, or clears the `editors` field.
-
-    Parameters
-    ----------
-    table: string
-    eid: string(ObjectId)
-    valueTables: the store for the value tables
-    expect: boolean
-    clear: boolean, optional `False`
-        If True, clears the editors field.
-    &#34;&#34;&#34;
-
-    if clear:
-        value = ([], &#34;&#34;)
-    else:
-        users = valueTables[&#34;user&#34;]
-        (editorId, editorName) = users[&#34;editor&#34;]
-        value = ([editorId], editorName)
-    assertModifyField(client, table, eid, &#34;editors&#34;, value, expect)
-
-
-def assertFieldValue(source, field, expect):
-    &#34;&#34;&#34;Verify whether a field has a certain expected value.
-
-    If we pass expect `None` we want to assert that the field is not present at all.
-
-    Parameters
-    ----------
-    source: dict | (client: fixture, table: string, eid: string)
-        The dictionary of fields and values of a retrieved response.
-        If it is a tuple, the dictionary will be retrieved by looking up
-        the item specified by `table` and `eid`.
-    field: string
-        The name of the specific field.
-    expect:
-        The expected value for this field.
-    &#34;&#34;&#34;
-
-    if type(source) is tuple:
-        (client, table, eid) = source
-        (text, fields, msgs, dummy) = findItem(client, table, eid)
-    else:
-        fields = source
-
-    if expect is None:
-        assert field not in fields
-    else:
-        assert field in fields
-        assert expect == fields[field]
-
-
-def assertModifyField(client, table, eid, field, newValue, expect):
-    &#34;&#34;&#34;Try to modify a field and check the outcome.
-
-    !!! note &#34;Read access&#34;
-        The test has to reckon with the fact that the client may not even have
-        read access to the field.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    field: string
-    newValue: string | tuple
-        If a tuple, the first component is the modification value,
-        and the second component is the value we read back from the modified record
-    expect: boolean
-        Whether we expect the modification to succeed
-    &#34;&#34;&#34;
-
-    if not expect:
-        fields = findItem(client, table, eid)[1]
-        oldValue = fields[field] if field in fields else None
-
-    if type(newValue) is tuple:
-        (newValue, newValueRep) = newValue
-    else:
-        newValueRep = newValue
-
-    (text, fields) = modifyField(client, table, eid, field, newValue)
-
-    if not expect:
-        assert field not in fields
-
-    (text, fields, msgs, eid) = findItem(client, table, eid)
-
-    if expect:
-        assertFieldValue(fields, field, newValueRep)
-    else:
-        if field in fields:
-            assertFieldValue(fields, field, oldValue)
-
-
-def assertMylist(client, table, eid, label, expect):
-    &#34;&#34;&#34;Verify whether the client can see mylist on table.
-
-    Mylist is retrieved, and if successful, it is also verified either that
-    a record with id `eid` is in it or that the list is empty.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(objectId)
-    label: string
-        How a record of this table is called on the interface, in the plural
-    expect: (mayList: boolean, showsUp: boolean)
-        mayList means: we expect to be able to see mylist
-        showsUp means: we expect the record to show up. Otherwise mylist should be
-        empty.
-    &#34;&#34;&#34;
-    url = f&#34;/{table}/list?action=my&#34;
-    (mayList, canSee) = expect
-    assertStatus(client, url, mayList)
-    if mayList:
-        (text, status, msgs) = accessUrl(client, url, redirect=True)
-        material = findMaterial(text)
-        theId = findEid(text)
-        if canSee:
-            assert eid == theId
-        else:
-            assert f&#34;0 {label}&#34; in material
-
-
-def assertStage(client, table, eid, expect):
-    &#34;&#34;&#34;Check whether a record has a certain workflow stage.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    expect: string
-    &#34;&#34;&#34;
-
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
-    stageFound = findStages(text)[0]
-    assert stageFound == expect
-    return (text, fields, msgs, eid)
-
-
-def assertStartAssessment(client, cId, expect):
-    &#34;&#34;&#34;Issues the startAssessment workflow command.
-
-    The response texts will be analysed into messages and fields, the aId
-    of the new assessment will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    cId: string(ObjectId)
-        The contribution id for which the assessment must be started.
-    expect: boolean
-
-    Returns
-    -------
-    aIds: list of str(ObjectId)
-        The ids of all assessments of the contribution after the act.
-    &#34;&#34;&#34;
-
-    assertStatus(client, f&#34;/api/task/startAssessment/{cId}&#34;, expect)
-    if expect:
-        aIds = getAid(client, multiple=True)
-    else:
-        aIds = []
-    return aIds
-
-
-def assertStatus(client, url, expect):
-    &#34;&#34;&#34;Get data and see whether that went right or wrong.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    expect: boolean
-        Whether it is expected to be successful
-    &#34;&#34;&#34;
-
-    response = client.get(url)
-    if expect:
-        assert response.status_code in {200, 302}
-    else:
-        assert response.status_code in {400, 303}
 
 
 def findDetails(text, dtable):
@@ -531,6 +306,19 @@ def findStages(text):
 
 
 def findUsers(text):
+    &#34;&#34;&#34;Get the users from a response.
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    dict
+        keyed by lower case eppns, valued by tuples of eid and name of the user.
+    &#34;&#34;&#34;
+
     return {
         name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
     }
@@ -544,32 +332,13 @@ def getAid(cl, multiple=False):
     return findEid(text, multiple=multiple)
 
 
-def inspectTitleAll(clients, eid, expect):
-    field = &#34;title&#34;
-
-    def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, eid), field, exp)
-
-    forall(clients, expect, assertIt)
-
-
 def checkWarning(text, label):
+    &#34;&#34;&#34;Whether there is a warned item with `label`.
+
+    See `warningRe`.
+    &#34;&#34;&#34;
+
     return not not warningRe(label).search(text)
-
-
-def startWithContrib(client):
-    eid = findItemEid(client, CONTRIB)
-    if eid:
-        result = findItem(client, CONTRIB, eid)
-        return result
-    return assertAddItem(client, CONTRIB, True)
-
-
-def startWithAssessment(client, cId):
-    aId = findItemEid(client, ASSESS)
-    if aId:
-        return [aId]
-    return assertStartAssessment(client, cId, True)
 
 
 def postJson(client, url, value):
@@ -638,44 +407,7 @@ def getRelatedValues(client, table, eid, field):
     valueStr = thisRe.findall(text)
     values = valueRe.findall(valueStr[0])
     valueDict = {value: eid for (eid, value) in values}
-    return valueDict
-
-
-def getValueTable(client, table, eid, valueTable, dest):
-    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
-
-    We obtain the mapping by asking for an edit view of a field that
-    takes values in this value table.
-    Then we inspect the edit widget and read off the values and ids.
-
-    Except for the user table, there we directly list the items.
-
-    The mapping is stored in the dict `dest` keyed by the
-    name of the valueTable.
-
-    Parameters
-    ----------
-    table: string
-        The name of table whose record we inspect
-    eid: dict
-        The id of the record
-    valueTable: string
-        The name of a value table which is also the name of the field in the record
-
-    Returns
-    -------
-    dict
-        The stored value dict for this valueTable
-    &#34;&#34;&#34;
-
-    if valueTable == &#34;user&#34;:
-        response = client.get(f&#34;/user/list&#34;)
-        text = response.get_data(as_text=True)
-        dest[valueTable] = findUsers(text)
-    else:
-        valueDict = getRelatedValues(client, table, eid, valueTable)
-        dest[valueTable] = valueDict
-    return dest[valueTable]</code></pre>
+    return valueDict</code></pre>
 </details>
 </section>
 <section>
@@ -704,468 +436,22 @@ def getValueTable(client, table, eid, valueTable, dest):
     return (text, status, msgs)</code></pre>
 </details>
 </dd>
-<dt id="helpers.assertAddItem"><code class="name flex">
-<span>def <span class="ident">assertAddItem</span></span>(<span>client, table, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Adds an item to a table.</p>
-<p>The response texts will be analysed into messages and fields, the eid
-of the new item will be read off.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
-<dd>The complete response text</dd>
-<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
-<dd>All fields and their values</dd>
-<dt><strong><code>msgs</code></strong> :&ensp;<code>list</code></dt>
-<dd>All entries that have been flashed (and arrived in the flash bar)</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The id of the inserted item.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertAddItem(client, table, expect):
-    &#34;&#34;&#34;Adds an item to a table.
-
-    The response texts will be analysed into messages and fields, the eid
-    of the new item will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    expect: boolean
-
-    Returns
-    -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the inserted item.
-    &#34;&#34;&#34;
-
-    response = client.get(f&#34;/api/{table}/insert&#34;, follow_redirects=True)
-    text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
-    eid = findEid(text)
-    if expect:
-        assert &#34;item added&#34; in msgs
-    else:
-        assert &#34;item added&#34; not in msgs
-    return (text, fields, msgs, eid)</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertDelItem"><code class="name flex">
-<span>def <span class="ident">assertDelItem</span></span>(<span>client, table, eid, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Deletes an item from a table.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertDelItem(client, table, eid, expect):
-    &#34;&#34;&#34;Deletes an item from a table.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(ObjectId)
-    expect: boolean
-    &#34;&#34;&#34;
-
-    assertStatus(client, f&#34;/api/{table}/delete/{eid}&#34;, expect)</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertEditor"><code class="name flex">
-<span>def <span class="ident">assertEditor</span></span>(<span>client, table, eid, valueTables, expect, clear=False)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Sets the <code>editors</code> of an item to <strong>editor</strong>, or clears the <code>editors</code> field.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>valueTables</code></strong> :&ensp;<code>the</code> <code>store</code> <code>for</code> <code>the</code> <code>value</code> <code>tables</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>clear</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
-<dd>If True, clears the editors field.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertEditor(client, table, eid, valueTables, expect, clear=False):
-    &#34;&#34;&#34;Sets the `editors` of an item to **editor**, or clears the `editors` field.
-
-    Parameters
-    ----------
-    table: string
-    eid: string(ObjectId)
-    valueTables: the store for the value tables
-    expect: boolean
-    clear: boolean, optional `False`
-        If True, clears the editors field.
-    &#34;&#34;&#34;
-
-    if clear:
-        value = ([], &#34;&#34;)
-    else:
-        users = valueTables[&#34;user&#34;]
-        (editorId, editorName) = users[&#34;editor&#34;]
-        value = ([editorId], editorName)
-    assertModifyField(client, table, eid, &#34;editors&#34;, value, expect)</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertFieldValue"><code class="name flex">
-<span>def <span class="ident">assertFieldValue</span></span>(<span>source, field, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Verify whether a field has a certain expected value.</p>
-<p>If we pass expect <code>None</code> we want to assert that the field is not present at all.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>source</code></strong> :&ensp;<code>dict</code> | (<code>client</code>: <code>fixture</code>, <code>table</code>: <code>string</code>, <code>eid</code>: <code>string</code>)</dt>
-<dd>The dictionary of fields and values of a retrieved response.
-If it is a tuple, the dictionary will be retrieved by looking up
-the item specified by <code>table</code> and <code>eid</code>.</dd>
-<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of the specific field.</dd>
-</dl>
-<p>expect:
-The expected value for this field.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertFieldValue(source, field, expect):
-    &#34;&#34;&#34;Verify whether a field has a certain expected value.
-
-    If we pass expect `None` we want to assert that the field is not present at all.
-
-    Parameters
-    ----------
-    source: dict | (client: fixture, table: string, eid: string)
-        The dictionary of fields and values of a retrieved response.
-        If it is a tuple, the dictionary will be retrieved by looking up
-        the item specified by `table` and `eid`.
-    field: string
-        The name of the specific field.
-    expect:
-        The expected value for this field.
-    &#34;&#34;&#34;
-
-    if type(source) is tuple:
-        (client, table, eid) = source
-        (text, fields, msgs, dummy) = findItem(client, table, eid)
-    else:
-        fields = source
-
-    if expect is None:
-        assert field not in fields
-    else:
-        assert field in fields
-        assert expect == fields[field]</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertModifyField"><code class="name flex">
-<span>def <span class="ident">assertModifyField</span></span>(<span>client, table, eid, field, newValue, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Try to modify a field and check the outcome.</p>
-<div class="admonition note">
-<p class="admonition-title">Read access</p>
-<p>The test has to reckon with the fact that the client may not even have
-read access to the field.</p>
-</div>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>newValue</code></strong> :&ensp;<code>string</code> | <code>tuple</code></dt>
-<dd>If a tuple, the first component is the modification value,
-and the second component is the value we read back from the modified record</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether we expect the modification to succeed</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertModifyField(client, table, eid, field, newValue, expect):
-    &#34;&#34;&#34;Try to modify a field and check the outcome.
-
-    !!! note &#34;Read access&#34;
-        The test has to reckon with the fact that the client may not even have
-        read access to the field.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    field: string
-    newValue: string | tuple
-        If a tuple, the first component is the modification value,
-        and the second component is the value we read back from the modified record
-    expect: boolean
-        Whether we expect the modification to succeed
-    &#34;&#34;&#34;
-
-    if not expect:
-        fields = findItem(client, table, eid)[1]
-        oldValue = fields[field] if field in fields else None
-
-    if type(newValue) is tuple:
-        (newValue, newValueRep) = newValue
-    else:
-        newValueRep = newValue
-
-    (text, fields) = modifyField(client, table, eid, field, newValue)
-
-    if not expect:
-        assert field not in fields
-
-    (text, fields, msgs, eid) = findItem(client, table, eid)
-
-    if expect:
-        assertFieldValue(fields, field, newValueRep)
-    else:
-        if field in fields:
-            assertFieldValue(fields, field, oldValue)</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertMylist"><code class="name flex">
-<span>def <span class="ident">assertMylist</span></span>(<span>client, table, eid, label, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Verify whether the client can see mylist on table.</p>
-<p>Mylist is retrieved, and if successful, it is also verified either that
-a record with id <code>eid</code> is in it or that the list is empty.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>objectId</code>)</dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
-<dd>How a record of this table is called on the interface, in the plural</dd>
-<dt><strong><code>expect</code></strong> :&ensp;(<code>mayList</code>: <code>boolean</code>, <code>showsUp</code>: <code>boolean</code>)</dt>
-<dd>mayList means: we expect to be able to see mylist
-showsUp means: we expect the record to show up. Otherwise mylist should be
-empty.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertMylist(client, table, eid, label, expect):
-    &#34;&#34;&#34;Verify whether the client can see mylist on table.
-
-    Mylist is retrieved, and if successful, it is also verified either that
-    a record with id `eid` is in it or that the list is empty.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(objectId)
-    label: string
-        How a record of this table is called on the interface, in the plural
-    expect: (mayList: boolean, showsUp: boolean)
-        mayList means: we expect to be able to see mylist
-        showsUp means: we expect the record to show up. Otherwise mylist should be
-        empty.
-    &#34;&#34;&#34;
-    url = f&#34;/{table}/list?action=my&#34;
-    (mayList, canSee) = expect
-    assertStatus(client, url, mayList)
-    if mayList:
-        (text, status, msgs) = accessUrl(client, url, redirect=True)
-        material = findMaterial(text)
-        theId = findEid(text)
-        if canSee:
-            assert eid == theId
-        else:
-            assert f&#34;0 {label}&#34; in material</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertStage"><code class="name flex">
-<span>def <span class="ident">assertStage</span></span>(<span>client, table, eid, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Check whether a record has a certain workflow stage.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertStage(client, table, eid, expect):
-    &#34;&#34;&#34;Check whether a record has a certain workflow stage.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: ObjectId | string
-    expect: string
-    &#34;&#34;&#34;
-
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
-    stageFound = findStages(text)[0]
-    assert stageFound == expect
-    return (text, fields, msgs, eid)</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertStartAssessment"><code class="name flex">
-<span>def <span class="ident">assertStartAssessment</span></span>(<span>client, cId, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Issues the startAssessment workflow command.</p>
-<p>The response texts will be analysed into messages and fields, the aId
-of the new assessment will be read off.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>The contribution id for which the assessment must be started.</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><strong><code>aIds</code></strong> :&ensp;<code>list</code> of <code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The ids of all assessments of the contribution after the act.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertStartAssessment(client, cId, expect):
-    &#34;&#34;&#34;Issues the startAssessment workflow command.
-
-    The response texts will be analysed into messages and fields, the aId
-    of the new assessment will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    cId: string(ObjectId)
-        The contribution id for which the assessment must be started.
-    expect: boolean
-
-    Returns
-    -------
-    aIds: list of str(ObjectId)
-        The ids of all assessments of the contribution after the act.
-    &#34;&#34;&#34;
-
-    assertStatus(client, f&#34;/api/task/startAssessment/{cId}&#34;, expect)
-    if expect:
-        aIds = getAid(client, multiple=True)
-    else:
-        aIds = []
-    return aIds</code></pre>
-</details>
-</dd>
-<dt id="helpers.assertStatus"><code class="name flex">
-<span>def <span class="ident">assertStatus</span></span>(<span>client, url, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get data and see whether that went right or wrong.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
-<dd>The url to retrieve from the server</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether it is expected to be successful</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertStatus(client, url, expect):
-    &#34;&#34;&#34;Get data and see whether that went right or wrong.
-
-    Parameters
-    ----------
-    client: function
-    url: string(url)
-        The url to retrieve from the server
-    expect: boolean
-        Whether it is expected to be successful
-    &#34;&#34;&#34;
-
-    response = client.get(url)
-    if expect:
-        assert response.status_code in {200, 302}
-    else:
-        assert response.status_code in {400, 303}</code></pre>
-</details>
-</dd>
 <dt id="helpers.checkWarning"><code class="name flex">
 <span>def <span class="ident">checkWarning</span></span>(<span>text, label)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Whether there is a warned item with <code>label</code>.</p>
+<p>See <a title="helpers.warningRe" href="#helpers.warningRe"><code>warningRe()</code></a>.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def checkWarning(text, label):
+    &#34;&#34;&#34;Whether there is a warned item with `label`.
+
+    See `warningRe`.
+    &#34;&#34;&#34;
+
     return not not warningRe(label).search(text)</code></pre>
 </details>
 </dd>
@@ -1173,12 +459,24 @@ of the new assessment will be read off.</p>
 <span>def <span class="ident">detailRe</span></span>(<span>dtable)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Given a detail table name, return a <code>re</code> that looks for the detail records.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>dtable</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def detailRe(dtable):
+    &#34;&#34;&#34;Given a detail table name, return a `re` that looks for the detail records.
+
+    Parameters
+    ----------
+    dtable: string
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{dtable}/([^&#39;&#34;]+)[&#39;&#34;][^&gt;]*&gt;(.*?)&lt;/details&gt;&#34;&#34;&#34;.format(
             dtable=dtable
@@ -1191,12 +489,28 @@ of the new assessment will be read off.</p>
 <span>def <span class="ident">fieldEditRe</span></span>(<span>eid, field)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Given a field name, return a <code>re</code> that looks for the value of that field.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the record whose field data we are searching</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def fieldEditRe(eid, field):
+    &#34;&#34;&#34;Given a field name, return a `re` that looks for the value of that field.
+
+    Parameters
+    ----------
+    eid: string(ObjectId)
+        The id of the record whose field data we are searching
+    field: string
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;
     &lt;span\ [^&gt;]*?eid=[&#39;&#34;]{eid}[&#39;&#34;]\s+field=[&#39;&#34;]{field}[&#39;&#34;].*?
@@ -1571,12 +885,35 @@ of the item will be read off.</p>
 <span>def <span class="ident">findUsers</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Get the users from a response.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The response text.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>keyed by lower case eppns, valued by tuples of eid and name of the user.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def findUsers(text):
+    &#34;&#34;&#34;Get the users from a response.
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    dict
+        keyed by lower case eppns, valued by tuples of eid and name of the user.
+    &#34;&#34;&#34;
+
     return {
         name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
     }</code></pre>
@@ -1667,90 +1004,6 @@ It will be passed all the <code>args</code> and a relevant part of <code>expect<
     return valueDict</code></pre>
 </details>
 </dd>
-<dt id="helpers.getValueTable"><code class="name flex">
-<span>def <span class="ident">getValueTable</span></span>(<span>client, table, eid, valueTable, dest)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get a mapping of values in a value table to their object ids.</p>
-<p>We obtain the mapping by asking for an edit view of a field that
-takes values in this value table.
-Then we inspect the edit widget and read off the values and ids.</p>
-<p>Except for the user table, there we directly list the items.</p>
-<p>The mapping is stored in the dict <code>dest</code> keyed by the
-name of the valueTable.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of table whose record we inspect</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>dict</code></dt>
-<dd>The id of the record</dd>
-<dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of a value table which is also the name of the field in the record</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>The stored value dict for this valueTable</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getValueTable(client, table, eid, valueTable, dest):
-    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
-
-    We obtain the mapping by asking for an edit view of a field that
-    takes values in this value table.
-    Then we inspect the edit widget and read off the values and ids.
-
-    Except for the user table, there we directly list the items.
-
-    The mapping is stored in the dict `dest` keyed by the
-    name of the valueTable.
-
-    Parameters
-    ----------
-    table: string
-        The name of table whose record we inspect
-    eid: dict
-        The id of the record
-    valueTable: string
-        The name of a value table which is also the name of the field in the record
-
-    Returns
-    -------
-    dict
-        The stored value dict for this valueTable
-    &#34;&#34;&#34;
-
-    if valueTable == &#34;user&#34;:
-        response = client.get(f&#34;/user/list&#34;)
-        text = response.get_data(as_text=True)
-        dest[valueTable] = findUsers(text)
-    else:
-        valueDict = getRelatedValues(client, table, eid, valueTable)
-        dest[valueTable] = valueDict
-    return dest[valueTable]</code></pre>
-</details>
-</dd>
-<dt id="helpers.inspectTitleAll"><code class="name flex">
-<span>def <span class="ident">inspectTitleAll</span></span>(<span>clients, eid, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def inspectTitleAll(clients, eid, expect):
-    field = &#34;title&#34;
-
-    def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, eid), field, exp)
-
-    forall(clients, expect, assertIt)</code></pre>
-</details>
-</dd>
 <dt id="helpers.modifyField"><code class="name flex">
 <span>def <span class="ident">modifyField</span></span>(<span>client, table, eid, field, newValue)</span>
 </code></dt>
@@ -1818,39 +1071,6 @@ Will be wrapped into JSON with a proper header.</dd>
     return text</code></pre>
 </details>
 </dd>
-<dt id="helpers.startWithAssessment"><code class="name flex">
-<span>def <span class="ident">startWithAssessment</span></span>(<span>client, cId)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def startWithAssessment(client, cId):
-    aId = findItemEid(client, ASSESS)
-    if aId:
-        return [aId]
-    return assertStartAssessment(client, cId, True)</code></pre>
-</details>
-</dd>
-<dt id="helpers.startWithContrib"><code class="name flex">
-<span>def <span class="ident">startWithContrib</span></span>(<span>client)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def startWithContrib(client):
-    eid = findItemEid(client, CONTRIB)
-    if eid:
-        result = findItem(client, CONTRIB, eid)
-        return result
-    return assertAddItem(client, CONTRIB, True)</code></pre>
-</details>
-</dd>
 <dt id="helpers.viewField"><code class="name flex">
 <span>def <span class="ident">viewField</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
@@ -1874,12 +1094,28 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">warningRe</span></span>(<span>label)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Given a label, return a <code>re</code> that looks for warned items with that label.</p>
+<p>A warned item is an item with a CSS class <code>warning</code> in it.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
+<dd>Usually the title of an item</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def warningRe(label):
+    &#34;&#34;&#34;Given a label, return a `re` that looks for warned items with that label.
+
+    A warned item is an item with a CSS class `warning` in it.
+
+    Parameters
+    ----------
+    label: string
+        Usually the title of an item
+    &#34;&#34;&#34;
+
     return re.compile(
         r&#34;&#34;&#34;\bclass=[&#39;&#34;][^&#39;&#34;]*\bwarning\b[^&#39;&#34;]*[&#39;&#34;][^&gt;]*&gt;{label}&lt;&#34;&#34;&#34;.format(
             label=label
@@ -1900,17 +1136,8 @@ Will be wrapped into JSON with a proper header.</dd>
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="helpers.accessUrl" href="#helpers.accessUrl">accessUrl</a></code></li>
-<li><code><a title="helpers.assertAddItem" href="#helpers.assertAddItem">assertAddItem</a></code></li>
-<li><code><a title="helpers.assertDelItem" href="#helpers.assertDelItem">assertDelItem</a></code></li>
-<li><code><a title="helpers.assertEditor" href="#helpers.assertEditor">assertEditor</a></code></li>
-<li><code><a title="helpers.assertFieldValue" href="#helpers.assertFieldValue">assertFieldValue</a></code></li>
-<li><code><a title="helpers.assertModifyField" href="#helpers.assertModifyField">assertModifyField</a></code></li>
-<li><code><a title="helpers.assertMylist" href="#helpers.assertMylist">assertMylist</a></code></li>
-<li><code><a title="helpers.assertStage" href="#helpers.assertStage">assertStage</a></code></li>
-<li><code><a title="helpers.assertStartAssessment" href="#helpers.assertStartAssessment">assertStartAssessment</a></code></li>
-<li><code><a title="helpers.assertStatus" href="#helpers.assertStatus">assertStatus</a></code></li>
 <li><code><a title="helpers.checkWarning" href="#helpers.checkWarning">checkWarning</a></code></li>
 <li><code><a title="helpers.detailRe" href="#helpers.detailRe">detailRe</a></code></li>
 <li><code><a title="helpers.fieldEditRe" href="#helpers.fieldEditRe">fieldEditRe</a></code></li>
@@ -1926,12 +1153,8 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.forall" href="#helpers.forall">forall</a></code></li>
 <li><code><a title="helpers.getAid" href="#helpers.getAid">getAid</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
-<li><code><a title="helpers.getValueTable" href="#helpers.getValueTable">getValueTable</a></code></li>
-<li><code><a title="helpers.inspectTitleAll" href="#helpers.inspectTitleAll">inspectTitleAll</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>
-<li><code><a title="helpers.startWithAssessment" href="#helpers.startWithAssessment">startWithAssessment</a></code></li>
-<li><code><a title="helpers.startWithContrib" href="#helpers.startWithContrib">startWithContrib</a></code></li>
 <li><code><a title="helpers.viewField" href="#helpers.viewField">viewField</a></code></li>
 <li><code><a title="helpers.warningRe" href="#helpers.warningRe">warningRe</a></code></li>
 </ul>

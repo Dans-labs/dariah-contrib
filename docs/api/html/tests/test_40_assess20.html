@@ -23,13 +23,12 @@
 <p>Test scenario for assessments.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with one contribution and one assessment, see <a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a>.</li>
-<li>The assessment has the original title.</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
+<li>The country table</li>
+<li>One contribution record</li>
+<li>One assessment record</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
@@ -49,16 +48,14 @@ assessment.</dd>
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with one contribution and one assessment, see `test_40_assess10`.
-*   The assessment has the original title.
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
+*   One assessment record
 
 ## Acts
-
 
 `test_addAssessment`
 :   **owner** cannot add another assessment.
@@ -72,73 +69,57 @@ assessment.</dd>
 
 import magic  # noqa
 from control.utils import pick as G
-from helpers import (
-    assertDelItem,
-    assertEditor,
-    assertModifyField,
-    assertStartAssessment,
+from example import (
     CONTRIB,
     ASSESS,
-    EXAMPLE_TYPE,
-    EXAMPLE_TYPE2,
+    TYPE,
+    TYPE2,
+)
+from helpers import (
     checkWarning,
     findItem,
-    getValueTable,
-    startWithContrib,
-    startWithAssessment,
+)
+from starters import (
+    start,
+)
+from subtest import (
+    assertDelItem,
+    assertModifyField,
+    assertStartAssessment,
 )
 
-contribInfo = {}
-assessInfo = {}
+recordInfo = {}
 valueTables = {}
 
 cIds = []
 ids = {}
 
 
-def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    cTitle = G(fields, &#34;title&#34;)
-    contribInfo[&#34;title&#34;] = cTitle
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
-    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
-    types = valueTables[&#34;typeContribution&#34;]
-    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
-    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
-    assertModifyField(
-        clientOwner,
-        CONTRIB,
-        eid,
-        &#34;typeContribution&#34;,
-        (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE),
-        True,
+def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        assessment=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
     )
-    aIds = startWithAssessment(clientOwner, eid)
-    assert len(aIds) == 1
-    aId = aIds[0]
-    assessInfo[&#34;eid&#34;] = aId
-    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
-    assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;
 
 
 def test_addAssessment(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertStartAssessment(clientOwner, eid, False)
 
 
 def test_addAssessment2(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
-    aId = assessInfo[&#34;eid&#34;]
-    aTitle = assessInfo[&#34;title&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
     field = &#34;typeContribution&#34;
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE2&#34;], EXAMPLE_TYPE2), True
+        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE2&#34;], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -150,7 +131,7 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)</code></pre>
@@ -173,7 +154,7 @@ def test_addAssessment2(clientOwner):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_addAssessment(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     assertStartAssessment(clientOwner, eid, False)</code></pre>
 </details>
 </dd>
@@ -187,12 +168,12 @@ def test_addAssessment2(clientOwner):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_addAssessment2(clientOwner):
-    eid = contribInfo[&#34;eid&#34;]
-    aId = assessInfo[&#34;eid&#34;]
-    aTitle = assessInfo[&#34;title&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
     field = &#34;typeContribution&#34;
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE2&#34;], EXAMPLE_TYPE2), True
+        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE2&#34;], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -204,14 +185,14 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE), True
+        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess20.test_start"><code class="name flex">
-<span>def <span class="ident">test_start</span></span>(<span>clientOwner, clientOffice)</span>
+<span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -219,35 +200,17 @@ def test_addAssessment2(clientOwner):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOwner, clientOffice):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    cTitle = G(fields, &#34;title&#34;)
-    contribInfo[&#34;title&#34;] = cTitle
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
-    getValueTable(clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables)
-    types = valueTables[&#34;typeContribution&#34;]
-    ids[&#34;EXAMPLE_TYPE&#34;] = types[EXAMPLE_TYPE]
-    ids[&#34;EXAMPLE_TYPE2&#34;] = types[EXAMPLE_TYPE2]
-    assertModifyField(
-        clientOwner,
-        CONTRIB,
-        eid,
-        &#34;typeContribution&#34;,
-        (ids[&#34;EXAMPLE_TYPE&#34;], EXAMPLE_TYPE),
-        True,
-    )
-    aIds = startWithAssessment(clientOwner, eid)
-    assert len(aIds) == 1
-    aId = aIds[0]
-    assessInfo[&#34;eid&#34;] = aId
-    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
-    assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;</code></pre>
+<pre><code class="python">def test_start(clientOffice, clientOwner):
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        assessment=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+        ids=ids,
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -260,7 +223,6 @@ def test_addAssessment2(clientOwner):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>

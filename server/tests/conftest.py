@@ -6,17 +6,47 @@ By means of
 we define the web-app objects
 to be tested and the web clients to exercise functions in those objects.
 
-Contents
+## Players
 
-### Set-up
+name | role | remarks
+--- | --- | ---
+owner | auth | authenticated user from Belgium, creates and assesses a contribution
+editor | auth | authenticated user, added as editor of the above contribution
+mycoord | coord | the national coordinator of Belgium
+coord | coord | any national coordinator, not from Belgium, in this case: Luxemburg
+expert | auth | authenticated user, expert reviewer for the above contribution
+final | auth | authenticated user, final reviewer for the above contribution
+auth | auth | any authenticated user without special rights
+public | public | any unauthenticated user
+
+## Auxiliary
+
+`starters`
+:   Provide test functions with a well-defined initial state.
+
+`helpers`
+:   Low-level library functions for testers.
+
+`subtest`
+:   Higher-level `assert` functions.
+
+`example`
+:   Concrete example values for testers to work with.
+
+## Test batches
+
+The following files can be run individually, or as part of an all-tests-run,
+in alphabetical order of the file names.
+
+### Tests: setup
 
 `test_10_factory10`
 :   How the app is set up, difference between production and development
 
-### Contributions: filling out
-
 `test_20_users10`
 :   All about users and what they can and cannot do.
+
+### Contributions
 
 `test_30_contrib10`
 :   Getting started with contributions.
@@ -30,15 +60,21 @@ Contents
 `test_30_contrib40`
 :   Checking the visibility of sensitive fields.
 
-### Assessments: filling out, submitting, and assigning reviewers
+### Tests: assessments
 
 `test_40_assess10`
-:   Starting an assessment, filling it out, submitting it and withdrawing it.
+:   Starting an assessment.
 
 `test_40_assess20`
+:   Starting a second assessment.
+
+`test_40_assess30`
+:   Filling out an assessment.
+
+`test_40_assess30`
 :   Assigning reviewers.
 
-### Reviews: filling out and deciding.
+### Tests: Reviews: filling out and deciding.
 
 `test_50_review10`
 :   Starting a review, filling it out, and deciding.
@@ -46,7 +82,7 @@ Contents
 `test_50_assess20`
 :   Revising and resubmitting assessments.
 
-### Contributions: selection.
+### Tests: contributions: selection.
 
 `test_60_contrib10`
 :   Selecting contributions.
