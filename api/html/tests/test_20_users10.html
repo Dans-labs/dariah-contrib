@@ -28,9 +28,12 @@
 <li>The user table</li>
 </ul>
 <h2 id="acts">Acts</h2>
+<p>Getting to know all users.</p>
 <dl>
 <dt><a title="test_20_users10.test_users" href="#test_20_users10.test_users"><code>test_users()</code></a></dt>
-<dd><strong>office</strong> checks whether all users can login, except <strong>public</strong>.</dd>
+<dd><strong>office</strong> checks whether all users in the database have a corresponding
+client fixture.
+This client has logged in, except in case of <strong>public</strong>.</dd>
 <dt><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail"><code>test_readEmail()</code></a></dt>
 <dd>All users try to read the email address of <strong>auth</strong>, but only some succeed</dd>
 </dl>
@@ -48,8 +51,12 @@
 
 ## Acts
 
+Getting to know all users.
+
 `test_users`
-:   **office** checks whether all users can login, except **public**.
+:   **office** checks whether all users in the database have a corresponding
+    client fixture.
+    This client has logged in, except in case of **public**.
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed
