@@ -24,12 +24,11 @@
 <p>About modifying fields by typing values.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Clean slate: see <a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a>.</li>
-<li>We work with the contribution table only</li>
-</ul>
-<h2 id="players">Players</h2>
-<ul>
-<li>As introduced in <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a>.</li>
+<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
+<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>The user table</li>
+<li>The country table</li>
+<li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
 <dl>
@@ -62,12 +61,11 @@ About modifying fields by typing values.
 
 ## Domain
 
-*   Clean slate: see `test_10_factory10`.
-*   We work with the contribution table only
-
-## Players
-
-*   As introduced in `test_20_users10`.
+*   Users as in `conftest`, under *players*
+*   Clean slate, see `starters`.
+*   The user table
+*   The country table
+*   One contribution record
 
 ## Acts
 
@@ -101,84 +99,48 @@ About modifying fields by typing values.
 import pytest
 
 import magic  # noqa
-from control.utils import EURO
+from control.utils import pick as G, EURO
 from conftest import USERS, POWER_USERS
-from helpers import (
-    assertEditor,
-    assertFieldValue,
-    assertModifyField,
+from example import (
     BELGIUM,
     CONTRIB,
     LUXEMBURG,
-    forall,
-    getValueTable,
-    startWithContrib,
+    TITLE,
+    CHECKS,
+    URL_C,
+    URL_A,
+    EXAMPLE,
+)
+from helpers import forall
+from starters import (
+    start,
+)
+from subtest import (
+    assertFieldValue,
+    assertModifyField,
 )
 
 
-contribInfo = {}
-
-TITLE = &#34;No Title Yet&#34;
-
-DESCRIPTION_CHECKS = (
-    &#34;&lt;h1&gt;Resource creation.&lt;/h1&gt;&#34;,
-    &#34;&lt;p&gt;This tool&#34;,
-    &#34;&lt;li&gt;How, we&#34;,
-    &#34;&lt;li&gt;More details&#34;,
-)
-
-COST_DESCRIPTION_CHECKS = (
-    &#34;&lt;h1&gt;Cost of resource creation.&lt;/h1&gt;&#34;,
-    &#34;&lt;p&gt;There are&#34;,
-    &#34;&lt;li&gt;The amount,&#34;,
-    &#34;&lt;li&gt;More cost details&#34;,
-)
-
-EXAMPLE = dict(
-    description=[
-        &#34;&#34;&#34;
-# Resource creation.
-
-This tool creates resources.
-
-*   How, we don&#39;t know yet
-*   More details will follow.
-&#34;&#34;&#34;
-    ],
-    costDescription=[
-        &#34;&#34;&#34;
-# Cost of resource creation.
-
-There are costs.
-
-*   The amount, we don&#39;t know yet
-*   More cost details will follow.
-&#34;&#34;&#34;
-    ],
-)
-
-URL_C = &#34;urlContribution&#34;
-URL_A = &#34;urlAcademic&#34;
+recordInfo = {}
 
 valueTables = {}
 
 
 def test_start(clientOffice, clientOwner):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )
 
 
 def test_changeUserCountry(clientsPower):
-    eid = contribInfo[&#34;eid&#34;]
     users = valueTables[&#34;user&#34;]
-    countries = getValueTable(
-        clientsPower[&#34;office&#34;], CONTRIB, eid, &#34;country&#34;, valueTables
-    )
+    countries = valueTables[&#34;country&#34;]
 
     assert &#34;mycoord&#34; in users
     assert BELGIUM in countries
@@ -200,7 +162,7 @@ def test_changeUserCountry(clientsPower):
 
 
 def test_modifyTitleAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;title&#34;
     newValue = &#34;Contribution (Modified)&#34;
 
@@ -222,7 +184,7 @@ def test_modifyTitleAll(clients):
     ),
 )
 def test_modifyDescription(clientsMy, field, value):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, value.strip()), exp)
@@ -234,12 +196,12 @@ def test_modifyDescription(clientsMy, field, value):
 @pytest.mark.parametrize(
     (&#34;field&#34;, &#34;checks&#34;),
     (
-        (&#34;description&#34;, DESCRIPTION_CHECKS),
-        (&#34;costDescription&#34;, COST_DESCRIPTION_CHECKS),
+        (&#34;description&#34;, CHECKS[&#34;description&#34;]),
+        (&#34;costDescription&#34;, CHECKS[&#34;costDescription&#34;]),
     ),
 )
 def test_descriptionMarkdown(clientsMy, field, checks):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         response = cl.get(f&#34;/api/{CONTRIB}/item/{eid}/field/{field}?action=view&#34;)
@@ -262,7 +224,7 @@ def test_descriptionMarkdown(clientsMy, field, checks):
     ),
 )
 def test_modifyCost(clientsMy, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;costTotal&#34;
 
     def assertIt(cl, exp):
@@ -283,7 +245,7 @@ def test_modifyCost(clientsMy, value, expectVal):
     ),
 )
 def test_modifyEmail(clientsMy, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;contactPersonEmail&#34;
 
     def assertIt(cl, exp):
@@ -326,7 +288,7 @@ def test_modifyEmail(clientsMy, value, expectVal):
     ),
 )
 def test_modifyUrl(clientsMy, field, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
@@ -352,11 +314,8 @@ def test_modifyUrl(clientsMy, field, value, expectVal):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_changeUserCountry(clientsPower):
-    eid = contribInfo[&#34;eid&#34;]
     users = valueTables[&#34;user&#34;]
-    countries = getValueTable(
-        clientsPower[&#34;office&#34;], CONTRIB, eid, &#34;country&#34;, valueTables
-    )
+    countries = valueTables[&#34;country&#34;]
 
     assert &#34;mycoord&#34; in users
     assert BELGIUM in countries
@@ -389,12 +348,12 @@ def test_modifyUrl(clientsMy, field, value, expectVal):
 <pre><code class="python">@pytest.mark.parametrize(
     (&#34;field&#34;, &#34;checks&#34;),
     (
-        (&#34;description&#34;, DESCRIPTION_CHECKS),
-        (&#34;costDescription&#34;, COST_DESCRIPTION_CHECKS),
+        (&#34;description&#34;, CHECKS[&#34;description&#34;]),
+        (&#34;costDescription&#34;, CHECKS[&#34;costDescription&#34;]),
     ),
 )
 def test_descriptionMarkdown(clientsMy, field, checks):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         response = cl.get(f&#34;/api/{CONTRIB}/item/{eid}/field/{field}?action=view&#34;)
@@ -426,7 +385,7 @@ def test_descriptionMarkdown(clientsMy, field, checks):
     ),
 )
 def test_modifyCost(clientsMy, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;costTotal&#34;
 
     def assertIt(cl, exp):
@@ -453,7 +412,7 @@ def test_modifyCost(clientsMy, value, expectVal):
     ),
 )
 def test_modifyDescription(clientsMy, field, value):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, value.strip()), exp)
@@ -482,7 +441,7 @@ def test_modifyDescription(clientsMy, field, value):
     ),
 )
 def test_modifyEmail(clientsMy, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;contactPersonEmail&#34;
 
     def assertIt(cl, exp):
@@ -502,7 +461,7 @@ def test_modifyEmail(clientsMy, value, expectVal):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTitleAll(clients):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     field = &#34;title&#34;
     newValue = &#34;Contribution (Modified)&#34;
 
@@ -558,7 +517,7 @@ def test_modifyEmail(clientsMy, value, expectVal):
     ),
 )
 def test_modifyUrl(clientsMy, field, value, expectVal):
-    eid = contribInfo[&#34;eid&#34;]
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
@@ -577,13 +536,15 @@ def test_modifyUrl(clientsMy, field, value, expectVal):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_start(clientOffice, clientOwner):
-    getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
-    (text, fields, msgs, eid) = startWithContrib(clientOwner)
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
-    assertEditor(clientOwner, CONTRIB, eid, valueTables, True)</code></pre>
+    start(
+        clientOffice=clientOffice,
+        clientOwner=clientOwner,
+        users=True,
+        contrib=True,
+        countries=True,
+        valueTables=valueTables,
+        recordInfo=recordInfo,
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -596,7 +557,6 @@ def test_modifyUrl(clientsMy, field, value, expectVal):
 <div class="toc">
 <ul>
 <li><a href="#domain">Domain</a></li>
-<li><a href="#players">Players</a></li>
 <li><a href="#acts">Acts</a></li>
 </ul>
 </div>

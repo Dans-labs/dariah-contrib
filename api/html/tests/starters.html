@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>starters API documentation</title>
+<meta name="description" content="The start-up functions for batches of tests …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>starters</code></h1>
+</header>
+<section id="section-intro">
+<p>The start-up functions for batches of tests.</p>
+<p>We have divided the tests in batches.
+Each batch is a separate file.</p>
+<p>The batches can be run alltogether in sequential order,
+or they can be run individually.</p>
+<p>The <a title="starters.start" href="#starters.start"><code>start()</code></a> function achieves that when a batch is run as part of a bigger sequence,
+the initial situation for the batch is the right one.
+And also, if the batch is run individually, that it starts with exactly the same
+state.</p>
+<h2 id="clean-slate">Clean slate</h2>
+<p>The base line is clean database, i.e. a database with
+all the value tables fully filled, with a set of test users,
+with packages, criteria, and types, but not with user-contributed content,
+such as contributions, assessments, and reviews.</p>
+<p>This is the <em>clean slate</em>.</p>
+<p>The starter functions may insert a few records in the database and fetch
+a few value tables for usage in test functions.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;The start-up functions for batches of tests.
+
+We have divided the tests in batches.
+Each batch is a separate file.
+
+The batches can be run alltogether in sequential order,
+or they can be run individually.
+
+The `start` function achieves that when a batch is run as part of a bigger sequence,
+the initial situation for the batch is the right one.
+And also, if the batch is run individually, that it starts with exactly the same
+state.
+
+## Clean slate
+
+The base line is clean database, i.e. a database with
+all the value tables fully filled, with a set of test users,
+with packages, criteria, and types, but not with user-contributed content,
+such as contributions, assessments, and reviews.
+
+This is the *clean slate*.
+
+The starter functions may insert a few records in the database and fetch
+a few value tables for usage in test functions.
+
+&#34;&#34;&#34;
+
+from control.utils import pick as G
+from example import (
+    ASSESS,
+    CONTRIB,
+    TYPE,
+    TYPE2,
+)
+from helpers import (
+    findItem,
+    findItemEid,
+    findUsers,
+    getRelatedValues,
+)
+from subtest import (
+    assertAddItem,
+    assertEditor,
+    assertStartAssessment,
+    assertModifyField,
+)
+
+
+def getValueTable(client, table, eid, valueTable, dest):
+    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
+
+    We obtain the mapping by asking for an edit view of a field that
+    takes values in this value table.
+    Then we inspect the edit widget and read off the values and ids.
+
+    Except for the user table, there we directly list the items.
+
+    The mapping is stored in the dict `dest` keyed by the
+    name of the valueTable.
+
+    !!! caution
+        Except for `table=&#39;user&#39;`, this function may only run if
+        there is a contribution record.
+
+    Parameters
+    ----------
+    table: string
+        The name of table whose record we inspect
+    eid: dict
+        The id of the record
+    valueTable: string
+        The name of a value table which is also the name of the field in the record
+
+    Returns
+    -------
+    dict
+        The stored value dict for this valueTable
+    &#34;&#34;&#34;
+
+    if valueTable == &#34;user&#34;:
+        response = client.get(f&#34;/user/list&#34;)
+        text = response.get_data(as_text=True)
+        dest[valueTable] = findUsers(text)
+    else:
+        valueDict = getRelatedValues(client, table, eid, valueTable)
+        dest[valueTable] = valueDict
+    return dest[valueTable]
+
+
+def findOrMakeItem(client, kind, cId=None):
+    &#34;&#34;&#34;Finds or makes a contribution/assessment.
+
+    Either previous tests have made a contribution/assessment, and then we have
+    to find it.
+    Or there are no contributions/assessments yet, and then we have to make one.
+
+    Parameters
+    ----------
+    client: fixture
+    kind: string
+        Either `contrib` or `assessment`
+    cId: string(ObjectId), optional `None`
+        If we make an assessment, the id of the contribution for which it is an
+        assessment
+
+    Returns
+    -------
+    tuple
+        The data of the contribution/assessment:
+    text: string(html)
+        the response text
+    fields: dict
+        the fieldnames and their values
+    msgs: list of string
+        error messages
+    eid: string(ObjectId)
+        the id of the contribution/assessment
+    &#34;&#34;&#34;
+
+    eid = findItemEid(client, kind)
+    if eid:
+        if kind == CONTRIB:
+            return findItem(client, kind, eid)
+        return [eid]
+
+    if kind == CONTRIB:
+        return assertAddItem(client, kind, True)
+    return assertStartAssessment(client, cId, True)
+
+
+def start(
+    clientOffice=None,
+    clientOwner=None,
+    users=False,
+    types=False,
+    countries=False,
+    contrib=False,
+    assessment=False,
+    criteriaEntries=False,
+    valueTables=None,
+    recordInfo=None,
+    ids=None,
+):
+    &#34;&#34;&#34;The start sequence for a batch of tests.
+
+    It depends on the batch what we have to find or make.
+
+    The result is always that certain records in the database are retrieved,
+    of if they do not exist, created.
+
+    Records with user added content are stored in the dict `recordInfo`,
+    under the name of the table as key.
+
+    Records in value tables are stored in the dict `valueTables`,
+    under the name of the table as key.
+
+    Parameters
+    ----------
+    clientOffice, clientOwner: fixture
+    users: boolean, optional `False`
+        Whether to fetch the list of users
+    types: boolean, optional `False`
+        Whether to fetch the list of contribution types
+    countries: boolean, optional `False`
+        Whether to fetch the list of countries
+    contrib: boolean, optional `False`
+        Whether to find or make a contribution
+    assessment: boolean, optional `False`
+        Whether to find or make an assessment
+    criteriaEntries: boolean, optional `False`
+        Whether to fill out the criteria entries
+    valueTables: dict, optional `None`
+        Where the retrieved data for the value tables end up
+    recordInfo: dict, optional `None`
+        Where the retrieved data for the other records end up
+    ids: dict, optional `None`
+        A mapping between values in a value table and their corresponding ids
+    &#34;&#34;&#34;
+
+    if criteriaEntries:
+        assessment = True
+    if assessment:
+        contrib = True
+        types = True
+    if countries:
+        contrib = True
+
+    if users:
+        getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
+
+    if contrib:
+        (text, fields, msgs, eid) = findOrMakeItem(clientOwner, CONTRIB)
+        cTitle = G(fields, &#34;title&#34;)
+        contribInfo = recordInfo.setdefault(CONTRIB, {})
+        contribInfo[&#34;title&#34;] = cTitle
+        contribInfo[&#34;text&#34;] = text
+        contribInfo[&#34;fields&#34;] = fields
+        contribInfo[&#34;msgs&#34;] = msgs
+        contribInfo[&#34;eid&#34;] = eid
+        assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+
+        if types:
+            typeValues = getValueTable(
+                clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables
+            )
+            ids[&#34;TYPE&#34;] = typeValues[TYPE]
+            ids[&#34;TYPE2&#34;] = typeValues[TYPE2]
+
+        if countries:
+            getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
+
+        if assessment:
+            assertModifyField(
+                clientOwner,
+                CONTRIB,
+                eid,
+                &#34;typeContribution&#34;,
+                (ids[&#34;TYPE&#34;], TYPE),
+                True,
+            )
+            aIds = findOrMakeItem(clientOwner, ASSESS, cId=eid)
+            assert len(aIds) == 1
+            aId = aIds[0]
+            assessInfo = recordInfo.setdefault(ASSESS, {})
+            assessInfo[&#34;eid&#34;] = aId
+            assertEditor(clientOwner, ASSESS, aId, valueTables, True)
+            assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;
+
+            if criteriaEntries:
+                pass</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="starters.findOrMakeItem"><code class="name flex">
+<span>def <span class="ident">findOrMakeItem</span></span>(<span>client, kind, cId=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds or makes a contribution/assessment.</p>
+<p>Either previous tests have made a contribution/assessment, and then we have
+to find it.
+Or there are no contributions/assessments yet, and then we have to make one.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string</code></dt>
+<dd>Either <code>contrib</code> or <code>assessment</code></dd>
+<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>), optional <code>None</code></dt>
+<dd>If we make an assessment, the id of the contribution for which it is an
+assessment</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple</code></dt>
+<dd>The data of the contribution/assessment:</dd>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code>(<code>html</code>)</dt>
+<dd>the response text</dd>
+<dt><strong><code>fields</code></strong> :&ensp;<code>dict</code></dt>
+<dd>the fieldnames and their values</dd>
+<dt><strong><code>msgs</code></strong> :&ensp;<code>list</code> of <code>string</code></dt>
+<dd>error messages</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>the id of the contribution/assessment</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findOrMakeItem(client, kind, cId=None):
+    &#34;&#34;&#34;Finds or makes a contribution/assessment.
+
+    Either previous tests have made a contribution/assessment, and then we have
+    to find it.
+    Or there are no contributions/assessments yet, and then we have to make one.
+
+    Parameters
+    ----------
+    client: fixture
+    kind: string
+        Either `contrib` or `assessment`
+    cId: string(ObjectId), optional `None`
+        If we make an assessment, the id of the contribution for which it is an
+        assessment
+
+    Returns
+    -------
+    tuple
+        The data of the contribution/assessment:
+    text: string(html)
+        the response text
+    fields: dict
+        the fieldnames and their values
+    msgs: list of string
+        error messages
+    eid: string(ObjectId)
+        the id of the contribution/assessment
+    &#34;&#34;&#34;
+
+    eid = findItemEid(client, kind)
+    if eid:
+        if kind == CONTRIB:
+            return findItem(client, kind, eid)
+        return [eid]
+
+    if kind == CONTRIB:
+        return assertAddItem(client, kind, True)
+    return assertStartAssessment(client, cId, True)</code></pre>
+</details>
+</dd>
+<dt id="starters.getValueTable"><code class="name flex">
+<span>def <span class="ident">getValueTable</span></span>(<span>client, table, eid, valueTable, dest)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get a mapping of values in a value table to their object ids.</p>
+<p>We obtain the mapping by asking for an edit view of a field that
+takes values in this value table.
+Then we inspect the edit widget and read off the values and ids.</p>
+<p>Except for the user table, there we directly list the items.</p>
+<p>The mapping is stored in the dict <code>dest</code> keyed by the
+name of the valueTable.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Except for <code>table='user'</code>, this function may only run if
+there is a contribution record.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of table whose record we inspect</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The id of the record</dd>
+<dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of a value table which is also the name of the field in the record</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The stored value dict for this valueTable</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getValueTable(client, table, eid, valueTable, dest):
+    &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
+
+    We obtain the mapping by asking for an edit view of a field that
+    takes values in this value table.
+    Then we inspect the edit widget and read off the values and ids.
+
+    Except for the user table, there we directly list the items.
+
+    The mapping is stored in the dict `dest` keyed by the
+    name of the valueTable.
+
+    !!! caution
+        Except for `table=&#39;user&#39;`, this function may only run if
+        there is a contribution record.
+
+    Parameters
+    ----------
+    table: string
+        The name of table whose record we inspect
+    eid: dict
+        The id of the record
+    valueTable: string
+        The name of a value table which is also the name of the field in the record
+
+    Returns
+    -------
+    dict
+        The stored value dict for this valueTable
+    &#34;&#34;&#34;
+
+    if valueTable == &#34;user&#34;:
+        response = client.get(f&#34;/user/list&#34;)
+        text = response.get_data(as_text=True)
+        dest[valueTable] = findUsers(text)
+    else:
+        valueDict = getRelatedValues(client, table, eid, valueTable)
+        dest[valueTable] = valueDict
+    return dest[valueTable]</code></pre>
+</details>
+</dd>
+<dt id="starters.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>clientOffice=None, clientOwner=None, users=False, types=False, countries=False, contrib=False, assessment=False, criteriaEntries=False, valueTables=None, recordInfo=None, ids=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>The start sequence for a batch of tests.</p>
+<p>It depends on the batch what we have to find or make.</p>
+<p>The result is always that certain records in the database are retrieved,
+of if they do not exist, created.</p>
+<p>Records with user added content are stored in the dict <code>recordInfo</code>,
+under the name of the table as key.</p>
+<p>Records in value tables are stored in the dict <code>valueTables</code>,
+under the name of the table as key.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clientOffice</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>users</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to fetch the list of users</dd>
+<dt><strong><code>types</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to fetch the list of contribution types</dd>
+<dt><strong><code>countries</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to fetch the list of countries</dd>
+<dt><strong><code>contrib</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to find or make a contribution</dd>
+<dt><strong><code>assessment</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to find or make an assessment</dd>
+<dt><strong><code>criteriaEntries</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>Whether to fill out the criteria entries</dd>
+<dt><strong><code>valueTables</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
+<dd>Where the retrieved data for the value tables end up</dd>
+<dt><strong><code>recordInfo</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
+<dd>Where the retrieved data for the other records end up</dd>
+<dt><strong><code>ids</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
+<dd>A mapping between values in a value table and their corresponding ids</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start(
+    clientOffice=None,
+    clientOwner=None,
+    users=False,
+    types=False,
+    countries=False,
+    contrib=False,
+    assessment=False,
+    criteriaEntries=False,
+    valueTables=None,
+    recordInfo=None,
+    ids=None,
+):
+    &#34;&#34;&#34;The start sequence for a batch of tests.
+
+    It depends on the batch what we have to find or make.
+
+    The result is always that certain records in the database are retrieved,
+    of if they do not exist, created.
+
+    Records with user added content are stored in the dict `recordInfo`,
+    under the name of the table as key.
+
+    Records in value tables are stored in the dict `valueTables`,
+    under the name of the table as key.
+
+    Parameters
+    ----------
+    clientOffice, clientOwner: fixture
+    users: boolean, optional `False`
+        Whether to fetch the list of users
+    types: boolean, optional `False`
+        Whether to fetch the list of contribution types
+    countries: boolean, optional `False`
+        Whether to fetch the list of countries
+    contrib: boolean, optional `False`
+        Whether to find or make a contribution
+    assessment: boolean, optional `False`
+        Whether to find or make an assessment
+    criteriaEntries: boolean, optional `False`
+        Whether to fill out the criteria entries
+    valueTables: dict, optional `None`
+        Where the retrieved data for the value tables end up
+    recordInfo: dict, optional `None`
+        Where the retrieved data for the other records end up
+    ids: dict, optional `None`
+        A mapping between values in a value table and their corresponding ids
+    &#34;&#34;&#34;
+
+    if criteriaEntries:
+        assessment = True
+    if assessment:
+        contrib = True
+        types = True
+    if countries:
+        contrib = True
+
+    if users:
+        getValueTable(clientOffice, None, None, &#34;user&#34;, valueTables)
+
+    if contrib:
+        (text, fields, msgs, eid) = findOrMakeItem(clientOwner, CONTRIB)
+        cTitle = G(fields, &#34;title&#34;)
+        contribInfo = recordInfo.setdefault(CONTRIB, {})
+        contribInfo[&#34;title&#34;] = cTitle
+        contribInfo[&#34;text&#34;] = text
+        contribInfo[&#34;fields&#34;] = fields
+        contribInfo[&#34;msgs&#34;] = msgs
+        contribInfo[&#34;eid&#34;] = eid
+        assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+
+        if types:
+            typeValues = getValueTable(
+                clientOffice, CONTRIB, eid, &#34;typeContribution&#34;, valueTables
+            )
+            ids[&#34;TYPE&#34;] = typeValues[TYPE]
+            ids[&#34;TYPE2&#34;] = typeValues[TYPE2]
+
+        if countries:
+            getValueTable(clientOffice, CONTRIB, eid, &#34;country&#34;, valueTables)
+
+        if assessment:
+            assertModifyField(
+                clientOwner,
+                CONTRIB,
+                eid,
+                &#34;typeContribution&#34;,
+                (ids[&#34;TYPE&#34;], TYPE),
+                True,
+            )
+            aIds = findOrMakeItem(clientOwner, ASSESS, cId=eid)
+            assert len(aIds) == 1
+            aId = aIds[0]
+            assessInfo = recordInfo.setdefault(ASSESS, {})
+            assessInfo[&#34;eid&#34;] = aId
+            assertEditor(clientOwner, ASSESS, aId, valueTables, True)
+            assessInfo[&#34;title&#34;] = f&#34;assessment of {cTitle}&#34;
+
+            if criteriaEntries:
+                pass</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#clean-slate">Clean slate</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="starters.findOrMakeItem" href="#starters.findOrMakeItem">findOrMakeItem</a></code></li>
+<li><code><a title="starters.getValueTable" href="#starters.getValueTable">getValueTable</a></code></li>
+<li><code><a title="starters.start" href="#starters.start">start</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

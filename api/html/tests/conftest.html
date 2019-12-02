@@ -26,16 +26,81 @@ By means of
 <a href="https://docs.pytest.org/en/latest/fixture.html">fixtures</a>
 we define the web-app objects
 to be tested and the web clients to exercise functions in those objects.</p>
-<p>Contents</p>
-<h3 id="set-up">Set-up</h3>
+<h2 id="players">Players</h2>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>role</th>
+<th>remarks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>owner</td>
+<td>auth</td>
+<td>authenticated user from Belgium, creates and assesses a contribution</td>
+</tr>
+<tr>
+<td>editor</td>
+<td>auth</td>
+<td>authenticated user, added as editor of the above contribution</td>
+</tr>
+<tr>
+<td>mycoord</td>
+<td>coord</td>
+<td>the national coordinator of Belgium</td>
+</tr>
+<tr>
+<td>coord</td>
+<td>coord</td>
+<td>any national coordinator, not from Belgium, in this case: Luxemburg</td>
+</tr>
+<tr>
+<td>expert</td>
+<td>auth</td>
+<td>authenticated user, expert reviewer for the above contribution</td>
+</tr>
+<tr>
+<td>final</td>
+<td>auth</td>
+<td>authenticated user, final reviewer for the above contribution</td>
+</tr>
+<tr>
+<td>auth</td>
+<td>auth</td>
+<td>any authenticated user without special rights</td>
+</tr>
+<tr>
+<td>public</td>
+<td>public</td>
+<td>any unauthenticated user</td>
+</tr>
+</tbody>
+</table>
+<h2 id="auxiliary">Auxiliary</h2>
+<dl>
+<dt><a title="starters" href="starters.html"><code>starters</code></a></dt>
+<dd>Provide test functions with a well-defined initial state.</dd>
+<dt><a title="helpers" href="helpers.html"><code>helpers</code></a></dt>
+<dd>Low-level library functions for testers.</dd>
+<dt><a title="subtest" href="subtest.html"><code>subtest</code></a></dt>
+<dd>Higher-level <code>assert</code> functions.</dd>
+<dt><a title="example" href="example.html"><code>example</code></a></dt>
+<dd>Concrete example values for testers to work with.</dd>
+</dl>
+<h2 id="test-batches">Test batches</h2>
+<p>The following files can be run individually, or as part of an all-tests-run,
+in alphabetical order of the file names.</p>
+<h3 id="tests-setup">Tests: setup</h3>
 <dl>
 <dt><a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a></dt>
 <dd>How the app is set up, difference between production and development</dd>
-</dl>
-<h3 id="contributions-filling-out">Contributions: filling out</h3>
-<dl>
 <dt><a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a></dt>
 <dd>All about users and what they can and cannot do.</dd>
+</dl>
+<h3 id="contributions">Contributions</h3>
+<dl>
 <dt><a title="test_30_contrib10" href="test_30_contrib10.html"><code>test_30_contrib10</code></a></dt>
 <dd>Getting started with contributions.</dd>
 <dt><a title="test_30_contrib20" href="test_30_contrib20.html"><code>test_30_contrib20</code></a></dt>
@@ -45,21 +110,25 @@ to be tested and the web clients to exercise functions in those objects.</p>
 <dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
 <dd>Checking the visibility of sensitive fields.</dd>
 </dl>
-<h3 id="assessments-filling-out-submitting-and-assigning-reviewers">Assessments: filling out, submitting, and assigning reviewers</h3>
+<h3 id="tests-assessments">Tests: assessments</h3>
 <dl>
 <dt><a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a></dt>
-<dd>Starting an assessment, filling it out, submitting it and withdrawing it.</dd>
+<dd>Starting an assessment.</dd>
 <dt><a title="test_40_assess20" href="test_40_assess20.html"><code>test_40_assess20</code></a></dt>
+<dd>Starting a second assessment.</dd>
+<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dd>Filling out an assessment.</dd>
+<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
 <dd>Assigning reviewers.</dd>
 </dl>
-<h3 id="reviews-filling-out-and-deciding">Reviews: filling out and deciding.</h3>
+<h3 id="tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</h3>
 <dl>
 <dt><code>test_50_review10</code></dt>
 <dd>Starting a review, filling it out, and deciding.</dd>
 <dt><code>test_50_assess20</code></dt>
 <dd>Revising and resubmitting assessments.</dd>
 </dl>
-<h3 id="contributions-selection">Contributions: selection.</h3>
+<h3 id="tests-contributions-selection">Tests: contributions: selection.</h3>
 <dl>
 <dt><code>test_60_contrib10</code></dt>
 <dd>Selecting contributions.</dd>
@@ -76,17 +145,47 @@ By means of
 we define the web-app objects
 to be tested and the web clients to exercise functions in those objects.
 
-Contents
+## Players
 
-### Set-up
+name | role | remarks
+--- | --- | ---
+owner | auth | authenticated user from Belgium, creates and assesses a contribution
+editor | auth | authenticated user, added as editor of the above contribution
+mycoord | coord | the national coordinator of Belgium
+coord | coord | any national coordinator, not from Belgium, in this case: Luxemburg
+expert | auth | authenticated user, expert reviewer for the above contribution
+final | auth | authenticated user, final reviewer for the above contribution
+auth | auth | any authenticated user without special rights
+public | public | any unauthenticated user
+
+## Auxiliary
+
+`starters`
+:   Provide test functions with a well-defined initial state.
+
+`helpers`
+:   Low-level library functions for testers.
+
+`subtest`
+:   Higher-level `assert` functions.
+
+`example`
+:   Concrete example values for testers to work with.
+
+## Test batches
+
+The following files can be run individually, or as part of an all-tests-run,
+in alphabetical order of the file names.
+
+### Tests: setup
 
 `test_10_factory10`
 :   How the app is set up, difference between production and development
 
-### Contributions: filling out
-
 `test_20_users10`
 :   All about users and what they can and cannot do.
+
+### Contributions
 
 `test_30_contrib10`
 :   Getting started with contributions.
@@ -100,15 +199,21 @@ Contents
 `test_30_contrib40`
 :   Checking the visibility of sensitive fields.
 
-### Assessments: filling out, submitting, and assigning reviewers
+### Tests: assessments
 
 `test_40_assess10`
-:   Starting an assessment, filling it out, submitting it and withdrawing it.
+:   Starting an assessment.
 
 `test_40_assess20`
+:   Starting a second assessment.
+
+`test_40_assess30`
+:   Filling out an assessment.
+
+`test_40_assess30`
 :   Assigning reviewers.
 
-### Reviews: filling out and deciding.
+### Tests: Reviews: filling out and deciding.
 
 `test_50_review10`
 :   Starting a review, filling it out, and deciding.
@@ -116,7 +221,7 @@ Contents
 `test_50_assess20`
 :   Revising and resubmitting assessments.
 
-### Contributions: selection.
+### Tests: contributions: selection.
 
 `test_60_contrib10`
 :   Selecting contributions.
@@ -697,11 +802,16 @@ def clientsPower(app):
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#set-up">Set-up</a></li>
-<li><a href="#contributions-filling-out">Contributions: filling out</a></li>
-<li><a href="#assessments-filling-out-submitting-and-assigning-reviewers">Assessments: filling out, submitting, and assigning reviewers</a></li>
-<li><a href="#reviews-filling-out-and-deciding">Reviews: filling out and deciding.</a></li>
-<li><a href="#contributions-selection">Contributions: selection.</a></li>
+<li><a href="#players">Players</a></li>
+<li><a href="#auxiliary">Auxiliary</a></li>
+<li><a href="#test-batches">Test batches</a><ul>
+<li><a href="#tests-setup">Tests: setup</a></li>
+<li><a href="#contributions">Contributions</a></li>
+<li><a href="#tests-assessments">Tests: assessments</a></li>
+<li><a href="#tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</a></li>
+<li><a href="#tests-contributions-selection">Tests: contributions: selection.</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <ul id="index">
