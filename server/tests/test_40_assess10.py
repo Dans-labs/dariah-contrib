@@ -11,17 +11,10 @@
 
 ## Acts
 
+Starting an assessment.
+
 `test_resetType`
 :   **owner** resets the contribution type to undefined.
-
-`test_startAll`
-:   **owner** looks for his contribution, but if it is not there, creates a new one.
-    So this batch can also be run in isolation.
-
-    Additionally:
-
-    *   the type of contribution is not yet filled in.
-    *   **editor** is added to the editors field.
 
 `test_tryStartAll`
 :   We start with a contribution without type. Then we cannot start an assessment.
@@ -68,6 +61,11 @@
 :   All users try to change the title of the assessment. Only some succeed.
     They change it back.
 
+`test_assignReviewers`
+:   All users try to assign reviewers to this assessment, but they all fail.
+    Most users fail because they do not have the right permission level.
+    The power users fail because of a workflow condition:
+    the assessment is not yet submitted.
 """
 
 import pytest
@@ -98,6 +96,7 @@ from subtest import (
     assertStartAssessment,
     assertStatus,
     inspectTitleAll,
+    assignReviewers,
 )
 
 ATITLE = "assessment of {cTitle}"
@@ -246,3 +245,17 @@ def test_modifyTitleAll(clients):
     expect = {user: False for user in USERS}
     expect.update({user: True for user in RIGHTFUL_USERS})
     forall(clients, expect, assertIt)
+
+
+@pytest.mark.parametrize(
+    ("field", "valueRep"),
+    (
+        ("reviewerE", "expert"),
+        ("reviewerF", "final"),
+    ),
+)
+def test_assignReviewers(clients, field, valueRep):
+    users = G(valueTables, "user")
+    aId = G(G(recordInfo, ASSESS), "eid")
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)

@@ -1,7 +1,5 @@
 """Test scenario for contributions.
 
-About adding and deleting contributions and some light editing.
-
 ## Domain
 
 *   Users as in `conftest`, under *players*
@@ -9,6 +7,8 @@ About adding and deleting contributions and some light editing.
 *   The user table
 
 ## Acts
+
+Getting started with contributions.
 
 `test_start`
 :   **office** consults the list of users.

@@ -1,7 +1,5 @@
 """Test scenario for contributions.
 
-About modifying fields by selecting values from value tables.
-
 ## Domain
 
 *   Users as in `conftest`, under *players*
@@ -10,6 +8,8 @@ About modifying fields by selecting values from value tables.
 *   One contribution record
 
 ## Acts
+
+Modifying contribution fields that have values in value tables.
 
 `test_start`
 :   **owner** looks for his contribution, but if it is not there, creates a new one.

@@ -24,8 +24,10 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from example import (
+<pre><code class="python">from control.utils import pick as G
+from example import (
     ASSESS,
+    UNDEF_VALUE
 )
 from helpers import (
     accessUrl,
@@ -285,6 +287,18 @@ def inspectTitleAll(clients, eid, expect):
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, eid), field, exp)
+
+    forall(clients, expect, assertIt)
+
+
+def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    value = G(users, valueRep)[0]
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        if exp:
+            assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
 
     forall(clients, expect, assertIt)</code></pre>
 </details>
@@ -748,6 +762,27 @@ of the new assessment will be read off.</p>
         assert response.status_code in {400, 303}</code></pre>
 </details>
 </dd>
+<dt id="subtest.assignReviewers"><code class="name flex">
+<span>def <span class="ident">assignReviewers</span></span>(<span>clients, recordInfo, users, aId, field, valueRep, expect)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    value = G(users, valueRep)[0]
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        if exp:
+            assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
+
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
 <dt id="subtest.inspectTitleAll"><code class="name flex">
 <span>def <span class="ident">inspectTitleAll</span></span>(<span>clients, eid, expect)</span>
 </code></dt>
@@ -788,6 +823,7 @@ of the new assessment will be read off.</p>
 <li><code><a title="subtest.assertStage" href="#subtest.assertStage">assertStage</a></code></li>
 <li><code><a title="subtest.assertStartAssessment" href="#subtest.assertStartAssessment">assertStartAssessment</a></code></li>
 <li><code><a title="subtest.assertStatus" href="#subtest.assertStatus">assertStatus</a></code></li>
+<li><code><a title="subtest.assignReviewers" href="#subtest.assignReviewers">assignReviewers</a></code></li>
 <li><code><a title="subtest.inspectTitleAll" href="#subtest.inspectTitleAll">inspectTitleAll</a></code></li>
 </ul>
 </li>

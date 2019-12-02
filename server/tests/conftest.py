@@ -44,7 +44,7 @@ in alphabetical order of the file names.
 :   How the app is set up, difference between production and development
 
 `test_20_users10`
-:   All about users and what they can and cannot do.
+:   Getting to know all users.
 
 ### Contributions
 

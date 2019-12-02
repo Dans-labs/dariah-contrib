@@ -463,6 +463,11 @@ class WorkflowItem:
         !!! note
             It might also depend on the current user.
 
+        !!! caution
+            Here is a case where the sysadmin and the root are less powerful
+            than the office users: only the office users can assign reviewers,
+            i.e. only they can update `reviewerE` and `reviewerF` inn assessment fields.
+
         Parameters
         ----------
         recordObj: object

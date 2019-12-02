@@ -31,19 +31,10 @@
 <li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
+<p>Starting an assessment.</p>
 <dl>
 <dt><a title="test_40_assess10.test_resetType" href="#test_40_assess10.test_resetType"><code>test_resetType()</code></a></dt>
 <dd><strong>owner</strong> resets the contribution type to undefined.</dd>
-<dt><code>test_startAll</code></dt>
-<dd>
-<p><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
-So this batch can also be run in isolation.</p>
-<p>Additionally:</p>
-<ul>
-<li>the type of contribution is not yet filled in.</li>
-<li><strong>editor</strong> is added to the editors field.</li>
-</ul>
-</dd>
 <dt><a title="test_40_assess10.test_tryStartAll" href="#test_40_assess10.test_tryStartAll"><code>test_tryStartAll()</code></a></dt>
 <dd>
 <p>We start with a contribution without type. Then we cannot start an assessment.
@@ -85,6 +76,11 @@ is fixed after creation.</dd>
 <dt><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll"><code>test_modifyTitleAll()</code></a></dt>
 <dd>All users try to change the title of the assessment. Only some succeed.
 They change it back.</dd>
+<dt><a title="test_40_assess10.test_assignReviewers" href="#test_40_assess10.test_assignReviewers"><code>test_assignReviewers()</code></a></dt>
+<dd>All users try to assign reviewers to this assessment, but they all fail.
+Most users fail because they do not have the right permission level.
+The power users fail because of a workflow condition:
+the assessment is not yet submitted.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -103,17 +99,10 @@ They change it back.</dd>
 
 ## Acts
 
+Starting an assessment.
+
 `test_resetType`
 :   **owner** resets the contribution type to undefined.
-
-`test_startAll`
-:   **owner** looks for his contribution, but if it is not there, creates a new one.
-    So this batch can also be run in isolation.
-
-    Additionally:
-
-    *   the type of contribution is not yet filled in.
-    *   **editor** is added to the editors field.
 
 `test_tryStartAll`
 :   We start with a contribution without type. Then we cannot start an assessment.
@@ -160,6 +149,11 @@ They change it back.</dd>
 :   All users try to change the title of the assessment. Only some succeed.
     They change it back.
 
+`test_assignReviewers`
+:   All users try to assign reviewers to this assessment, but they all fail.
+    Most users fail because they do not have the right permission level.
+    The power users fail because of a workflow condition:
+    the assessment is not yet submitted.
 &#34;&#34;&#34;
 
 import pytest
@@ -190,6 +184,7 @@ from subtest import (
     assertStartAssessment,
     assertStatus,
     inspectTitleAll,
+    assignReviewers,
 )
 
 ATITLE = &#34;assessment of {cTitle}&#34;
@@ -337,7 +332,21 @@ def test_modifyTitleAll(clients):
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in RIGHTFUL_USERS})
-    forall(clients, expect, assertIt)</code></pre>
+    forall(clients, expect, assertIt)
+
+
+@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;valueRep&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers(clients, field, valueRep):
+    users = G(valueTables, &#34;user&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)</code></pre>
 </details>
 </section>
 <section>
@@ -347,6 +356,29 @@ def test_modifyTitleAll(clients):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="test_40_assess10.test_assignReviewers"><code class="name flex">
+<span>def <span class="ident">test_assignReviewers</span></span>(<span>clients, field, valueRep)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;valueRep&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers(clients, field, valueRep):
+    users = G(valueTables, &#34;user&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)</code></pre>
+</details>
+</dd>
 <dt id="test_40_assess10.test_inspectTitleAll"><code class="name flex">
 <span>def <span class="ident">test_inspectTitleAll</span></span>(<span>clients)</span>
 </code></dt>
@@ -592,6 +624,7 @@ def test_tryStartAll(clients, url):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_40_assess10.test_assignReviewers" href="#test_40_assess10.test_assignReviewers">test_assignReviewers</a></code></li>
 <li><code><a title="test_40_assess10.test_inspectTitleAll" href="#test_40_assess10.test_inspectTitleAll">test_inspectTitleAll</a></code></li>
 <li><code><a title="test_40_assess10.test_inspectTypeAll" href="#test_40_assess10.test_inspectTypeAll">test_inspectTypeAll</a></code></li>
 <li><code><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll">test_modifyTitleAll</a></code></li>

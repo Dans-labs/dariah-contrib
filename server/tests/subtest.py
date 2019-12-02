@@ -1,5 +1,7 @@
+from control.utils import pick as G
 from example import (
     ASSESS,
+    UNDEF_VALUE
 )
 from helpers import (
     accessUrl,
@@ -259,5 +261,17 @@ def inspectTitleAll(clients, eid, expect):
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, eid), field, exp)
+
+    forall(clients, expect, assertIt)
+
+
+def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
+    aId = G(G(recordInfo, ASSESS), "eid")
+    value = G(users, valueRep)[0]
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        if exp:
+            assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
 
     forall(clients, expect, assertIt)

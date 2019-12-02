@@ -21,7 +21,6 @@
 </header>
 <section id="section-intro">
 <p>Test scenario for contributions.</p>
-<p>About modifying fields by selecting values from value tables.</p>
 <h2 id="domain">Domain</h2>
 <ul>
 <li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
@@ -30,6 +29,7 @@
 <li>One contribution record</li>
 </ul>
 <h2 id="acts">Acts</h2>
+<p>Modifying contribution fields that have values in value tables.</p>
 <dl>
 <dt><a title="test_30_contrib30.test_start" href="#test_30_contrib30.test_start"><code>test_start()</code></a></dt>
 <dd><strong>owner</strong> looks for his contribution, but if it is not there, creates a new one.
@@ -73,8 +73,6 @@ The user could do so with <code>curl</code>, he cannot do so in the web-interfac
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Test scenario for contributions.
 
-About modifying fields by selecting values from value tables.
-
 ## Domain
 
 *   Users as in `conftest`, under *players*
@@ -83,6 +81,8 @@ About modifying fields by selecting values from value tables.
 *   One contribution record
 
 ## Acts
+
+Modifying contribution fields that have values in value tables.
 
 `test_start`
 :   **owner** looks for his contribution, but if it is not there, creates a new one.

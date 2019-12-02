@@ -8,8 +8,12 @@
 
 ## Acts
 
+Getting to know all users.
+
 `test_users`
-:   **office** checks whether all users can login, except **public**.
+:   **office** checks whether all users in the database have a corresponding
+    client fixture.
+    This client has logged in, except in case of **public**.
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed

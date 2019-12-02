@@ -1,7 +1,5 @@
 """Test scenario for contributions.
 
-About the visibility of sensitive fields.
-
 ## Domain
 
 *   Users as in `conftest`, under *players*
@@ -11,6 +9,8 @@ About the visibility of sensitive fields.
 *   One contribution record
 
 ## Acts
+
+Checking the visibility of sensitive fields.
 
 `test_modifyCost`
 :   **owner** sets the cost field to an example value.

@@ -551,6 +551,11 @@ class WorkflowItem:
         !!! note
             It might also depend on the current user.
 
+        !!! caution
+            Here is a case where the sysadmin and the root are less powerful
+            than the office users: only the office users can assign reviewers,
+            i.e. only they can update `reviewerE` and `reviewerF` inn assessment fields.
+
         Parameters
         ----------
         recordObj: object
@@ -1515,6 +1520,11 @@ details of the current user can be read off.</dd>
         !!! note
             It might also depend on the current user.
 
+        !!! caution
+            Here is a case where the sysadmin and the root are less powerful
+            than the office users: only the office users can assign reviewers,
+            i.e. only they can update `reviewerE` and `reviewerF` inn assessment fields.
+
         Parameters
         ----------
         recordObj: object
@@ -2172,6 +2182,12 @@ i.e. whether editing is possible.</p>
 <p class="admonition-title">Note</p>
 <p>It might also depend on the current user.</p>
 </div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Here is a case where the sysadmin and the root are less powerful
+than the office users: only the office users can assign reviewers,
+i.e. only they can update <code>reviewerE</code> and <code>reviewerF</code> inn assessment fields.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>recordObj</code></strong> :&ensp;<code>object</code></dt>
@@ -2203,6 +2219,11 @@ Otherwise, we check for the fixity of this field in the record.</dd>
 
     !!! note
         It might also depend on the current user.
+
+    !!! caution
+        Here is a case where the sysadmin and the root are less powerful
+        than the office users: only the office users can assign reviewers,
+        i.e. only they can update `reviewerE` and `reviewerF` inn assessment fields.
 
     Parameters
     ----------

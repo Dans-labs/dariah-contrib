@@ -35,8 +35,6 @@ CW = C.web
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
-UNKNOWN = CW.unknown
-
 Qc = H.icon(CW.unknown[N.country], asChar=True)
 Qu = H.icon(CW.unknown[N.user], asChar=True)
 Qg = H.icon(CW.unknown[N.group], asChar=True)
@@ -366,7 +364,7 @@ class Auth:
             user = self.user
 
         if self.isDevel:
-            return G(user, N.eppn, default=G(user, N.email, default=UNKNOWN))
+            return G(user, N.eppn, default=G(user, N.email, default=Qu))
 
         name = G(user, N.name) or E
         if not name:

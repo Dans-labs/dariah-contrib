@@ -1,7 +1,5 @@
 """Test scenario for contributions.
 
-About modifying fields by typing values.
-
 ## Domain
 
 *   Users as in `conftest`, under *players*
@@ -11,6 +9,8 @@ About modifying fields by typing values.
 *   One contribution record
 
 ## Acts
+
+Modifying contribution fields that are typed in by the user.
 
 `test_start`
 :   **owner** adds a new contribution and adds **editor** to the editors.

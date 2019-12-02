@@ -6,7 +6,7 @@
 
 ## Acts
 
-Are we sure we are in development or in production?
+How the app is set up, difference between production and development
 
 `test_test`
 :   In development the `testing` attribute of the Flask app is False.
