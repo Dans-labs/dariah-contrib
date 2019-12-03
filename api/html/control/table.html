@@ -46,6 +46,7 @@ from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
+CW = C.workflow
 
 
 MAIN_TABLE = CT.userTables[0]
@@ -57,6 +58,8 @@ VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
 PROV_SPECS = CT.prov
+
+ASSESSMENT_STAGES = set(CW.assessmentStages)
 
 
 class Table:
@@ -336,6 +339,29 @@ class Table:
         wfitem = recordObj.wfitem
         return wfitem.stage(table, kind=kind) if wfitem else None
 
+    def creators(self, record, table, kind=None):
+        &#34;&#34;&#34;Retrieve the workflow attribute `creators` from a record, if existing.
+
+        This is a quick and direct way to retrieve workflow info for a record.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+        table: string {contrib, assessment, review}
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId) | `None`
+        &#34;&#34;&#34;
+
+        recordObj = self.record(record=record)
+
+        wfitem = recordObj.wfitem
+        return wfitem.creators(table, kind=kind) if wfitem else None
+
     def wrap(self, openEid, action=None):
         &#34;&#34;&#34;Wrap the list of records into HTML.
 
@@ -417,8 +443,11 @@ class Table:
             records = [
                 record
                 for record in records
-                if self.stage(record, N.review, kind=N.final)
+                if self.stage(record, N.assessment)
+                in ASSESSMENT_STAGES
+                and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
+                and uid in self.creators(record, N.assessment)
             ]
         if action == N.review:
             records = [record for record in records if not self.myFinished(uid, record)]
@@ -443,7 +472,8 @@ class Table:
 
         nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
+        nRepCmt = f&#34;&#34;&#34;&lt;!-- mainN~{nRecords}~{itemLabel} --&gt;&#34;&#34;&#34;
+        nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
             [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
@@ -912,6 +942,29 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         wfitem = recordObj.wfitem
         return wfitem.stage(table, kind=kind) if wfitem else None
 
+    def creators(self, record, table, kind=None):
+        &#34;&#34;&#34;Retrieve the workflow attribute `creators` from a record, if existing.
+
+        This is a quick and direct way to retrieve workflow info for a record.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+        table: string {contrib, assessment, review}
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId) | `None`
+        &#34;&#34;&#34;
+
+        recordObj = self.record(record=record)
+
+        wfitem = recordObj.wfitem
+        return wfitem.creators(table, kind=kind) if wfitem else None
+
     def wrap(self, openEid, action=None):
         &#34;&#34;&#34;Wrap the list of records into HTML.
 
@@ -993,8 +1046,11 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             records = [
                 record
                 for record in records
-                if self.stage(record, N.review, kind=N.final)
+                if self.stage(record, N.assessment)
+                in ASSESSMENT_STAGES
+                and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
+                and uid in self.creators(record, N.assessment)
             ]
         if action == N.review:
             records = [record for record in records if not self.myFinished(uid, record)]
@@ -1019,7 +1075,8 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 
         nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
+        nRepCmt = f&#34;&#34;&#34;&lt;!-- mainN~{nRecords}~{itemLabel} --&gt;&#34;&#34;&#34;
+        nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
             [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
@@ -1427,6 +1484,51 @@ otherwise update the existing item.</dd>
         wf.insert(contribId)
     else:
         wf.recompute(contribId)</code></pre>
+</details>
+</dd>
+<dt id="control.table.Table.creators"><code class="name flex">
+<span>def <span class="ident">creators</span></span>(<span>self, record, table, kind=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Retrieve the workflow attribute <code>creators</code> from a record, if existing.</p>
+<p>This is a quick and direct way to retrieve workflow info for a record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The full record</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code> {<code>contrib</code>, <code>assessment</code>, <code>review</code>}</dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}, optional <code>None</code></dt>
+<dd>Only if we want review attributes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>(list of ObjectId) | <code>None</code></p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def creators(self, record, table, kind=None):
+    &#34;&#34;&#34;Retrieve the workflow attribute `creators` from a record, if existing.
+
+    This is a quick and direct way to retrieve workflow info for a record.
+
+    Parameters
+    ----------
+    record: dict
+        The full record
+    table: string {contrib, assessment, review}
+    kind: string {`expert`, `final`}, optional `None`
+        Only if we want review attributes
+
+    Returns
+    -------
+    (list of ObjectId) | `None`
+    &#34;&#34;&#34;
+
+    recordObj = self.record(record=record)
+
+    wfitem = recordObj.wfitem
+    return wfitem.creators(table, kind=kind) if wfitem else None</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.insert"><code class="name flex">
@@ -2041,8 +2143,11 @@ otherwise all records go to the interface.</dd>
         records = [
             record
             for record in records
-            if self.stage(record, N.review, kind=N.final)
+            if self.stage(record, N.assessment)
+            in ASSESSMENT_STAGES
+            and self.stage(record, N.review, kind=N.final)
             not in {N.reviewAccept, N.reviewReject}
+            and uid in self.creators(record, N.assessment)
         ]
     if action == N.review:
         records = [record for record in records if not self.myFinished(uid, record)]
@@ -2067,7 +2172,8 @@ otherwise all records go to the interface.</dd>
 
     nRecords = len(recordsHtml)
     itemLabel = itemSingular if nRecords == 1 else itemPlural
-    nRep = H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
+    nRepCmt = f&#34;&#34;&#34;&lt;!-- mainN~{nRecords}~{itemLabel} --&gt;&#34;&#34;&#34;
+    nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
     return H.div(
         [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
@@ -2100,6 +2206,7 @@ otherwise all records go to the interface.</dd>
 <li><code><a title="control.table.Table.adjustWorkflow" href="#control.table.Table.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.table.Table.context" href="#control.table.Table.context">context</a></code></li>
 <li><code><a title="control.table.Table.countryId" href="#control.table.Table.countryId">countryId</a></code></li>
+<li><code><a title="control.table.Table.creators" href="#control.table.Table.creators">creators</a></code></li>
 <li><code><a title="control.table.Table.eppn" href="#control.table.Table.eppn">eppn</a></code></li>
 <li><code><a title="control.table.Table.fields" href="#control.table.Table.fields">fields</a></code></li>
 <li><code><a title="control.table.Table.forceOpen" href="#control.table.Table.forceOpen">forceOpen</a></code></li>

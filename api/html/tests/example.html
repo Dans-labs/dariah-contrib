@@ -28,7 +28,11 @@
 <pre><code class="python">&#34;&#34;&#34;Various concrete values needed in the tests.&#34;&#34;&#34;
 
 from control.utils import EURO
+from conftest import USERS, AUTH_USERS, POWER_USERS
 
+
+WELCOME = &#34;Welcome to the DARIAH contribution tool&#34;
+OVERVIEW = &#34;Country selection&#34;
 
 ASSESS = &#34;assessment&#34;
 CRITERIA_ENTRY = &#34;criteriaEntry&#34;
@@ -37,9 +41,6 @@ CONTRIB = &#34;contrib&#34;
 DUMMY_ID = &#34;00000000ffa4bbd9fe000f15&#34;
 
 UNDEF_VALUE = &#34;○&#34;
-
-BELGIUM = &#34;BE🇧🇪&#34;
-LUXEMBURG = &#34;LU🇱🇺&#34;
 
 TITLE = &#34;No Title Yet&#34;
 NEW_A_TITLE = &#34;My contribution assessed&#34;
@@ -67,6 +68,69 @@ VCC12 = &#34;VCC1,VCC2&#34;
 URL_C = &#34;urlContribution&#34;
 URL_A = &#34;urlAcademic&#34;
 
+CAPTIONS = (
+    (&#34;Home&#34;, USERS, None, WELCOME, None),
+    (&#34;Overview&#34;, USERS, None, OVERVIEW, None),
+    (&#34;All contributions&#34;, USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;My contributions&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;{country} contributions&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;Contributions I am assessing&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (
+        &#34;Contributions to be selected&#34;,
+        {&#34;coord&#34;, &#34;mycoord&#34;},
+        0,
+        &#34;contribution&#34;,
+        &#34;contributions&#34;,
+    ),
+    (&#34;All assessments&#34;, POWER_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;My assessments&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments needing reviewers&#34;, {&#34;office&#34;}, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments in review by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments reviewed by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;All reviews&#34;, POWER_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
+    (&#34;My reviews&#34;, AUTH_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
+    (&#34;countries&#34;, POWER_USERS, 51, &#34;country&#34;, None),
+    (&#34;criteria&#34;, POWER_USERS, 32, &#34;criteria&#34;, None),
+    (&#34;disciplines&#34;, POWER_USERS, 28, None, None),
+    (&#34;keywords&#34;, POWER_USERS, 270, None, None),
+    (&#34;packages&#34;, POWER_USERS, 2, None, None),
+    (&#34;score levels&#34;, POWER_USERS, 97, None, None),
+    (&#34;TADIRAH Activities&#34;, POWER_USERS, 8, &#34;TADIRAH Activity&#34;, None),
+    (&#34;TADIRAH Objects&#34;, POWER_USERS, 36, None, None),
+    (&#34;TADIRAH Techniques&#34;, POWER_USERS, 34, None, None),
+    (&#34;contribution types&#34;, POWER_USERS, 22, None, None),
+    (&#34;users&#34;, POWER_USERS, 11, None, None),
+    (&#34;vccs&#34;, POWER_USERS, 6, None, None),
+    (&#34;years&#34;, POWER_USERS, 20, None, None),
+    (&#34;decisions&#34;, {&#34;system&#34;, &#34;root&#34;}, 3, None, None),
+    (&#34;permission groups&#34;, {&#34;system&#34;, &#34;root&#34;}, 9, None, None),
+    (&#34;Recompute workflow table&#34;, {&#34;system&#34;, &#34;root&#34;}, None, WELCOME, None),
+)
+
+BELGIUM = &#34;BE🇧🇪&#34;
+LUXEMBURG = &#34;LU🇱🇺&#34;
+GERMANY = &#34;DE🇩🇪&#34;
+FRANCE = &#34;FR🇫🇷&#34;
+ITALY = &#34;IT🇮🇹&#34;
+IRELAND = &#34;IE🇮🇪&#34;
+PORTUGAL = &#34;PT🇵🇹&#34;
+POLAND = &#34;PL🇵🇱&#34;
+NETHERLANDS = &#34;NL🇳🇱&#34;
+
+USER_COUNTRY = dict(
+    public=None,
+    auth=GERMANY,
+    owner=BELGIUM,
+    editor=IRELAND,
+    mycoord=BELGIUM,
+    coord=LUXEMBURG,
+    expert=FRANCE,
+    final=ITALY,
+    office=PORTUGAL,
+    system=POLAND,
+    root=NETHERLANDS,
+)
+
 EXAMPLE = dict(
     description=[
         &#34;&#34;&#34;
@@ -91,24 +155,24 @@ There are costs.
 &#34;&#34;&#34;
     ],
     year=tuple(str(yr) for yr in range(2010, 2030)),
-    country=&#34;&#34;&#34;
+    country=f&#34;&#34;&#34;
 AT🇦🇹
-BE🇧🇪
+{BELGIUM}
 HR🇭🇷
 CY🇨🇾
 DK🇩🇰
-FR🇫🇷
-DE🇩🇪
+{FRANCE}
+{GERMANY}
 GR🇬🇷
-IE🇮🇪
-IT🇮🇹
-LU🇱🇺
+{IRELAND}
+{ITALY}
+{LUXEMBURG}
 MT🇲🇹
-NL🇳🇱
-PT🇵🇹
+{NETHERLANDS}
+{PORTUGAL}
 RS🇷🇸
 SI🇸🇮
-PL🇵🇱
+{POLAND}
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),

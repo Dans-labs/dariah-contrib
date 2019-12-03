@@ -8,7 +8,7 @@
     
     
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for control/workflow/compute.py: 92%</title>
+    <title>Coverage for control/workflow/compute.py: 93%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -24,19 +24,19 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>control/workflow/compute.py</b> :
-            <span class="pc_cov">92%</span>
+            <span class="pc_cov">93%</span>
         </h1>
 
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
 
         <h2 class="stats">
             161 statements &nbsp;
-            <span class="run hide_run shortkey_r button_toggle_run">150 run</span>
-            <span class="mis shortkey_m button_toggle_mis">11 missing</span>
+            <span class="run hide_run shortkey_r button_toggle_run">152 run</span>
+            <span class="mis shortkey_m button_toggle_mis">9 missing</span>
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
             
-                <span class="par run hide_run shortkey_p button_toggle_par">6 partial</span>
+                <span class="par run hide_run shortkey_p button_toggle_par">5 partial</span>
             
         </h2>
     </div>
@@ -250,12 +250,12 @@
 <p id="n179" class="pln"><a href="#n179">179</a></p>
 <p id="n180" class="stm run hide_run"><a href="#n180">180</a></p>
 <p id="n181" class="pln"><a href="#n181">181</a></p>
-<p id="n182" class="stm par run hide_run"><a href="#n182">182</a></p>
+<p id="n182" class="stm run hide_run"><a href="#n182">182</a></p>
 <p id="n183" class="stm run hide_run"><a href="#n183">183</a></p>
 <p id="n184" class="stm run hide_run"><a href="#n184">184</a></p>
 <p id="n185" class="pln"><a href="#n185">185</a></p>
-<p id="n186" class="stm mis"><a href="#n186">186</a></p>
-<p id="n187" class="stm mis"><a href="#n187">187</a></p>
+<p id="n186" class="stm run hide_run"><a href="#n186">186</a></p>
+<p id="n187" class="stm run hide_run"><a href="#n187">187</a></p>
 <p id="n188" class="pln"><a href="#n188">188</a></p>
 <p id="n189" class="stm run hide_run"><a href="#n189">189</a></p>
 <p id="n190" class="stm run hide_run"><a href="#n190">190</a></p>
@@ -919,12 +919,12 @@
 <p id="t179" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t180" class="stm run hide_run">        <span class="nam">db</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">db</span><span class="strut">&nbsp;</span></p>
 <p id="t181" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t182" class="stm par run hide_run"><span class="annotate short">182&#x202F;&#x219B;&#x202F;186</span><span class="annotate long">line 182 didn't jump to line 186, because the condition on line 182 was never false</span>        <span class="key">if</span> <span class="nam">drop</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t182" class="stm run hide_run">        <span class="key">if</span> <span class="nam">drop</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t183" class="stm run hide_run">            <span class="nam">serverprint</span><span class="op">(</span><span class="str">"WORKFLOW: Drop exisiting table"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t184" class="stm run hide_run">            <span class="nam">db</span><span class="op">.</span><span class="nam">dropWorkflow</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t185" class="pln">        <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t186" class="stm mis">            <span class="nam">serverprint</span><span class="op">(</span><span class="str">"WORKFLOW: Clear exisiting table"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t187" class="stm mis">            <span class="nam">db</span><span class="op">.</span><span class="nam">clearWorkflow</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t186" class="stm run hide_run">            <span class="nam">serverprint</span><span class="op">(</span><span class="str">"WORKFLOW: Clear exisiting table"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t187" class="stm run hide_run">            <span class="nam">db</span><span class="op">.</span><span class="nam">clearWorkflow</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t188" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t189" class="stm run hide_run">        <span class="nam">entries</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
 <p id="t190" class="stm run hide_run">        <span class="nam">serverprint</span><span class="op">(</span><span class="str">"WORKFLOW: Read user (entry) tables"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
@@ -1414,7 +1414,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-11-28 22:03
+            created at 2019-12-03 17:41
         </p>
     </div>
 </div>

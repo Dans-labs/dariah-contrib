@@ -32,14 +32,17 @@ import re
 
 from flask import json
 from control.utils import serverprint
+from conftest import USER_LIST
 from example import ASSESS
 
 
 materialRe = re.compile(
     r&#34;&#34;&#34;&lt;div id=[&#39;&#34;]material[&#39;&#34;]&gt;(.*?)&lt;/div&gt;\s*&lt;/div&gt;\s*&lt;script&#34;&#34;&#34;, re.S
 )
-fieldRe = re.compile(&#34;&#34;&#34;&lt;!-- ([^=]+)=(.*?) --&gt;&#34;&#34;&#34;, re.S)
+fieldRe = re.compile(&#34;&#34;&#34;&lt;!-- ([a-zA-Z0-9]+)=(.*?) --&gt;&#34;&#34;&#34;, re.S)
+mainNRe = re.compile(&#34;&#34;&#34;&lt;!-- mainN~([0-9]+)~(.*?) --&gt;&#34;&#34;&#34;, re.S)
 stageRe = re.compile(&#34;&#34;&#34;&lt;!-- stage:(.*?) --&gt;&#34;&#34;&#34;, re.S)
+captionRe = re.compile(r&#34;&#34;&#34;&lt;!-- caption\^([^&gt;]*?) --&gt;&lt;a [^&gt;]*href=[&#39;&#34;]([^&#39;&#34;]*)[&#39;&#34;]&#34;&#34;&#34;, re.S)
 msgRe = re.compile(&#34;&#34;&#34;&lt;div class=&#34;msgitem.*?&gt;(.*?)&lt;/div&gt;&#34;&#34;&#34;, re.S)
 eidRe = re.compile(&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;][a-zA-Z0-9_]+/([^/&#39;&#34;]*)[&#39;&#34;]&#34;&#34;&#34;, re.S)
 userRe = re.compile(
@@ -66,7 +69,10 @@ def forall(cls, expect, assertFunc, *args):
         Keyed by user (eppn), contains the expected value for that user.
     &#34;&#34;&#34;
 
-    for (user, exp) in expect.items():
+    for user in USER_LIST:
+        if user not in expect:
+            continue
+        exp = expect[user]
         serverprint(f&#34;USER {user} EXPECTS {exp}&#34;)
         assertFunc(cls[user], *args, exp)
 
@@ -305,6 +311,44 @@ def findStages(text):
     return stageRe.findall(text)
 
 
+def findMainN(text):
+    &#34;&#34;&#34;Get the number of main records from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return mainNRe.findall(text)
+
+
+def findCaptions(text):
+    &#34;&#34;&#34;Get the captions from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return captionRe.findall(text)
+
+
 def findUsers(text):
     &#34;&#34;&#34;Get the users from a response.
 
@@ -521,6 +565,48 @@ def getRelatedValues(client, table, eid, field):
         ),
         re.S | re.X,
     )</code></pre>
+</details>
+</dd>
+<dt id="helpers.findCaptions"><code class="name flex">
+<span>def <span class="ident">findCaptions</span></span>(<span>text)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the captions from a response.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>They are neatly packaged in comment lines!</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The response text.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findCaptions(text):
+    &#34;&#34;&#34;Get the captions from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return captionRe.findall(text)</code></pre>
 </details>
 </dd>
 <dt id="helpers.findDetails"><code class="name flex">
@@ -787,6 +873,48 @@ of the item will be read off.</p>
     return eid</code></pre>
 </details>
 </dd>
+<dt id="helpers.findMainN"><code class="name flex">
+<span>def <span class="ident">findMainN</span></span>(<span>text)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the number of main records from a response.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>They are neatly packaged in comment lines!</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The response text.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code> of <code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findMainN(text):
+    &#34;&#34;&#34;Get the number of main records from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return mainNRe.findall(text)</code></pre>
+</details>
+</dd>
 <dt id="helpers.findMaterial"><code class="name flex">
 <span>def <span class="ident">findMaterial</span></span>(<span>text)</span>
 </code></dt>
@@ -957,7 +1085,10 @@ It will be passed all the <code>args</code> and a relevant part of <code>expect<
         Keyed by user (eppn), contains the expected value for that user.
     &#34;&#34;&#34;
 
-    for (user, exp) in expect.items():
+    for user in USER_LIST:
+        if user not in expect:
+            continue
+        exp = expect[user]
         serverprint(f&#34;USER {user} EXPECTS {exp}&#34;)
         assertFunc(cls[user], *args, exp)</code></pre>
 </details>
@@ -1141,11 +1272,13 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.checkWarning" href="#helpers.checkWarning">checkWarning</a></code></li>
 <li><code><a title="helpers.detailRe" href="#helpers.detailRe">detailRe</a></code></li>
 <li><code><a title="helpers.fieldEditRe" href="#helpers.fieldEditRe">fieldEditRe</a></code></li>
+<li><code><a title="helpers.findCaptions" href="#helpers.findCaptions">findCaptions</a></code></li>
 <li><code><a title="helpers.findDetails" href="#helpers.findDetails">findDetails</a></code></li>
 <li><code><a title="helpers.findEid" href="#helpers.findEid">findEid</a></code></li>
 <li><code><a title="helpers.findFields" href="#helpers.findFields">findFields</a></code></li>
 <li><code><a title="helpers.findItem" href="#helpers.findItem">findItem</a></code></li>
 <li><code><a title="helpers.findItemEid" href="#helpers.findItemEid">findItemEid</a></code></li>
+<li><code><a title="helpers.findMainN" href="#helpers.findMainN">findMainN</a></code></li>
 <li><code><a title="helpers.findMaterial" href="#helpers.findMaterial">findMaterial</a></code></li>
 <li><code><a title="helpers.findMsg" href="#helpers.findMsg">findMsg</a></code></li>
 <li><code><a title="helpers.findStages" href="#helpers.findStages">findStages</a></code></li>
