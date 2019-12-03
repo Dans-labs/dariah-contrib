@@ -84,6 +84,14 @@ stageAtts:
     msg: Rejected
     cls: error
 
+assessmentStages:
+  - submitted
+  - submittedRevised
+  - complete
+  - completeRevised
+  - incomplete
+  - incompleteRevised
+
 statusRep:
   frozen: Finalized and frozen
   locked: Locked

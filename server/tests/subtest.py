@@ -1,15 +1,19 @@
 from control.utils import pick as G
+from conftest import USERS
 from example import (
     ASSESS,
-    UNDEF_VALUE
+    CAPTIONS,
+    UNDEF_VALUE,
+    USER_COUNTRY,
 )
 from helpers import (
     accessUrl,
     fieldRe,
+    findCaptions,
     findMsg,
     findEid,
     findItem,
-    findMaterial,
+    findMainN,
     findStages,
     forall,
     getAid,
@@ -162,37 +166,6 @@ def assertModifyField(client, table, eid, field, newValue, expect):
             assertFieldValue(fields, field, oldValue)
 
 
-def assertMylist(client, table, eid, label, expect):
-    """Verify whether the client can see mylist on table.
-
-    Mylist is retrieved, and if successful, it is also verified either that
-    a record with id `eid` is in it or that the list is empty.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(objectId)
-    label: string
-        How a record of this table is called on the interface, in the plural
-    expect: (mayList: boolean, showsUp: boolean)
-        mayList means: we expect to be able to see mylist
-        showsUp means: we expect the record to show up. Otherwise mylist should be
-        empty.
-    """
-    url = f"/{table}/list?action=my"
-    (mayList, canSee) = expect
-    assertStatus(client, url, mayList)
-    if mayList:
-        (text, status, msgs) = accessUrl(client, url, redirect=True)
-        material = findMaterial(text)
-        theId = findEid(text)
-        if canSee:
-            assert eid == theId
-        else:
-            assert f"0 {label}" in material
-
-
 def assertStage(client, table, eid, expect):
     """Check whether a record has a certain workflow stage.
 
@@ -208,6 +181,33 @@ def assertStage(client, table, eid, expect):
     stageFound = findStages(text)[0]
     assert stageFound == expect
     return (text, fields, msgs, eid)
+
+
+def assertCaptions(client, expect):
+    """Check whether a response text shows a certain set of captions.
+
+    Parameters
+    ----------
+    client: fixture
+    expect: set of string
+    """
+
+    url = "/"
+    (text, status, msgs) = accessUrl(client, url)
+    captionsFound = {caption: url for (caption, url) in findCaptions(text)}
+    for caption in captionsFound:
+        assert caption in expect
+    for caption in expect:
+        assert caption in captionsFound
+    for (caption, url) in captionsFound.items():
+        (expNumber, expItem) = expect[caption]
+        (text, status, msgs) = accessUrl(client, url)
+        if expNumber is None:
+            expItem in text
+        else:
+            (n, item) = findMainN(text)[0]
+            assert n == str(expNumber)
+            assert item == expItem
 
 
 def assertStartAssessment(client, cId, expect):
@@ -256,22 +256,96 @@ def assertStatus(client, url, expect):
         assert response.status_code in {400, 303}
 
 
-def inspectTitleAll(clients, eid, expect):
+def inspectTitleAll(clients, table, eid, expect):
+    """Verify the title of an item, as seen by each user.
+
+    Parameters
+    ----------
+    clients: fixture
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    """
+
     field = "title"
 
     def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, eid), field, exp)
+        assertFieldValue((cl, table, eid), field, exp)
 
     forall(clients, expect, assertIt)
 
 
-def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
-    aId = G(G(recordInfo, ASSESS), "eid")
-    value = G(users, valueRep)[0]
+def assignReviewers(clients, assessInfo, users, aId, field, user, expect):
+    """Verify assigning reviewers to an assessment.
+
+    Parameters
+    ----------
+    clients: fixture
+    assessInfo: dict
+        The assessment data as previously retrieved
+    users: dict
+        Mapping of users to ids
+    aId: string(ObjectId)
+        Assessment id
+    field: string
+        Reviewer field (`reviewerE` or `reviewerF`)
+    user: string
+        The reviewer user
+    expect: dict
+        For each user a boolean saying whether that user can assign the reviewer
+    """
+
+    aId = G(assessInfo, "eid")
+    value = G(users, user)[0]
 
     def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        assertModifyField(cl, ASSESS, aId, field, (value, user), exp)
         if exp:
             assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
 
     forall(clients, expect, assertIt)
+
+
+def sidebar(clients, amounts):
+    """Verify the sidebar.
+
+    It will be verified whether each user sees the right entries,
+    and that following an entry leads to the expected results.
+
+    Parameters
+    ----------
+    clients: fixture
+    amounts: dict
+        Keyed by entry, it is a list of instructions to change the expected amount.
+        Each instruction is a pair `(set of users, amount)`, leading
+        to setting the indicated amount for the indicated users.
+        The set of users can be left out, then all users are implied.
+    """
+
+    expectedCaptions = {}
+    for (caption, expectedUsers, expectedN, expectedItemSg, expectedItemPl) in CAPTIONS:
+        for user in expectedUsers:
+            thisCaption = (
+                caption.format(country=USER_COUNTRY[user])
+                if "{country}" in caption
+                else caption
+            )
+            n = expectedN
+            for instruction in G(amounts, thisCaption, default=[]):
+                if type(instruction) is tuple or type(instruction) is list:
+                    (theseUsers, thisAmount) = instruction
+                else:
+                    (theseUsers, thisAmount) = (USERS, instruction)
+                if user in theseUsers:
+                    n = thisAmount
+            if n is None:
+                expectedItem = expectedItemSg or thisCaption
+            else:
+                pl = expectedItemPl or thisCaption
+                sg = expectedItemSg or thisCaption[0:-1]
+                expectedItem = sg if n == 1 else pl
+            expectedCaptions.setdefault(user, {})[thisCaption] = (n, expectedItem)
+
+    expect = {user: G(expectedCaptions, user) for user in USERS}
+    forall(clients, expect, assertCaptions)

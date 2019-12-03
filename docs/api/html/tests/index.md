@@ -1,3 +1,5 @@
+[analysis](analysis.html)
+
 [conftest](conftest.html)
 
 [example](example.html)

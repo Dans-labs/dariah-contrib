@@ -131,6 +131,10 @@ class Sidebar:
     def makeEntry(self, label, path, withOptions=False, asTask=False):
         """Produce an entry.
 
+        !!! hint "easy comments"
+            We also include a comment `<!-- caption^label -->
+            for the ease of testing.
+
         Parameters
         ----------
         label: string
@@ -170,9 +174,10 @@ class Sidebar:
         if withOptions:
             atts[N.hrefbase] = path
 
+        comment = f"""<!-- caption^{label} -->"""
         return (
             path,
-            H.a(label, path + optionsRep, **atts),
+            comment + H.a(label, path + optionsRep, **atts),
         )
 
     def tableEntry(
@@ -387,7 +392,7 @@ class Sidebar:
         if isSuperUser:
             for table in USER_TABLES_LIST[1:]:
                 if isSysAdmin or table not in USER_ENTRY_TABLES:
-                    subEntries.append(self.tableEntry(table, prefix="all"))
+                    subEntries.append(self.tableEntry(table, prefix="All"))
             entries.append(self.makeCaption(G(CAPTIONS, N.user), subEntries, rule=True))
 
         # office content

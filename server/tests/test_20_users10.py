@@ -20,7 +20,7 @@ Getting to know all users.
 """
 
 import magic  # noqa
-from conftest import USERS, POWER_USERS
+from conftest import USER_LIST, POWER_USERS
 from helpers import (
     viewField
 )
@@ -31,7 +31,6 @@ from subtest import (
     assertFieldValue,
 )
 
-
 valueTables = {}
 
 
@@ -40,9 +39,9 @@ def test_start(clientOffice):
 
 
 def test_users(clientOffice):
-    assert len(USERS) == 11
+    assert len(USER_LIST) == 11
     users = valueTables["user"]
-    for user in USERS:
+    for user in USER_LIST:
         if user == "public":
             assert user not in users
         else:

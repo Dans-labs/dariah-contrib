@@ -13,11 +13,20 @@ Getting started with contributions.
 `test_start`
 :   **office** consults the list of users.
 
+`test_sidebar`
+:   All users check the entries in the sidebar.
+    They check whether they see exactly the ones they expect, and
+    they check what happens when they follow the link.
+
 `test_addDelAll`
 :   All users try to add a contribution. Only some succeed, and they delete it again.
 
 `test_addOwner`
 :   **owner** adds contribution and stores details for later tests.
+
+`test_sidebar2`
+:   All users check the entries in the sidebar.
+    All users should see 1 contribution now.
 
 `test_fields`
 :   **owner** sees that year, country and some
@@ -30,9 +39,9 @@ Getting started with contributions.
 `test_makeEditorOwner`
     **owner** makes **editor** editor of this contribution.
 
-`test_mylistAll`
-:   All users try to see the `my` list of contributions.
-    Some succeed, and some see the new contribution there.
+`test_sidebar3`
+:   All users check the entries in the sidebar.
+    The editor should now also see the contribution is `mylist`.
 
 """
 
@@ -42,19 +51,16 @@ import magic  # noqa
 from control.utils import pick as G, now
 from conftest import USERS
 from example import (
+    BELGIUM,
     CONTRIB,
 )
-from helpers import (
-    forall,
-)
-from starters import (
-    start,
-)
+from helpers import forall
+from starters import start
 from subtest import (
     assertAddItem,
     assertDelItem,
     assertEditor,
-    assertMylist,
+    sidebar,
 )
 
 
@@ -66,6 +72,11 @@ TITLE = "No Title Yet"
 
 def test_start(clientOffice):
     start(clientOffice=clientOffice, users=True, valueTables=valueTables)
+
+
+def test_sidebar(clients):
+    amounts = {}
+    sidebar(clients, amounts)
 
 
 def test_addDelAll(clients):
@@ -86,6 +97,16 @@ def test_addOwner(clientOwner):
     contribInfo["fields"] = fields
     contribInfo["msgs"] = msgs
     contribInfo["eid"] = eid
+
+
+def test_sidebar2(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({"owner"}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({"mycoord"}, 1)],
+    }
+    sidebar(clients, amounts)
 
 
 @pytest.mark.parametrize(
@@ -121,15 +142,11 @@ def test_makeEditorOwner(clientOwner):
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 
-def test_mylistAll(clients):
-    eid = G(G(recordInfo, CONTRIB), "eid")
-
-    expect = {user: (True, False) for user in USERS}
-    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
-
-    def assertIt(cl, exp):
-        assertMylist(cl, CONTRIB, eid, "contributions", exp)
-
-    expect = {user: (True, False) for user in USERS}
-    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
-    forall(clients, expect, assertIt)
+def test_sidebar3(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({"owner", "editor"}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({"mycoord"}, 1)],
+    }
+    sidebar(clients, amounts)

@@ -52,15 +52,15 @@ Modifying contribution fields that have values in value tables.
 
 `test_addMetaRight`
 :   **owner** can new values in metadata fields that allow new values.
+    **office** then deletes these new values.
 
-*   **owner** finds her contribution and continues filling it out.
-*   During this filling-out, several checks will be performed.
 
 Here we focus on the fields that have values in other tables, the valueTables.
 
 """
 
 
+from pymongo import MongoClient
 import pytest
 
 import magic  # noqa
@@ -79,6 +79,7 @@ from starters import (
 )
 from subtest import (
     assertModifyField,
+    assertDelItem,
 )
 
 
@@ -244,7 +245,13 @@ def test_addMetaWrong(clientOwner, field):
 @pytest.mark.parametrize(
     ("field", "value"), (("discipline", "ddd"), ("keyword", "kkk"),),
 )
-def test_addMetaRight(clientOwner, field, value):
+def test_addMetaRight(clientOwner, clientOffice, field, value):
     eid = G(G(recordInfo, CONTRIB), "eid")
     updateValues = ((value,),)
     assertModifyField(clientOwner, CONTRIB, eid, field, (updateValues, value), True)
+    assertModifyField(clientOwner, CONTRIB, eid, field, (None, ""), True)
+
+    client = MongoClient()
+    mongo = client.dariah
+    mid = list(mongo[field].find(dict(rep=value)))[0]["_id"]
+    assertDelItem(clientOffice, field, mid, True)

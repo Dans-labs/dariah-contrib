@@ -25,17 +25,21 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from control.utils import pick as G
+from conftest import USERS
 from example import (
     ASSESS,
-    UNDEF_VALUE
+    CAPTIONS,
+    UNDEF_VALUE,
+    USER_COUNTRY,
 )
 from helpers import (
     accessUrl,
     fieldRe,
+    findCaptions,
     findMsg,
     findEid,
     findItem,
-    findMaterial,
+    findMainN,
     findStages,
     forall,
     getAid,
@@ -188,37 +192,6 @@ def assertModifyField(client, table, eid, field, newValue, expect):
             assertFieldValue(fields, field, oldValue)
 
 
-def assertMylist(client, table, eid, label, expect):
-    &#34;&#34;&#34;Verify whether the client can see mylist on table.
-
-    Mylist is retrieved, and if successful, it is also verified either that
-    a record with id `eid` is in it or that the list is empty.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(objectId)
-    label: string
-        How a record of this table is called on the interface, in the plural
-    expect: (mayList: boolean, showsUp: boolean)
-        mayList means: we expect to be able to see mylist
-        showsUp means: we expect the record to show up. Otherwise mylist should be
-        empty.
-    &#34;&#34;&#34;
-    url = f&#34;/{table}/list?action=my&#34;
-    (mayList, canSee) = expect
-    assertStatus(client, url, mayList)
-    if mayList:
-        (text, status, msgs) = accessUrl(client, url, redirect=True)
-        material = findMaterial(text)
-        theId = findEid(text)
-        if canSee:
-            assert eid == theId
-        else:
-            assert f&#34;0 {label}&#34; in material
-
-
 def assertStage(client, table, eid, expect):
     &#34;&#34;&#34;Check whether a record has a certain workflow stage.
 
@@ -234,6 +207,33 @@ def assertStage(client, table, eid, expect):
     stageFound = findStages(text)[0]
     assert stageFound == expect
     return (text, fields, msgs, eid)
+
+
+def assertCaptions(client, expect):
+    &#34;&#34;&#34;Check whether a response text shows a certain set of captions.
+
+    Parameters
+    ----------
+    client: fixture
+    expect: set of string
+    &#34;&#34;&#34;
+
+    url = &#34;/&#34;
+    (text, status, msgs) = accessUrl(client, url)
+    captionsFound = {caption: url for (caption, url) in findCaptions(text)}
+    for caption in captionsFound:
+        assert caption in expect
+    for caption in expect:
+        assert caption in captionsFound
+    for (caption, url) in captionsFound.items():
+        (expNumber, expItem) = expect[caption]
+        (text, status, msgs) = accessUrl(client, url)
+        if expNumber is None:
+            expItem in text
+        else:
+            (n, item) = findMainN(text)[0]
+            assert n == str(expNumber)
+            assert item == expItem
 
 
 def assertStartAssessment(client, cId, expect):
@@ -282,25 +282,99 @@ def assertStatus(client, url, expect):
         assert response.status_code in {400, 303}
 
 
-def inspectTitleAll(clients, eid, expect):
+def inspectTitleAll(clients, table, eid, expect):
+    &#34;&#34;&#34;Verify the title of an item, as seen by each user.
+
+    Parameters
+    ----------
+    clients: fixture
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    &#34;&#34;&#34;
+
     field = &#34;title&#34;
 
     def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, eid), field, exp)
+        assertFieldValue((cl, table, eid), field, exp)
 
     forall(clients, expect, assertIt)
 
 
-def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    value = G(users, valueRep)[0]
+def assignReviewers(clients, assessInfo, users, aId, field, user, expect):
+    &#34;&#34;&#34;Verify assigning reviewers to an assessment.
+
+    Parameters
+    ----------
+    clients: fixture
+    assessInfo: dict
+        The assessment data as previously retrieved
+    users: dict
+        Mapping of users to ids
+    aId: string(ObjectId)
+        Assessment id
+    field: string
+        Reviewer field (`reviewerE` or `reviewerF`)
+    user: string
+        The reviewer user
+    expect: dict
+        For each user a boolean saying whether that user can assign the reviewer
+    &#34;&#34;&#34;
+
+    aId = G(assessInfo, &#34;eid&#34;)
+    value = G(users, user)[0]
 
     def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        assertModifyField(cl, ASSESS, aId, field, (value, user), exp)
         if exp:
             assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
 
-    forall(clients, expect, assertIt)</code></pre>
+    forall(clients, expect, assertIt)
+
+
+def sidebar(clients, amounts):
+    &#34;&#34;&#34;Verify the sidebar.
+
+    It will be verified whether each user sees the right entries,
+    and that following an entry leads to the expected results.
+
+    Parameters
+    ----------
+    clients: fixture
+    amounts: dict
+        Keyed by entry, it is a list of instructions to change the expected amount.
+        Each instruction is a pair `(set of users, amount)`, leading
+        to setting the indicated amount for the indicated users.
+        The set of users can be left out, then all users are implied.
+    &#34;&#34;&#34;
+
+    expectedCaptions = {}
+    for (caption, expectedUsers, expectedN, expectedItemSg, expectedItemPl) in CAPTIONS:
+        for user in expectedUsers:
+            thisCaption = (
+                caption.format(country=USER_COUNTRY[user])
+                if &#34;{country}&#34; in caption
+                else caption
+            )
+            n = expectedN
+            for instruction in G(amounts, thisCaption, default=[]):
+                if type(instruction) is tuple or type(instruction) is list:
+                    (theseUsers, thisAmount) = instruction
+                else:
+                    (theseUsers, thisAmount) = (USERS, instruction)
+                if user in theseUsers:
+                    n = thisAmount
+            if n is None:
+                expectedItem = expectedItemSg or thisCaption
+            else:
+                pl = expectedItemPl or thisCaption
+                sg = expectedItemSg or thisCaption[0:-1]
+                expectedItem = sg if n == 1 else pl
+            expectedCaptions.setdefault(user, {})[thisCaption] = (n, expectedItem)
+
+    expect = {user: G(expectedCaptions, user) for user in USERS}
+    forall(clients, expect, assertCaptions)</code></pre>
 </details>
 </section>
 <section>
@@ -375,6 +449,49 @@ of the new item will be read off.</p>
     else:
         assert &#34;item added&#34; not in msgs
     return (text, fields, msgs, eid)</code></pre>
+</details>
+</dd>
+<dt id="subtest.assertCaptions"><code class="name flex">
+<span>def <span class="ident">assertCaptions</span></span>(<span>client, expect)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Check whether a response text shows a certain set of captions.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>set</code> of <code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertCaptions(client, expect):
+    &#34;&#34;&#34;Check whether a response text shows a certain set of captions.
+
+    Parameters
+    ----------
+    client: fixture
+    expect: set of string
+    &#34;&#34;&#34;
+
+    url = &#34;/&#34;
+    (text, status, msgs) = accessUrl(client, url)
+    captionsFound = {caption: url for (caption, url) in findCaptions(text)}
+    for caption in captionsFound:
+        assert caption in expect
+    for caption in expect:
+        assert caption in captionsFound
+    for (caption, url) in captionsFound.items():
+        (expNumber, expItem) = expect[caption]
+        (text, status, msgs) = accessUrl(client, url)
+        if expNumber is None:
+            expItem in text
+        else:
+            (n, item) = findMainN(text)[0]
+            assert n == str(expNumber)
+            assert item == expItem</code></pre>
 </details>
 </dd>
 <dt id="subtest.assertDelItem"><code class="name flex">
@@ -579,63 +696,6 @@ and the second component is the value we read back from the modified record</dd>
             assertFieldValue(fields, field, oldValue)</code></pre>
 </details>
 </dd>
-<dt id="subtest.assertMylist"><code class="name flex">
-<span>def <span class="ident">assertMylist</span></span>(<span>client, table, eid, label, expect)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Verify whether the client can see mylist on table.</p>
-<p>Mylist is retrieved, and if successful, it is also verified either that
-a record with id <code>eid</code> is in it or that the list is empty.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>objectId</code>)</dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
-<dd>How a record of this table is called on the interface, in the plural</dd>
-<dt><strong><code>expect</code></strong> :&ensp;(<code>mayList</code>: <code>boolean</code>, <code>showsUp</code>: <code>boolean</code>)</dt>
-<dd>mayList means: we expect to be able to see mylist
-showsUp means: we expect the record to show up. Otherwise mylist should be
-empty.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def assertMylist(client, table, eid, label, expect):
-    &#34;&#34;&#34;Verify whether the client can see mylist on table.
-
-    Mylist is retrieved, and if successful, it is also verified either that
-    a record with id `eid` is in it or that the list is empty.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    eid: string(objectId)
-    label: string
-        How a record of this table is called on the interface, in the plural
-    expect: (mayList: boolean, showsUp: boolean)
-        mayList means: we expect to be able to see mylist
-        showsUp means: we expect the record to show up. Otherwise mylist should be
-        empty.
-    &#34;&#34;&#34;
-    url = f&#34;/{table}/list?action=my&#34;
-    (mayList, canSee) = expect
-    assertStatus(client, url, mayList)
-    if mayList:
-        (text, status, msgs) = accessUrl(client, url, redirect=True)
-        material = findMaterial(text)
-        theId = findEid(text)
-        if canSee:
-            assert eid == theId
-        else:
-            assert f&#34;0 {label}&#34; in material</code></pre>
-</details>
-</dd>
 <dt id="subtest.assertStage"><code class="name flex">
 <span>def <span class="ident">assertStage</span></span>(<span>client, table, eid, expect)</span>
 </code></dt>
@@ -763,20 +823,56 @@ of the new assessment will be read off.</p>
 </details>
 </dd>
 <dt id="subtest.assignReviewers"><code class="name flex">
-<span>def <span class="ident">assignReviewers</span></span>(<span>clients, recordInfo, users, aId, field, valueRep, expect)</span>
+<span>def <span class="ident">assignReviewers</span></span>(<span>clients, assessInfo, users, aId, field, user, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Verify assigning reviewers to an assessment.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>assessInfo</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The assessment data as previously retrieved</dd>
+<dt><strong><code>users</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mapping of users to ids</dd>
+<dt><strong><code>aId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>Assessment id</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>Reviewer field (<code>reviewerE</code> or <code>reviewerF</code>)</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>string</code></dt>
+<dd>The reviewer user</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
+<dd>For each user a boolean saying whether that user can assign the reviewer</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    value = G(users, valueRep)[0]
+<pre><code class="python">def assignReviewers(clients, assessInfo, users, aId, field, user, expect):
+    &#34;&#34;&#34;Verify assigning reviewers to an assessment.
+
+    Parameters
+    ----------
+    clients: fixture
+    assessInfo: dict
+        The assessment data as previously retrieved
+    users: dict
+        Mapping of users to ids
+    aId: string(ObjectId)
+        Assessment id
+    field: string
+        Reviewer field (`reviewerE` or `reviewerF`)
+    user: string
+        The reviewer user
+    expect: dict
+        For each user a boolean saying whether that user can assign the reviewer
+    &#34;&#34;&#34;
+
+    aId = G(assessInfo, &#34;eid&#34;)
+    value = G(users, user)[0]
 
     def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, (value, valueRep), exp)
+        assertModifyField(cl, ASSESS, aId, field, (value, user), exp)
         if exp:
             assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
 
@@ -784,21 +880,108 @@ of the new assessment will be read off.</p>
 </details>
 </dd>
 <dt id="subtest.inspectTitleAll"><code class="name flex">
-<span>def <span class="ident">inspectTitleAll</span></span>(<span>clients, eid, expect)</span>
+<span>def <span class="ident">inspectTitleAll</span></span>(<span>clients, table, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Verify the title of an item, as seen by each user.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>the</code> <code>table</code> of <code>the</code> <code>item</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>the</code> <code>id</code> of <code>the</code> <code>item</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The expected values, keyed per user</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def inspectTitleAll(clients, eid, expect):
+<pre><code class="python">def inspectTitleAll(clients, table, eid, expect):
+    &#34;&#34;&#34;Verify the title of an item, as seen by each user.
+
+    Parameters
+    ----------
+    clients: fixture
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    &#34;&#34;&#34;
+
     field = &#34;title&#34;
 
     def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, eid), field, exp)
+        assertFieldValue((cl, table, eid), field, exp)
 
     forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="subtest.sidebar"><code class="name flex">
+<span>def <span class="ident">sidebar</span></span>(<span>clients, amounts)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Verify the sidebar.</p>
+<p>It will be verified whether each user sees the right entries,
+and that following an entry leads to the expected results.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>fixture</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>amounts</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Keyed by entry, it is a list of instructions to change the expected amount.
+Each instruction is a pair <code>(set of users, amount)</code>, leading
+to setting the indicated amount for the indicated users.
+The set of users can be left out, then all users are implied.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sidebar(clients, amounts):
+    &#34;&#34;&#34;Verify the sidebar.
+
+    It will be verified whether each user sees the right entries,
+    and that following an entry leads to the expected results.
+
+    Parameters
+    ----------
+    clients: fixture
+    amounts: dict
+        Keyed by entry, it is a list of instructions to change the expected amount.
+        Each instruction is a pair `(set of users, amount)`, leading
+        to setting the indicated amount for the indicated users.
+        The set of users can be left out, then all users are implied.
+    &#34;&#34;&#34;
+
+    expectedCaptions = {}
+    for (caption, expectedUsers, expectedN, expectedItemSg, expectedItemPl) in CAPTIONS:
+        for user in expectedUsers:
+            thisCaption = (
+                caption.format(country=USER_COUNTRY[user])
+                if &#34;{country}&#34; in caption
+                else caption
+            )
+            n = expectedN
+            for instruction in G(amounts, thisCaption, default=[]):
+                if type(instruction) is tuple or type(instruction) is list:
+                    (theseUsers, thisAmount) = instruction
+                else:
+                    (theseUsers, thisAmount) = (USERS, instruction)
+                if user in theseUsers:
+                    n = thisAmount
+            if n is None:
+                expectedItem = expectedItemSg or thisCaption
+            else:
+                pl = expectedItemPl or thisCaption
+                sg = expectedItemSg or thisCaption[0:-1]
+                expectedItem = sg if n == 1 else pl
+            expectedCaptions.setdefault(user, {})[thisCaption] = (n, expectedItem)
+
+    expect = {user: G(expectedCaptions, user) for user in USERS}
+    forall(clients, expect, assertCaptions)</code></pre>
 </details>
 </dd>
 </dl>
@@ -815,16 +998,17 @@ of the new assessment will be read off.</p>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="subtest.assertAddItem" href="#subtest.assertAddItem">assertAddItem</a></code></li>
+<li><code><a title="subtest.assertCaptions" href="#subtest.assertCaptions">assertCaptions</a></code></li>
 <li><code><a title="subtest.assertDelItem" href="#subtest.assertDelItem">assertDelItem</a></code></li>
 <li><code><a title="subtest.assertEditor" href="#subtest.assertEditor">assertEditor</a></code></li>
 <li><code><a title="subtest.assertFieldValue" href="#subtest.assertFieldValue">assertFieldValue</a></code></li>
 <li><code><a title="subtest.assertModifyField" href="#subtest.assertModifyField">assertModifyField</a></code></li>
-<li><code><a title="subtest.assertMylist" href="#subtest.assertMylist">assertMylist</a></code></li>
 <li><code><a title="subtest.assertStage" href="#subtest.assertStage">assertStage</a></code></li>
 <li><code><a title="subtest.assertStartAssessment" href="#subtest.assertStartAssessment">assertStartAssessment</a></code></li>
 <li><code><a title="subtest.assertStatus" href="#subtest.assertStatus">assertStatus</a></code></li>
 <li><code><a title="subtest.assignReviewers" href="#subtest.assignReviewers">assignReviewers</a></code></li>
 <li><code><a title="subtest.inspectTitleAll" href="#subtest.inspectTitleAll">inspectTitleAll</a></code></li>
+<li><code><a title="subtest.sidebar" href="#subtest.sidebar">sidebar</a></code></li>
 </ul>
 </li>
 </ul>

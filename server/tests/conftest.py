@@ -95,10 +95,13 @@ import magic  # noqa
 from control.app import appFactory
 
 
+URL_LOG = """tests/urllog.txt"""
+URL_LOG_FH = open(URL_LOG, 'w')
+
 DEBUG = False
 TEST = True
 
-USERS = """
+USER_LIST = """
     public
     auth
     coord
@@ -125,21 +128,26 @@ Finally, there is a fixture `clients` that contains fixtures for all the users.
 """
 
 
-RIGHTFUL_USERS = """
+USERS = set(USER_LIST)
+
+AUTH_USERS = USERS - {"public"}
+"""All authenticated users."""
+
+RIGHTFUL_USERS = set("""
     editor
     owner
     office
     system
     root
-""".strip().split()
+""".strip().split())
 """The users that have normally access to an item. """
 
 
-POWER_USERS = """
+POWER_USERS = set("""
     office
     system
     root
-""".strip().split()
+""".strip().split())
 """The power users."""
 
 
@@ -182,6 +190,20 @@ def clientProd(appProd):
     return appProd.test_client()
 
 
+class Client:
+    def __init__(self, user, client):
+        self.cl = client
+        self.user = user
+
+    def get(self, *args, **kwargs):
+        URL_LOG_FH.write(f"{self.user}\t{args[0]}\n")
+        return self.cl.get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        URL_LOG_FH.write(f"{self.user}\t{args[0]}\n")
+        return self.cl.post(*args, **kwargs)
+
+
 def makeClient(app, user):
     """Logs in a specific user.
 
@@ -193,12 +215,14 @@ def makeClient(app, user):
     """
 
     client = app.test_client()
-    if user == "public":
-        return client
 
-    response = client.get(f"/login?eppn={user}")
-    if response.status_code == 302:
-        return client
+    good = True
+    if user != "public":
+        response = client.get(f"/login?eppn={user}")
+        if response.status_code != 302:
+            good = False
+    if good:
+        return Client(user, client)
     return None
 
 
@@ -237,7 +261,7 @@ def clientsPower(app):
 
 @pytest.fixture
 def clientPublic(app):
-    return app.test_client()
+    return makeClient(app, "public")
 
 
 @pytest.fixture

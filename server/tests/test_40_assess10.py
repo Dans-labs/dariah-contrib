@@ -40,11 +40,16 @@ Starting an assessment.
 `test_tryStartAgainOwner`
 :   **owner** performs the task `startAssessment` with the proper contribution.
 
-`test_mylistAll`
-:   All users try to see the `my` list of assessments.
-    All except **public** succeed, only **owner** sees the assessment.
-    Then we add **editor** to the editors of the assessment,
-    and then **editor** also sees it in mylist.
+`test_sidebar`
+:   All users check the entries in the sidebar.
+    All users should see 1 contribution now and some should see 1 assessment too.
+
+`test_editor`
+:   Then we add **editor** to the editors of the assessment,
+
+`test_sidebar2`
+:   All users check the entries in the sidebar.
+    The editor should see the assessment now as well.
 
 `test_inspectTitleAll`
 :   All users try to check the prefilled title of the assessment.
@@ -64,7 +69,7 @@ Starting an assessment.
 `test_assignReviewers`
 :   All users try to assign reviewers to this assessment, but they all fail.
     Most users fail because they do not have the right permission level.
-    The power users fail because of a workflow condition:
+    The office user fails because of a workflow condition:
     the assessment is not yet submitted.
 """
 
@@ -72,8 +77,9 @@ import pytest
 
 import magic  # noqa
 from control.utils import pick as G
-from conftest import USERS, RIGHTFUL_USERS
+from conftest import USERS, RIGHTFUL_USERS, POWER_USERS
 from example import (
+    BELGIUM,
     CONTRIB,
     ASSESS,
     UNDEF_VALUE,
@@ -92,11 +98,11 @@ from subtest import (
     assertEditor,
     assertFieldValue,
     assertModifyField,
-    assertMylist,
     assertStartAssessment,
     assertStatus,
     inspectTitleAll,
     assignReviewers,
+    sidebar,
 )
 
 ATITLE = "assessment of {cTitle}"
@@ -177,23 +183,35 @@ def test_tryStartAgainOwner(clientOwner):
     assessInfo["eid"] = aIds[0]
 
 
-def test_mylistAll(clients):
+def test_sidebar(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({"owner", "editor"}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({"mycoord"}, 1)],
+        "Contributions I am assessing": [({"owner"}, 1)],
+        "My assessments": [({"owner"}, 1)],
+        "All assessments": [(POWER_USERS, 1)],
+    }
+    sidebar(clients, amounts)
+
+
+def test_editor(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
+    assertEditor(clientOwner, ASSESS, aId, valueTables, True)
 
-    expect = {user: (True, False) for user in USERS}
-    expect.update(dict(owner=(True, True), editor=(True, True), public=(False, False)))
 
-    def assertIt(cl, exp):
-        assertMylist(cl, ASSESS, aId, "assessments", exp)
-
-    expect = {user: (True, False) for user in USERS}
-    expect.update(dict(owner=(True, True), public=(False, False)))
-    forall(clients, expect, assertIt)
-
-    assertEditor(clients["owner"], ASSESS, aId, valueTables, True)
-
-    expect.update(dict(editor=(True, True)))
-    forall(clients, expect, assertIt)
+def test_sidebar2(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({"owner", "editor"}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({"mycoord"}, 1)],
+        "Contributions I am assessing": [({"owner", "editor"}, 1)],
+        "My assessments": [({"owner", "editor"}, 1)],
+        "All assessments": [(POWER_USERS, 1)],
+    }
+    sidebar(clients, amounts)
 
 
 def test_inspectTitleAll(clients):
@@ -203,7 +221,7 @@ def test_inspectTitleAll(clients):
     aTitle = ATITLE.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
-    inspectTitleAll(clients, aId, expect)
+    inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_inspectTypeAll(clients):
@@ -248,14 +266,15 @@ def test_modifyTitleAll(clients):
 
 
 @pytest.mark.parametrize(
-    ("field", "valueRep"),
+    ("field", "user"),
     (
         ("reviewerE", "expert"),
         ("reviewerF", "final"),
     ),
 )
-def test_assignReviewers(clients, field, valueRep):
+def test_assignReviewers(clients, field, user):
     users = G(valueTables, "user")
-    aId = G(G(recordInfo, ASSESS), "eid")
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)

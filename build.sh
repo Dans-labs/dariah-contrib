@@ -128,6 +128,7 @@ function runtestmode {
     rm $destTestTmp
     if [[ $testerror == 0 ]]; then
         echo "ALL TESTS PASSED"
+        python3 tests/analysis.py >> $destTest
     elif [[ $testerror == 1 ]]; then
         echo "SOME TESTS FAILED"
     elif [[ $testerror == 2 ]]; then

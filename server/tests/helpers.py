@@ -5,14 +5,17 @@ import re
 
 from flask import json
 from control.utils import serverprint
+from conftest import USER_LIST
 from example import ASSESS
 
 
 materialRe = re.compile(
     r"""<div id=['"]material['"]>(.*?)</div>\s*</div>\s*<script""", re.S
 )
-fieldRe = re.compile("""<!-- ([^=]+)=(.*?) -->""", re.S)
+fieldRe = re.compile("""<!-- ([a-zA-Z0-9]+)=(.*?) -->""", re.S)
+mainNRe = re.compile("""<!-- mainN~([0-9]+)~(.*?) -->""", re.S)
 stageRe = re.compile("""<!-- stage:(.*?) -->""", re.S)
+captionRe = re.compile(r"""<!-- caption\^([^>]*?) --><a [^>]*href=['"]([^'"]*)['"]""", re.S)
 msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
 eidRe = re.compile("""<details itemkey=['"][a-zA-Z0-9_]+/([^/'"]*)['"]""", re.S)
 userRe = re.compile(
@@ -39,7 +42,10 @@ def forall(cls, expect, assertFunc, *args):
         Keyed by user (eppn), contains the expected value for that user.
     """
 
-    for (user, exp) in expect.items():
+    for user in USER_LIST:
+        if user not in expect:
+            continue
+        exp = expect[user]
         serverprint(f"USER {user} EXPECTS {exp}")
         assertFunc(cls[user], *args, exp)
 
@@ -276,6 +282,44 @@ def findStages(text):
     """
 
     return stageRe.findall(text)
+
+
+def findMainN(text):
+    """Get the number of main records from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return mainNRe.findall(text)
+
+
+def findCaptions(text):
+    """Get the captions from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return captionRe.findall(text)
 
 
 def findUsers(text):

@@ -1,7 +1,11 @@
 """Various concrete values needed in the tests."""
 
 from control.utils import EURO
+from conftest import USERS, AUTH_USERS, POWER_USERS
 
+
+WELCOME = "Welcome to the DARIAH contribution tool"
+OVERVIEW = "Country selection"
 
 ASSESS = "assessment"
 CRITERIA_ENTRY = "criteriaEntry"
@@ -10,9 +14,6 @@ CONTRIB = "contrib"
 DUMMY_ID = "00000000ffa4bbd9fe000f15"
 
 UNDEF_VALUE = "○"
-
-BELGIUM = "BE🇧🇪"
-LUXEMBURG = "LU🇱🇺"
 
 TITLE = "No Title Yet"
 NEW_A_TITLE = "My contribution assessed"
@@ -40,6 +41,69 @@ VCC12 = "VCC1,VCC2"
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
 
+CAPTIONS = (
+    ("Home", USERS, None, WELCOME, None),
+    ("Overview", USERS, None, OVERVIEW, None),
+    ("All contributions", USERS, 0, "contribution", "contributions"),
+    ("My contributions", AUTH_USERS, 0, "contribution", "contributions"),
+    ("{country} contributions", AUTH_USERS, 0, "contribution", "contributions"),
+    ("Contributions I am assessing", AUTH_USERS, 0, "contribution", "contributions"),
+    (
+        "Contributions to be selected",
+        {"coord", "mycoord"},
+        0,
+        "contribution",
+        "contributions",
+    ),
+    ("All assessments", POWER_USERS, 0, "assessment", "assessments"),
+    ("My assessments", AUTH_USERS, 0, "assessment", "assessments"),
+    ("Assessments needing reviewers", {"office"}, 0, "assessment", "assessments"),
+    ("Assessments in review by me", AUTH_USERS, 0, "assessment", "assessments"),
+    ("Assessments reviewed by me", AUTH_USERS, 0, "assessment", "assessments"),
+    ("All reviews", POWER_USERS, 0, "review", "reviews"),
+    ("My reviews", AUTH_USERS, 0, "review", "reviews"),
+    ("countries", POWER_USERS, 51, "country", None),
+    ("criteria", POWER_USERS, 32, "criteria", None),
+    ("disciplines", POWER_USERS, 28, None, None),
+    ("keywords", POWER_USERS, 270, None, None),
+    ("packages", POWER_USERS, 2, None, None),
+    ("score levels", POWER_USERS, 97, None, None),
+    ("TADIRAH Activities", POWER_USERS, 8, "TADIRAH Activity", None),
+    ("TADIRAH Objects", POWER_USERS, 36, None, None),
+    ("TADIRAH Techniques", POWER_USERS, 34, None, None),
+    ("contribution types", POWER_USERS, 22, None, None),
+    ("users", POWER_USERS, 11, None, None),
+    ("vccs", POWER_USERS, 6, None, None),
+    ("years", POWER_USERS, 20, None, None),
+    ("decisions", {"system", "root"}, 3, None, None),
+    ("permission groups", {"system", "root"}, 9, None, None),
+    ("Recompute workflow table", {"system", "root"}, None, WELCOME, None),
+)
+
+BELGIUM = "BE🇧🇪"
+LUXEMBURG = "LU🇱🇺"
+GERMANY = "DE🇩🇪"
+FRANCE = "FR🇫🇷"
+ITALY = "IT🇮🇹"
+IRELAND = "IE🇮🇪"
+PORTUGAL = "PT🇵🇹"
+POLAND = "PL🇵🇱"
+NETHERLANDS = "NL🇳🇱"
+
+USER_COUNTRY = dict(
+    public=None,
+    auth=GERMANY,
+    owner=BELGIUM,
+    editor=IRELAND,
+    mycoord=BELGIUM,
+    coord=LUXEMBURG,
+    expert=FRANCE,
+    final=ITALY,
+    office=PORTUGAL,
+    system=POLAND,
+    root=NETHERLANDS,
+)
+
 EXAMPLE = dict(
     description=[
         """
@@ -64,24 +128,24 @@ There are costs.
 """
     ],
     year=tuple(str(yr) for yr in range(2010, 2030)),
-    country="""
+    country=f"""
 AT🇦🇹
-BE🇧🇪
+{BELGIUM}
 HR🇭🇷
 CY🇨🇾
 DK🇩🇰
-FR🇫🇷
-DE🇩🇪
+{FRANCE}
+{GERMANY}
 GR🇬🇷
-IE🇮🇪
-IT🇮🇹
-LU🇱🇺
+{IRELAND}
+{ITALY}
+{LUXEMBURG}
 MT🇲🇹
-NL🇳🇱
-PT🇵🇹
+{NETHERLANDS}
+{PORTUGAL}
 RS🇷🇸
 SI🇸🇮
-PL🇵🇱
+{POLAND}
 """.strip().split(
         "\n"
     ),

@@ -696,6 +696,24 @@ class WorkflowItem:
 
         return list(self.info(table, N.stage, kind=kind))[0]
 
+    def creators(self, table, kind=None):
+        """Find the creators from a workflow related record.
+
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to see the creators:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId)
+        """
+
+        return list(self.info(table, N.creators, kind=kind))[0]
+
     def status(self, table, kind=None):
         """Present all workflow info and controls relevant to the record.
 

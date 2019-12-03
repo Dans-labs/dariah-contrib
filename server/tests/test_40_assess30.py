@@ -48,7 +48,7 @@ Filling out an assessment.
 `test_assignReviewers`
 :   All users try to assign reviewers to this assessment, but they all fail.
     Most users fail because they do not have the right permission level.
-    The power users fail because of a workflow condition:
+    The office user fails because of a workflow condition:
     the assessment is complete, not yet submitted.
 
 `test_withdrawAssessment`
@@ -70,7 +70,7 @@ Filling out an assessment.
 
 `test_assignReviewers2`
 :   All users try to assign reviewers to this assessment.
-    The power users succeed because of a workflow condition:
+    The office user succeeds because of a workflow condition:
     the assessment is submitted.
 
 `test_inspectTitleAll3`
@@ -86,11 +86,21 @@ Filling out an assessment.
 `test_withdrawAssessment2`
 :   **owner** tries to withdraw the assessment, successfully been submitted.
 
+`test_assignReviewers3`
+:   All users try to assign reviewers to this assessment.
+    The office user fails because of a workflow condition:
+    the assessment is withdrawn.
+
 `test_submitAssessmentRevised2`
 :   **owwner cannot submit this assessment as a revision.
 
 `test_resubmitAssessment2`
 :   **owner** re-submits this assessment.
+
+`test_assignReviewers4`
+:   All users try to assign reviewers to this assessment.
+    The office user succeeds because of a workflow condition:
+    the assessment is submitted.
 """
 
 import pytest
@@ -248,17 +258,18 @@ def test_complete(clientOwner):
 
 
 @pytest.mark.parametrize(
-    ("field", "valueRep"),
+    ("field", "user"),
     (
         ("reviewerE", "expert"),
         ("reviewerF", "final"),
     ),
 )
-def test_assignReviewers(clients, field, valueRep):
+def test_assignReviewers(clients, field, user):
     users = G(valueTables, "user")
-    aId = G(G(recordInfo, ASSESS), "eid")
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_withdrawAssessment(clientOwner):
@@ -272,7 +283,7 @@ def test_inspectTitleAll2(clients):
     aTitle = G(G(recordInfo, ASSESS), "title")
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
-    inspectTitleAll(clients, aId, expect)
+    inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_resubmitAssessment(clientOwner):
@@ -294,18 +305,19 @@ def test_submitAssessment2(clientOwner):
 
 
 @pytest.mark.parametrize(
-    ("field", "valueRep"),
+    ("field", "user"),
     (
         ("reviewerE", "expert"),
         ("reviewerF", "final"),
     ),
 )
-def test_assignReviewers2(clients, field, valueRep):
+def test_assignReviewers2(clients, field, user):
     users = G(valueTables, "user")
-    aId = G(G(recordInfo, ASSESS), "eid")
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
     expect["office"] = True
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_inspectTitleAll3(clients):
@@ -314,13 +326,28 @@ def test_inspectTitleAll3(clients):
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update(dict(mycoord=aTitle))
-    inspectTitleAll(clients, aId, expect)
+    inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_withdrawAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/withdrawAssessment/{aId}"
     assertStatus(clientOwner, url, True)
+
+
+@pytest.mark.parametrize(
+    ("field", "user"),
+    (
+        ("reviewerE", "expert"),
+        ("reviewerF", "final"),
+    ),
+)
+def test_assignReviewers3(clients, field, user):
+    users = G(valueTables, "user")
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, "eid")
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_submitAssessmentRevised2(clientOwner):
@@ -333,3 +360,19 @@ def test_resubmitAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
     url = f"/api/task/resubmitAssessment/{aId}"
     assertStatus(clientOwner, url, True)
+
+
+@pytest.mark.parametrize(
+    ("field", "user"),
+    (
+        ("reviewerE", "expert"),
+        ("reviewerF", "final"),
+    ),
+)
+def test_assignReviewers4(clients, field, user):
+    users = G(valueTables, "user")
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, "eid")
+    expect = {user: False for user in USERS}
+    expect["office"] = True
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)

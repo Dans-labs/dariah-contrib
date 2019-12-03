@@ -63,7 +63,7 @@ and at the end the status is <code>complete</code>.</dd>
 <dt><a title="test_40_assess30.test_assignReviewers" href="#test_40_assess30.test_assignReviewers"><code>test_assignReviewers()</code></a></dt>
 <dd>All users try to assign reviewers to this assessment, but they all fail.
 Most users fail because they do not have the right permission level.
-The power users fail because of a workflow condition:
+The office user fails because of a workflow condition:
 the assessment is complete, not yet submitted.</dd>
 <dt><a title="test_40_assess30.test_withdrawAssessment" href="#test_40_assess30.test_withdrawAssessment"><code>test_withdrawAssessment()</code></a></dt>
 <dd><strong>owner</strong> tries to withdraw the assessment, unsuccessfully, because it has not
@@ -79,7 +79,7 @@ been submitted.</dd>
 <dd><strong>owner</strong> tries to submit the assessment, successfully.</dd>
 <dt><a title="test_40_assess30.test_assignReviewers2" href="#test_40_assess30.test_assignReviewers2"><code>test_assignReviewers2()</code></a></dt>
 <dd>All users try to assign reviewers to this assessment.
-The power users succeed because of a workflow condition:
+The office user succeeds because of a workflow condition:
 the assessment is submitted.</dd>
 <dt><a title="test_40_assess30.test_inspectTitleAll3" href="#test_40_assess30.test_inspectTitleAll3"><code>test_inspectTitleAll3()</code></a></dt>
 <dd>We check of the assessment is still private to <strong>owner</strong>.</dd>
@@ -95,10 +95,18 @@ been submitted.</li>
 <dl>
 <dt><a title="test_40_assess30.test_withdrawAssessment2" href="#test_40_assess30.test_withdrawAssessment2"><code>test_withdrawAssessment2()</code></a></dt>
 <dd><strong>owner</strong> tries to withdraw the assessment, successfully been submitted.</dd>
+<dt><a title="test_40_assess30.test_assignReviewers3" href="#test_40_assess30.test_assignReviewers3"><code>test_assignReviewers3()</code></a></dt>
+<dd>All users try to assign reviewers to this assessment.
+The office user fails because of a workflow condition:
+the assessment is withdrawn.</dd>
 <dt><a title="test_40_assess30.test_submitAssessmentRevised2" href="#test_40_assess30.test_submitAssessmentRevised2"><code>test_submitAssessmentRevised2()</code></a></dt>
 <dd>**owwner cannot submit this assessment as a revision.</dd>
 <dt><a title="test_40_assess30.test_resubmitAssessment2" href="#test_40_assess30.test_resubmitAssessment2"><code>test_resubmitAssessment2()</code></a></dt>
 <dd><strong>owner</strong> re-submits this assessment.</dd>
+<dt><a title="test_40_assess30.test_assignReviewers4" href="#test_40_assess30.test_assignReviewers4"><code>test_assignReviewers4()</code></a></dt>
+<dd>All users try to assign reviewers to this assessment.
+The office user succeeds because of a workflow condition:
+the assessment is submitted.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -154,7 +162,7 @@ Filling out an assessment.
 `test_assignReviewers`
 :   All users try to assign reviewers to this assessment, but they all fail.
     Most users fail because they do not have the right permission level.
-    The power users fail because of a workflow condition:
+    The office user fails because of a workflow condition:
     the assessment is complete, not yet submitted.
 
 `test_withdrawAssessment`
@@ -176,7 +184,7 @@ Filling out an assessment.
 
 `test_assignReviewers2`
 :   All users try to assign reviewers to this assessment.
-    The power users succeed because of a workflow condition:
+    The office user succeeds because of a workflow condition:
     the assessment is submitted.
 
 `test_inspectTitleAll3`
@@ -192,11 +200,21 @@ Filling out an assessment.
 `test_withdrawAssessment2`
 :   **owner** tries to withdraw the assessment, successfully been submitted.
 
+`test_assignReviewers3`
+:   All users try to assign reviewers to this assessment.
+    The office user fails because of a workflow condition:
+    the assessment is withdrawn.
+
 `test_submitAssessmentRevised2`
 :   **owwner cannot submit this assessment as a revision.
 
 `test_resubmitAssessment2`
 :   **owner** re-submits this assessment.
+
+`test_assignReviewers4`
+:   All users try to assign reviewers to this assessment.
+    The office user succeeds because of a workflow condition:
+    the assessment is submitted.
 &#34;&#34;&#34;
 
 import pytest
@@ -354,17 +372,18 @@ def test_complete(clientOwner):
 
 
 @pytest.mark.parametrize(
-    (&#34;field&#34;, &#34;valueRep&#34;),
+    (&#34;field&#34;, &#34;user&#34;),
     (
         (&#34;reviewerE&#34;, &#34;expert&#34;),
         (&#34;reviewerF&#34;, &#34;final&#34;),
     ),
 )
-def test_assignReviewers(clients, field, valueRep):
+def test_assignReviewers(clients, field, user):
     users = G(valueTables, &#34;user&#34;)
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_withdrawAssessment(clientOwner):
@@ -378,7 +397,7 @@ def test_inspectTitleAll2(clients):
     aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
-    inspectTitleAll(clients, aId, expect)
+    inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_resubmitAssessment(clientOwner):
@@ -400,18 +419,19 @@ def test_submitAssessment2(clientOwner):
 
 
 @pytest.mark.parametrize(
-    (&#34;field&#34;, &#34;valueRep&#34;),
+    (&#34;field&#34;, &#34;user&#34;),
     (
         (&#34;reviewerE&#34;, &#34;expert&#34;),
         (&#34;reviewerF&#34;, &#34;final&#34;),
     ),
 )
-def test_assignReviewers2(clients, field, valueRep):
+def test_assignReviewers2(clients, field, user):
     users = G(valueTables, &#34;user&#34;)
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[&#34;office&#34;] = True
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_inspectTitleAll3(clients):
@@ -420,13 +440,28 @@ def test_inspectTitleAll3(clients):
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update(dict(mycoord=aTitle))
-    inspectTitleAll(clients, aId, expect)
+    inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_withdrawAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     url = f&#34;/api/task/withdrawAssessment/{aId}&#34;
     assertStatus(clientOwner, url, True)
+
+
+@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;user&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers3(clients, field, user):
+    users = G(valueTables, &#34;user&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
 
 
 def test_submitAssessmentRevised2(clientOwner):
@@ -438,7 +473,23 @@ def test_submitAssessmentRevised2(clientOwner):
 def test_resubmitAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     url = f&#34;/api/task/resubmitAssessment/{aId}&#34;
-    assertStatus(clientOwner, url, True)</code></pre>
+    assertStatus(clientOwner, url, True)
+
+
+@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;user&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers4(clients, field, user):
+    users = G(valueTables, &#34;user&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    expect[&#34;office&#34;] = True
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
 </details>
 </section>
 <section>
@@ -449,7 +500,7 @@ def test_resubmitAssessment2(clientOwner):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="test_40_assess30.test_assignReviewers"><code class="name flex">
-<span>def <span class="ident">test_assignReviewers</span></span>(<span>clients, field, valueRep)</span>
+<span>def <span class="ident">test_assignReviewers</span></span>(<span>clients, field, user)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -458,21 +509,22 @@ def test_resubmitAssessment2(clientOwner):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.mark.parametrize(
-    (&#34;field&#34;, &#34;valueRep&#34;),
+    (&#34;field&#34;, &#34;user&#34;),
     (
         (&#34;reviewerE&#34;, &#34;expert&#34;),
         (&#34;reviewerF&#34;, &#34;final&#34;),
     ),
 )
-def test_assignReviewers(clients, field, valueRep):
+def test_assignReviewers(clients, field, user):
     users = G(valueTables, &#34;user&#34;)
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_assignReviewers2"><code class="name flex">
-<span>def <span class="ident">test_assignReviewers2</span></span>(<span>clients, field, valueRep)</span>
+<span>def <span class="ident">test_assignReviewers2</span></span>(<span>clients, field, user)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -481,18 +533,68 @@ def test_assignReviewers(clients, field, valueRep):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@pytest.mark.parametrize(
-    (&#34;field&#34;, &#34;valueRep&#34;),
+    (&#34;field&#34;, &#34;user&#34;),
     (
         (&#34;reviewerE&#34;, &#34;expert&#34;),
         (&#34;reviewerF&#34;, &#34;final&#34;),
     ),
 )
-def test_assignReviewers2(clients, field, valueRep):
+def test_assignReviewers2(clients, field, user):
     users = G(valueTables, &#34;user&#34;)
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[&#34;office&#34;] = True
-    assignReviewers(clients, recordInfo, users, aId, field, valueRep, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+</details>
+</dd>
+<dt id="test_40_assess30.test_assignReviewers3"><code class="name flex">
+<span>def <span class="ident">test_assignReviewers3</span></span>(<span>clients, field, user)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;user&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers3(clients, field, user):
+    users = G(valueTables, &#34;user&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+</details>
+</dd>
+<dt id="test_40_assess30.test_assignReviewers4"><code class="name flex">
+<span>def <span class="ident">test_assignReviewers4</span></span>(<span>clients, field, user)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.parametrize(
+    (&#34;field&#34;, &#34;user&#34;),
+    (
+        (&#34;reviewerE&#34;, &#34;expert&#34;),
+        (&#34;reviewerF&#34;, &#34;final&#34;),
+    ),
+)
+def test_assignReviewers4(clients, field, user):
+    users = G(valueTables, &#34;user&#34;)
+    assessInfo = G(recordInfo, ASSESS)
+    aId = G(assessInfo, &#34;eid&#34;)
+    expect = {user: False for user in USERS}
+    expect[&#34;office&#34;] = True
+    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_complete"><code class="name flex">
@@ -665,7 +767,7 @@ def test_assignReviewers2(clients, field, valueRep):
     aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
-    inspectTitleAll(clients, aId, expect)</code></pre>
+    inspectTitleAll(clients, ASSESS, aId, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_inspectTitleAll3"><code class="name flex">
@@ -683,7 +785,7 @@ def test_assignReviewers2(clients, field, valueRep):
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update(dict(mycoord=aTitle))
-    inspectTitleAll(clients, aId, expect)</code></pre>
+    inspectTitleAll(clients, ASSESS, aId, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_resubmitAssessment"><code class="name flex">
@@ -846,6 +948,8 @@ def test_assignReviewers2(clients, field, valueRep):
 <ul class="">
 <li><code><a title="test_40_assess30.test_assignReviewers" href="#test_40_assess30.test_assignReviewers">test_assignReviewers</a></code></li>
 <li><code><a title="test_40_assess30.test_assignReviewers2" href="#test_40_assess30.test_assignReviewers2">test_assignReviewers2</a></code></li>
+<li><code><a title="test_40_assess30.test_assignReviewers3" href="#test_40_assess30.test_assignReviewers3">test_assignReviewers3</a></code></li>
+<li><code><a title="test_40_assess30.test_assignReviewers4" href="#test_40_assess30.test_assignReviewers4">test_assignReviewers4</a></code></li>
 <li><code><a title="test_40_assess30.test_complete" href="#test_40_assess30.test_complete">test_complete</a></code></li>
 <li><code><a title="test_40_assess30.test_criteriaEntries" href="#test_40_assess30.test_criteriaEntries">test_criteriaEntries</a></code></li>
 <li><code><a title="test_40_assess30.test_fillEvidenceAll" href="#test_40_assess30.test_fillEvidenceAll">test_fillEvidenceAll</a></code></li>

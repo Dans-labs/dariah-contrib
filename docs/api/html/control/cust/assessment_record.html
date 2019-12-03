@@ -75,7 +75,6 @@ class AssessmentR(Record):
                 if stage not in {
                     N.submitted,
                     N.submittedRevised,
-                    N.completeWithdrawn,
                     N.reviewRevise,
                 }:
                     kwargs[N.mayEdit] = False
@@ -166,7 +165,6 @@ that spawns a record object.</p>
                 if stage not in {
                     N.submitted,
                     N.submittedRevised,
-                    N.completeWithdrawn,
                     N.reviewRevise,
                 }:
                     kwargs[N.mayEdit] = False
@@ -216,7 +214,6 @@ with a <code>mayEdit=False</code> parameter.</p></section>
             if stage not in {
                 N.submitted,
                 N.submittedRevised,
-                N.completeWithdrawn,
                 N.reviewRevise,
             }:
                 kwargs[N.mayEdit] = False

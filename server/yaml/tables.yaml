@@ -89,15 +89,19 @@ recollect:
   dateField: dateCollected
 
 items:
-  contrib: [contribution, contributions]
+  assessmentType: [assessment type, assessment types]
   country: [country, countries]
+  contrib: [contribution, contributions]
   criteria: [criterion, criteria]
   criteriaEntry: [criteria entry, criteria entries]
+  permissionGroup: [permission group, permission groups]
   reviewEntry: [review entry, review entries]
+  reviewType: [review type, review types]
   score: [score level, score levels]
   tadirahActivity: [TADIRAH Activity, TADIRAH Activities]
   tadirahObject: [TADIRAH Object, TADIRAH Objects]
   tadirahTechnique: [TADIRAH Technique, TADIRAH Techniques]
+  typeContribution: [contribution type, contribution types]
 
 defaultType: text
 

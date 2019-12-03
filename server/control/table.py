@@ -14,6 +14,7 @@ from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
 CT = C.tables
+CW = C.workflow
 
 
 MAIN_TABLE = CT.userTables[0]
@@ -25,6 +26,8 @@ VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
 PROV_SPECS = CT.prov
+
+ASSESSMENT_STAGES = set(CW.assessmentStages)
 
 
 class Table:
@@ -304,6 +307,29 @@ class Table:
         wfitem = recordObj.wfitem
         return wfitem.stage(table, kind=kind) if wfitem else None
 
+    def creators(self, record, table, kind=None):
+        """Retrieve the workflow attribute `creators` from a record, if existing.
+
+        This is a quick and direct way to retrieve workflow info for a record.
+
+        Parameters
+        ----------
+        record: dict
+            The full record
+        table: string {contrib, assessment, review}
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId) | `None`
+        """
+
+        recordObj = self.record(record=record)
+
+        wfitem = recordObj.wfitem
+        return wfitem.creators(table, kind=kind) if wfitem else None
+
     def wrap(self, openEid, action=None):
         """Wrap the list of records into HTML.
 
@@ -385,8 +411,11 @@ class Table:
             records = [
                 record
                 for record in records
-                if self.stage(record, N.review, kind=N.final)
+                if self.stage(record, N.assessment)
+                in ASSESSMENT_STAGES
+                and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
+                and uid in self.creators(record, N.assessment)
             ]
         if action == N.review:
             records = [record for record in records if not self.myFinished(uid, record)]
@@ -411,7 +440,8 @@ class Table:
 
         nRecords = len(recordsHtml)
         itemLabel = itemSingular if nRecords == 1 else itemPlural
-        nRep = H.span(f"""{nRecords} {itemLabel}""", cls="stats")
+        nRepCmt = f"""<!-- mainN~{nRecords}~{itemLabel} -->"""
+        nRep = nRepCmt + H.span(f"""{nRecords} {itemLabel}""", cls="stats")
 
         return H.div(
             [H.span([self.insertButton(), sep, nRep])] + recordsHtml,

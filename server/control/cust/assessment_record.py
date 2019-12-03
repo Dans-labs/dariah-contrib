@@ -49,7 +49,6 @@ class AssessmentR(Record):
                 if stage not in {
                     N.submitted,
                     N.submittedRevised,
-                    N.completeWithdrawn,
                     N.reviewRevise,
                 }:
                     kwargs[N.mayEdit] = False

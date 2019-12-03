@@ -784,6 +784,24 @@ class WorkflowItem:
 
         return list(self.info(table, N.stage, kind=kind))[0]
 
+    def creators(self, table, kind=None):
+        &#34;&#34;&#34;Find the creators from a workflow related record.
+
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to see the creators:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId)
+        &#34;&#34;&#34;
+
+        return list(self.info(table, N.creators, kind=kind))[0]
+
     def status(self, table, kind=None):
         &#34;&#34;&#34;Present all workflow info and controls relevant to the record.
 
@@ -1753,6 +1771,24 @@ details of the current user can be read off.</dd>
 
         return list(self.info(table, N.stage, kind=kind))[0]
 
+    def creators(self, table, kind=None):
+        &#34;&#34;&#34;Find the creators from a workflow related record.
+
+        Parameters
+        ----------
+        table: string
+            We must specify the kind of record for which we want to see the creators:
+            contrib, assessment, or review.
+        kind: string {`expert`, `final`}, optional `None`
+            Only if we want review attributes
+
+        Returns
+        -------
+        (list of ObjectId)
+        &#34;&#34;&#34;
+
+        return list(self.info(table, N.creators, kind=kind))[0]
+
     def status(self, table, kind=None):
         &#34;&#34;&#34;Present all workflow info and controls relevant to the record.
 
@@ -2442,6 +2478,44 @@ Otherwise, we check for the readability of this field in the record.</dd>
         )
         return result
     return None</code></pre>
+</details>
+</dd>
+<dt id="control.workflow.apply.WorkflowItem.creators"><code class="name flex">
+<span>def <span class="ident">creators</span></span>(<span>self, table, kind=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Find the creators from a workflow related record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>We must specify the kind of record for which we want to see the creators:
+contrib, assessment, or review.</dd>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}, optional <code>None</code></dt>
+<dd>Only if we want review attributes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>(list of ObjectId)</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def creators(self, table, kind=None):
+    &#34;&#34;&#34;Find the creators from a workflow related record.
+
+    Parameters
+    ----------
+    table: string
+        We must specify the kind of record for which we want to see the creators:
+        contrib, assessment, or review.
+    kind: string {`expert`, `final`}, optional `None`
+        Only if we want review attributes
+
+    Returns
+    -------
+    (list of ObjectId)
+    &#34;&#34;&#34;
+
+    return list(self.info(table, N.creators, kind=kind))[0]</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.apply.WorkflowItem.doTask"><code class="name flex">
@@ -3341,6 +3415,7 @@ tasks: contrib, assessment, or review.</dd>
 <li><code><a title="control.workflow.apply.WorkflowItem.auth" href="#control.workflow.apply.WorkflowItem.auth">auth</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.checkFixed" href="#control.workflow.apply.WorkflowItem.checkFixed">checkFixed</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.checkReadable" href="#control.workflow.apply.WorkflowItem.checkReadable">checkReadable</a></code></li>
+<li><code><a title="control.workflow.apply.WorkflowItem.creators" href="#control.workflow.apply.WorkflowItem.creators">creators</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.data" href="#control.workflow.apply.WorkflowItem.data">data</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.doTask" href="#control.workflow.apply.WorkflowItem.doTask">doTask</a></code></li>
 <li><code><a title="control.workflow.apply.WorkflowItem.eppn" href="#control.workflow.apply.WorkflowItem.eppn">eppn</a></code></li>
