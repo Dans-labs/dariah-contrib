@@ -14,7 +14,6 @@ else
     echo "NOT ON DANS"
     dataroot=~/Documents/DANS/projects/has/testdatabackups
 fi
-exit
 
 today=`date +'%Y-%m-%d'`
 datastore="$dataroot/$today"
