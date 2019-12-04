@@ -9,7 +9,7 @@ HOST_PROD="clarin11.dans.knaw.nl"
 
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     echo "ON DANS"
-    dataroot="~/dirkr/dariah-backups"
+    dataroot="~dirkr/dariah-backups"
 else
     echo "NOT ON DANS"
     dataroot=~/Documents/DANS/projects/has/testdatabackups
