@@ -7,13 +7,11 @@ APP="dariah-contrib"
 HOST_TEST="tclarin11.dans.knaw.nl"
 HOST_PROD="clarin11.dans.knaw.nl"
 
-echo "'$HOSTNAME'" "'$HOST_PROD'" "'$HOST_TEST'"
-
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
-    echo "ON CLARIN"
+    echo "ON DANS"
     dataroot="~/dirkr/dariah-backups"
 else
-    echo "ON LOCAL"
+    echo "NOT ON DANS"
     dataroot=~/Documents/DANS/projects/has/testdatabackups
 fi
 exit
