@@ -17,7 +17,7 @@ APP="dariah-contrib"
 HOST_TEST="tclarin11.dans.knaw.nl"
 HOST_PROD="clarin11.dans.knaw.nl"
 
-if [ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]; then
+if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     ON_DANS=1
     ADIR="/opt/web-apps"
 fi

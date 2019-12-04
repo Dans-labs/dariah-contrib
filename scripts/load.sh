@@ -40,10 +40,10 @@ cd $ADIR/$APP
 source /opt/rh/rh-python36/enable
 echo "UPDATE.SH: rh-python36 enabled"
 
-if [ "$1" == "-r" ]; then
+if [[ "$1" == "-r" ]]; then
     cd tools
     python3 mongoFromFm.py production -r
-elif [ "$1" == "-R" ]; then
+elif [[ "$1" == "-R" ]]; then
     cd tools
     python3 mongoFromFm.py production -R
 else
