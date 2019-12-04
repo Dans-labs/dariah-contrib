@@ -2,24 +2,6 @@
 
 # Make a backup of the complete dariah database in MongoDb or restore from backup
 
-APP="dariah-contrib"
-
-HOST_TEST="tclarin11.dans.knaw.nl"
-HOST_PROD="clarin11.dans.knaw.nl"
-
-if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
-    echo "ON DANS"
-    dataroot="/home/dirkr/dariah-backups"
-else
-    echo "NOT ON DANS"
-    dataroot=~/Documents/DANS/projects/has/testdatabackups
-fi
-
-today=`date +'%Y-%m-%d'`
-datastore="$dataroot/$today"
-databasebu="dariah"
-databasers="dariahRestored"
-
 function givehelp {
     if [[ "$1" != "help" && "$1" != "--help" && "$1" != "-h" ]]; then
         echo "Unknown argument '$1'"
@@ -29,7 +11,32 @@ function givehelp {
     echo "    where <location> is the directory where the backup files are stored"
     echo "    If none is given, a date-dependent default is chosen"
     echo "    This directory will be created"
+    echo "./data.sh get"
+    echo "    Fetch the remote dariah backups of the database to the local computer"
 }
+
+APP="dariah-contrib"
+
+HOST_TEST="tclarin11.dans.knaw.nl"
+HOST_PROD="clarin11.dans.knaw.nl"
+DATA_PROD="/home/dirkr/dariah-backups"
+DATA_TEST=~/Documents/DANS/projects/has/testdatabackups
+DATA_SAVE=~/Documents/DANS/projects/has
+
+if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
+    echo "ON DANS"
+    onDans="1"
+    dataroot=$DATA_PROD
+else
+    echo "NOT ON DANS"
+    onDans=""
+    dataroot=$DATA_TEST
+fi
+
+today=`date +'%Y-%m-%d'`
+datastore="$dataroot/$today"
+databasebu="dariah"
+databasers="dariahRestored"
 
 function startmongo {
     if [[ `ps aux | grep -v grep | grep mongod` ]]; then
@@ -72,6 +79,15 @@ function restore {
     fi
 }
 
+function getfromremote {
+    if [[ "$onDans" == "" ]]; then
+        cd $DATA_SAVE
+        scp -r "dirkr@tclarin11.dans.knaw.nl:/$DATA_PROD" .
+    else
+        echo "Cannot get data when on the DANS machine"
+    fi
+}
+
 # MAIN
 
 if [[ "$1" == "backup" ]]; then
@@ -80,6 +96,9 @@ if [[ "$1" == "backup" ]]; then
 elif [[ "$1" == "restore" ]]; then
     shift
     restore "$@"
+elif [[ "$1" == "get" ]]; then
+    shift
+    getfromremote "$@"
 else
     givehelp "$@"
 fi

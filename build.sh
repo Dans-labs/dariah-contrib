@@ -5,6 +5,17 @@
 #   do not any cd
 #   do not call functions
 
+APP="dariah-contrib"
+
+HOST_TEST="tclarin11.dans.knaw.nl"
+HOST_PROD="clarin11.dans.knaw.nl"
+
+if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
+    APP_DIR="/opt/web-apps"
+else
+    APP_DIR="~/github/Dans-labs"
+fi
+
 function givehelp {
     if [[ "$1" != "help" && "$1" != "--help" && "$1" != "" ]]; then
         echo "Unknown argument '$1'"
@@ -60,7 +71,7 @@ function stopmongo {
 
 # SETTING THE DIRECTORY AND LOCAL VARS
 
-cd ~/github/Dans-labs/dariah-contrib
+cd $APP_DIR/$APP
 root=`pwd`
 apidocbase='docs/api/html'
 
@@ -188,7 +199,6 @@ function gserve {
     fi
     host='-b 127.0.0.1:8001'
     logfile='--access-logfile -'
-    # fmt='%(h)s・%(l)s・%(u)s・%(t)s・"%(r)s"・%(s)s・%(b)s・"%(f)s"・"%(a)s"'
     fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
     logformat="--access-logformat '$fmt'" 
     gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
