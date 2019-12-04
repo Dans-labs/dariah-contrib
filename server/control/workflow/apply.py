@@ -890,7 +890,7 @@ class WorkflowItem:
 
         scorePart = E
         if table == N.assessment:
-            scoreParts = presentScore(score, table, eid)
+            scoreParts = presentScore(score, eid)
             scorePart = (
                 H.span(scoreParts)
                 if table == N.assessment

@@ -29,13 +29,13 @@ Modifying contribution fields that are typed in by the user.
 :   **owner** sees that the description is formatted in markdown.
 
 `test_modifyCost`
-:   **owner fills out the costTotal field.
+:   **owner** fills out the costTotal field.
 
 `test_modifyEmail`
-:   **owner enters multiple contact email addresses.
+:   **owner** enters multiple contact email addresses.
 
 `test_modifyUrl`
-:   **owner enters multiple contact urls, with various malformed forms.
+:   **owner** enters multiple contact urls, with various malformed forms.
     They all get normalized.
 """
 
@@ -65,7 +65,6 @@ from subtest import (
 
 
 recordInfo = {}
-
 valueTables = {}
 
 

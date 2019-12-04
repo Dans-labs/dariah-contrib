@@ -16,6 +16,7 @@ DUMMY_ID = "00000000ffa4bbd9fe000f15"
 UNDEF_VALUE = "○"
 
 TITLE = "No Title Yet"
+ATITLE = "assessment of {cTitle}"
 NEW_A_TITLE = "My contribution assessed"
 
 TYPE = "activity - resource creation"
@@ -79,6 +80,15 @@ CAPTIONS = (
     ("permission groups", {"system", "root"}, 9, None, None),
     ("Recompute workflow table", {"system", "root"}, None, WELCOME, None),
 )
+"""Sidebar entries.
+
+With the information which users can see that entry,
+and, if they click on it, how many items they encounter if run in a clean slate
+database.
+
+The test functions may fill in other amounts when testing in situations where
+additional records have been created.
+"""
 
 BELGIUM = "BE🇧🇪"
 LUXEMBURG = "LU🇱🇺"
@@ -103,6 +113,7 @@ USER_COUNTRY = dict(
     system=POLAND,
     root=NETHERLANDS,
 )
+"""Where the test users come from."""
 
 EXAMPLE = dict(
     description=[
@@ -315,3 +326,4 @@ Cœur du Hainaut
         "\n"
     ),
 )
+"""Lots of values in several fields of a contribution."""

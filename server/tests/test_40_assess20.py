@@ -46,7 +46,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
 cIds = []
 ids = {}
 

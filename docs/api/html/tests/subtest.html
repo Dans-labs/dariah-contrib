@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
 <title>subtest API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Higher level assert functions test helpers …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,11 +20,29 @@
 <h1 class="title">Module <code>subtest</code></h1>
 </header>
 <section id="section-intro">
+<p>Higher level assert functions test helpers.</p>
+<p>This module contains a bunch of <code>assertXXX</code> functions,
+which all have a client as first argument and an expected outcome as last.
+They perform higher level tasks for a single client and can be conveniently be
+used in iterations using <a title="helpers.forall" href="helpers.html#helpers.forall"><code>forall()</code></a>.</p>
+<p>There are also some functions that are even higher level, and have been
+factored out from concrete test functions.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from control.utils import pick as G
+<pre><code class="python">&#34;&#34;&#34;Higher level assert functions test helpers.
+
+This module contains a bunch of `assertXXX` functions,
+which all have a client as first argument and an expected outcome as last.
+They perform higher level tasks for a single client and can be conveniently be
+used in iterations using `helpers.forall`.
+
+There are also some functions that are even higher level, and have been
+factored out from concrete test functions.
+&#34;&#34;&#34;
+
+from control.utils import pick as G
 from conftest import USERS
 from example import (
     ASSESS,
@@ -393,7 +411,7 @@ def sidebar(clients, amounts):
 of the new item will be read off.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -458,7 +476,7 @@ of the new item will be read off.</p>
 <section class="desc"><p>Check whether a response text shows a certain set of captions.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>set</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -501,7 +519,7 @@ of the new item will be read off.</p>
 <section class="desc"><p>Deletes an item from a table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -580,7 +598,7 @@ of the new item will be read off.</p>
 <p>If we pass expect <code>None</code> we want to assert that the field is not present at all.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>source</code></strong> :&ensp;<code>dict</code> | (<code>client</code>: <code>fixture</code>, <code>table</code>: <code>string</code>, <code>eid</code>: <code>string</code>)</dt>
+<dt><strong><code>source</code></strong> :&ensp;<code>dict</code> | (<a title="client" href="client.html"><code>client</code></a>: <code>fixture</code>, <code>table</code>: <code>string</code>, <code>eid</code>: <code>string</code>)</dt>
 <dd>The dictionary of fields and values of a retrieved response.
 If it is a tuple, the dictionary will be retrieved by looking up
 the item specified by <code>table</code> and <code>eid</code>.</dd>
@@ -635,7 +653,7 @@ read access to the field.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -703,7 +721,7 @@ and the second component is the value we read back from the modified record</dd>
 <section class="desc"><p>Check whether a record has a certain workflow stage.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -742,7 +760,7 @@ and the second component is the value we read back from the modified record</dd>
 of the new assessment will be read off.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
 <dd>The contribution id for which the assessment must be started.</dd>
@@ -792,7 +810,7 @@ of the new assessment will be read off.</p>
 <section class="desc"><p>Get data and see whether that went right or wrong.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>function</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
 <dd>The url to retrieve from the server</dd>

@@ -70,9 +70,7 @@ from example import (
     VCC12,
     EXAMPLE,
 )
-from helpers import (
-    modifyField,
-)
+from helpers import modifyField
 from starters import (
     start,
     getValueTable,
@@ -85,22 +83,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
-
-# SPECIFIC HELPERS
-
-
-def modifyType(client, eid):
-    """Modifies the typeContribution field to the example value.
-    """
-
-    types = valueTables["typeContribution"]
-    field = "typeContribution"
-    newValue = EXAMPLE["typeContribution"][-2]
-    assertModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
-
-
-# TESTS
 
 
 def test_start(clientOffice, clientOwner):
@@ -129,13 +111,6 @@ def test_start(clientOffice, clientOwner):
     ),
 )
 def test_valueEdit(clientOwner, field):
-    """NB.
-
-    !!! hint "Stored for later use"
-        By using `getValueTable` we store the dict of values in the global
-        `valueTables`.
-    """
-
     eid = G(G(recordInfo, CONTRIB), "eid")
     values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
@@ -170,7 +145,11 @@ def test_modifyVccError(clientOwner):
 
 def test_modifyTypeEx1(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    modifyType(clientOwner, eid)
+    field = "typeContribution"
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )
 
 
 def test_modifyTypeMult(clientOwner):
@@ -185,7 +164,11 @@ def test_modifyTypeMult(clientOwner):
 
 def test_modifyTypeEx2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    modifyType(clientOwner, eid)
+    field = "typeContribution"
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )
 
 
 def test_modifyTypeWrong(clientOwner):

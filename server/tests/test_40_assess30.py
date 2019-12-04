@@ -92,7 +92,7 @@ Filling out an assessment.
     the assessment is withdrawn.
 
 `test_submitAssessmentRevised2`
-:   **owwner cannot submit this assessment as a revision.
+:   **owner** cannot submit this assessment as a revision.
 
 `test_resubmitAssessment2`
 :   **owner** re-submits this assessment.
@@ -131,7 +131,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
 cIds = []
 ids = {}
 

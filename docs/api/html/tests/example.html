@@ -43,6 +43,7 @@ DUMMY_ID = &#34;00000000ffa4bbd9fe000f15&#34;
 UNDEF_VALUE = &#34;○&#34;
 
 TITLE = &#34;No Title Yet&#34;
+ATITLE = &#34;assessment of {cTitle}&#34;
 NEW_A_TITLE = &#34;My contribution assessed&#34;
 
 TYPE = &#34;activity - resource creation&#34;
@@ -106,6 +107,15 @@ CAPTIONS = (
     (&#34;permission groups&#34;, {&#34;system&#34;, &#34;root&#34;}, 9, None, None),
     (&#34;Recompute workflow table&#34;, {&#34;system&#34;, &#34;root&#34;}, None, WELCOME, None),
 )
+&#34;&#34;&#34;Sidebar entries.
+
+With the information which users can see that entry,
+and, if they click on it, how many items they encounter if run in a clean slate
+database.
+
+The test functions may fill in other amounts when testing in situations where
+additional records have been created.
+&#34;&#34;&#34;
 
 BELGIUM = &#34;BE🇧🇪&#34;
 LUXEMBURG = &#34;LU🇱🇺&#34;
@@ -130,6 +140,7 @@ USER_COUNTRY = dict(
     system=POLAND,
     root=NETHERLANDS,
 )
+&#34;&#34;&#34;Where the test users come from.&#34;&#34;&#34;
 
 EXAMPLE = dict(
     description=[
@@ -341,12 +352,33 @@ Cœur du Hainaut
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-)</code></pre>
+)
+&#34;&#34;&#34;Lots of values in several fields of a contribution.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="example.CAPTIONS"><code class="name">var <span class="ident">CAPTIONS</span></code></dt>
+<dd>
+<section class="desc"><p>Sidebar entries.</p>
+<p>With the information which users can see that entry,
+and, if they click on it, how many items they encounter if run in a clean slate
+database.</p>
+<p>The test functions may fill in other amounts when testing in situations where
+additional records have been created.</p></section>
+</dd>
+<dt id="example.EXAMPLE"><code class="name">var <span class="ident">EXAMPLE</span></code></dt>
+<dd>
+<section class="desc"><p>Lots of values in several fields of a contribution.</p></section>
+</dd>
+<dt id="example.USER_COUNTRY"><code class="name">var <span class="ident">USER_COUNTRY</span></code></dt>
+<dd>
+<section class="desc"><p>Where the test users come from.</p></section>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -359,6 +391,13 @@ Cœur du Hainaut
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="example.CAPTIONS" href="#example.CAPTIONS">CAPTIONS</a></code></li>
+<li><code><a title="example.EXAMPLE" href="#example.EXAMPLE">EXAMPLE</a></code></li>
+<li><code><a title="example.USER_COUNTRY" href="#example.USER_COUNTRY">USER_COUNTRY</a></code></li>
+</ul>
+</li>
 </ul>
 </nav>
 </main>

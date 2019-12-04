@@ -41,7 +41,14 @@ This application uses configuration files in
 and those in
 [tables]({{repBase}}/server/tables)
 to model tables and fields, with their permissions.
-It has base classes to deal with most situations, but special tables may use their own derived classes.
+It has base classes
+(
+[table](/{{apidocs}}/table.html),
+[record](/{{apidocs}}/record.html),
+[field](/{{apidocs}}/field.html),
+[details](/{{apidocs}}/details.html)
+) to deal with most situations, but special tables may use
+their own derived classes.
 
 ??? abstract "classification of tables"
     ??? details "user tables"
@@ -77,25 +84,25 @@ It has base classes to deal with most situations, but special tables may use the
         is named after the master table.
 
 ??? details "cascade"
-        When a master record is deleted,
-        its details have a dangling reference to a non-existing master record.
-        In some cases it is desirable to delete the detail records as well.
+    When a master record is deleted,
+    its details have a dangling reference to a non-existing master record.
+    In some cases it is desirable to delete the detail records as well.
 
-        ??? example "criteriaEntry"
-            *criteriaEntry* records are deleted with their
-            master: an assessment record.
+    ??? example "criteriaEntry"
+        *criteriaEntry* records are deleted with their
+        master: an assessment record.
 
-        ??? example "criteria"
-            *criteria* records are *not* deleted with their
-            master record.
+    ??? example "criteria"
+        *criteria* records are *not* deleted with their
+        master record.
 
-        ???+ hint "Deletion prohibited"
-            In all cases where a record has dependencies, deletion of such
-            a record is prohibited, unless all of its dependencies
-            are marked for cascade-deletion.
+    ???+ hint "Deletion prohibited"
+        In all cases where a record has dependencies, deletion of such
+        a record is prohibited, unless all of its dependencies
+        are marked for cascade-deletion.
 
-            In order to remove a contribution with assessments and reviews,
-            you first have to delete all its assessments and reviews.
+        In order to remove a contribution with assessments and reviews,
+        you first have to delete all its assessments and reviews.
 
 ??? abstract "provenance"
     Fields for recording the edit history of a record.
@@ -150,42 +157,53 @@ For each field there is a key under which some specs are written.
 
         ??? details "text"
             A string of characters, usually just a one-liner.
+            See [text](/{{apidocs}}/typ/text.html#control.typ.text.Text).
 
         ??? details "url"
             A syntactically valid URL: i.e. a string of text that can be
             interpreted as a URL. A validation routine will check this.
+            See [url](/{{apidocs}}/typ/text.html#control.typ.text.Url).
 
         ??? details "email"
             A syntactically valid email address. A validation routine will check
             this.
+            See [email](/{{apidocs}}/typ/text.html#control.typ.text.Email).
 
         ??? details "markdown"
             A string of characters, which may extend to several pages,
-            formaated as Markdown text.
+            formatted as Markdown text.
+            See [markdown](/{{apidocs}}/typ/text.html#control.typ.text.Markdown).
 
         ??? details "bool2"
             `true` or `false`.
+            See [bool2](/{{apidocs}}/typ/bool.html#control.typ.bool.Bool2).
 
         ??? details "bool3"
             `true` , `null`, or `false`.
+            See [bool3](/{{apidocs}}/typ/bool.html#control.typ.bool.Bool3).
 
         ??? details "int"
             An integer number.
+            See [int](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Int).
 
         ??? details "decimal"
             An decimal number.
+            See [decimal](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Decimal).
 
         ??? details "money"
             An decimal number with an implicit monetary unit: €.
+            See [money](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Money).
 
         ??? details "datetime"
             A date time, mostly represented in its
             [ISO 8601]({{iso8601}})
             format.
+            See [datetime](/{{apidocs}}/typ/datetime.html).
 
         ??? details "Related values"
             When a field refers to other records, there is much more to specify.
-            In this case `tType` is the name of a value table.
+            In this case `type` is the name of a value table.
+            See [related](/{{apidocs}}/typ/related.html).
 
     ??? details "multiple"
         Whether there is only one value allowed for this field,

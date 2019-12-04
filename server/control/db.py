@@ -461,6 +461,9 @@ class Db:
 
             `'0'`: means: don't care.
 
+        !!! hint
+            See also `Db.getList`.
+
         Parameters
         ----------
         mainTable: string
@@ -524,6 +527,7 @@ class Db:
         Some constraints need to fetch more from Mongo than will be returned:
         post-filtering may be needed.
 
+
         !!! note
             All records have a field `editors` which contains the ids of users
             that are allowed to edit it besides the creator.
@@ -532,8 +536,10 @@ class Db:
             Assessment records have fields `reviewerE` and `reviewerF` that
             point to the expert reviewer and the final reviewer.
 
-        !!! caution
-            `select` and `**conditions` below are currently not used.
+        !!! hint
+            `select` and `**conditions` below are used as a consequence of
+            the filtering on the interface by the options `assessed` and `reviewed`.
+            See also `Db.makeCrit` and `Db.satisfies`.
 
         Parameters
         ----------
@@ -582,8 +588,8 @@ class Db:
         **conditions: dict
             **Task: produce a list of records filtered by custom conditions.**
             If `select`, carry out filtering on the retrieved records, where
-            **conditions
-            specify the filtering (through _makeCrit() and satisfies()).
+            **conditions specify the filtering
+            (through `Db.makeCrit` and `Db.satisfies`).
 
         Returns
         -------
@@ -1215,8 +1221,8 @@ class Db:
     def satisfies(record, criterion):
         """Test whether a record satifies a criterion.
 
-        !!! caution
-            The program does not currently use it in cases that happen.
+        !!! hint
+            See also `Db.getList`.
 
         Parameters
         ----------

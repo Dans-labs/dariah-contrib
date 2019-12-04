@@ -33,11 +33,11 @@ Getting started with contributions.
     other fields are pre-filled with appropriate values
 
 `test_makeEditorAll`
-    All users try to make **editor** editor of this contribution.
+:   All users try to make **editor** editor of this contribution.
     Only some succeed, and remove **editor** again.
 
 `test_makeEditorOwner`
-    **owner** makes **editor** editor of this contribution.
+:   **owner** makes **editor** editor of this contribution.
 
 `test_sidebar3`
 :   All users check the entries in the sidebar.
@@ -53,6 +53,7 @@ from conftest import USERS
 from example import (
     BELGIUM,
     CONTRIB,
+    TITLE,
 )
 from helpers import forall
 from starters import start
@@ -66,8 +67,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
-TITLE = "No Title Yet"
 
 
 def test_start(clientOffice):

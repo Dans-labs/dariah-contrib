@@ -105,8 +105,8 @@ function runtestmode {
     testmode="$1"
     shift
     dest="../docs"
-    destTestTmp="$dest/Tech/Tests.tmp"
-    destTest="$dest/Tech/Tests.txt"
+    destTestTmp="$dest/api/html/tests/results.tmp"
+    destTest="$dest/api/html/tests/results.txt"
     set -o pipefail
     testerror=0
     if [[ "$testmode" == "cov" ]]; then
@@ -128,6 +128,7 @@ function runtestmode {
     rm $destTestTmp
     if [[ $testerror == 0 ]]; then
         echo "ALL TESTS PASSED"
+        echo "" >> $destTest
         python3 tests/analysis.py >> $destTest
     elif [[ $testerror == 1 ]]; then
         echo "SOME TESTS FAILED"
@@ -197,7 +198,6 @@ function apidocs {
     cd $root/server
     pdoc3 --force --html --output-dir "../$apidocbase" control
     pdoc3 --force --html --output-dir "../$apidocbase/tests" tests/*.py
-    python3 ../mktest.py "../$apidocbase/tests"
 }
 
 function docsmk {

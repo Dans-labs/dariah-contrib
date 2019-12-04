@@ -154,6 +154,13 @@ def start(
     Records in value tables are stored in the dict `valueTables`,
     under the name of the table as key.
 
+
+    !!! hint "Dependencies of parameters"
+        Some things are dependent on others, for example, making an assessment
+        presupposes that there is a contribution.
+        The function will switch on all parameters that are implied before
+        creating or finding stuff.
+
     Parameters
     ----------
     clientOffice, clientOwner: fixture

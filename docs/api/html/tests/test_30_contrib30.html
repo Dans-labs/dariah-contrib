@@ -140,9 +140,7 @@ from example import (
     VCC12,
     EXAMPLE,
 )
-from helpers import (
-    modifyField,
-)
+from helpers import modifyField
 from starters import (
     start,
     getValueTable,
@@ -155,22 +153,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
-
-# SPECIFIC HELPERS
-
-
-def modifyType(client, eid):
-    &#34;&#34;&#34;Modifies the typeContribution field to the example value.
-    &#34;&#34;&#34;
-
-    types = valueTables[&#34;typeContribution&#34;]
-    field = &#34;typeContribution&#34;
-    newValue = EXAMPLE[&#34;typeContribution&#34;][-2]
-    assertModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)
-
-
-# TESTS
 
 
 def test_start(clientOffice, clientOwner):
@@ -199,13 +181,6 @@ def test_start(clientOffice, clientOwner):
     ),
 )
 def test_valueEdit(clientOwner, field):
-    &#34;&#34;&#34;NB.
-
-    !!! hint &#34;Stored for later use&#34;
-        By using `getValueTable` we store the dict of values in the global
-        `valueTables`.
-    &#34;&#34;&#34;
-
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
@@ -240,7 +215,11 @@ def test_modifyVccError(clientOwner):
 
 def test_modifyTypeEx1(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    modifyType(clientOwner, eid)
+    field = &#34;typeContribution&#34;
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )
 
 
 def test_modifyTypeMult(clientOwner):
@@ -255,7 +234,11 @@ def test_modifyTypeMult(clientOwner):
 
 def test_modifyTypeEx2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    modifyType(clientOwner, eid)
+    field = &#34;typeContribution&#34;
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )
 
 
 def test_modifyTypeWrong(clientOwner):
@@ -334,25 +317,6 @@ def test_addMetaRight(clientOwner, clientOffice, field, value):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_30_contrib30.modifyType"><code class="name flex">
-<span>def <span class="ident">modifyType</span></span>(<span>client, eid)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Modifies the typeContribution field to the example value.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def modifyType(client, eid):
-    &#34;&#34;&#34;Modifies the typeContribution field to the example value.
-    &#34;&#34;&#34;
-
-    types = valueTables[&#34;typeContribution&#34;]
-    field = &#34;typeContribution&#34;
-    newValue = EXAMPLE[&#34;typeContribution&#34;][-2]
-    assertModifyField(client, CONTRIB, eid, field, (types[newValue], newValue), True)</code></pre>
-</details>
-</dd>
 <dt id="test_30_contrib30.test_addMetaRight"><code class="name flex">
 <span>def <span class="ident">test_addMetaRight</span></span>(<span>clientOwner, clientOffice, field, value)</span>
 </code></dt>
@@ -444,7 +408,11 @@ def test_modifyMeta(clientOwner, field):
 </summary>
 <pre><code class="python">def test_modifyTypeEx1(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    modifyType(clientOwner, eid)</code></pre>
+    field = &#34;typeContribution&#34;
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib30.test_modifyTypeEx2"><code class="name flex">
@@ -458,7 +426,11 @@ def test_modifyMeta(clientOwner, field):
 </summary>
 <pre><code class="python">def test_modifyTypeEx2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    modifyType(clientOwner, eid)</code></pre>
+    field = &#34;typeContribution&#34;
+    newValue = EXAMPLE[field][-2]
+    assertModifyField(
+        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib30.test_modifyTypeMult"><code class="name flex">
@@ -590,12 +562,7 @@ def test_modifyMeta(clientOwner, field):
 <span>def <span class="ident">test_valueEdit</span></span>(<span>clientOwner, field)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>NB.</p>
-<div class="admonition hint">
-<p class="admonition-title">Stored for later use</p>
-<p>By using <code>getValueTable</code> we store the dict of values in the global
-<code>valueTables</code>.</p>
-</div></section>
+<section class="desc"></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -615,13 +582,6 @@ def test_modifyMeta(clientOwner, field):
     ),
 )
 def test_valueEdit(clientOwner, field):
-    &#34;&#34;&#34;NB.
-
-    !!! hint &#34;Stored for later use&#34;
-        By using `getValueTable` we store the dict of values in the global
-        `valueTables`.
-    &#34;&#34;&#34;
-
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
 
@@ -645,7 +605,6 @@ def test_valueEdit(clientOwner, field):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="test_30_contrib30.modifyType" href="#test_30_contrib30.modifyType">modifyType</a></code></li>
 <li><code><a title="test_30_contrib30.test_addMetaRight" href="#test_30_contrib30.test_addMetaRight">test_addMetaRight</a></code></li>
 <li><code><a title="test_30_contrib30.test_addMetaWrong" href="#test_30_contrib30.test_addMetaWrong">test_addMetaWrong</a></code></li>
 <li><code><a title="test_30_contrib30.test_modifyMeta" href="#test_30_contrib30.test_modifyMeta">test_modifyMeta</a></code></li>

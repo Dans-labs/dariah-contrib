@@ -85,6 +85,7 @@ from example import (
     UNDEF_VALUE,
     DUMMY_ID,
     TYPE,
+    ATITLE,
     NEW_A_TITLE,
 )
 from helpers import (
@@ -105,11 +106,8 @@ from subtest import (
     sidebar,
 )
 
-ATITLE = "assessment of {cTitle}"
-
 recordInfo = {}
 valueTables = {}
-
 cIds = []
 ids = {}
 

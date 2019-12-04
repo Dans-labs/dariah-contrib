@@ -197,6 +197,13 @@ def start(
     Records in value tables are stored in the dict `valueTables`,
     under the name of the table as key.
 
+
+    !!! hint &#34;Dependencies of parameters&#34;
+        Some things are dependent on others, for example, making an assessment
+        presupposes that there is a contribution.
+        The function will switch on all parameters that are implied before
+        creating or finding stuff.
+
     Parameters
     ----------
     clientOffice, clientOwner: fixture
@@ -290,7 +297,7 @@ to find it.
 Or there are no contributions/assessments yet, and then we have to make one.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>kind</code></strong> :&ensp;<code>string</code></dt>
 <dd>Either <code>contrib</code> or <code>assessment</code></dd>
@@ -443,6 +450,13 @@ of if they do not exist, created.</p>
 under the name of the table as key.</p>
 <p>Records in value tables are stored in the dict <code>valueTables</code>,
 under the name of the table as key.</p>
+<div class="admonition hint">
+<p class="admonition-title">Dependencies of parameters</p>
+<p>Some things are dependent on others, for example, making an assessment
+presupposes that there is a contribution.
+The function will switch on all parameters that are implied before
+creating or finding stuff.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clientOffice</code></strong>, <strong><code>clientOwner</code></strong> :&ensp;<code>fixture</code></dt>
@@ -495,6 +509,13 @@ under the name of the table as key.</p>
 
     Records in value tables are stored in the dict `valueTables`,
     under the name of the table as key.
+
+
+    !!! hint &#34;Dependencies of parameters&#34;
+        Some things are dependent on others, for example, making an assessment
+        presupposes that there is a contribution.
+        The function will switch on all parameters that are implied before
+        creating or finding stuff.
 
     Parameters
     ----------

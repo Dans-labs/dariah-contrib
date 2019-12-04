@@ -49,7 +49,7 @@ formatting options and issues.
 
 ??? details "Usage in this app"
     *   all documentation here is written in Markdown
-    *   the docstrings insode the Python code use Markdown
+    *   the docstrings inside the Python code use Markdown
     *   all big editable text fields in this app support Markdown.
 
 ### JavaScript
@@ -83,7 +83,7 @@ A general purpose scripting language with excellent data processing facilities.
     a light-weight framework for handling http(s) requests.
 
     We have added a set of
-    [controllers](../{{apidocs}})
+    [controllers](/{{apidocs}})
     .
 
 ### CSS

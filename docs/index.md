@@ -66,10 +66,10 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
     Here are the bits and pieces you have to do in order to get a
     working system out of this. [More ...](Tech/Deploy.md)
 
-??? abstract "Docstrings"
+??? abstract "Apidocs"
     The technical documentation of the Python code is largely in so-called
     *docstrings* within the code. But you can see them nicely formatted
-    [here ...]({{apidocs}}/)
+    [here ...](/{{apidocs}}/)
 
 ??? abstract "Code base"
     A few remarks on our code and their languages.
@@ -85,20 +85,19 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
     Does the app work properly? Can we develop new functions without breaking
     one of the innumerable logical threads in it?
     We have a test suite that covers most of the code and checks most of the logic.
-    [More ...](Tech/Testing.md)
 
-??? abstract "Results"
-    The last test results.
-    [Here ...](Tech/Tests.txt)
+    The server is tested following the approach of the
+    [Flask documentation]({{flask}}/tutorial/tests).
 
-??? abstract "Tests"
-    Also the tests have been documented by docstrings.
-    [Here ...](/api/html/tests/index.html)
+    The tests have been documented by docstrings.
+    [Here ...](/{{apidoctests}}/conftest.html)
 
-??? abstract "Coverage"
     Do the test coverage all the code? Here you can see the source code with
     the lines that have not been executed during tests highlighted.
     [Here ...](/api/html/coverage/index.html)
+
+    The latest test results.
+    [Here ...](/{{apidoctests}}/results.txt)
 
 ## Author
 

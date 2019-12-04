@@ -1,3 +1,14 @@
+"""Higher level assert functions test helpers.
+
+This module contains a bunch of `assertXXX` functions,
+which all have a client as first argument and an expected outcome as last.
+They perform higher level tasks for a single client and can be conveniently be
+used in iterations using `helpers.forall`.
+
+There are also some functions that are even higher level, and have been
+factored out from concrete test functions.
+"""
+
 from control.utils import pick as G
 from conftest import USERS
 from example import (

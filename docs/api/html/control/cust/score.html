@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
 <title>control.cust.score API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Handles assessment scores." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,16 +20,38 @@
 <h1 class="title">Module <code>control.cust.score</code></h1>
 </header>
 <section id="section-intro">
+<p>Handles assessment scores.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from config import Names as N
+<pre><code class="python">&#34;&#34;&#34;Handles assessment scores.
+&#34;&#34;&#34;
+
+from config import Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
 
 
-def presentScore(score, table, eid, derivation=True):
+def presentScore(score, eid, derivation=True):
+    &#34;&#34;&#34;Presents the result of a score computation.
+
+    It shows the overall score, but it can also expand a derivation of the
+    overall score.
+
+    Parameters
+    ----------
+    score: dict
+        Quantities relevant to the score and its derivation
+    eid: ObjectId
+        Id of the assessment of which the score has been taken.
+        Only used to give the score presentation a unique identifier on the
+        interface, so that the derivation can be collapsed and expanded
+        in the presence of other score presentations.
+    derivation: boolean, optional `True`
+        If `False`, the derivation will be suppressed.
+    &#34;&#34;&#34;
+
     overall = G(score, N.overall, default=0)
     relevantScore = G(score, N.relevantScore, default=0)
     relevantMax = G(score, N.relevantMax, default=0)
@@ -85,7 +107,7 @@ def presentScore(score, table, eid, derivation=True):
     scoreWidget = H.detailx(
         (N.calc, N.dismiss),
         scoreMaterial,
-        f&#34;&#34;&#34;{table}/{eid}/scorebox&#34;&#34;&#34;,
+        f&#34;&#34;&#34;{N.assessment}/{eid}/scorebox&#34;&#34;&#34;,
         openAtts=dict(cls=&#34;button small&#34;, title=&#34;Show derivation&#34;),
         closeAtts=dict(cls=&#34;button small&#34;, title=&#34;Hide derivation&#34;),
     )
@@ -100,15 +122,47 @@ def presentScore(score, table, eid, derivation=True):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="control.cust.score.presentScore"><code class="name flex">
-<span>def <span class="ident">presentScore</span></span>(<span>score, table, eid, derivation=True)</span>
+<span>def <span class="ident">presentScore</span></span>(<span>score, eid, derivation=True)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Presents the result of a score computation.</p>
+<p>It shows the overall score, but it can also expand a derivation of the
+overall score.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>score</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Quantities relevant to the score and its derivation</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code></dt>
+<dd>Id of the assessment of which the score has been taken.
+Only used to give the score presentation a unique identifier on the
+interface, so that the derivation can be collapsed and expanded
+in the presence of other score presentations.</dd>
+<dt><strong><code>derivation</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
+<dd>If <code>False</code>, the derivation will be suppressed.</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def presentScore(score, table, eid, derivation=True):
+<pre><code class="python">def presentScore(score, eid, derivation=True):
+    &#34;&#34;&#34;Presents the result of a score computation.
+
+    It shows the overall score, but it can also expand a derivation of the
+    overall score.
+
+    Parameters
+    ----------
+    score: dict
+        Quantities relevant to the score and its derivation
+    eid: ObjectId
+        Id of the assessment of which the score has been taken.
+        Only used to give the score presentation a unique identifier on the
+        interface, so that the derivation can be collapsed and expanded
+        in the presence of other score presentations.
+    derivation: boolean, optional `True`
+        If `False`, the derivation will be suppressed.
+    &#34;&#34;&#34;
+
     overall = G(score, N.overall, default=0)
     relevantScore = G(score, N.relevantScore, default=0)
     relevantMax = G(score, N.relevantMax, default=0)
@@ -164,7 +218,7 @@ def presentScore(score, table, eid, derivation=True):
     scoreWidget = H.detailx(
         (N.calc, N.dismiss),
         scoreMaterial,
-        f&#34;&#34;&#34;{table}/{eid}/scorebox&#34;&#34;&#34;,
+        f&#34;&#34;&#34;{N.assessment}/{eid}/scorebox&#34;&#34;&#34;,
         openAtts=dict(cls=&#34;button small&#34;, title=&#34;Show derivation&#34;),
         closeAtts=dict(cls=&#34;button small&#34;, title=&#34;Hide derivation&#34;),
     )

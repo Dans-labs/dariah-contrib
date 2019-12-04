@@ -10,16 +10,28 @@ to be tested and the web clients to exercise functions in those objects.
 
 name | role | remarks
 --- | --- | ---
-owner | auth | authenticated user from Belgium, creates and assesses a contribution
-editor | auth | authenticated user, added as editor of the above contribution
-mycoord | coord | the national coordinator of Belgium
-coord | coord | any national coordinator, not from Belgium, in this case: Luxemburg
-expert | auth | authenticated user, expert reviewer for the above contribution
-final | auth | authenticated user, final reviewer for the above contribution
-auth | auth | any authenticated user without special rights
+HaSProject | - | user that cannot login, author of legacy stuff and system objects
 public | public | any unauthenticated user
+auth | auth | any authenticated user without special rights
+coord | coord | any national coordinator, from Luxemburg, but that is not relevant
+mycoord | coord | the national coordinator of Belgium
+expert | auth | authenticated user, expert reviewer of a test contribution
+final | auth | authenticated user, final reviewer of a test contribution
+editor | auth | authenticated user, added as editor of a test contribution
+owner | auth | authenticated user from Belgium, creates and assesses a contribution
+office | office | authenticated user of the DARIAH backoffice
+system | system | authenticated user and system administrator
+root | root | unique authenticated user that can assign office users and system admins
+
+!!! caution
+    Although it seems that `root` and `system` are more powerful than `office`,
+    there are things that they cannot do but `office` can.
+    For example: **assigning** reviewers to an assessment.
 
 ## Auxiliary
+
+`client`
+:   Wrap the Flask test-`client` in something more capable.
 
 `starters`
 :   Provide test functions with a well-defined initial state.
@@ -32,6 +44,9 @@ public | public | any unauthenticated user
 
 `example`
 :   Concrete example values for testers to work with.
+
+`analysis`
+:   Interpret the request log after testing.
 
 ## Test batches
 
@@ -46,7 +61,7 @@ in alphabetical order of the file names.
 `test_20_users10`
 :   Getting to know all users.
 
-### Contributions
+### Tests: Contributions
 
 `test_30_contrib10`
 :   Getting started with contributions.
@@ -93,10 +108,8 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
+from client import makeClient
 
-
-URL_LOG = """tests/urllog.txt"""
-URL_LOG_FH = open(URL_LOG, 'w')
 
 DEBUG = False
 TEST = True
@@ -116,7 +129,7 @@ USER_LIST = """
 """.strip().split()
 """The `eppn` attribute of all relevant test users in this suite.
 
-See `test_20_users10` where we introduce them.
+See the table above.
 
 Here we make fixtures `clientAuth`, `clientOwner` etc. for each of them.
 These client fixtures represent a web client with the corresponding user logged in,
@@ -188,42 +201,6 @@ def clientProd(appProd):
     """Client accessing the production app."""
 
     return appProd.test_client()
-
-
-class Client:
-    def __init__(self, user, client):
-        self.cl = client
-        self.user = user
-
-    def get(self, *args, **kwargs):
-        URL_LOG_FH.write(f"{self.user}\t{args[0]}\n")
-        return self.cl.get(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        URL_LOG_FH.write(f"{self.user}\t{args[0]}\n")
-        return self.cl.post(*args, **kwargs)
-
-
-def makeClient(app, user):
-    """Logs in a specific user.
-
-    Parameters
-    ----------
-    app: object
-    user: string
-        Identity of the user (eppn)
-    """
-
-    client = app.test_client()
-
-    good = True
-    if user != "public":
-        response = client.get(f"/login?eppn={user}")
-        if response.status_code != 302:
-            good = False
-    if good:
-        return Client(user, client)
-    return None
 
 
 @pytest.fixture

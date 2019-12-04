@@ -493,6 +493,9 @@ class Db:
 
             `&#39;0&#39;`: means: don&#39;t care.
 
+        !!! hint
+            See also `Db.getList`.
+
         Parameters
         ----------
         mainTable: string
@@ -556,6 +559,7 @@ class Db:
         Some constraints need to fetch more from Mongo than will be returned:
         post-filtering may be needed.
 
+
         !!! note
             All records have a field `editors` which contains the ids of users
             that are allowed to edit it besides the creator.
@@ -564,8 +568,10 @@ class Db:
             Assessment records have fields `reviewerE` and `reviewerF` that
             point to the expert reviewer and the final reviewer.
 
-        !!! caution
-            `select` and `**conditions` below are currently not used.
+        !!! hint
+            `select` and `**conditions` below are used as a consequence of
+            the filtering on the interface by the options `assessed` and `reviewed`.
+            See also `Db.makeCrit` and `Db.satisfies`.
 
         Parameters
         ----------
@@ -614,8 +620,8 @@ class Db:
         **conditions: dict
             **Task: produce a list of records filtered by custom conditions.**
             If `select`, carry out filtering on the retrieved records, where
-            **conditions
-            specify the filtering (through _makeCrit() and satisfies()).
+            **conditions specify the filtering
+            (through `Db.makeCrit` and `Db.satisfies`).
 
         Returns
         -------
@@ -1247,8 +1253,8 @@ class Db:
     def satisfies(record, criterion):
         &#34;&#34;&#34;Test whether a record satifies a criterion.
 
-        !!! caution
-            The program does not currently use it in cases that happen.
+        !!! hint
+            See also `Db.getList`.
 
         Parameters
         ----------
@@ -1723,6 +1729,9 @@ as recommended in
 
             `&#39;0&#39;`: means: don&#39;t care.
 
+        !!! hint
+            See also `Db.getList`.
+
         Parameters
         ----------
         mainTable: string
@@ -1786,6 +1795,7 @@ as recommended in
         Some constraints need to fetch more from Mongo than will be returned:
         post-filtering may be needed.
 
+
         !!! note
             All records have a field `editors` which contains the ids of users
             that are allowed to edit it besides the creator.
@@ -1794,8 +1804,10 @@ as recommended in
             Assessment records have fields `reviewerE` and `reviewerF` that
             point to the expert reviewer and the final reviewer.
 
-        !!! caution
-            `select` and `**conditions` below are currently not used.
+        !!! hint
+            `select` and `**conditions` below are used as a consequence of
+            the filtering on the interface by the options `assessed` and `reviewed`.
+            See also `Db.makeCrit` and `Db.satisfies`.
 
         Parameters
         ----------
@@ -1844,8 +1856,8 @@ as recommended in
         **conditions: dict
             **Task: produce a list of records filtered by custom conditions.**
             If `select`, carry out filtering on the retrieved records, where
-            **conditions
-            specify the filtering (through _makeCrit() and satisfies()).
+            **conditions specify the filtering
+            (through `Db.makeCrit` and `Db.satisfies`).
 
         Returns
         -------
@@ -2477,8 +2489,8 @@ as recommended in
     def satisfies(record, criterion):
         &#34;&#34;&#34;Test whether a record satifies a criterion.
 
-        !!! caution
-            The program does not currently use it in cases that happen.
+        !!! hint
+            See also `Db.getList`.
 
         Parameters
         ----------
@@ -2566,9 +2578,9 @@ def inCrit(items):
 </code></dt>
 <dd>
 <section class="desc"><p>Test whether a record satifies a criterion.</p>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>The program does not currently use it in cases that happen.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See also <a title="control.db.Db.getList" href="#control.db.Db.getList"><code>Db.getList()</code></a>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2594,8 +2606,8 @@ that record.</dd>
 def satisfies(record, criterion):
     &#34;&#34;&#34;Test whether a record satifies a criterion.
 
-    !!! caution
-        The program does not currently use it in cases that happen.
+    !!! hint
+        See also `Db.getList`.
 
     Parameters
     ----------
@@ -3335,9 +3347,11 @@ that are allowed to edit it besides the creator.</p>
 <p>Assessment records have fields <code>reviewerE</code> and <code>reviewerF</code> that
 point to the expert reviewer and the final reviewer.</p>
 </div>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p><code>select</code> and <code>**conditions</code> below are currently not used.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p><code>select</code> and <code>**conditions</code> below are used as a consequence of
+the filtering on the interface by the options <code>assessed</code> and <code>reviewed</code>.
+See also <a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit"><code>Db.makeCrit()</code></a> and <a title="control.db.Db.satisfies" href="#control.db.Db.satisfies"><code>Db.satisfies()</code></a>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -3386,8 +3400,8 @@ and typically, that user is a National Coordinator.</dd>
 <dt><strong><code>**conditions</code></strong> :&ensp;<code>dict</code></dt>
 <dd><strong>Task: produce a list of records filtered by custom conditions.</strong>
 If <code>select</code>, carry out filtering on the retrieved records, where
-**conditions
-specify the filtering (through _makeCrit() and satisfies()).</dd>
+**conditions specify the filtering
+(through <code>Db.makeCrit</code> and <code>Db.satisfies</code>).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -3420,6 +3434,7 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
     Some constraints need to fetch more from Mongo than will be returned:
     post-filtering may be needed.
 
+
     !!! note
         All records have a field `editors` which contains the ids of users
         that are allowed to edit it besides the creator.
@@ -3428,8 +3443,10 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
         Assessment records have fields `reviewerE` and `reviewerF` that
         point to the expert reviewer and the final reviewer.
 
-    !!! caution
-        `select` and `**conditions` below are currently not used.
+    !!! hint
+        `select` and `**conditions` below are used as a consequence of
+        the filtering on the interface by the options `assessed` and `reviewed`.
+        See also `Db.makeCrit` and `Db.satisfies`.
 
     Parameters
     ----------
@@ -3478,8 +3495,8 @@ specify the filtering (through _makeCrit() and satisfies()).</dd>
     **conditions: dict
         **Task: produce a list of records filtered by custom conditions.**
         If `select`, carry out filtering on the retrieved records, where
-        **conditions
-        specify the filtering (through _makeCrit() and satisfies()).
+        **conditions specify the filtering
+        (through `Db.makeCrit` and `Db.satisfies`).
 
     Returns
     -------
@@ -4027,6 +4044,10 @@ It can also be used to filter a list of record that has already been fetched.</p
 <p><code>'-1'</code>: means: not having an assessment.</p>
 <p><code>'0'</code>: means: don't care.</p>
 </div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>See also <a title="control.db.Db.getList" href="#control.db.Db.getList"><code>Db.getList()</code></a>.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>mainTable</code></strong> :&ensp;<code>string</code></dt>
@@ -4061,6 +4082,9 @@ Only for the criteria that do care!</dd>
         `&#39;-1&#39;`: means: not having an assessment.
 
         `&#39;0&#39;`: means: don&#39;t care.
+
+    !!! hint
+        See also `Db.getList`.
 
     Parameters
     ----------

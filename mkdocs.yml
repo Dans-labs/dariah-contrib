@@ -142,10 +142,10 @@ nav:
     - Lessons: 'Tech/Lessons.md'
   - Maintenance:
     - Deploy: 'Tech/Deploy.md'
-    - Docstrings: 'api/html/control/index.html'
+    - Apidocs: 'api/html/control/index.html'
+    - Testing:
+      - Apidocs: 'api/html/tests/conftest.html'
+      - Results: 'api/html/tests/results.txt'
+      - Coverage: 'api/html/coverage/index.html'
     - Codebase: 'Tech/Codebase.md'
     - Stats: 'Tech/Stats.md'
-    - Testing: 'Tech/Testing.md'
-    - Results: 'Tech/Tests.txt'
-    - Tests: 'api/html/tests/index.md'
-    - Coverage: 'api/html/coverage/index.html'

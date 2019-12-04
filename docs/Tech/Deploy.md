@@ -107,7 +107,7 @@ mapping between routes (URL patterns) and functions (request => response transfo
 The app source code for the server resides in [serve.py]({{repBase}}/server/serve.py) and
 other `.py` files in [controllers]({{repBase}}/server/control) imported by it.
 See also the 
-[API docs of the controllers](../{{apidocs}}).
+[API docs of the controllers](/{{apidocs}}).
 
     The module
     [index.py]({{repe}}/server/server/index.py)

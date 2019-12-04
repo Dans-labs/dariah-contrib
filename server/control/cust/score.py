@@ -1,9 +1,30 @@
+"""Handles assessment scores.
+"""
+
 from config import Names as N
 from control.utils import pick as G, E
 from control.html import HtmlElements as H
 
 
-def presentScore(score, table, eid, derivation=True):
+def presentScore(score, eid, derivation=True):
+    """Presents the result of a score computation.
+
+    It shows the overall score, but it can also expand a derivation of the
+    overall score.
+
+    Parameters
+    ----------
+    score: dict
+        Quantities relevant to the score and its derivation
+    eid: ObjectId
+        Id of the assessment of which the score has been taken.
+        Only used to give the score presentation a unique identifier on the
+        interface, so that the derivation can be collapsed and expanded
+        in the presence of other score presentations.
+    derivation: boolean, optional `True`
+        If `False`, the derivation will be suppressed.
+    """
+
     overall = G(score, N.overall, default=0)
     relevantScore = G(score, N.relevantScore, default=0)
     relevantMax = G(score, N.relevantMax, default=0)
@@ -59,7 +80,7 @@ def presentScore(score, table, eid, derivation=True):
     scoreWidget = H.detailx(
         (N.calc, N.dismiss),
         scoreMaterial,
-        f"""{table}/{eid}/scorebox""",
+        f"""{N.assessment}/{eid}/scorebox""",
         openAtts=dict(cls="button small", title="Show derivation"),
         closeAtts=dict(cls="button small", title="Hide derivation"),
     )

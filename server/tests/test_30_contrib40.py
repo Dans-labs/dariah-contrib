@@ -46,9 +46,6 @@ recordInfo = {}
 valueTables = {}
 
 
-# TESTS
-
-
 def test_start(clientOffice, clientOwner):
     start(
         clientOffice=clientOffice,
