@@ -7,7 +7,7 @@ APP="dariah-contrib"
 HOST_TEST="tclarin11.dans.knaw.nl"
 HOST_PROD="clarin11.dans.knaw.nl"
 
-if [ "$HOSTNAME" == "$HOST_TEST"  | "$HOSTNAME" == "$HOST_PROD" ]; then
+if [ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]; then
     dataroot="~/dirkr/dariah-backups"
 else
     dataroot=~/Documents/DANS/projects/has/testdatabackups
