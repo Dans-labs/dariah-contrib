@@ -31,6 +31,7 @@ function givehelp {
     echo "      prod db = dariah"
     echo "<task>:"
     echo "update      : fetch new code and deploy it on the server"
+    echo "activate36  : activate python36 in the shell"
     echo ""
     echo "    Both:"
     echo "      prod db = dariah"
@@ -82,7 +83,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    update)
+    update|activate36)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
@@ -420,6 +421,8 @@ elif [[ "$1" == "mongostop" ]]; then
     mongostop
 elif [[ "$1" == "serve" ]]; then
     serve
+elif [[ "$1" == "activate36" ]]; then
+    source /opt/rh/rh-python36/enable
 elif [[ "$1" == "servetest" ]]; then
     servetest
 elif [[ "$1" == "ship" ]]; then
