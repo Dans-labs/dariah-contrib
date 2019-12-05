@@ -1,0 +1,11 @@
+# add this to your .bashrc file
+
+function dab {
+    root=~/github/Dans-labs/dariah-contrib
+    if [[ "$1" == "" ]]; then
+        cd "$root/server"
+    else
+        $root/build.sh "$@"
+    fi
+}
+

@@ -9,6 +9,40 @@
 | doc source                    | {{repBase}}/docs |
 | app live                      | {{liveBase}} |
 
+## Build script
+
+There is a shell script, 
+[build.sh]({{repBase}}/build.sh) that can perform all tasks needed for
+developing, testing, deploying and administering the app.
+Some functions work on your development machine, some work on the remote
+staging and production machines.
+
+It works handiest if you copy the function `dab` (acronym for *dariah build*)in
+[addbash.rc]({{repBase}}/addbash.rc)
+into your `.bashrc`  file.
+
+Then the command `dab` without arguments puts you in the `server` directory
+(on all machines), and `dab --help` gives you an overview of what you can do.
+
+Here are the kinds of things you can do
+
+task | development | staging, production
+--- | --- | ---
+start/stop mongo | yes | yes
+backup data | yes | yes
+restore data | yes |yes
+transfer backup to local machine | yes | no
+reset test database | yes | yes
+reset dev database | yes | no (not present on remote machines)
+reset workflow table | yes | yes
+make user root | yes | yes
+generate docs | yes | no
+dev server | yes | no
+gunicorn server | yes | yes
+run tests | yes | yes
+ship everything | yes | no
+update production | no | yes
+
 ## Python
 
 This app needs [Python]({{python}}) , version at least 3.6.3.

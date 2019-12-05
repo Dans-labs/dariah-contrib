@@ -147,11 +147,10 @@ The shell is the interpreter of system level commands.
     Our app does not use it,
     but we use it to develop the app. All the development tasks, such
     pushing code to GitHub, transporting databases to the production server
-    are done by specialized frameworks. These frameworks must be steered by
-    intricate commands with many options which are easily forgotten.
+    are done by intricate commands with many options which are easily forgotten.
 
     That's why we have a
-    [build]({{repBase}}/scripts/build.sh)
+    [build]({{repBase}}/build.sh)
     script. You have to pass
     it just the name of a task, and the script executes that task with all the
     sophistication needed.

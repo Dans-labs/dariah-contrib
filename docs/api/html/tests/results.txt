@@ -14,7 +14,7 @@ tests/test_40_assess10.py .................                           [106/134]
 tests/test_40_assess20.py ...                                         [109/134]
 tests/test_40_assess30.py .........................                   [134/134]
 
-========================= 134 passed in 34.01 seconds ==========================
+========================= 134 passed in 33.95 seconds ==========================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
       1838        112        3.7       16.4
