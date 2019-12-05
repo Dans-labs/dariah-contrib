@@ -22,6 +22,7 @@ function givehelp {
     echo "docs        : build and serve github pages documentation"
     echo "docsapi     : generate api docs from docstrings, also in tests"
     echo "docsship msg: build docs, commit/push all code to github. msg=commit message"
+    echo "gits msg    : commits with msg and pushes repo to github"
     echo "serve       : start serving with Flask development server"
     echo "serve p     :     idem, but Flask development mode is off"
     echo "servetest   :     idem, but use test database"
@@ -33,7 +34,7 @@ function givehelp {
     echo "      prod db = dariah"
     echo "<task>:"
     echo "update      : fetch new code and deploy it on the server"
-    echo "activate36  : activate python36 in the shell"
+    echo "activate36  : activate python36 in a spawned shell"
     echo ""
     echo "    Both:"
     echo "      prod db = dariah"
@@ -88,7 +89,7 @@ fi
 mayrun="1"
 
 case "$1" in
-    dataxf|dbinitdev|docs|docsapi|docsship|serve|servetest|ship|stats)
+    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
@@ -152,6 +153,16 @@ function mongostop {
             echo "mongo daemon stopped"
         fi
     fi
+}
+
+# PYTHON 36
+
+function activate36here {
+    source /opt/rh/rh-python36/enable
+}
+
+function activate36spawn {
+    scl enable rh-python36 bash
 }
 
 # SETTING THE DIRECTORY AND LOCAL VARS
@@ -371,7 +382,7 @@ function updateprocess {
     # servestop
     cd $root
     gitpullforce
-    activate36
+    activate36here
     python3 -m compileall server
     # servestart
 }
@@ -383,7 +394,7 @@ function updateprocess {
 #   only call functions of level 0 and 1 or 2
 
 function activate36 {
-    scl enable rh-python36 bash
+    activate36spawn
 }
 
 function databu {
@@ -435,6 +446,10 @@ function dbroot {
 
 function dbroottest {
     dbrootreset "test"
+}
+
+function gits {
+    gitsave "$@"
 }
 
 function guni {
@@ -515,6 +530,9 @@ elif [[ "$1" == "docsship" ]]; then
 elif [[ "$1" == "guni" ]]; then
     shift
     guni "$@"
+elif [[ "$1" == "gits" ]]; then
+    shift
+    gits "$@"
 elif [[ "$1" == "gunitest" ]]; then
     shift
     gunitest "$@"
