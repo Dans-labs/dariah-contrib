@@ -16,6 +16,7 @@ function givehelp {
     echo "      test db = dariah_test"
     echo "      dev  db = dariah_dev"
     echo "<task>:"
+    echo "dataxf lab  : get backup from production directory under lab"
     echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
     echo "docs        : build and serve github pages documentation"
     echo "docsapi     : generate api docs from docstrings, also in tests"
@@ -38,6 +39,8 @@ function givehelp {
     echo "      dev  db = dariah_dev"
     echo "      test db = dariah_test"
     echo "<task>:"
+    echo "databu [lab]: dump the database into local directory under current date or lab"
+    echo "datarest lab: restore the database from local directory under lab"
     echo "dbinittest  : clean the test db in Mongo"
     echo "dbroot      : restore the root permissions: only the one user in base.yaml"
     echo "dbroottest  :     idem, but on test database"
@@ -62,16 +65,21 @@ DB_TEST="dariah_test"
 DB_DEV="dariah_dev"
 DB_PROD="dariah"
 
+BACKUP_PROD="/home/dirkr/backups"
+BACKUP_DEV=~/Documents/DANS/projects/has/backups
+
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     ON_DANS="1"
     APP_DIR="/opt/web-apps"
     DB=$DB_PROD
     MODE="production"
+    BACKUP=$BACKUP_PROD
 else
     ON_DANS="0"
     APP_DIR=~/github/Dans-labs
     DB=$DB_DEV
     MODE="development"
+    BACKUP=$BACKUP_DEV
 fi
 
 # IS THE COMMAND SUPPORTED ON THIS MACHINE ?
@@ -79,7 +87,7 @@ fi
 mayrun="1"
 
 case "$1" in
-    dbinitdev|docs|docsapi|docsship|serve|servetest|ship|stats)
+    dataxf|dbinitdev|docs|docsapi|docsship|serve|servetest|ship|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
@@ -87,7 +95,7 @@ case "$1" in
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
-    dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
+    databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
         mayrun="1";;
     *)
         mayrun="-1";;
@@ -148,6 +156,54 @@ apidocbase='docs/api/html'
 # All these functions:
 #   cd to the right dir
 #   do not call functions of level 1 or higher
+
+function datamanage {
+    if [[ "$1" == "backup" ]]; then
+        shift
+        if [[ "$1" != "" ]]; then
+            datastore="$1"
+        else
+            today=`date +'%Y-%m-%d'`
+            datastore="$BACKUP/$today"
+        fi
+        if [ -d "$datastore" ]; then
+            echo "Backup destination already exists: '$datastore'"
+        else
+            mkdir -p "$datastore"
+            direrror=$?
+            if [[ $direrror == 0 ]]; then
+                mongostart
+                mongodump -d $DB -o "$datastore"
+                echo "Database $DB backed up in $datastore"
+            else
+                echo "Could not create directory '$datastore'"
+            fi
+        fi
+    elif [[ "$1" == "restore" ]]; then
+        shift
+        if [[ "$1" == "" ]]; then
+            echo "No backup specified to restore from"
+        else
+            datastore="$BACKUP/$1"
+            if [ -d "$datastore" ]; then
+                mongostart
+                mongorestore --drop --nsFrom "$DB.*" --nsTo "$DB""_restored.*" "$datastore"
+                echo "Database $DB""_restored restored from $DB"
+            else
+                echo "Could not find directory '$datastore'"
+            fi
+        fi
+    elif [[ "$1" == "get" ]]; then
+        shift
+        if [[ "$1" == "" ]]; then
+            echo "No backup specified to restore from"
+        else
+            datastore="$BACKUP_PROD/$1"
+            cd $BACKUP_DEV
+            scp -r "dirkr@tclarin11.dans.knaw.nl:/$datastore" .
+        fi
+    fi
+}
 
 function dbdevinit {
     cd $root/import
@@ -314,6 +370,18 @@ function activate36 {
     scl enable rh-python36 bash
 }
 
+function databu {
+    datamanage backup "$@"
+}
+
+function datarest {
+    datamanage restore "$@"
+}
+
+function dataxf {
+    datamanage get "$@"
+}
+
 function dbinitdev {
     dbdevinit
 }
@@ -400,7 +468,16 @@ function update {
 #   parses arguments and calls level 2 functions or gives help
 
 
-if [[ "$1" == "dbinitdev" ]]; then
+if [[ "$1" == "databu" ]]; then
+    shift
+    databu "$@"
+elif [[ "$1" == "datarest" ]]; then
+    shift
+    datarest "$@"
+elif [[ "$1" == "dataxf" ]]; then
+    shift
+    dataxf "$@"
+elif [[ "$1" == "dbinitdev" ]]; then
     dbinitdev
 elif [[ "$1" == "dbinittest" ]]; then
     dbinittest
