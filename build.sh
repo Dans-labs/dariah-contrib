@@ -295,11 +295,24 @@ function testrun {
     fi
 }
 
+function updateprocess {
+    # servestop
+    cd $root
+    git pull origin master
+    activate36
+    python3 -m compileall server
+    # servestart
+}
+
 # LEVEL 2
 # All these functions:
 #   do not an explicit cd
 #   do not perform cd-sensitive shell commands
 #   only call functions of level 0 and 1 or 2
+
+function activate36 {
+    scl enable rh-python36 bash
+}
 
 function dbinitdev {
     dbdevinit
@@ -379,10 +392,7 @@ function testc {
 }
 
 function update {
-    servestop
-    gitpull
-    doupdate
-    servestart
+    updateprocess
 }
 
 # MAIN
@@ -422,7 +432,7 @@ elif [[ "$1" == "mongostop" ]]; then
 elif [[ "$1" == "serve" ]]; then
     serve
 elif [[ "$1" == "activate36" ]]; then
-    scl enable rh-python36 bash
+    activate36
 elif [[ "$1" == "servetest" ]]; then
     servetest
 elif [[ "$1" == "ship" ]]; then
