@@ -30,6 +30,7 @@
 from control.utils import EURO
 from conftest import USERS, AUTH_USERS, POWER_USERS
 
+DB = &#34;dariah_test&#34;
 
 WELCOME = &#34;Welcome to the DARIAH contribution tool&#34;
 OVERVIEW = &#34;Country selection&#34;
@@ -46,18 +47,18 @@ TITLE = &#34;No Title Yet&#34;
 ATITLE = &#34;assessment of {cTitle}&#34;
 NEW_A_TITLE = &#34;My contribution assessed&#34;
 
-TYPE = &#34;activity - resource creation&#34;
-TYPE2 = &#34;service - processing service&#34;
+TYPE = &#34;service - data hosting&#34;
+TYPE2 = &#34;activity - software development&#34;
 
 CHECKS = dict(
     description=(
-        &#34;&lt;h1&gt;Resource creation.&lt;/h1&gt;&#34;,
+        &#34;&lt;h1&gt;Data hosting.&lt;/h1&gt;&#34;,
         &#34;&lt;p&gt;This tool&#34;,
         &#34;&lt;li&gt;How, we&#34;,
         &#34;&lt;li&gt;More details&#34;,
     ),
     costDescription=(
-        &#34;&lt;h1&gt;Cost of resource creation.&lt;/h1&gt;&#34;,
+        &#34;&lt;h1&gt;Cost of data hosting.&lt;/h1&gt;&#34;,
         &#34;&lt;p&gt;There are&#34;,
         &#34;&lt;li&gt;The amount,&#34;,
         &#34;&lt;li&gt;More cost details&#34;,
@@ -65,7 +66,7 @@ CHECKS = dict(
 )
 
 
-VCC12 = &#34;VCC1,VCC2&#34;
+VCC12 = &#34;vcc1,vcc2&#34;
 URL_C = &#34;urlContribution&#34;
 URL_A = &#34;urlAcademic&#34;
 
@@ -91,17 +92,17 @@ CAPTIONS = (
     (&#34;All reviews&#34;, POWER_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
     (&#34;My reviews&#34;, AUTH_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
     (&#34;countries&#34;, POWER_USERS, 51, &#34;country&#34;, None),
-    (&#34;criteria&#34;, POWER_USERS, 32, &#34;criteria&#34;, None),
-    (&#34;disciplines&#34;, POWER_USERS, 28, None, None),
-    (&#34;keywords&#34;, POWER_USERS, 270, None, None),
+    (&#34;criteria&#34;, POWER_USERS, 7, &#34;criteria&#34;, None),
+    (&#34;disciplines&#34;, POWER_USERS, 3, None, None),
+    (&#34;keywords&#34;, POWER_USERS, 2, None, None),
     (&#34;packages&#34;, POWER_USERS, 2, None, None),
-    (&#34;score levels&#34;, POWER_USERS, 97, None, None),
-    (&#34;TADIRAH Activities&#34;, POWER_USERS, 8, &#34;TADIRAH Activity&#34;, None),
-    (&#34;TADIRAH Objects&#34;, POWER_USERS, 36, None, None),
-    (&#34;TADIRAH Techniques&#34;, POWER_USERS, 34, None, None),
-    (&#34;contribution types&#34;, POWER_USERS, 22, None, None),
+    (&#34;score levels&#34;, POWER_USERS, 20, None, None),
+    (&#34;TADIRAH Activities&#34;, POWER_USERS, 2, &#34;TADIRAH Activity&#34;, None),
+    (&#34;TADIRAH Objects&#34;, POWER_USERS, 3, None, None),
+    (&#34;TADIRAH Techniques&#34;, POWER_USERS, 4, None, None),
+    (&#34;contribution types&#34;, POWER_USERS, 5, None, None),
     (&#34;users&#34;, POWER_USERS, 11, None, None),
-    (&#34;vccs&#34;, POWER_USERS, 6, None, None),
+    (&#34;vccs&#34;, POWER_USERS, 2, None, None),
     (&#34;years&#34;, POWER_USERS, 20, None, None),
     (&#34;decisions&#34;, {&#34;system&#34;, &#34;root&#34;}, 3, None, None),
     (&#34;permission groups&#34;, {&#34;system&#34;, &#34;root&#34;}, 9, None, None),
@@ -142,12 +143,20 @@ USER_COUNTRY = dict(
 )
 &#34;&#34;&#34;Where the test users come from.&#34;&#34;&#34;
 
+N_CRITERIA_ENTRIES = {
+    &#34;service - data hosting&#34;: 2,
+    &#34;service - processing service&#34;: 2,
+    &#34;activity - resource creation&#34;: 4,
+    &#34;activity - software development&#34;: 3,
+    &#34;legacy - infrastructure&#34;: 1,
+}
+
 EXAMPLE = dict(
     description=[
         &#34;&#34;&#34;
-# Resource creation.
+# Data hosting.
 
-This tool creates resources.
+This tool hosts data.
 
 *   How, we don&#39;t know yet
 *   More details will follow.
@@ -157,7 +166,7 @@ This tool creates resources.
     costTotal=f&#34;{EURO} 103.456&#34;,
     costDescription=[
         &#34;&#34;&#34;
-# Cost of resource creation.
+# Cost of data hosting.
 
 There are costs.
 
@@ -188,167 +197,51 @@ SI🇸🇮
         &#34;\n&#34;
     ),
     vcc=&#34;&#34;&#34;
-Coordination
-VCC1
-VCC2
-VCC3
-VCC4
-Working Group
+vcc1
+vcc2
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     typeContribution=&#34;&#34;&#34;
 service - data hosting
 service - processing service
-service - support service
-service - access to resources
-activity - event
-activity - consulting
-activity - DARIAH coordination
 activity - resource creation
 activity - software development
+legacy - infrastructure
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     tadirahObject=&#34;&#34;&#34;
-Artifacts
-Bibliographic Listings
-Code
-Computers
-Curricula
-Data
-Digital Humanities
-File
-Images
-Images (3D)
-Infrastructure
-Interaction
-Language
-Link
-Literature
-Manuscript
-Map
-Metadata
-Methods
-Multimedia
-Multimodal
-Named Entities
-Persons
-Projects
-Research
-Research Process
-Research Results
-Sheet Music
-Software
-Sound
-Standards
-Text
-Text Bearing Objects
-Tools
-VREs
-Video
+object1
+object2
+object3
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     tadirahActivity=&#34;&#34;&#34;
-Analysis
-Capture
-Creation
-Dissemination
-Enrichment
-Interpretation
-Meta-Activities
-Storage
+activity1
+activity2
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     tadirahTechnique=&#34;&#34;&#34;
-Bit Stream Preservation &gt; Storage-Preservation
-Brainstorming
-Browsing
-Cluster Analysis &gt; Analysis-Stylistic Analysis
-Collocation Analysis &gt; Analysis- Structural Analysis
-Concordancing &gt; Analysis-Structural Analysis
-Debugging
-Distance Measures &gt; Analysis-Stylistic Analysis
-Durable Persistent Media &gt; Storage-Preservation
-Emulation &gt; Storage-Preservation
-Encoding
-Gamification &gt; Dissemination-Crowdsourcing
-Georeferencing &gt; Enrichment-Annotation
-Information Retrieval &gt; Analysis-Content Analysis
-Linked open data &gt; Enrichment-Annotation; Dissemination-Publishing
-Machine Learning &gt; Analysis-Structural Analysis; Analysis-Stylistic Analysis; Analysis-Content Analysis
-Mapping
-Migration &gt; Storage-Preservation
-Named Entity Recognition &gt; Enrichment-Annotation; Analysis-Content Analysis
-Open Archival Information Systems &gt; Storage-Preservation
-POS-Tagging &gt; Analysis-Structural Analysis
-Pattern Recognition &gt; Analysis-Relational Analysis
-Photography
-Preservation Metadata &gt; Storage-Preservation
-Principal Component Analysis &gt; Analysis-Stylistic Analysis
-Replication &gt; Storage-Preservation
-Scanning
-Searching
-Sentiment Analysis &gt; Analysis-Content Analysis
-Sequence Alignment &gt; Analysis-Relational Analysis
-Technology Preservation &gt; Storage-Preservation
-Topic Modeling &gt; Analysis-Content Analysis
-Versioning &gt; Storage-Preservation
-Web Crawling &gt; Capture-Gathering
+technique1
+technique2
+technique3
+technique4
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     discipline=&#34;&#34;&#34;
-Archaeology and Prehistory
-Architecture, space management
-Art and art history
-Biological anthropology
-Classical studies
-Communication sciences
-Cultural heritage and museology
-Demography
-Economies and finances
-Education
-Environmental studies
-Gender studies
-Geography
-History
-History, Philosophy and Sociology of Sciences
-Law
-Linguistics
-Literature
-Management
-Media studies
-Methods and statistics
-Musicology and performing arts
-Philosophy
-Political science
-Psychology
-Religions
-Social Anthropology and ethnology
-Sociology
+alpha
+beta
+gamma
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
     keyword=&#34;&#34;&#34;
-(socio-)linguistic analyses
-1795-2015
-3D modeling
-3D scanning
-Analyse quantitative
-Analysis-Stylistic Analysis
-Architecture
-Archives
-Arts
-Arts and Humanities
-Augmented reality
-Belgian justice
-Belgium
-Browsing
-Brussels
-Cœur du Hainaut
+static
+dynamic
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),

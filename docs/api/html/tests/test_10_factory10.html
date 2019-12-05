@@ -30,10 +30,6 @@
 <dl>
 <dt><a title="test_10_factory10.test_test" href="#test_10_factory10.test_test"><code>test_test()</code></a></dt>
 <dd>In development the <code>testing</code> attribute of the Flask app is False.</dd>
-<dt><a title="test_10_factory10.test_noTest" href="#test_10_factory10.test_noTest"><code>test_noTest()</code></a></dt>
-<dd>In production the <code>testing</code> attribute of the Flask app is True.</dd>
-<dt><a title="test_10_factory10.test_loginProd" href="#test_10_factory10.test_loginProd"><code>test_loginProd()</code></a></dt>
-<dd>In production we cannot login any of the test users.</dd>
 <dt><a title="test_10_factory10.test_login" href="#test_10_factory10.test_login"><code>test_login()</code></a></dt>
 <dd>In development we can login all test users.</dd>
 </dl>
@@ -54,12 +50,6 @@ How the app is set up, difference between production and development
 `test_test`
 :   In development the `testing` attribute of the Flask app is False.
 
-`test_noTest`
-:   In production the `testing` attribute of the Flask app is True.
-
-`test_loginProd`
-:   In production we cannot login any of the test users.
-
 `test_login`
 :   In development we can login all test users.
 
@@ -76,15 +66,6 @@ def test_start():
 
 def test_test(app):
     assert app.testing
-
-
-def test_noTest(appNotest):
-    assert not appNotest.testing
-
-
-def test_loginProd(clientProd, clients):
-    for user in clients:
-        assertStatus(clientProd, f&#34;/login?eppn={user}&#34;, False)
 
 
 def test_login(clientPublic, clients):
@@ -111,33 +92,6 @@ def test_login(clientPublic, clients):
 <pre><code class="python">def test_login(clientPublic, clients):
     for user in clients:
         assertStatus(clientPublic, f&#34;/login?eppn={user}&#34;, True)</code></pre>
-</details>
-</dd>
-<dt id="test_10_factory10.test_loginProd"><code class="name flex">
-<span>def <span class="ident">test_loginProd</span></span>(<span>clientProd, clients)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_loginProd(clientProd, clients):
-    for user in clients:
-        assertStatus(clientProd, f&#34;/login?eppn={user}&#34;, False)</code></pre>
-</details>
-</dd>
-<dt id="test_10_factory10.test_noTest"><code class="name flex">
-<span>def <span class="ident">test_noTest</span></span>(<span>appNotest)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_noTest(appNotest):
-    assert not appNotest.testing</code></pre>
 </details>
 </dd>
 <dt id="test_10_factory10.test_start"><code class="name flex">
@@ -183,8 +137,6 @@ def test_login(clientPublic, clients):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="test_10_factory10.test_login" href="#test_10_factory10.test_login">test_login</a></code></li>
-<li><code><a title="test_10_factory10.test_loginProd" href="#test_10_factory10.test_loginProd">test_loginProd</a></code></li>
-<li><code><a title="test_10_factory10.test_noTest" href="#test_10_factory10.test_noTest">test_noTest</a></code></li>
 <li><code><a title="test_10_factory10.test_start" href="#test_10_factory10.test_start">test_start</a></code></li>
 <li><code><a title="test_10_factory10.test_test" href="#test_10_factory10.test_test">test_test</a></code></li>
 </ul>

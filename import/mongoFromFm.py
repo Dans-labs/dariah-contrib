@@ -1,11 +1,3 @@
-# ARGS:
-#   (obligatory) production | development | test
-#   (optional) -r
-
-# if -r is present, no data conversion will be done,
-# In this case the role 'root' will be assigned to
-# the user configured as root user.
-
 import os
 import sys
 import re
@@ -17,35 +9,6 @@ from datetime import datetime, date
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from hashlib import md5
-
-runMode = sys.argv[1] if len(sys.argv) > 1 else None
-makeRoot = len(sys.argv) > 2 and sys.argv[2] == "-r"
-makeRootOnly = len(sys.argv) > 2 and sys.argv[2] == "-R"
-isDevel = runMode == "development"
-isTest = runMode == "test"
-
-
-def makeUserRoot(only=False):
-    with open("./config.yaml") as ch:
-        config = yaml.load(ch, Loader=yaml.FullLoader)
-    client = MongoClient()
-    db = client.dariah
-    rootData = config["rootUser"]
-    rootEppn = rootData[runMode]
-    rootRep = rootData["rootRole"]
-    fallbackRep = rootData["fallbackRole"]
-    permRoot = db.permissionGroup.find({"rep": rootRep}, {"_id": True})[0]["_id"]
-    permFallback = db.permissionGroup.find({"rep": fallbackRep}, {"_id": True})[0][
-        "_id"
-    ]
-    if only:
-        db.user.update_many(
-            {"group": permRoot},
-            {"$set": {"group": permFallback, "groupRep": fallbackRep}},
-        )
-    db.user.update_one(
-        {"eppn": rootEppn}, {"$set": {"group": permRoot, "groupRep": rootRep}},
-    )
 
 
 def info(x):
@@ -233,18 +196,9 @@ class FMConvert:
             config = yaml.load(ch, Loader=yaml.FullLoader)
         with open("./backoffice.yaml") as ch:
             config.update(yaml.load(ch, Loader=yaml.FullLoader))
-        baseDir = config["locations"][
-            "BASE_DIR_{}".format("DEVEL" if isDevel else "TEST" if isTest else "PROD")
-        ]
-        exportDir = config["locations"]["EXPORT_DIR"]
-        exportDirFull = os.path.expanduser(exportDir)
-        if not isTest and not os.path.exists(exportDirFull):
-            os.makedirs(exportDirFull, exist_ok=True)
 
         for (loc, path) in config["locations"].items():
-            config["locations"][loc] = os.path.expanduser(
-                path.format(b=baseDir, e=exportDir)
-            )
+            config["locations"][loc] = os.path.expanduser(path)
 
         self.config = config
 
@@ -637,33 +591,33 @@ class FMConvert:
 
         # LEGACY USERS: used as creator of non-contrib legacy records
 
-        if not isTest:
-            eppnSet = set()
-            for c in self.allData["contrib"]:
-                crsPre = [c.get(field, None) for field in ["creator"]]
-                crs = [x for x in crsPre if x is not None]
-                for cr in crs:
-                    eppnSet.add(cr)
+        eppnSet = set()
+        for c in self.allData["contrib"]:
+            crsPre = [c.get(field, None) for field in ["creator"]]
+            crs = [x for x in crsPre if x is not None]
+            for cr in crs:
+                eppnSet.add(cr)
 
-            for eppn in sorted(eppnSet):  # deterministic order
-                lu = dict(
-                    eppn=eppn,
-                    mayLogin=False,
-                    authority="legacy",
-                    group=groupMapping["auth"],
-                )
-                lu["_id"] = self.mongo.newId("user")
-                idMapping[lu["eppn"]] = lu["_id"]
-                existingUsers.append(lu)
+        for eppn in sorted(eppnSet):  # deterministic order
+            lu = dict(
+                eppn=eppn,
+                mayLogin=False,
+                authority="legacy",
+                group=groupMapping["auth"],
+            )
+            lu["_id"] = self.mongo.newId("user")
+            idMapping[lu["eppn"]] = lu["_id"]
+            existingUsers.append(lu)
 
         # TEST USERS: used in development and test modes only
 
         # deterministic order
         countryMapping = self.countryMapping
-        for testUser in self.testUsers if isDevel or isTest else []:
+        for testUser in self.testUsers:
             tu = dict(x for x in testUser.items())
             tu["group"] = groupMapping[tu["group"]]
-            tu["country"] = countryMapping[tu["country"]]
+            if "country" in tu:
+                tu["country"] = countryMapping[tu["country"]]
             tu["_id"] = self.mongo.newId("user")
             idMapping[tu["eppn"]] = tu["_id"]
             existingUsers.append(tu)
@@ -685,19 +639,15 @@ class FMConvert:
 
         # ADD the mongo IDs of legacy creators in the contrib records
 
-        if not isTest:
-            for c in self.allData["contrib"]:
-                c["creator"] = idMapping[c["creator"]]
+        for c in self.allData["contrib"]:
+            c["creator"] = idMapping[c["creator"]]
 
     def deleteTestUsers(self, db):
-        if isDevel:
-            for testUser in self.testUsers:
-                eppn = testUser["eppn"]
-                authority = testUser["authority"]
-                info("Deleting test user {} @ {}".format(eppn, authority))
-                db.user.delete_one(dict(eppn=eppn, authority=authority))
-        else:
-            db.user.delete_many({} if isTest else dict(authority=self.testAuthority))
+        for testUser in self.testUsers:
+            eppn = testUser["eppn"]
+            authority = testUser["authority"]
+            info("Deleting test user {} @ {}".format(eppn, authority))
+            db.user.delete_one(dict(eppn=eppn, authority=authority))
 
     def provenance(self):
         for c in self.allData["contrib"]:
@@ -833,20 +783,17 @@ class FMConvert:
                     del row["key"]
 
     def importMongo(self):
-        testBlankTables = set(self.testBlankTables)
+        database = self.database
         client = MongoClient()
-        db = client.dariah
+        db = client[database]
         self.deleteTestUsers(db)
         pristine = self.PRISTINE
         tableFmt = "| {:<20} |"
         lineFmt = " {:>4} |" * 6
         headFmt = tableFmt + lineFmt
         headings = "COLL EXST PRST MODF GENR TRBL INSR".split()
-        if isTest:
-            sys.stdout.write("RESET the TEST DATABASE ... ")
-        else:
-            info(
-                """LEGEND:
+        info(
+            """LEGEND:
 COLL = Collection
 EXST = documents existing before import
 PRST = pristine existing documents
@@ -855,101 +802,33 @@ GENR = generated documents
 TRBL = modified existing documents threatened by overwriting
 INSR = documents to be inserted, avoiding overwriting
 """
-            )
-            info(headFmt.format(*headings))
+        )
+        info(headFmt.format(*headings))
         for (mt, generatedRows) in self.allData.items():
-            skip = isTest and mt in testBlankTables
-
-            if not skip:
-                if not isTest:
-                    sys.stdout.write(tableFmt.format(mt))
-                generatedIds = {row["_id"] for row in generatedRows}
-                existingRows = list(db[mt].find({}, {"_id": True, pristine: True}))
-                existingPristineIds = {
-                    row["_id"] for row in existingRows if row.get(pristine, False)
-                }
-                existingNonPristineIds = {
-                    row["_id"] for row in existingRows if not row.get(pristine, False)
-                }
-                troubleIds = existingNonPristineIds & generatedIds
-                insertRows = (
-                    list(generatedRows)
-                    if isTest
-                    else [row for row in generatedRows if row["_id"] not in troubleIds]
+            sys.stdout.write(tableFmt.format(mt))
+            generatedIds = {row["_id"] for row in generatedRows}
+            existingRows = list(db[mt].find({}, {"_id": True, pristine: True}))
+            existingPristineIds = {
+                row["_id"] for row in existingRows if row.get(pristine, False)
+            }
+            existingNonPristineIds = {
+                row["_id"] for row in existingRows if not row.get(pristine, False)
+            }
+            troubleIds = existingNonPristineIds & generatedIds
+            insertRows = [row for row in generatedRows if row["_id"] not in troubleIds]
+            info(
+                lineFmt.format(
+                    len(existingRows),
+                    len(existingPristineIds),
+                    len(existingNonPristineIds),
+                    len(generatedIds),
+                    len(troubleIds),
+                    len(insertRows),
                 )
-                if not isTest:
-                    info(
-                        lineFmt.format(
-                            len(existingRows),
-                            len(existingPristineIds),
-                            len(existingNonPristineIds),
-                            len(generatedIds),
-                            len(troubleIds),
-                            len(insertRows),
-                        )
-                    )
-            if isTest:
-                db[mt].drop()
-            else:
-                db[mt].delete_many({pristine: True})
-            if not skip:
-                db[mt].insert_many(insertRows)
-        if isTest:
-            for mt in testBlankTables:
-                db[mt].drop()
-            sys.stdout.write("DONE\n")
-
-    def exportXlsx(self):
-        import xlsxwriter
-
-        workbook = xlsxwriter.Workbook(self.EXPORT_ORIG, {"strings_to_urls": False})
-        for mt in self.rawData:
-            worksheet = workbook.add_worksheet(mt)
-            for (f, field) in enumerate(self.rawFields[mt]):
-                worksheet.write(0, f, field)
-            for (r, row) in enumerate(self.rawData[mt]):
-                for (f, field) in enumerate(self.rawFields[mt]):
-                    val = row[field]
-                    val = [] if val is None else val if type(val) is list else [val]
-                    val = "|".join(val)
-                    worksheet.write(r + 1, f, val)
-        workbook.close()
-        return
-
-        workbook = xlsxwriter.Workbook(self.EXPORT_MONGO, {"strings_to_urls": False})
-
-        def getName(i):
-            self.mongo.getName(i)
-
-        for mt in self.allData:
-            if mt in self.backofficeTables:
-                continue
-            worksheet = workbook.add_worksheet(mt)
-            fields = sorted(self.allFields[mt])
-            for (f, field) in enumerate(fields):
-                worksheet.write(0, f, field)
-            for (r, row) in enumerate(self.allData[mt]):
-                for (f, field) in enumerate(fields):
-                    val = row.get(field, [])
-                    if field == "_id":
-                        val = getName(val)
-                    (ftype, fmult) = self.allFields[mt][field]
-                    val = [] if val is None else [val] if type(val) is not list else val
-                    exportVal = []
-                    for v in val:
-                        if type(v) is dict:
-                            exportVal.append(
-                                ",".join(
-                                    str(getName(vv) if kk == "_id" else vv)
-                                    for (kk, vv) in v.items()
-                                )
-                            )
-                        elif ftype == "date" or ftype == "datetime":
-                            exportVal.append(v if type(v) is str else v.isoformat())
-                        else:
-                            exportVal.append(str(v))
-                    worksheet.write(r + 1, f, " | ".join(exportVal))
-        workbook.close()
+            )
+            db[mt].delete_many({pristine: True})
+            db[mt].insert_many(insertRows)
+        sys.stdout.write("DONE\n")
 
     def run(self):
         self.moneyWarnings = {}
@@ -977,13 +856,6 @@ INSR = documents to be inserted, avoiding overwriting
         self.provenance()
         self.pristinize()
         self.importMongo()
-        # self.showData()
-        # self.showMoney()
-        if isDevel:
-            self.exportXlsx()
 
 
-if makeRoot or makeRootOnly:
-    makeUserRoot(only=makeRootOnly)
-else:
-    FMConvert().run()
+FMConvert().run()

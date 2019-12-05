@@ -66,6 +66,7 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G
 from example import (
+    DB,
     CONTRIB,
     VCC12,
     EXAMPLE,
@@ -122,7 +123,7 @@ def test_modifyVcc(clientOwner):
     field = "vcc"
     eid = G(G(recordInfo, CONTRIB), "eid")
     vccs = valueTables["vcc"]
-    vcc12 = [vccs["VCC1"], vccs["VCC2"]]
+    vcc12 = [vccs["vcc1"], vccs["vcc2"]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vcc12, VCC12), True)
 
 
@@ -131,7 +132,7 @@ def test_modifyVccWrong(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
     vccs = valueTables["vcc"]
     wrongValue = list(valueTables["tadirahObject"].values())[0]
-    vccVal = [wrongValue, vccs["VCC2"]]
+    vccVal = [wrongValue, vccs["vcc2"]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
 
 
@@ -139,7 +140,7 @@ def test_modifyVccError(clientOwner):
     field = "vcc"
     eid = G(G(recordInfo, CONTRIB), "eid")
     vccs = valueTables["vcc"]
-    vccVal = ["monkey", vccs["VCC2"]]
+    vccVal = ["monkey", vccs["vcc2"]]
     assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
 
 
@@ -235,6 +236,6 @@ def test_addMetaRight(clientOwner, clientOffice, field, value):
     assertModifyField(clientOwner, CONTRIB, eid, field, (None, ""), True)
 
     client = MongoClient()
-    mongo = client.dariah
+    mongo = client[DB]
     mid = list(mongo[field].find(dict(rep=value)))[0]["_id"]
     assertDelItem(clientOffice, field, mid, True)

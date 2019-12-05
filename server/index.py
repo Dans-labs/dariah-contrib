@@ -4,16 +4,15 @@ from control.utils import serverprint
 
 
 DEBUG = False
-TEST = False
 
 
-def factory(regime, **kwargs):
+def factory(regime, test, **kwargs):
     if regime not in {"production", "development"}:
         serverprint(f"REGIME: illegal value: {regime}")
         sys.exit()
     serverprint(f"REGIME: {regime}")
-    return appFactory(regime, DEBUG, TEST, **kwargs)
+    return appFactory(regime, test == "test", DEBUG, **kwargs)
 
 
 if __name__ == "__main__":
-    app = factory(None)
+    app = factory("development", "test")

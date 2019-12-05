@@ -5,53 +5,120 @@
 #   do not any cd
 #   do not call functions
 
-APP="dariah-contrib"
-
-HOST_TEST="tclarin11.dans.knaw.nl"
-HOST_PROD="clarin11.dans.knaw.nl"
-
-if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
-    APP_DIR="/opt/web-apps"
-else
-    APP_DIR="~/github/Dans-labs"
-fi
-
 function givehelp {
     if [[ "$1" != "help" && "$1" != "--help" && "$1" != "" ]]; then
         echo "Unknown argument '$1'"
     fi
     echo "./build.sh <task>"
-    echo "    where <task> is one of:"
-#    echo "python      : activate the version of python used for this app"
-    echo "mongo       : start mongo db daemon"
-    echo "mongostop   : start mongo db daemon"
-    echo "data dev    : convert legacy FileMaker data and import it into MongoDB"
-    echo "data test   : convert legacy FileMaker and trim it into a clean test db in Mongo"
-    echo "workflow    : (re)initialize the workflow table"
-    echo "serve prod  : start serving with flask server; 'prod': development mode is off"
-    echo "gserve      : start serving with gunicorn"
-    echo "stats       : collect codebase statistics"
+    echo "Management commands for development, testing, and production"
+    echo ""
+    echo "    Development only:"
+    echo "      test db = dariah_test"
+    echo "      dev  db = dariah_dev"
+    echo "<task>:"
+    echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
     echo "docs        : build and serve github pages documentation"
-    echo "pdoc        : generate api docs from docstrings, also in tests"
-    echo "test        : run all tests"
-    echo "testx       : run all tests, verbose"
+    echo "docsapi     : generate api docs from docstrings, also in tests"
+    echo "docsship msg: build docs, commit/push all code to github. msg=commit message"
+    echo "serve       : start serving with Flask development server"
+    echo "serve p     :     idem, but Flask development mode is off"
+    echo "servetest   :     idem, but use test database"
+    echo "servetest p :     idem, but Flask development mode is off"
+    echo "ship msg    : run tests, build docs, commit/push all code to github, msg=commit message"
+    echo "stats       : collect codebase statistics"
+    echo ""
+    echo "    Production only:"
+    echo "      prod db = dariah"
+    echo "<task>:"
+    echo "update      : fetch new code and deploy it on the server"
+    echo ""
+    echo "    Both:"
+    echo "      prod db = dariah"
+    echo "      dev  db = dariah_dev"
+    echo "      test db = dariah_test"
+    echo "<task>:"
+    echo "dbinittest  : clean the test db in Mongo"
+    echo "dbroot      : restore the root permissions: only the one user in base.yaml"
+    echo "dbroottest  :     idem, but on test database"
+    echo "dbwf        : (re)initialize the workflow table"
+    echo "dbwftest    :     idem, but on test database"
+    echo "guni        : start serving with gunicorn"
+    echo "gunitest    :     idem, but now with the test database"
+    echo "mongostart  : start mongo db daemon"
+    echo "mongostop   : start mongo db daemon"
+    echo "test       : run all tests"
     echo "testc       : run all tests with coverage"
-    echo "ship \$1      : run tests, build docs, commit/push all code to github. \$=commit message"
-    echo "shipdocs \$1  : build docs, commit/push all code to github. \$=commit message"
 }
 
+# WHERE ARE WE ?
+
+APP="dariah-contrib"
+
+HOST_TEST="tclarin11.dans.knaw.nl"
+HOST_PROD="clarin11.dans.knaw.nl"
+
+DB_TEST="dariah_test"
+DB_DEV="dariah_dev"
+DB_PROD="dariah"
+
+if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
+    ON_DANS="1"
+    APP_DIR="/opt/web-apps"
+    DB=$DB_PROD
+    MODE="production"
+else
+    ON_DANS="0"
+    APP_DIR=~/github/Dans-labs
+    DB=$DB_DEV
+    MODE="development"
+fi
+
+# IS THE COMMAND SUPPORTED ON THIS MACHINE ?
+
+mayrun="1"
+
+case "$1" in
+    dbinitdev|docs|docsapi|docsship|serve|servetest|ship|stats)
+        if [[ "$ON_DANS" == "1" ]]; then
+            mayrun="0"
+        fi;;
+    update)
+        if [[ "$ON_DANS" == "0" ]]; then
+            mayrun="0"
+        fi;;
+    dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
+        mayrun="1";;
+    *)
+        mayrun="-1";;
+esac
+
+if [[ "$mayrun" == "-1" ]]; then
+    givehelp "$@"
+    exit
+elif [[ "$mayrun" == "0" ]]; then
+    echo "not supported on $HOSTNAME"
+    exit
+fi
+
+# FUNCTIONS
+
 function setvars {
+    if [[ "$1" == "test" ]]; then
+        mode="test"
+    else
+        mode=normal
+    fi
     export PYTHONDONTWRITEBYTECODE=1
-    export FLASK_APP="index:factory('development')"
+    export FLASK_APP="index:factory('development', '$mode')"
     export FLASK_RUN_PORT=8001
-    if [[ "$1" != "prod" ]]; then
+    if [[ "$2" != "p" ]]; then
         export FLASK_ENV=development
     fi
 }
 
 # MONGO
 
-function startmongo {
+function mongostart {
     if [[ `ps aux | grep -v grep | grep mongod` ]]; then
         echo "mongo daemon already running"
     else
@@ -59,7 +126,7 @@ function startmongo {
     fi
 }
 
-function stopmongo {
+function mongostop {
     pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
     if [[ "$pid" == "" ]]; then
         echo "mongo daemon already stopped"
@@ -81,10 +148,40 @@ apidocbase='docs/api/html'
 #   cd to the right dir
 #   do not call functions of level 1 or higher
 
-function workflow {
+function dbdevinit {
+    cd $root/import
+    python3 mongoFromFm.py development
+}
+
+function dbrootreset {
     cd $root/server
-    startmongo
-    python3 workflow.py
+    python3 root.py "$MODE" "$1" --only
+}
+
+function dbtestinit {
+    cd $root/server/tests
+    python3 clean.py
+}
+
+function dbworkflowinit {
+    cd $root/server
+    mongostart
+    python3 workflow.py "$MODE" "$1"
+}
+
+function docsapiall {
+    cd $root/server
+    pdoc3 --force --html --output-dir "../$apidocbase" control
+    pdoc3 --force --html --output-dir "../$apidocbase/tests" tests/*.py
+}
+
+function docsmk {
+    cd $root
+    if [[ "$1" == "deploy" ]]; then
+        mkdocs gh-deploy
+    else
+        mkdocs serve
+    fi
 }
 
 function gitsave {
@@ -94,7 +191,48 @@ function gitsave {
     git push origin master
 }
 
-function codestats {
+function gunirun {
+    cd $root/server
+    mongostart
+    if [[ "$1" == "test" ]]; then
+        mode="test"
+    else
+        mode=$MODE
+    fi
+    if [[ "$1" != "" ]]; then
+        shift
+    fi
+    if [[ "$1" == "" ]]; then
+        workers=""
+    else
+        workers="-w $1"
+        shift
+    fi
+    echo "mode=$mode"
+    if [[ "$mode" == "dev" ]]; then
+        maxw='--worker-connections 1'
+    else
+        maxw=''
+    fi
+    host='-b 127.0.0.1:8001'
+    logfile='--access-logfile -'
+    fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
+    logformat="--access-logformat '$fmt'" 
+    gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+}
+
+function serverun {
+    cd $root/server
+    mongostart
+    if [[ "$1" == "test" ]]; then
+        mode="test"
+    else
+        mode=$MODE
+    fi
+    setvars "$mode"; python3 -m flask run
+}
+
+function stats {
     cd $root
     xd=".git,images,fonts,favicons"
     xdx=",tests"
@@ -110,9 +248,9 @@ function codestats {
     cat $rf
 }
 
-function runtestmode {
+function testrun {
     cd $root/server
-    startmongo
+    mongostart
     testmode="$1"
     shift
     dest="../docs"
@@ -156,100 +294,69 @@ function runtestmode {
     fi
 }
 
-function dataimport {
-    cd $root/import
-    startmongo
-    if [[ "$1" == "dev" ]]; then
-        python3 mongoFromFm.py development
-    elif [[ "$1" == "test" ]]; then
-        python3 mongoFromFm.py test
-    else
-        python3 mongoFromFm.py
-    fi
-}
-
-function serve {
-    cd $root/server
-    startmongo
-    setvars "$1"; python3 -m flask run
-}
-
-function gserve {
-    cd $root/server
-    startmongo
-    if [[ "$1" == "dev" ]]; then
-        mode="dev"
-    else
-        mode="prod"
-    fi
-    if [[ "$1" != "" ]]; then
-        shift
-    fi
-    if [[ "$1" == "" ]]; then
-        workers=""
-    else
-        workers="-w $1"
-        shift
-    fi
-    echo "mode=$mode"
-    if [[ "$mode" == "dev" ]]; then
-        maxw='--worker-connections 1'
-    else
-        maxw=''
-    fi
-    host='-b 127.0.0.1:8001'
-    logfile='--access-logfile -'
-    fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
-    logformat="--access-logformat '$fmt'" 
-    gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
-}
-
-function apidocs {
-    cd $root/server
-    pdoc3 --force --html --output-dir "../$apidocbase" control
-    pdoc3 --force --html --output-dir "../$apidocbase/tests" tests/*.py
-}
-
-function docsmk {
-    cd $root
-    if [[ "$1" == "deploy" ]]; then
-        mkdocs gh-deploy
-    else
-        mkdocs serve
-    fi
-}
-
-
 # LEVEL 2
 # All these functions:
 #   do not an explicit cd
 #   do not perform cd-sensitive shell commands
-#   only call functions of level 0 and 1
+#   only call functions of level 0 and 1 or 2
+
+function dbinitdev {
+    dbdevinit
+}
+
+function dbinittest {
+    dbtestinit
+}
+
+function dbwf {
+    dbworkflowinit
+}
+
+function dbwftest {
+    dbworkflowinit "test"
+}
 
 function docs {
-    codestats
-    apidocs
+    stats
+    docsapiall
     docsmk "$1"
 }
 
-function runtest {
-    testmode="$1"
-    if [[ "$testmode" == "plain" ]]; then
-        echo "RUNNING TESTS ..."
-    elif [[ "$testmode" == "cov" ]]; then
-        echo "RUNNING TESTS with COVERAGE ..."
-    else
-        echo "Unknown test mode: '$1'"
-        exit
-    fi
-    shift
+function docsship {
+    docs "deploy"
+    gitsave "docs update: $*"
+}
 
-    dataimport test
-    runtestmode $testmode "$@"
+function docsapi {
+    docsapiall
+}
+
+function dbroot {
+    dbrootreset 
+}
+
+function dbroottest {
+    dbrootreset "test"
+}
+
+function guni {
+    gunirun "" "$@"
+}
+
+function gunitest {
+    gunirun "test" "$@"
+}
+
+function serve {
+    serverun "" "$@"
+}
+
+function servetest {
+    serverun "test" "$@"
 }
 
 function ship {
-    runtest cov
+    testc
     if [[ $testerror != 0 ]]; then
         echo "SHIPPING ABORTED! ($testerror)"
         return
@@ -258,48 +365,76 @@ function ship {
     gitsave "ship: $*"
 }
 
-function shipdocs {
-    docs "deploy"
-    gitsave "docs update: $*"
+function test {
+    echo "RUNNING TESTS ..."
+    dbtestinit
+    testrun plain "$@"
+}
+
+function testc {
+    echo "RUNNING TESTS with COVERAGE ..."
+    dbtestinit
+    testrun cov "$@"
+}
+
+function update {
+    servestop
+    gitpull
+    doupdate
+    servestart
 }
 
 # MAIN
 #   does not do any explicit cd
 #   parses arguments and calls level 2 functions or gives help
 
-if [[ "$1" == "mongo" ]]; then
-    startmongo
-elif [[ "$1" == "mongostop" ]]; then
-    stopmongo
-elif [[ "$1" == "data" ]]; then
-    shift
-    dataimport "$1"
-elif [[ "$1" == "workflow" ]]; then
-    workflow
-elif [[ "$1" == "serve" ]]; then
-    shift
-    serve "$1"
-elif [[ "$1" == "gserve" ]]; then
-    shift
-    gserve "$@"
-elif [[ "$1" == "stats" ]]; then
-    codestats
+
+if [[ "$1" == "dbinitdev" ]]; then
+    dbinitdev
+elif [[ "$1" == "dbinittest" ]]; then
+    dbinittest
+elif [[ "$1" == "dbroottest" ]]; then
+    dbroottest
+elif [[ "$1" == "dbroot" ]]; then
+    dbroot
+elif [[ "$1" == "dbwf" ]]; then
+    dbwf
+elif [[ "$1" == "dbwftest" ]]; then
+    dbwftest
 elif [[ "$1" == "docs" ]]; then
     docs "serve"
-elif [[ "$1" == "pdoc" ]]; then
-    apidocs
-elif [[ "$1" == "test" ]]; then
+elif [[ "$1" == "docsapi" ]]; then
+    docsapi
+elif [[ "$1" == "docsship" ]]; then
     shift
-    runtest plain "$@"
-elif [[ "$1" == "testc" ]]; then
+    docsship "$@"
+elif [[ "$1" == "guni" ]]; then
     shift
-    runtest cov "$@"
+    guni "$@"
+elif [[ "$1" == "gunitest" ]]; then
+    shift
+    gunitest "$@"
+elif [[ "$1" == "mongostart" ]]; then
+    mongostart
+elif [[ "$1" == "mongostop" ]]; then
+    mongostop
+elif [[ "$1" == "serve" ]]; then
+    serve
+elif [[ "$1" == "servetest" ]]; then
+    servetest
 elif [[ "$1" == "ship" ]]; then
     shift
     ship "$@"
-elif [[ "$1" == "shipdocs" ]]; then
+elif [[ "$1" == "stats" ]]; then
+    stats
+elif [[ "$1" == "test" ]]; then
     shift
-    shipdocs "$@"
+    test "$@"
+elif [[ "$1" == "testc" ]]; then
+    shift
+    testc "$@"
+elif [[ "$1" == "update" ]]; then
+    update
 else
     givehelp "$@"
 fi

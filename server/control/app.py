@@ -75,7 +75,7 @@ def redirectResult(url, good):
     return redirect(url, code=code)
 
 
-def appFactory(regime, debug, test, **kwargs):
+def appFactory(regime, test, debug, **kwargs):
     """Creates the flask app that serves the website.
 
     We read a secret key from the system which is stored in a file outside the app.
@@ -89,10 +89,11 @@ def appFactory(regime, debug, test, **kwargs):
 
     Parameters
     ----------
-    debug: boolean
-        Whether to generate debug messages for certain actions.
+    regime: {development, production}
     test: boolean
         Whether the app is in test mode.
+    debug: boolean
+        Whether to generate debug messages for certain actions.
     kwargs: dict
         Additional parameters to tweak the behaviour of the Flask application.
         They will be passed to the object initializer `Flask()`.
@@ -114,7 +115,7 @@ def appFactory(regime, debug, test, **kwargs):
 
     GP = dict(methods=[N.GET, N.POST])
 
-    DB = Db(test=test)
+    DB = Db(regime, test=test)
     """*object* The `control.db.Db` singleton."""
 
     WF = Workflow(DB)

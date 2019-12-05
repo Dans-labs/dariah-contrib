@@ -9,7 +9,7 @@ There are also some functions that are even higher level, and have been
 factored out from concrete test functions.
 """
 
-from control.utils import pick as G
+from control.utils import pick as G, serverprint, E
 from conftest import USERS
 from example import (
     ASSESS,
@@ -217,6 +217,10 @@ def assertCaptions(client, expect):
             expItem in text
         else:
             (n, item) = findMainN(text)[0]
+            nX = f"=/={expNumber}" if n != str(expNumber) else E
+            iX = f"=/={expItem}" if item != expItem else E
+            if iX or nX:
+                serverprint(f"CAPTION {caption}: {n}{nX} {item}{iX}")
             assert n == str(expNumber)
             assert item == expItem
 

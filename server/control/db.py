@@ -5,6 +5,7 @@
 *   Caching values
 """
 
+import sys
 from itertools import chain
 from pymongo import MongoClient
 
@@ -29,8 +30,8 @@ CT = C.tables
 CF = C.workflow
 CW = C.web
 
+DATABASE = CB.database
 DEBUG = CB.debug
-
 CREATOR = CB.creator
 
 M_SET = CM.set
@@ -87,7 +88,7 @@ class Db:
         [PyMongo](https://api.mongodb.com/python/current/faq.html#is-pymongo-fork-safe).
     """
 
-    def __init__(self, test=False):
+    def __init__(self, regime, test=False):
         """## Initialization
 
         Pick up the connection to MongoDb.
@@ -96,12 +97,25 @@ class Db:
 
         Parameters
         ----------
+        regime: {"production", "development"}
+            See below
         test: boolean
             See below.
         """
 
+        self.regime = regime
+        """*string* Whether the app runs in production or in development."""
+
         self.test = test
         """*boolean* Whether to connect to the test database."""
+
+        database = G(DATABASE, N.test) if test else G(DATABASE, regime)
+        self.database = database
+
+        mode = f"""regime = {regime} {"test" if test else E}"""
+        if not self.database:
+            serverprint(f"""MONGO: no database configured for {mode}""")
+            sys.exit(1)
 
         self.client = None
         """*object* The MongoDb client."""
@@ -120,11 +134,16 @@ class Db:
         """
         self.collect()
 
-        self.creatorId = [
+        creator = [
             G(record, N._id)
             for record in self.user.values()
             if G(record, N.eppn) == CREATOR
-        ][0]
+        ]
+        if not creator:
+            serverprint(f"""DATABASE: no creator user found in {database}.user""")
+            sys.exit(1)
+
+        self.creatorId = creator[0]
         """*ObjectId* System user.
 
         There is a userId, fixed by configuration, that represents the system.
@@ -133,17 +152,29 @@ class Db:
         """
 
     def mongoOpen(self):
+        """Open connection with MongoDb.
+
+        Which database we open, depends on `Db.regime` and `Db.test`.
+        """
+
         client = self.client
         mongo = self.mongo
+        database = self.database
 
         if not mongo:
             client = MongoClient()
-            mongo = client.dariah
+            mongo = client[database]
             self.client = client
             self.mongo = mongo
-            serverprint("""MONGO: new connection""")
+            serverprint(f"""MONGO: new connection to {database}""")
 
     def mongoClose(self):
+        """Close connection with MongoDb.
+
+        We need this, because before we fork the process to workers,
+        all MongoDb connections should be closed.
+        """
+
         client = self.client
 
         if client:
@@ -196,7 +227,7 @@ class Db:
     def cacheValueTable(self, valueTable):
         """Caches the contents of a value table.
 
-        The tables will be cached as under two attributes:
+        The tables will be cached under two attributes:
 
         the name of the table
         :   dictionary keyed by id and valued by the corresponding record
@@ -211,7 +242,13 @@ class Db:
         """
 
         valueList = list(self.mongoCmd(N.collect, valueTable, N.find))
-        repField = N.iso if valueTable == N.country else N.rep
+        repField = (
+            N.iso
+            if valueTable == N.country
+            else N.eppn
+            if valueTable == N.user
+            else N.rep
+        )
 
         setattr(
             self, valueTable, {G(record, N._id): record for record in valueList},
@@ -239,11 +276,17 @@ class Db:
             After that, this worker will not execute it again.
             See also `recollect`.
 
-        !!! caution
+        !!! warning
             We must take other workers into account. They need a signal
             to recollect. See `recollect`.
             We store the time that this worker has collected each table
             in attribute `collected`.
+
+        !!! caution
+            If you change the MongoDb from without, an you forget to
+            put an appropriate time stamp, the app will not see it untill it
+            is restarted.
+            See for example how `root.makeUserRoot` handles this.
 
         !!! warning
             This is a complicated app.
@@ -325,14 +368,17 @@ class Db:
             self.cacheValueTable(table)
             collected[table] = now()
             affected = {table}
-            self.mongoCmd(
-                N.collect,
-                N.collect,
-                N.update_one,
-                {RECOLLECT_NAME: table},
-                {M_SET: {RECOLLECT_DATE: now()}},
-                upsert=True,
-            )
+        if affected:
+            justNow = now()
+            for aTable in affected:
+                self.mongoCmd(
+                    N.collect,
+                    N.collect,
+                    N.update_one,
+                    {RECOLLECT_NAME: aTable},
+                    {M_SET: {RECOLLECT_DATE: justNow}},
+                    upsert=True,
+                )
 
         self.collectActualItems(tables=affected)
 

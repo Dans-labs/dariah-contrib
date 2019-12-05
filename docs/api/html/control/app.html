@@ -102,7 +102,7 @@ def redirectResult(url, good):
     return redirect(url, code=code)
 
 
-def appFactory(regime, debug, test, **kwargs):
+def appFactory(regime, test, debug, **kwargs):
     &#34;&#34;&#34;Creates the flask app that serves the website.
 
     We read a secret key from the system which is stored in a file outside the app.
@@ -116,10 +116,11 @@ def appFactory(regime, debug, test, **kwargs):
 
     Parameters
     ----------
-    debug: boolean
-        Whether to generate debug messages for certain actions.
+    regime: {development, production}
     test: boolean
         Whether the app is in test mode.
+    debug: boolean
+        Whether to generate debug messages for certain actions.
     kwargs: dict
         Additional parameters to tweak the behaviour of the Flask application.
         They will be passed to the object initializer `Flask()`.
@@ -141,7 +142,7 @@ def appFactory(regime, debug, test, **kwargs):
 
     GP = dict(methods=[N.GET, N.POST])
 
-    DB = Db(test=test)
+    DB = Db(regime, test=test)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)
@@ -531,7 +532,7 @@ def appFactory(regime, debug, test, **kwargs):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="control.app.appFactory"><code class="name flex">
-<span>def <span class="ident">appFactory</span></span>(<span>regime, debug, test, **kwargs)</span>
+<span>def <span class="ident">appFactory</span></span>(<span>regime, test, debug, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Creates the flask app that serves the website.</p>
@@ -546,10 +547,12 @@ Before we fork, we close the MongoDb connection, because PyMongo is not
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>debug</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether to generate debug messages for certain actions.</dd>
+<dt><strong><code>regime</code></strong> :&ensp;{<code>development</code>, <code>production</code>}</dt>
+<dd>&nbsp;</dd>
 <dt><strong><code>test</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether the app is in test mode.</dd>
+<dt><strong><code>debug</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether to generate debug messages for certain actions.</dd>
 <dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Additional parameters to tweak the behaviour of the Flask application.
 They will be passed to the object initializer <code>Flask()</code>.</dd>
@@ -563,7 +566,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def appFactory(regime, debug, test, **kwargs):
+<pre><code class="python">def appFactory(regime, test, debug, **kwargs):
     &#34;&#34;&#34;Creates the flask app that serves the website.
 
     We read a secret key from the system which is stored in a file outside the app.
@@ -577,10 +580,11 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     Parameters
     ----------
-    debug: boolean
-        Whether to generate debug messages for certain actions.
+    regime: {development, production}
     test: boolean
         Whether the app is in test mode.
+    debug: boolean
+        Whether to generate debug messages for certain actions.
     kwargs: dict
         Additional parameters to tweak the behaviour of the Flask application.
         They will be passed to the object initializer `Flask()`.
@@ -602,7 +606,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     GP = dict(methods=[N.GET, N.POST])
 
-    DB = Db(test=test)
+    DB = Db(regime, test=test)
     &#34;&#34;&#34;*object* The `control.db.Db` singleton.&#34;&#34;&#34;
 
     WF = Workflow(DB)

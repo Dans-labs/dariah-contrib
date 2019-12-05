@@ -1,112 +1,15 @@
 locations:
-  BASE_DIR_DEVEL: ~/Documents/DANS/projects/has/dacs
-  BASE_DIR_TEST: ~/Documents/DANS/projects/has/dacs
-  BASE_DIR_PROD: /home/dirkr/dariah_data
-  FM_DIR: >-
-    {b}/fm
-  EXPORT_DIR: ~/github/Dans-labs/dariah-contrib/_temp
-  EXPORT_ORIG: >-
-    {e}/contribFromFileMaker.xlsx
-  EXPORT_MONGO: >-
-    {e}/contribInMongoDB.xlsx
+  FM_DIR: ~/Documents/DANS/projects/has/dacs/fm
 
 xml:
   FMNS: >-
     {http://www.filemaker.com/fmpxmlresult}
 
+database: dariah_dev
+
 testAuthority: local
 
-testBlankTables:
-  - contrib
-  - assessment
-  - assessmentLegacy
-  - review
-  - criteriaEntry
-  - reviewEntry
-
 testUsers:
-  - eppn: auth
-    email: auth@test.eu
-    firstName: Auth
-    lastName: Authenticated
-    country: DE
-    mayLogin: true
-    authority: local
-    group: auth
-  - eppn: coord
-    email: coord@test.eu
-    firstName: Coordinator
-    lastName: of Luxemburg
-    country: LU
-    mayLogin: true
-    authority: local
-    group: coord
-  - eppn: expert
-    email: expert@test.eu
-    firstName: Expert
-    lastName: Reviewer
-    country: FR
-    mayLogin: true
-    authority: local
-    group: auth
-  - eppn: final
-    email: final@test.eu
-    firstName: Final
-    lastName: Reviewer
-    country: IT
-    mayLogin: true
-    authority: local
-    group: auth
-  - eppn: mycoord
-    email: mycoord@test.eu
-    firstName: Coordinator
-    lastName: of Belgium
-    country: BE
-    mayLogin: true
-    authority: local
-    group: coord
-  - eppn: editor
-    email: editor@test.eu
-    firstName: Editor
-    lastName: for Owner
-    country: IE
-    mayLogin: true
-    authority: local
-    group: auth
-  - eppn: owner
-    email: owner@test.eu
-    firstName: Owner
-    lastName: of Contribution
-    country: BE
-    mayLogin: true
-    authority: local
-    group: auth
-  - eppn: office
-    email: office@test.eu
-    firstName: Office
-    lastName: of Dariah
-    country: PT
-    mayLogin: true
-    authority: local
-    group: office
-  - eppn: system
-    email: system@test.eu
-    firstName: System
-    lastName: of Tool
-    country: PL
-    mayLogin: true
-    authority: local
-    group: system
-  - eppn: root
-    email: root@test.eu
-    firstName: Root
-    lastName: of Development
-    country: NL
-    mayLogin: true
-    authority: local
-    group: root
-
-testUsersOld:
   - eppn: suzan
     email: suzan@test.eu
     firstName: Suzan
@@ -170,12 +73,6 @@ testUsersOld:
     mayLogin: true
     authority: local
     group: auth
-
-rootUser:
-  development: dirk
-  production: DirkRoorda@dariah.eu
-  rootRole: root
-  fallbackRole: office
 
 CREATOR:
   eppn: HaSProject

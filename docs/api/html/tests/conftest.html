@@ -108,15 +108,17 @@ For example: <strong>assigning</strong> reviewers to an assessment.</p>
 <dl>
 <dt><a title="client" href="client.html"><code>client</code></a></dt>
 <dd>Wrap the Flask test-<a title="client" href="client.html"><code>client</code></a> in something more capable.</dd>
-<dt><a title="starters" href="starters.html"><code>starters</code></a></dt>
+<dt><a title="clean" href="clean.html"><code>clean</code></a></dt>
+<dd>Provides a clean slate test database`</dd>
+<dt><code>starters</code></dt>
 <dd>Provide test functions with a well-defined initial state.</dd>
-<dt><a title="helpers" href="helpers.html"><code>helpers</code></a></dt>
+<dt><code>helpers</code></dt>
 <dd>Low-level library functions for testers.</dd>
-<dt><a title="subtest" href="subtest.html"><code>subtest</code></a></dt>
+<dt><code>subtest</code></dt>
 <dd>Higher-level <code>assert</code> functions.</dd>
-<dt><a title="example" href="example.html"><code>example</code></a></dt>
+<dt><code>example</code></dt>
 <dd>Concrete example values for testers to work with.</dd>
-<dt><a title="analysis" href="analysis.html"><code>analysis</code></a></dt>
+<dt><code>analysis</code></dt>
 <dd>Interpret the request log after testing.</dd>
 </dl>
 <h2 id="test-batches">Test batches</h2>
@@ -124,31 +126,31 @@ For example: <strong>assigning</strong> reviewers to an assessment.</p>
 in alphabetical order of the file names.</p>
 <h3 id="tests-setup">Tests: setup</h3>
 <dl>
-<dt><a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a></dt>
-<dd>How the app is set up, difference between production and development</dd>
-<dt><a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a></dt>
+<dt><code>test_10_factory10</code></dt>
+<dd>How the app is set up.</dd>
+<dt><code>test_20_users10</code></dt>
 <dd>Getting to know all users.</dd>
 </dl>
 <h3 id="tests-contributions">Tests: Contributions</h3>
 <dl>
-<dt><a title="test_30_contrib10" href="test_30_contrib10.html"><code>test_30_contrib10</code></a></dt>
+<dt><code>test_30_contrib10</code></dt>
 <dd>Getting started with contributions.</dd>
-<dt><a title="test_30_contrib20" href="test_30_contrib20.html"><code>test_30_contrib20</code></a></dt>
+<dt><code>test_30_contrib20</code></dt>
 <dd>Modifying contribution fields that are typed in by the user.</dd>
-<dt><a title="test_30_contrib30" href="test_30_contrib30.html"><code>test_30_contrib30</code></a></dt>
+<dt><code>test_30_contrib30</code></dt>
 <dd>Modifying contribution fields that have values in value tables.</dd>
-<dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
+<dt><code>test_30_contrib40</code></dt>
 <dd>Checking the visibility of sensitive fields.</dd>
 </dl>
 <h3 id="tests-assessments">Tests: assessments</h3>
 <dl>
-<dt><a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a></dt>
+<dt><code>test_40_assess10</code></dt>
 <dd>Starting an assessment.</dd>
-<dt><a title="test_40_assess20" href="test_40_assess20.html"><code>test_40_assess20</code></a></dt>
+<dt><code>test_40_assess20</code></dt>
 <dd>Starting a second assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code>test_40_assess30</code></dt>
 <dd>Filling out an assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code>test_40_assess30</code></dt>
 <dd>Assigning reviewers.</dd>
 </dl>
 <h3 id="tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</h3>
@@ -202,6 +204,9 @@ root | root | unique authenticated user that can assign office users and system 
 `client`
 :   Wrap the Flask test-`client` in something more capable.
 
+`clean`
+:   Provides a clean slate test database`
+
 `starters`
 :   Provide test functions with a well-defined initial state.
 
@@ -225,7 +230,7 @@ in alphabetical order of the file names.
 ### Tests: setup
 
 `test_10_factory10`
-:   How the app is set up, difference between production and development
+:   How the app is set up.
 
 `test_20_users10`
 :   Getting to know all users.
@@ -344,32 +349,7 @@ def app():
     Only a few tests are in production mode, see below.
     &#34;&#34;&#34;
 
-    yield appFactory(&#34;development&#34;, DEBUG, True)
-
-
-@pytest.fixture
-def appNotest():
-    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
-
-    yield appFactory(&#34;development&#34;, DEBUG, False)
-
-
-@pytest.fixture
-def appProd():
-    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
-
-    We only use this for verifying that test users cannot log in onto
-    the production app.
-    &#34;&#34;&#34;
-
-    yield appFactory(&#34;production&#34;, DEBUG, False)
-
-
-@pytest.fixture
-def clientProd(appProd):
-    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
-
-    return appProd.test_client()
+    yield appFactory(&#34;development&#34;, True, DEBUG)
 
 
 @pytest.fixture
@@ -516,45 +496,7 @@ def app():
     Only a few tests are in production mode, see below.
     &#34;&#34;&#34;
 
-    yield appFactory(&#34;development&#34;, DEBUG, True)</code></pre>
-</details>
-</dd>
-<dt id="conftest.appNotest"><code class="name flex">
-<span>def <span class="ident">appNotest</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Special app: development mode, but Flask test mode switched off.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def appNotest():
-    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
-
-    yield appFactory(&#34;development&#34;, DEBUG, False)</code></pre>
-</details>
-</dd>
-<dt id="conftest.appProd"><code class="name flex">
-<span>def <span class="ident">appProd</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Production app: production mode, but Flask test mode switched on.</p>
-<p>We only use this for verifying that test users cannot log in onto
-the production app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def appProd():
-    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
-
-    We only use this for verifying that test users cannot log in onto
-    the production app.
-    &#34;&#34;&#34;
-
-    yield appFactory(&#34;production&#34;, DEBUG, False)</code></pre>
+    yield appFactory(&#34;development&#34;, True, DEBUG)</code></pre>
 </details>
 </dd>
 <dt id="conftest.clientAuth"><code class="name flex">
@@ -667,22 +609,6 @@ def clientOffice(app):
 <pre><code class="python">@pytest.fixture
 def clientOwner(app):
     return makeClient(app, &#34;owner&#34;)</code></pre>
-</details>
-</dd>
-<dt id="conftest.clientProd"><code class="name flex">
-<span>def <span class="ident">clientProd</span></span>(<span>appProd)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Client accessing the production app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def clientProd(appProd):
-    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
-
-    return appProd.test_client()</code></pre>
 </details>
 </dd>
 <dt id="conftest.clientPublic"><code class="name flex">
@@ -825,8 +751,6 @@ def clientsPower(app):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="conftest.app" href="#conftest.app">app</a></code></li>
-<li><code><a title="conftest.appNotest" href="#conftest.appNotest">appNotest</a></code></li>
-<li><code><a title="conftest.appProd" href="#conftest.appProd">appProd</a></code></li>
 <li><code><a title="conftest.clientAuth" href="#conftest.clientAuth">clientAuth</a></code></li>
 <li><code><a title="conftest.clientCoord" href="#conftest.clientCoord">clientCoord</a></code></li>
 <li><code><a title="conftest.clientEditor" href="#conftest.clientEditor">clientEditor</a></code></li>
@@ -835,7 +759,6 @@ def clientsPower(app):
 <li><code><a title="conftest.clientMycoord" href="#conftest.clientMycoord">clientMycoord</a></code></li>
 <li><code><a title="conftest.clientOffice" href="#conftest.clientOffice">clientOffice</a></code></li>
 <li><code><a title="conftest.clientOwner" href="#conftest.clientOwner">clientOwner</a></code></li>
-<li><code><a title="conftest.clientProd" href="#conftest.clientProd">clientProd</a></code></li>
 <li><code><a title="conftest.clientPublic" href="#conftest.clientPublic">clientPublic</a></code></li>
 <li><code><a title="conftest.clientRoot" href="#conftest.clientRoot">clientRoot</a></code></li>
 <li><code><a title="conftest.clientSystem" href="#conftest.clientSystem">clientSystem</a></code></li>

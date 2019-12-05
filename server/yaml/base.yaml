@@ -3,6 +3,16 @@ secretFile: /opt/web-apps/dariah_jwt.secret
 shibKey: Shib-Session-ID
 creator: HaSProject
 
+database:
+  development: dariah_dev
+  test: dariah_test
+  production: dariah
+
+root:
+  dariah: DirkRoorda@dariah.eu
+  dariah_dev: dirk
+  dariah_test: root
+
 debug: false
 
 attributes:
@@ -22,5 +32,4 @@ objects:
 
 names:
   - DARIAH
-  - development
   - mail

@@ -16,6 +16,8 @@ TABLE_DIR = f"{SERVER_PATH}/tables"
 ALL = "all"
 NAMES = "names"
 
+TERSE = True
+
 
 class Config:
     pass
@@ -41,6 +43,10 @@ class Workflow:
     pass
 
 
+class Clean:
+    pass
+
+
 class Tables:
     @classmethod
     def showReferences(cls):
@@ -61,6 +67,7 @@ class Names:
     def getNames(source, val, doString=True, inner=False):
         names = set()
         pureNames = set()
+        good = True
 
         if type(val) is str:
             names = {val} if doString and Names.isName(val) else set()
@@ -83,8 +90,12 @@ class Names:
                                 f"NAMES in {source}: "
                                 f"WARNING: wrong type {type(val)} for {val}"
                             )
+                            good = False
                         else:
                             pureNames.add(val)
+        if not good:
+            serverprint("EXIT because of FATAL ERROR")
+            sys.exit()
         return names if inner else (pureNames, names)
 
     @classmethod
@@ -116,171 +127,178 @@ class Names:
         return {method for method in cls.__dict__ if callable(getattr(cls, method))}
 
 
-methodNames = Names.getMethods()
-allPureNames = set()
-allNames = set()
+def main():
+    methodNames = Names.getMethods()
+    allPureNames = set()
+    allNames = set()
 
-with os.scandir(CONFIG_DIR) as sd:
-    files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
-for configFile in files:
-    section = os.path.splitext(configFile)[0]
-    className = cap1(section)
-    classObj = globals()[className]
-    setattr(Config, section, classObj)
+    with os.scandir(CONFIG_DIR) as sd:
+        files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
+    for configFile in files:
+        section = os.path.splitext(configFile)[0]
+        className = cap1(section)
+        classObj = globals()[className]
+        setattr(Config, section, classObj)
 
-    with open(f"""{CONFIG_DIR}/{section}{CONFIG_EXT}""") as fh:
-        settings = yaml.load(fh, Loader=yaml.FullLoader)
+        with open(f"""{CONFIG_DIR}/{section}{CONFIG_EXT}""") as fh:
+            settings = yaml.load(fh, Loader=yaml.FullLoader)
 
-    for (subsection, subsettings) in settings.items():
-        if subsection != NAMES:
-            setattr(classObj, subsection, subsettings)
+        for (subsection, subsettings) in settings.items():
+            if subsection != NAMES:
+                setattr(classObj, subsection, subsettings)
 
-    (pureNames, names) = Names.addNames(configFile, settings)
-    allPureNames |= pureNames
-    allNames |= names
+        (pureNames, names) = Names.addNames(configFile, settings)
+        allPureNames |= pureNames
+        allNames |= names
 
+    N = Names
+    C = Config
+    CT = C.tables
 
-N = Names
-C = Config
-CT = C.tables
+    masters = {}
+    for (master, details) in CT.details.items():
+        for detail in details:
+            masters.setdefault(detail, set()).add(master)
+    setattr(CT, "masters", masters)
 
-masters = {}
-for (master, details) in CT.details.items():
-    for detail in details:
-        masters.setdefault(detail, set()).add(master)
-setattr(CT, "masters", masters)
+    with os.scandir(TABLE_DIR) as sd:
+        files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
+    for tableFile in files:
+        with open(f"""{TABLE_DIR}/{tableFile}""") as fh:
+            settings = yaml.load(fh, Loader=yaml.FullLoader)
+        (pureNames, names) = Names.addNames(configFile, settings)
+        allPureNames |= pureNames
+        allNames |= names
 
-with os.scandir(TABLE_DIR) as sd:
-    files = tuple(e.name for e in sd if e.is_file() and e.name.endswith(CONFIG_EXT))
-for tableFile in files:
-    with open(f"""{TABLE_DIR}/{tableFile}""") as fh:
-        settings = yaml.load(fh, Loader=yaml.FullLoader)
-    (pureNames, names) = Names.addNames(configFile, settings)
-    allPureNames |= pureNames
-    allNames |= names
-
-spuriousNames = allPureNames & allNames
-if spuriousNames:
-    serverprint(f"NAMES: {len(spuriousNames)} spurious names")
-    serverprint(", ".join(sorted(spuriousNames)))
-else:
-    serverprint(f"NAMES: No spurious names")
-
-NAME_RE = re.compile(r"""\bN\.[A-Za-z0-9_]+""")
-
-usedNames = set()
-
-for (top, subdirs, files) in os.walk("."):
-    for f in files:
-        if not f.endswith(".py"):
-            continue
-        path = f"{top}/{f}"
-        with open(path) as pf:
-            text = pf.read()
-            usedNames |= {name[2:] for name in set(NAME_RE.findall(text))}
-
-unusedNames = allPureNames - usedNames
-if unusedNames:
-    serverprint(f"NAMES: {len(unusedNames)} unused names")
-    serverprint(", ".join(sorted(unusedNames)))
-else:
-    serverprint(f"NAMES: No unused names")
-
-undefNames = usedNames - allPureNames - allNames - methodNames
-if undefNames:
-    serverprint(f"NAMES: {len(undefNames)} undefined names")
-    serverprint(", ".join(sorted(undefNames)))
-else:
-    serverprint(f"NAMES: No undefined names")
-
-serverprint(f"NAMES: {len(allPureNames | allNames):>4} defined in yaml files")
-serverprint(f"NAMES: {len(usedNames):>4} used in python code")
-
-if undefNames:
-    serverprint("EXIT because of a fatal error!")
-    sys.exit()
-
-tables = set()
-
-MAIN_TABLE = CT.userTables[0]
-USER_TABLES = set(CT.userTables)
-USER_ENTRY_TABLES = set(CT.userEntryTables)
-VALUE_TABLES = set(CT.valueTables)
-SCALAR_TYPES = CT.scalarTypes
-SCALAR_TYPE_SET = set(chain.from_iterable(SCALAR_TYPES.values()))
-PROV_SPECS = CT.prov
-VALUE_SPECS = CT.value
-CASCADE = CT.cascade
-
-tables = tables | USER_TABLES | USER_ENTRY_TABLES | VALUE_TABLES
-sortedTables = (
-    [MAIN_TABLE]
-    + sorted(USER_TABLES - {MAIN_TABLE})
-    + sorted(tables - USER_TABLES - {MAIN_TABLE})
-)
-
-reference = {}
-cascade = {}
-
-for table in tables:
-    specs = {}
-    tableFile = f"""{TABLE_DIR}/{table}{CONFIG_EXT}"""
-    if os.path.exists(tableFile):
-        with open(tableFile) as fh:
-            specs.update(yaml.load(fh, Loader=yaml.FullLoader))
+    spuriousNames = allPureNames & allNames
+    if spuriousNames:
+        serverprint(f"NAMES: {len(spuriousNames)} spurious names")
+        serverprint(", ".join(sorted(spuriousNames)))
     else:
-        specs.update(VALUE_SPECS)
-    specs.update(PROV_SPECS)
+        if not TERSE:
+            serverprint(f"NAMES: No spurious names")
 
-    for (field, fieldSpecs) in specs.items():
-        fieldType = G(fieldSpecs, N.type)
-        if fieldType and fieldType not in SCALAR_TYPE_SET:
-            cascaded = set(G(CASCADE, fieldType, default=[]))
-            if table in cascaded:
-                cascade.setdefault(fieldType, {}).setdefault(table, set()).add(field)
-            else:
-                reference.setdefault(fieldType, {}).setdefault(table, set()).add(field)
-    setattr(Tables, table, specs)
-    tables.add(table)
+    NAME_RE = re.compile(r"""\bN\.[A-Za-z0-9_]+""")
 
-    Names.addNames(table, specs)
+    usedNames = set()
 
-constrainedPre = {}
-for table in VALUE_TABLES:
-    fieldSpecs = getattr(Tables, table, {})
-    for (field, fieldSpec) in fieldSpecs.items():
-        tp = G(fieldSpec, N.type)
-        if tp in VALUE_TABLES and tp == field:
-            constrainedPre[table] = field
+    for (top, subdirs, files) in os.walk(SERVER_PATH):
+        for f in files:
+            if not f.endswith(".py"):
+                continue
+            path = f"{top}/{f}"
+            with open(path) as pf:
+                text = pf.read()
+                usedNames |= {name[2:] for name in set(NAME_RE.findall(text))}
 
-constrained = {}
-for table in tables:
-    fieldSpecs = getattr(Tables, table, {})
-    fields = set(fieldSpecs)
-    for (ctable, mfield) in constrainedPre.items():
-        if ctable in fields and mfield in fields:
-            ctp = G(fieldSpecs[ctable], N.type)
-            if ctp == ctable:
-                constrained[ctable] = mfield
+    unusedNames = allPureNames - usedNames
+    if unusedNames:
+        serverprint(f"NAMES: {len(unusedNames)} unused names")
+        serverprint(", ".join(sorted(unusedNames)))
+    else:
+        if not TERSE:
+            serverprint(f"NAMES: No unused names")
 
-setattr(Tables, ALL, tables)
-setattr(Tables, N.sorted, sortedTables)
-setattr(Tables, N.reference, reference)
-setattr(Tables, N.cascade, cascade)
-setattr(Tables, N.constrained, constrained)
+    undefNames = usedNames - allPureNames - allNames - methodNames
+    if undefNames:
+        serverprint(f"NAMES: {len(undefNames)} undefined names")
+        serverprint(", ".join(sorted(undefNames)))
+    else:
+        if not TERSE:
+            serverprint(f"NAMES: No undefined names")
 
-CF = C.workflow
+    if not TERSE:
+        serverprint(f"NAMES: {len(allPureNames | allNames):>4} defined in yaml files")
+        serverprint(f"NAMES: {len(usedNames):>4} used in python code")
 
-TASKS = CF.tasks
+    if undefNames:
+        serverprint("EXIT because of FATAL ERROR")
+        sys.exit()
 
-taskFields = {}
+    tables = set()
 
-for taskInfo in TASKS.values():
-    if G(taskInfo, N.operator) == N.set:
-        table = G(taskInfo, N.table)
-        taskFields.setdefault(table, set()).add(G(taskInfo, N.field))
-        dateField = G(taskInfo, N.date)
-        if dateField:
-            taskFields[table].add(dateField)
+    MAIN_TABLE = CT.userTables[0]
+    USER_TABLES = set(CT.userTables)
+    USER_ENTRY_TABLES = set(CT.userEntryTables)
+    VALUE_TABLES = set(CT.valueTables)
+    SCALAR_TYPES = CT.scalarTypes
+    SCALAR_TYPE_SET = set(chain.from_iterable(SCALAR_TYPES.values()))
+    PROV_SPECS = CT.prov
+    VALUE_SPECS = CT.value
+    CASCADE = CT.cascade
 
-setattr(Workflow, N.taskFields, taskFields)
+    tables = tables | USER_TABLES | USER_ENTRY_TABLES | VALUE_TABLES
+    sortedTables = (
+        [MAIN_TABLE]
+        + sorted(USER_TABLES - {MAIN_TABLE})
+        + sorted(tables - USER_TABLES - {MAIN_TABLE})
+    )
+
+    reference = {}
+    cascade = {}
+
+    for table in tables:
+        specs = {}
+        tableFile = f"""{TABLE_DIR}/{table}{CONFIG_EXT}"""
+        if os.path.exists(tableFile):
+            with open(tableFile) as fh:
+                specs.update(yaml.load(fh, Loader=yaml.FullLoader))
+        else:
+            specs.update(VALUE_SPECS)
+        specs.update(PROV_SPECS)
+
+        for (field, fieldSpecs) in specs.items():
+            fieldType = G(fieldSpecs, N.type)
+            if fieldType and fieldType not in SCALAR_TYPE_SET:
+                cascaded = set(G(CASCADE, fieldType, default=[]))
+                if table in cascaded:
+                    cascade.setdefault(fieldType, {}).setdefault(table, set()).add(field)
+                else:
+                    reference.setdefault(fieldType, {}).setdefault(table, set()).add(field)
+        setattr(Tables, table, specs)
+        tables.add(table)
+
+        Names.addNames(table, specs)
+
+    constrainedPre = {}
+    for table in VALUE_TABLES:
+        fieldSpecs = getattr(Tables, table, {})
+        for (field, fieldSpec) in fieldSpecs.items():
+            tp = G(fieldSpec, N.type)
+            if tp in VALUE_TABLES and tp == field:
+                constrainedPre[table] = field
+
+    constrained = {}
+    for table in tables:
+        fieldSpecs = getattr(Tables, table, {})
+        fields = set(fieldSpecs)
+        for (ctable, mfield) in constrainedPre.items():
+            if ctable in fields and mfield in fields:
+                ctp = G(fieldSpecs[ctable], N.type)
+                if ctp == ctable:
+                    constrained[ctable] = mfield
+
+    setattr(Tables, ALL, tables)
+    setattr(Tables, N.sorted, sortedTables)
+    setattr(Tables, N.reference, reference)
+    setattr(Tables, N.cascade, cascade)
+    setattr(Tables, N.constrained, constrained)
+
+    CF = C.workflow
+
+    TASKS = CF.tasks
+
+    taskFields = {}
+
+    for taskInfo in TASKS.values():
+        if G(taskInfo, N.operator) == N.set:
+            table = G(taskInfo, N.table)
+            taskFields.setdefault(table, set()).add(G(taskInfo, N.field))
+            dateField = G(taskInfo, N.date)
+            if dateField:
+                taskFields[table].add(dateField)
+
+    setattr(Workflow, N.taskFields, taskFields)
+
+
+main()

@@ -42,7 +42,7 @@ There are also some functions that are even higher level, and have been
 factored out from concrete test functions.
 &#34;&#34;&#34;
 
-from control.utils import pick as G
+from control.utils import pick as G, serverprint, E
 from conftest import USERS
 from example import (
     ASSESS,
@@ -250,6 +250,10 @@ def assertCaptions(client, expect):
             expItem in text
         else:
             (n, item) = findMainN(text)[0]
+            nX = f&#34;=/={expNumber}&#34; if n != str(expNumber) else E
+            iX = f&#34;=/={expItem}&#34; if item != expItem else E
+            if iX or nX:
+                serverprint(f&#34;CAPTION {caption}: {n}{nX} {item}{iX}&#34;)
             assert n == str(expNumber)
             assert item == expItem
 
@@ -508,6 +512,10 @@ of the new item will be read off.</p>
             expItem in text
         else:
             (n, item) = findMainN(text)[0]
+            nX = f&#34;=/={expNumber}&#34; if n != str(expNumber) else E
+            iX = f&#34;=/={expItem}&#34; if item != expItem else E
+            if iX or nX:
+                serverprint(f&#34;CAPTION {caption}: {n}{nX} {item}{iX}&#34;)
             assert n == str(expNumber)
             assert item == expItem</code></pre>
 </details>

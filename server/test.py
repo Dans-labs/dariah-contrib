@@ -11,4 +11,4 @@ sys.path.append(DOT)
 
 from index import factory  # noqa
 
-application = factory('production')
+application = factory('development', 'test')

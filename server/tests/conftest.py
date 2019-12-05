@@ -33,6 +33,9 @@ root | root | unique authenticated user that can assign office users and system 
 `client`
 :   Wrap the Flask test-`client` in something more capable.
 
+`clean`
+:   Provides a clean slate test database`
+
 `starters`
 :   Provide test functions with a well-defined initial state.
 
@@ -56,7 +59,7 @@ in alphabetical order of the file names.
 ### Tests: setup
 
 `test_10_factory10`
-:   How the app is set up, difference between production and development
+:   How the app is set up.
 
 `test_20_users10`
 :   Getting to know all users.
@@ -175,32 +178,7 @@ def app():
     Only a few tests are in production mode, see below.
     """
 
-    yield appFactory("development", DEBUG, True)
-
-
-@pytest.fixture
-def appNotest():
-    """Special app: development mode, but Flask test mode switched off."""
-
-    yield appFactory("development", DEBUG, False)
-
-
-@pytest.fixture
-def appProd():
-    """Production app: production mode, but Flask test mode switched on.
-
-    We only use this for verifying that test users cannot log in onto
-    the production app.
-    """
-
-    yield appFactory("production", DEBUG, False)
-
-
-@pytest.fixture
-def clientProd(appProd):
-    """Client accessing the production app."""
-
-    return appProd.test_client()
+    yield appFactory("development", True, DEBUG)
 
 
 @pytest.fixture

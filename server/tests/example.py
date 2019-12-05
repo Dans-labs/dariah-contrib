@@ -3,6 +3,7 @@
 from control.utils import EURO
 from conftest import USERS, AUTH_USERS, POWER_USERS
 
+DB = "dariah_test"
 
 WELCOME = "Welcome to the DARIAH contribution tool"
 OVERVIEW = "Country selection"
@@ -19,18 +20,18 @@ TITLE = "No Title Yet"
 ATITLE = "assessment of {cTitle}"
 NEW_A_TITLE = "My contribution assessed"
 
-TYPE = "activity - resource creation"
-TYPE2 = "service - processing service"
+TYPE = "service - data hosting"
+TYPE2 = "activity - software development"
 
 CHECKS = dict(
     description=(
-        "<h1>Resource creation.</h1>",
+        "<h1>Data hosting.</h1>",
         "<p>This tool",
         "<li>How, we",
         "<li>More details",
     ),
     costDescription=(
-        "<h1>Cost of resource creation.</h1>",
+        "<h1>Cost of data hosting.</h1>",
         "<p>There are",
         "<li>The amount,",
         "<li>More cost details",
@@ -38,7 +39,7 @@ CHECKS = dict(
 )
 
 
-VCC12 = "VCC1,VCC2"
+VCC12 = "vcc1,vcc2"
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
 
@@ -64,17 +65,17 @@ CAPTIONS = (
     ("All reviews", POWER_USERS, 0, "review", "reviews"),
     ("My reviews", AUTH_USERS, 0, "review", "reviews"),
     ("countries", POWER_USERS, 51, "country", None),
-    ("criteria", POWER_USERS, 32, "criteria", None),
-    ("disciplines", POWER_USERS, 28, None, None),
-    ("keywords", POWER_USERS, 270, None, None),
+    ("criteria", POWER_USERS, 7, "criteria", None),
+    ("disciplines", POWER_USERS, 3, None, None),
+    ("keywords", POWER_USERS, 2, None, None),
     ("packages", POWER_USERS, 2, None, None),
-    ("score levels", POWER_USERS, 97, None, None),
-    ("TADIRAH Activities", POWER_USERS, 8, "TADIRAH Activity", None),
-    ("TADIRAH Objects", POWER_USERS, 36, None, None),
-    ("TADIRAH Techniques", POWER_USERS, 34, None, None),
-    ("contribution types", POWER_USERS, 22, None, None),
+    ("score levels", POWER_USERS, 20, None, None),
+    ("TADIRAH Activities", POWER_USERS, 2, "TADIRAH Activity", None),
+    ("TADIRAH Objects", POWER_USERS, 3, None, None),
+    ("TADIRAH Techniques", POWER_USERS, 4, None, None),
+    ("contribution types", POWER_USERS, 5, None, None),
     ("users", POWER_USERS, 11, None, None),
-    ("vccs", POWER_USERS, 6, None, None),
+    ("vccs", POWER_USERS, 2, None, None),
     ("years", POWER_USERS, 20, None, None),
     ("decisions", {"system", "root"}, 3, None, None),
     ("permission groups", {"system", "root"}, 9, None, None),
@@ -115,12 +116,20 @@ USER_COUNTRY = dict(
 )
 """Where the test users come from."""
 
+N_CRITERIA_ENTRIES = {
+    "service - data hosting": 2,
+    "service - processing service": 2,
+    "activity - resource creation": 4,
+    "activity - software development": 3,
+    "legacy - infrastructure": 1,
+}
+
 EXAMPLE = dict(
     description=[
         """
-# Resource creation.
+# Data hosting.
 
-This tool creates resources.
+This tool hosts data.
 
 *   How, we don't know yet
 *   More details will follow.
@@ -130,7 +139,7 @@ This tool creates resources.
     costTotal=f"{EURO} 103.456",
     costDescription=[
         """
-# Cost of resource creation.
+# Cost of data hosting.
 
 There are costs.
 
@@ -161,167 +170,51 @@ SI🇸🇮
         "\n"
     ),
     vcc="""
-Coordination
-VCC1
-VCC2
-VCC3
-VCC4
-Working Group
+vcc1
+vcc2
 """.strip().split(
         "\n"
     ),
     typeContribution="""
 service - data hosting
 service - processing service
-service - support service
-service - access to resources
-activity - event
-activity - consulting
-activity - DARIAH coordination
 activity - resource creation
 activity - software development
+legacy - infrastructure
 """.strip().split(
         "\n"
     ),
     tadirahObject="""
-Artifacts
-Bibliographic Listings
-Code
-Computers
-Curricula
-Data
-Digital Humanities
-File
-Images
-Images (3D)
-Infrastructure
-Interaction
-Language
-Link
-Literature
-Manuscript
-Map
-Metadata
-Methods
-Multimedia
-Multimodal
-Named Entities
-Persons
-Projects
-Research
-Research Process
-Research Results
-Sheet Music
-Software
-Sound
-Standards
-Text
-Text Bearing Objects
-Tools
-VREs
-Video
+object1
+object2
+object3
 """.strip().split(
         "\n"
     ),
     tadirahActivity="""
-Analysis
-Capture
-Creation
-Dissemination
-Enrichment
-Interpretation
-Meta-Activities
-Storage
+activity1
+activity2
 """.strip().split(
         "\n"
     ),
     tadirahTechnique="""
-Bit Stream Preservation > Storage-Preservation
-Brainstorming
-Browsing
-Cluster Analysis > Analysis-Stylistic Analysis
-Collocation Analysis > Analysis- Structural Analysis
-Concordancing > Analysis-Structural Analysis
-Debugging
-Distance Measures > Analysis-Stylistic Analysis
-Durable Persistent Media > Storage-Preservation
-Emulation > Storage-Preservation
-Encoding
-Gamification > Dissemination-Crowdsourcing
-Georeferencing > Enrichment-Annotation
-Information Retrieval > Analysis-Content Analysis
-Linked open data > Enrichment-Annotation; Dissemination-Publishing
-Machine Learning > Analysis-Structural Analysis; Analysis-Stylistic Analysis; Analysis-Content Analysis
-Mapping
-Migration > Storage-Preservation
-Named Entity Recognition > Enrichment-Annotation; Analysis-Content Analysis
-Open Archival Information Systems > Storage-Preservation
-POS-Tagging > Analysis-Structural Analysis
-Pattern Recognition > Analysis-Relational Analysis
-Photography
-Preservation Metadata > Storage-Preservation
-Principal Component Analysis > Analysis-Stylistic Analysis
-Replication > Storage-Preservation
-Scanning
-Searching
-Sentiment Analysis > Analysis-Content Analysis
-Sequence Alignment > Analysis-Relational Analysis
-Technology Preservation > Storage-Preservation
-Topic Modeling > Analysis-Content Analysis
-Versioning > Storage-Preservation
-Web Crawling > Capture-Gathering
+technique1
+technique2
+technique3
+technique4
 """.strip().split(
         "\n"
     ),
     discipline="""
-Archaeology and Prehistory
-Architecture, space management
-Art and art history
-Biological anthropology
-Classical studies
-Communication sciences
-Cultural heritage and museology
-Demography
-Economies and finances
-Education
-Environmental studies
-Gender studies
-Geography
-History
-History, Philosophy and Sociology of Sciences
-Law
-Linguistics
-Literature
-Management
-Media studies
-Methods and statistics
-Musicology and performing arts
-Philosophy
-Political science
-Psychology
-Religions
-Social Anthropology and ethnology
-Sociology
+alpha
+beta
+gamma
 """.strip().split(
         "\n"
     ),
     keyword="""
-(socio-)linguistic analyses
-1795-2015
-3D modeling
-3D scanning
-Analyse quantitative
-Analysis-Stylistic Analysis
-Architecture
-Archives
-Arts
-Arts and Humanities
-Augmented reality
-Belgian justice
-Belgium
-Browsing
-Brussels
-Cœur du Hainaut
+static
+dynamic
 """.strip().split(
         "\n"
     ),

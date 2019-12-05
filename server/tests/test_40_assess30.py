@@ -111,6 +111,8 @@ from conftest import USERS, RIGHTFUL_USERS
 from example import (
     ASSESS,
     CRITERIA_ENTRY,
+    N_CRITERIA_ENTRIES,
+    TYPE,
 )
 from helpers import (
     findDetails,
@@ -152,13 +154,14 @@ def test_criteriaEntries(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
     ellips = "<div>...</div>"
     dtable = "criteriaEntry"
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
 
     def assertIt(cl, exp):
         (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
         criteriaEntries = findDetails(text, dtable)
         nEntries = len(criteriaEntries)
         if exp:
-            assert nEntries == 4
+            assert nEntries == expEntries
             for (cId, material) in criteriaEntries:
                 assert ellips in material
         else:
@@ -198,7 +201,8 @@ def test_fillEvidenceOwner(clientOwner):
 
     dtable = "criteriaEntry"
     criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
+    assert len(criteriaEntries) == expEntries
 
     for (i, (cId, material)) in enumerate(criteriaEntries):
         assert ellips in material

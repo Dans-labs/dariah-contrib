@@ -1,0 +1,628 @@
+country:
+  AM:
+    name: Armenia
+    latitude: 40
+    longitude: 45
+    isMember: false
+  AZ:
+    name: Azerbaijan
+    latitude: 40.5
+    longitude: 47.5
+    isMember: false
+  UZ:
+    name: Uzbekistan
+    latitude: 41
+    longitude: 64
+    isMember: false
+  VA:
+    name: Vatican State
+    latitude: 41.9
+    longitude: 12.4
+    isMember: false
+  AT:
+    name: Austria
+    latitude: 47.7
+    longitude: 15.11
+    isMember: true
+  BE:
+    name: Belgium
+    latitude: 51.3
+    longitude: 3.1
+    isMember: true
+  HR:
+    name: Croatia
+    latitude: 44.7
+    longitude: 15.6
+    isMember: true
+  CY:
+    name: Cyprus
+    latitude: 35.0
+    longitude: 32.8
+    isMember: true
+  CZ:
+    name: Czech Republic
+    latitude: 49.8
+    longitude: 15.2
+    isMember: false
+  DK:
+    name: Denmark
+    latitude: 55.6
+    longitude: 11.0
+    isMember: true
+  EE:
+    name: Estonia
+    latitude: 59.0
+    longitude: 25.0
+    isMember: false
+  FR:
+    name: France
+    latitude: 46.5
+    longitude: 1.9
+    isMember: true
+  DE:
+    name: Germany
+    latitude: 51.0
+    longitude: 10.4
+    isMember: true
+  GR:
+    name: Greece
+    latitude: 38.0
+    longitude: 23.8
+    isMember: true
+  HU:
+    name: Hungary
+    latitude: 46.9
+    longitude: 19.8
+    isMember: false
+  IE:
+    name: Ireland
+    latitude: 53.1
+    longitude: -8.4
+    isMember: true
+  IT:
+    name: Italy
+    latitude: 41.6
+    longitude: 13.0
+    isMember: true
+  LV:
+    name: Latvia
+    latitude: 56.9
+    longitude: 26.8
+    isMember: false
+  LT:
+    name: Lithuania
+    latitude: 55.2
+    longitude: 24.9
+    isMember: false
+  LU:
+    name: Luxembourg
+    latitude: 49.6
+    longitude: 6.1
+    isMember: true
+  MT:
+    name: Malta
+    latitude: 35.9
+    longitude: 14.4
+    isMember: true
+  NL:
+    name: Netherlands
+    latitude: 52.8
+    longitude: 5.8
+    isMember: true
+  PL:
+    name: Poland
+    latitude: 52.3
+    longitude: 19.8
+    isMember: true
+  PT:
+    name: Portugal
+    latitude: 38.7
+    longitude: -9.0
+    isMember: true
+  RS:
+    name: Serbia
+    latitude: 44.0
+    longitude: 20.8
+    isMember: true
+  SK:
+    name: Slovakia
+    latitude: 48.8
+    longitude: 19.9
+    isMember: false
+  SI:
+    name: Slovenia
+    latitude: 46.2
+    longitude: 14.4
+    isMember: true
+  CH:
+    name: Switzerland
+    latitude: 46.9
+    longitude: 8.3
+    isMember: false
+  GB:
+    name: United Kingdom
+    latitude: 52.9
+    longitude: -1.8
+    isMember: false
+  AL:
+    name: Albania
+    latitude: 41.1
+    longitude: 19.9
+    isMember: false
+  AD:
+    name: Andorra
+    latitude: 42.5
+    longitude: 1.6
+    isMember: false
+  BY:
+    name: Belarus
+    latitude: 53.8
+    longitude: 29.2
+    isMember: false
+  BA:
+    name: Bosnia and Herzegovina
+    latitude: 44.2
+    longitude: 18.2
+    isMember: false
+  BG:
+    name: Bulgaria
+    latitude: 42.9
+    longitude: 26.5
+    isMember: false
+  FI:
+    name: Finland
+    latitude: 63.3
+    longitude: 27.6
+    isMember: false
+  GE:
+    name: Georgia
+    latitude: 41.66
+    longitude: 43.68
+    isMember: false
+  IS:
+    name: Iceland
+    latitude: 65.0
+    longitude: -18.8
+    isMember: false
+  SM:
+    name: San Marino
+    latitude: 43.8
+    longitude: 12.3
+    isMember: false
+  KS:
+    name: Kosovo
+    latitude: 43.2
+    longitude: 21.9
+    isMember: false
+  LI:
+    name: Liechtenstein
+    latitude: 47.2
+    longitude: 9.4
+    isMember: false
+  MK:
+    name: Macedonia
+    latitude: 41.6
+    longitude: 21.8
+    isMember: false
+  MD:
+    name: Moldova
+    latitude: 47.3
+    longitude: 28.7
+    isMember: false
+  MC:
+    name: Monaco
+    latitude: 43.7
+    longitude: 7.4
+    isMember: false
+  ME:
+    name: Montenegro
+    latitude: 42.3
+    longitude: 19.2
+    isMember: false
+  "NO":
+    name: Norway
+    latitude: 62.0
+    longitude: 7.1
+    isMember: false
+  RO:
+    name: Romania
+    latitude: 45.8
+    longitude: 24.8
+    isMember: false
+  RU:
+    name: Russian Federation
+    latitude: 55.6
+    longitude: 37.7
+    isMember: false
+  ES:
+    name: Spain
+    latitude: 39.8
+    longitude: -3.4
+    isMember: false
+  SE:
+    name: Sweden
+    latitude: 59.5
+    longitude: 16.1
+    isMember: false
+  TR:
+    name: Turkey
+    latitude: 40.0
+    longitude: 32.8
+    isMember: false
+  UA:
+    name: Ukraine
+    latitude: 49.3
+    longitude: 32.6
+    isMember: false
+
+group:
+  - [auth,   authenticated user]
+  - [nobody, nobody]
+  - [office, management user]
+  - [own,    authenticated user and creator of records in question]
+  - [public, user without logging in]
+  - [root,   all powerful]
+  - [system, system administrator]
+  - [edit,   authenticated user and editor of records in question]
+  - [coord,  national coordinator]
+
+user:
+  - eppn: HaSProject
+    authority: DARIAH
+    mayLogin: false
+    group: office
+  - eppn: auth
+    email: auth@test.eu
+    firstName: Auth
+    lastName: Authenticated
+    country: DE
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: coord
+    email: coord@test.eu
+    firstName: Coordinator
+    lastName: of Luxemburg
+    country: LU
+    mayLogin: true
+    authority: local
+    group: coord
+  - eppn: expert
+    email: expert@test.eu
+    firstName: Expert
+    lastName: Reviewer
+    country: FR
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: final
+    email: final@test.eu
+    firstName: Final
+    lastName: Reviewer
+    country: IT
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: mycoord
+    email: mycoord@test.eu
+    firstName: Coordinator
+    lastName: of Belgium
+    country: BE
+    mayLogin: true
+    authority: local
+    group: coord
+  - eppn: editor
+    email: editor@test.eu
+    firstName: Editor
+    lastName: for Owner
+    country: IE
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: owner
+    email: owner@test.eu
+    firstName: Owner
+    lastName: of Contribution
+    country: BE
+    mayLogin: true
+    authority: local
+    group: auth
+  - eppn: office
+    email: office@test.eu
+    firstName: Office
+    lastName: of Dariah
+    country: PT
+    mayLogin: true
+    authority: local
+    group: office
+  - eppn: system
+    email: system@test.eu
+    firstName: System
+    lastName: of Tool
+    country: PL
+    mayLogin: true
+    authority: local
+    group: system
+  - eppn: root
+    email: root@test.eu
+    firstName: Root
+    lastName: of Development
+    country: NL
+    mayLogin: true
+    authority: local
+    group: root
+
+values:
+  keyword:
+  - static
+  - dynamic
+  discipline:
+  - alpha
+  - beta
+  - gamma
+  tadirahActivity:
+  - activity1
+  - activity2
+  tadirahObject:
+  - object1
+  - object2
+  - object3
+  tadirahTechnique:
+  - technique1
+  - technique2
+  - technique3
+  - technique4
+  vcc:
+  - vcc1
+  - vcc2
+
+decision:
+  order:
+    - accept
+    - reject
+    - revise
+  values:
+    accept:
+      acro: good
+      rep: Accept
+      participle: Accepted
+      sign: '✔'
+    reject:
+      acro: error
+      rep: Reject
+      participle: Rejected
+      sign: '✘'
+    revise:
+      acro: warning
+      rep: Revise
+      participle: Revision needed
+      sign: '✋'
+
+keyField:
+  package: title
+  typeContribution: subType
+  criteria: key
+  score: key
+
+procedure:
+  - name: typeContribution
+    rows:
+      - mainType: service
+        subType: data hosting
+        explanation:
+          - cloud storage
+      - mainType: service
+        subType: processing service
+        explanation:
+          - cloud computing
+      - mainType: activity
+        subType: resource creation
+        explanation:
+          - smart data entry
+      - mainType: activity
+        subType: software development
+        explanation:
+          - expertise
+          - facilities
+      - mainType: legacy
+        subType: infrastructure
+        explanation:
+          - design
+          - implementation
+
+  - name: package
+    rows:
+      - title: oldPackage
+        startDate: 2010-06-21T00:00:00
+        endDate: 2017-10-20T00:00:00
+        typeContribution:
+          - infrastructure
+        remarks:
+          - legacy package
+      - title: currentPackage
+        startDate: 2017-06-20T00:00:00
+        endDate: 2030-12-31T00:00:00
+        typeContribution:
+          - data hosting
+          - processing service
+          - resource creation
+          - software development
+        remarks:
+          - test package
+          - trimmed down
+
+  - name: criteria
+    rows:
+      - key: sv1
+        package: currentPackage
+        typeContribution:
+          - data hosting
+          - processing service
+          - resource creation
+          - software development
+        criterion: Support Contact Information
+        remarks:
+          - Provide contact details
+      - key: sv2
+        package: currentPackage
+        typeContribution:
+          - data hosting
+          - processing service
+        criterion: Details of underlying software
+        remarks:
+          - Free input or link to in-kind of type software.
+      - key: sv3
+        package: currentPackage
+        typeContribution:
+          - resource creation
+          - software development
+        criterion: Terms of use, license
+        remarks:
+          - Conditions of use of the software/resource(s) are clearly indicated.
+      - key: sv4
+        package: currentPackage
+        typeContribution:
+          - resource creation
+        criterion: Resource metadata
+        remarks:
+          - The information should contain the type of the resource
+      - key: sv5
+        package: currentPackage
+        typeContribution:
+          - resource creation
+        criterion: Stable Url
+        remarks:
+          - A stable URL where the resource is available
+      - key: sv6
+        package: currentPackage
+        typeContribution:
+          - software development
+        criterion: Version control
+        remarks:
+          - Code is maintained under version control and available via a public repository
+      - key: sv7
+        package: oldPackage
+        typeContribution:
+          - infrastructure
+        criterion: Details of the systems provided
+        remarks:
+          - Free input or link to documentation
+
+  - name: score
+    rows:
+      - key: sv1-0
+        criteria: sv1
+        score:  0
+        level: None
+        description: No contact details
+      - key: sv1-2
+        criteria: sv1
+        score:  2
+        level: Basic
+        description: An email address
+      - key: sv1-4
+        criteria: sv1
+        score:  4
+        level: Full
+        description: An email address plus pointers to support
+        remarks:
+          - issue tracker, helpdesk, feedback form
+      - key: sv2-0
+        criteria: sv2
+        score:  0
+        level: None
+        description: No information on underlying software.
+      - key: sv2-2
+        criteria: sv2
+        score:  2
+        level: Partial
+        description: Some information on underlying software.
+      - key: sv2-4
+        criteria: sv2
+        score:  4
+        level: Full
+        description: Link to the source code
+        remarks:
+          - Preferably the source code is held in accessible repository, e.g. Github.
+      - key: sv3-0
+        criteria: sv3
+        score:  0
+        level: None
+        description: No license information available
+      - key: sv3-2
+        criteria: sv3
+        score:  2
+        level: Partial
+        description: Restricted license applies
+      - key: sv3-4
+        criteria: sv3
+        score:  4
+        level: Comprehensive
+        description: Under an open or standard license
+      - key: sv4-0
+        criteria: sv4
+        score:  0
+        level: None
+        description: No description of the resource is provided
+      - key: sv4-2
+        criteria: sv4
+        score:  2
+        level: Partial
+        description: Only partial information of the resource
+      - key: sv4-4
+        criteria: sv4
+        score:  4
+        level: Complete
+        description: Full description
+        remarks:
+          - The description of the resource is fully provided
+      - key: sv5-0
+        criteria: sv5
+        score:  0
+        level: None
+        description: No url provided
+      - key: sv5-2
+        criteria: sv5
+        score:  2
+        level: Partial
+        description: A url to to resource is provided, but it is not stable
+      - key: sv5-4
+        criteria: sv5
+        score:  4
+        level: Complete
+        description: A stable url is provided
+        remarks:
+          - A persistent identifier, e.g. a DOI
+      - key: sv6-0
+        criteria: sv6
+        score:  0
+        level: None
+        description: No versioning and no sharing
+        remarks:
+          - There is no defined way of code versioning
+      - key: sv6-2
+        criteria: sv6
+        score:  2
+        level: Partial
+        description: Limited versioning or sharing
+        remarks:
+          - There is a code repository with versioning, but it is not available to the public.
+      - key: sv6-4
+        criteria: sv6
+        score:  4
+        level: Complete
+        description: Versioned and open
+        remarks:
+          - The code is available via a public code repository, e.g. Github.
+      - key: sv7-0
+        criteria: sv7
+        score:  0
+        level: None
+        description: No description of the infrastructure is provided
+      - key: sv7-4
+        criteria: sv7
+        score:  4
+        level: Complete
+        description: Full description
+        remarks:
+          - The description of the infrastructure is fully provided
