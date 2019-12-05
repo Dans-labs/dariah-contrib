@@ -129,20 +129,28 @@ function setvars {
 # MONGO
 
 function mongostart {
-    if [[ `ps aux | grep -v grep | grep mongod` ]]; then
-        echo "mongo daemon already running"
+    if [[ "$ON_DANS" == "1" ]]; then
+        service mongod start
     else
-        mongod -f /usr/local/etc/mongod.conf --fork
+        if [[ `ps aux | grep -v grep | grep mongod` ]]; then
+            echo "mongo daemon already running"
+        else
+            mongod -f /usr/local/etc/mongod.conf --fork
+        fi
     fi
 }
 
 function mongostop {
-    pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
-    if [[ "$pid" == "" ]]; then
-        echo "mongo daemon already stopped"
+    if [[ "$ON_DANS" == "1" ]]; then
+        service mongod stop
     else
-        kill $pid
-        echo "mongo daemon stopped"
+        pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
+        if [[ "$pid" == "" ]]; then
+            echo "mongo daemon already stopped"
+        else
+            kill $pid
+            echo "mongo daemon stopped"
+        fi
     fi
 }
 
