@@ -100,7 +100,7 @@ been submitted.</li>
 The office user fails because of a workflow condition:
 the assessment is withdrawn.</dd>
 <dt><a title="test_40_assess30.test_submitAssessmentRevised2" href="#test_40_assess30.test_submitAssessmentRevised2"><code>test_submitAssessmentRevised2()</code></a></dt>
-<dd>**owwner cannot submit this assessment as a revision.</dd>
+<dd><strong>owner</strong> cannot submit this assessment as a revision.</dd>
 <dt><a title="test_40_assess30.test_resubmitAssessment2" href="#test_40_assess30.test_resubmitAssessment2"><code>test_resubmitAssessment2()</code></a></dt>
 <dd><strong>owner</strong> re-submits this assessment.</dd>
 <dt><a title="test_40_assess30.test_assignReviewers4" href="#test_40_assess30.test_assignReviewers4"><code>test_assignReviewers4()</code></a></dt>
@@ -206,7 +206,7 @@ Filling out an assessment.
     the assessment is withdrawn.
 
 `test_submitAssessmentRevised2`
-:   **owwner cannot submit this assessment as a revision.
+:   **owner** cannot submit this assessment as a revision.
 
 `test_resubmitAssessment2`
 :   **owner** re-submits this assessment.
@@ -225,6 +225,8 @@ from conftest import USERS, RIGHTFUL_USERS
 from example import (
     ASSESS,
     CRITERIA_ENTRY,
+    N_CRITERIA_ENTRIES,
+    TYPE,
 )
 from helpers import (
     findDetails,
@@ -245,7 +247,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
 cIds = []
 ids = {}
 
@@ -267,13 +268,14 @@ def test_criteriaEntries(clients):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
     dtable = &#34;criteriaEntry&#34;
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
 
     def assertIt(cl, exp):
         (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
         criteriaEntries = findDetails(text, dtable)
         nEntries = len(criteriaEntries)
         if exp:
-            assert nEntries == 4
+            assert nEntries == expEntries
             for (cId, material) in criteriaEntries:
                 assert ellips in material
         else:
@@ -313,7 +315,8 @@ def test_fillEvidenceOwner(clientOwner):
 
     dtable = &#34;criteriaEntry&#34;
     criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
+    assert len(criteriaEntries) == expEntries
 
     for (i, (cId, material)) in enumerate(criteriaEntries):
         assert ellips in material
@@ -636,13 +639,14 @@ def test_assignReviewers4(clients, field, user):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     ellips = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
     dtable = &#34;criteriaEntry&#34;
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
 
     def assertIt(cl, exp):
         (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
         criteriaEntries = findDetails(text, dtable)
         nEntries = len(criteriaEntries)
         if exp:
-            assert nEntries == 4
+            assert nEntries == expEntries
             for (cId, material) in criteriaEntries:
                 assert ellips in material
         else:
@@ -700,7 +704,8 @@ def test_assignReviewers4(clients, field, user):
 
     dtable = &#34;criteriaEntry&#34;
     criteriaEntries = findDetails(text, dtable)
-    assert len(criteriaEntries) == 4
+    expEntries = N_CRITERIA_ENTRIES[TYPE]
+    assert len(criteriaEntries) == expEntries
 
     for (i, (cId, material)) in enumerate(criteriaEntries):
         assert ellips in material

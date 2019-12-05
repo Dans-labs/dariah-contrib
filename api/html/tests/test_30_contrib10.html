@@ -46,13 +46,11 @@ All users should see 1 contribution now.</dd>
 <dt><a title="test_30_contrib10.test_fields" href="#test_30_contrib10.test_fields"><code>test_fields()</code></a></dt>
 <dd><strong>owner</strong> sees that year, country and some
 other fields are pre-filled with appropriate values</dd>
-</dl>
-<p><a title="test_30_contrib10.test_makeEditorAll" href="#test_30_contrib10.test_makeEditorAll"><code>test_makeEditorAll()</code></a>
-All users try to make <strong>editor</strong> editor of this contribution.
-Only some succeed, and remove <strong>editor</strong> again.</p>
-<p><a title="test_30_contrib10.test_makeEditorOwner" href="#test_30_contrib10.test_makeEditorOwner"><code>test_makeEditorOwner()</code></a>
-<strong>owner</strong> makes <strong>editor</strong> editor of this contribution.</p>
-<dl>
+<dt><a title="test_30_contrib10.test_makeEditorAll" href="#test_30_contrib10.test_makeEditorAll"><code>test_makeEditorAll()</code></a></dt>
+<dd>All users try to make <strong>editor</strong> editor of this contribution.
+Only some succeed, and remove <strong>editor</strong> again.</dd>
+<dt><a title="test_30_contrib10.test_makeEditorOwner" href="#test_30_contrib10.test_makeEditorOwner"><code>test_makeEditorOwner()</code></a></dt>
+<dd><strong>owner</strong> makes <strong>editor</strong> editor of this contribution.</dd>
 <dt><a title="test_30_contrib10.test_sidebar3" href="#test_30_contrib10.test_sidebar3"><code>test_sidebar3()</code></a></dt>
 <dd>All users check the entries in the sidebar.
 The editor should now also see the contribution is <code>mylist</code>.</dd>
@@ -96,11 +94,11 @@ Getting started with contributions.
     other fields are pre-filled with appropriate values
 
 `test_makeEditorAll`
-    All users try to make **editor** editor of this contribution.
+:   All users try to make **editor** editor of this contribution.
     Only some succeed, and remove **editor** again.
 
 `test_makeEditorOwner`
-    **owner** makes **editor** editor of this contribution.
+:   **owner** makes **editor** editor of this contribution.
 
 `test_sidebar3`
 :   All users check the entries in the sidebar.
@@ -116,6 +114,7 @@ from conftest import USERS
 from example import (
     BELGIUM,
     CONTRIB,
+    TITLE,
 )
 from helpers import forall
 from starters import start
@@ -129,8 +128,6 @@ from subtest import (
 
 recordInfo = {}
 valueTables = {}
-
-TITLE = &#34;No Title Yet&#34;
 
 
 def test_start(clientOffice):

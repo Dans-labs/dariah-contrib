@@ -37,34 +37,14 @@ to be tested and the web clients to exercise functions in those objects.</p>
 </thead>
 <tbody>
 <tr>
-<td>owner</td>
-<td>auth</td>
-<td>authenticated user from Belgium, creates and assesses a contribution</td>
+<td>HaSProject</td>
+<td>-</td>
+<td>user that cannot login, author of legacy stuff and system objects</td>
 </tr>
 <tr>
-<td>editor</td>
-<td>auth</td>
-<td>authenticated user, added as editor of the above contribution</td>
-</tr>
-<tr>
-<td>mycoord</td>
-<td>coord</td>
-<td>the national coordinator of Belgium</td>
-</tr>
-<tr>
-<td>coord</td>
-<td>coord</td>
-<td>any national coordinator, not from Belgium, in this case: Luxemburg</td>
-</tr>
-<tr>
-<td>expert</td>
-<td>auth</td>
-<td>authenticated user, expert reviewer for the above contribution</td>
-</tr>
-<tr>
-<td>final</td>
-<td>auth</td>
-<td>authenticated user, final reviewer for the above contribution</td>
+<td>public</td>
+<td>public</td>
+<td>any unauthenticated user</td>
 </tr>
 <tr>
 <td>auth</td>
@@ -72,53 +52,105 @@ to be tested and the web clients to exercise functions in those objects.</p>
 <td>any authenticated user without special rights</td>
 </tr>
 <tr>
-<td>public</td>
-<td>public</td>
-<td>any unauthenticated user</td>
+<td>coord</td>
+<td>coord</td>
+<td>any national coordinator, from Luxemburg, but that is not relevant</td>
+</tr>
+<tr>
+<td>mycoord</td>
+<td>coord</td>
+<td>the national coordinator of Belgium</td>
+</tr>
+<tr>
+<td>expert</td>
+<td>auth</td>
+<td>authenticated user, expert reviewer of a test contribution</td>
+</tr>
+<tr>
+<td>final</td>
+<td>auth</td>
+<td>authenticated user, final reviewer of a test contribution</td>
+</tr>
+<tr>
+<td>editor</td>
+<td>auth</td>
+<td>authenticated user, added as editor of a test contribution</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>auth</td>
+<td>authenticated user from Belgium, creates and assesses a contribution</td>
+</tr>
+<tr>
+<td>office</td>
+<td>office</td>
+<td>authenticated user of the DARIAH backoffice</td>
+</tr>
+<tr>
+<td>system</td>
+<td>system</td>
+<td>authenticated user and system administrator</td>
+</tr>
+<tr>
+<td>root</td>
+<td>root</td>
+<td>unique authenticated user that can assign office users and system admins</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Although it seems that <code>root</code> and <code>system</code> are more powerful than <code>office</code>,
+there are things that they cannot do but <code>office</code> can.
+For example: <strong>assigning</strong> reviewers to an assessment.</p>
+</div>
 <h2 id="auxiliary">Auxiliary</h2>
 <dl>
-<dt><a title="starters" href="starters.html"><code>starters</code></a></dt>
+<dt><a title="client" href="client.html"><code>client</code></a></dt>
+<dd>Wrap the Flask test-<a title="client" href="client.html"><code>client</code></a> in something more capable.</dd>
+<dt><a title="clean" href="clean.html"><code>clean</code></a></dt>
+<dd>Provides a clean slate test database`</dd>
+<dt><code>starters</code></dt>
 <dd>Provide test functions with a well-defined initial state.</dd>
-<dt><a title="helpers" href="helpers.html"><code>helpers</code></a></dt>
+<dt><code>helpers</code></dt>
 <dd>Low-level library functions for testers.</dd>
-<dt><a title="subtest" href="subtest.html"><code>subtest</code></a></dt>
+<dt><code>subtest</code></dt>
 <dd>Higher-level <code>assert</code> functions.</dd>
-<dt><a title="example" href="example.html"><code>example</code></a></dt>
+<dt><code>example</code></dt>
 <dd>Concrete example values for testers to work with.</dd>
+<dt><code>analysis</code></dt>
+<dd>Interpret the request log after testing.</dd>
 </dl>
 <h2 id="test-batches">Test batches</h2>
 <p>The following files can be run individually, or as part of an all-tests-run,
 in alphabetical order of the file names.</p>
 <h3 id="tests-setup">Tests: setup</h3>
 <dl>
-<dt><a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a></dt>
-<dd>How the app is set up, difference between production and development</dd>
-<dt><a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a></dt>
+<dt><code>test_10_factory10</code></dt>
+<dd>How the app is set up.</dd>
+<dt><code>test_20_users10</code></dt>
 <dd>Getting to know all users.</dd>
 </dl>
-<h3 id="contributions">Contributions</h3>
+<h3 id="tests-contributions">Tests: Contributions</h3>
 <dl>
-<dt><a title="test_30_contrib10" href="test_30_contrib10.html"><code>test_30_contrib10</code></a></dt>
+<dt><code>test_30_contrib10</code></dt>
 <dd>Getting started with contributions.</dd>
-<dt><a title="test_30_contrib20" href="test_30_contrib20.html"><code>test_30_contrib20</code></a></dt>
+<dt><code>test_30_contrib20</code></dt>
 <dd>Modifying contribution fields that are typed in by the user.</dd>
-<dt><a title="test_30_contrib30" href="test_30_contrib30.html"><code>test_30_contrib30</code></a></dt>
+<dt><code>test_30_contrib30</code></dt>
 <dd>Modifying contribution fields that have values in value tables.</dd>
-<dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
+<dt><code>test_30_contrib40</code></dt>
 <dd>Checking the visibility of sensitive fields.</dd>
 </dl>
 <h3 id="tests-assessments">Tests: assessments</h3>
 <dl>
-<dt><a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a></dt>
+<dt><code>test_40_assess10</code></dt>
 <dd>Starting an assessment.</dd>
-<dt><a title="test_40_assess20" href="test_40_assess20.html"><code>test_40_assess20</code></a></dt>
+<dt><code>test_40_assess20</code></dt>
 <dd>Starting a second assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code>test_40_assess30</code></dt>
 <dd>Filling out an assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code>test_40_assess30</code></dt>
 <dd>Assigning reviewers.</dd>
 </dl>
 <h3 id="tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</h3>
@@ -149,16 +181,31 @@ to be tested and the web clients to exercise functions in those objects.
 
 name | role | remarks
 --- | --- | ---
-owner | auth | authenticated user from Belgium, creates and assesses a contribution
-editor | auth | authenticated user, added as editor of the above contribution
-mycoord | coord | the national coordinator of Belgium
-coord | coord | any national coordinator, not from Belgium, in this case: Luxemburg
-expert | auth | authenticated user, expert reviewer for the above contribution
-final | auth | authenticated user, final reviewer for the above contribution
-auth | auth | any authenticated user without special rights
+HaSProject | - | user that cannot login, author of legacy stuff and system objects
 public | public | any unauthenticated user
+auth | auth | any authenticated user without special rights
+coord | coord | any national coordinator, from Luxemburg, but that is not relevant
+mycoord | coord | the national coordinator of Belgium
+expert | auth | authenticated user, expert reviewer of a test contribution
+final | auth | authenticated user, final reviewer of a test contribution
+editor | auth | authenticated user, added as editor of a test contribution
+owner | auth | authenticated user from Belgium, creates and assesses a contribution
+office | office | authenticated user of the DARIAH backoffice
+system | system | authenticated user and system administrator
+root | root | unique authenticated user that can assign office users and system admins
+
+!!! caution
+    Although it seems that `root` and `system` are more powerful than `office`,
+    there are things that they cannot do but `office` can.
+    For example: **assigning** reviewers to an assessment.
 
 ## Auxiliary
+
+`client`
+:   Wrap the Flask test-`client` in something more capable.
+
+`clean`
+:   Provides a clean slate test database`
 
 `starters`
 :   Provide test functions with a well-defined initial state.
@@ -172,6 +219,9 @@ public | public | any unauthenticated user
 `example`
 :   Concrete example values for testers to work with.
 
+`analysis`
+:   Interpret the request log after testing.
+
 ## Test batches
 
 The following files can be run individually, or as part of an all-tests-run,
@@ -180,12 +230,12 @@ in alphabetical order of the file names.
 ### Tests: setup
 
 `test_10_factory10`
-:   How the app is set up, difference between production and development
+:   How the app is set up.
 
 `test_20_users10`
 :   Getting to know all users.
 
-### Contributions
+### Tests: Contributions
 
 `test_30_contrib10`
 :   Getting started with contributions.
@@ -232,10 +282,8 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
+from client import makeClient
 
-
-URL_LOG = &#34;&#34;&#34;tests/urllog.txt&#34;&#34;&#34;
-URL_LOG_FH = open(URL_LOG, &#39;w&#39;)
 
 DEBUG = False
 TEST = True
@@ -255,7 +303,7 @@ USER_LIST = &#34;&#34;&#34;
 &#34;&#34;&#34;.strip().split()
 &#34;&#34;&#34;The `eppn` attribute of all relevant test users in this suite.
 
-See `test_20_users10` where we introduce them.
+See the table above.
 
 Here we make fixtures `clientAuth`, `clientOwner` etc. for each of them.
 These client fixtures represent a web client with the corresponding user logged in,
@@ -301,68 +349,7 @@ def app():
     Only a few tests are in production mode, see below.
     &#34;&#34;&#34;
 
-    yield appFactory(&#34;development&#34;, DEBUG, True)
-
-
-@pytest.fixture
-def appNotest():
-    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
-
-    yield appFactory(&#34;development&#34;, DEBUG, False)
-
-
-@pytest.fixture
-def appProd():
-    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
-
-    We only use this for verifying that test users cannot log in onto
-    the production app.
-    &#34;&#34;&#34;
-
-    yield appFactory(&#34;production&#34;, DEBUG, False)
-
-
-@pytest.fixture
-def clientProd(appProd):
-    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
-
-    return appProd.test_client()
-
-
-class Client:
-    def __init__(self, user, client):
-        self.cl = client
-        self.user = user
-
-    def get(self, *args, **kwargs):
-        URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-        return self.cl.get(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-        return self.cl.post(*args, **kwargs)
-
-
-def makeClient(app, user):
-    &#34;&#34;&#34;Logs in a specific user.
-
-    Parameters
-    ----------
-    app: object
-    user: string
-        Identity of the user (eppn)
-    &#34;&#34;&#34;
-
-    client = app.test_client()
-
-    good = True
-    if user != &#34;public&#34;:
-        response = client.get(f&#34;/login?eppn={user}&#34;)
-        if response.status_code != 302:
-            good = False
-    if good:
-        return Client(user, client)
-    return None
+    yield appFactory(&#34;development&#34;, True, DEBUG)
 
 
 @pytest.fixture
@@ -473,7 +460,7 @@ def clientRoot(app):
 <dt id="conftest.USER_LIST"><code class="name">var <span class="ident">USER_LIST</span></code></dt>
 <dd>
 <section class="desc"><p>The <code>eppn</code> attribute of all relevant test users in this suite.</p>
-<p>See <a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a> where we introduce them.</p>
+<p>See the table above.</p>
 <p>Here we make fixtures <a title="conftest.clientAuth" href="#conftest.clientAuth"><code>clientAuth()</code></a>, <a title="conftest.clientOwner" href="#conftest.clientOwner"><code>clientOwner()</code></a> etc. for each of them.
 These client fixtures represent a web client with the corresponding user logged in,
 ready to interact with the server (in development mode).</p>
@@ -509,45 +496,7 @@ def app():
     Only a few tests are in production mode, see below.
     &#34;&#34;&#34;
 
-    yield appFactory(&#34;development&#34;, DEBUG, True)</code></pre>
-</details>
-</dd>
-<dt id="conftest.appNotest"><code class="name flex">
-<span>def <span class="ident">appNotest</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Special app: development mode, but Flask test mode switched off.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def appNotest():
-    &#34;&#34;&#34;Special app: development mode, but Flask test mode switched off.&#34;&#34;&#34;
-
-    yield appFactory(&#34;development&#34;, DEBUG, False)</code></pre>
-</details>
-</dd>
-<dt id="conftest.appProd"><code class="name flex">
-<span>def <span class="ident">appProd</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Production app: production mode, but Flask test mode switched on.</p>
-<p>We only use this for verifying that test users cannot log in onto
-the production app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def appProd():
-    &#34;&#34;&#34;Production app: production mode, but Flask test mode switched on.
-
-    We only use this for verifying that test users cannot log in onto
-    the production app.
-    &#34;&#34;&#34;
-
-    yield appFactory(&#34;production&#34;, DEBUG, False)</code></pre>
+    yield appFactory(&#34;development&#34;, True, DEBUG)</code></pre>
 </details>
 </dd>
 <dt id="conftest.clientAuth"><code class="name flex">
@@ -662,22 +611,6 @@ def clientOwner(app):
     return makeClient(app, &#34;owner&#34;)</code></pre>
 </details>
 </dd>
-<dt id="conftest.clientProd"><code class="name flex">
-<span>def <span class="ident">clientProd</span></span>(<span>appProd)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Client accessing the production app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.fixture
-def clientProd(appProd):
-    &#34;&#34;&#34;Client accessing the production app.&#34;&#34;&#34;
-
-    return appProd.test_client()</code></pre>
-</details>
-</dd>
 <dt id="conftest.clientPublic"><code class="name flex">
 <span>def <span class="ident">clientPublic</span></span>(<span>app)</span>
 </code></dt>
@@ -785,105 +718,9 @@ def clientsPower(app):
     return {user: makeClient(app, user) for user in POWER_USERS}</code></pre>
 </details>
 </dd>
-<dt id="conftest.makeClient"><code class="name flex">
-<span>def <span class="ident">makeClient</span></span>(<span>app, user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Logs in a specific user.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><a title="conftest.app" href="#conftest.app"><code>app()</code></a></strong> :&ensp;<code>object</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>user</code></strong> :&ensp;<code>string</code></dt>
-<dd>Identity of the user (eppn)</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def makeClient(app, user):
-    &#34;&#34;&#34;Logs in a specific user.
-
-    Parameters
-    ----------
-    app: object
-    user: string
-        Identity of the user (eppn)
-    &#34;&#34;&#34;
-
-    client = app.test_client()
-
-    good = True
-    if user != &#34;public&#34;:
-        response = client.get(f&#34;/login?eppn={user}&#34;)
-        if response.status_code != 302:
-            good = False
-    if good:
-        return Client(user, client)
-    return None</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="conftest.Client"><code class="flex name class">
-<span>class <span class="ident">Client</span></span>
-<span>(</span><span>user, client)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Client:
-    def __init__(self, user, client):
-        self.cl = client
-        self.user = user
-
-    def get(self, *args, **kwargs):
-        URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-        return self.cl.get(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-        return self.cl.post(*args, **kwargs)</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="conftest.Client.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get(self, *args, **kwargs):
-    URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-    return self.cl.get(*args, **kwargs)</code></pre>
-</details>
-</dd>
-<dt id="conftest.Client.post"><code class="name flex">
-<span>def <span class="ident">post</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def post(self, *args, **kwargs):
-    URL_LOG_FH.write(f&#34;{self.user}\t{args[0]}\n&#34;)
-    return self.cl.post(*args, **kwargs)</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -894,7 +731,7 @@ def clientsPower(app):
 <li><a href="#auxiliary">Auxiliary</a></li>
 <li><a href="#test-batches">Test batches</a><ul>
 <li><a href="#tests-setup">Tests: setup</a></li>
-<li><a href="#contributions">Contributions</a></li>
+<li><a href="#tests-contributions">Tests: Contributions</a></li>
 <li><a href="#tests-assessments">Tests: assessments</a></li>
 <li><a href="#tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</a></li>
 <li><a href="#tests-contributions-selection">Tests: contributions: selection.</a></li>
@@ -914,8 +751,6 @@ def clientsPower(app):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="conftest.app" href="#conftest.app">app</a></code></li>
-<li><code><a title="conftest.appNotest" href="#conftest.appNotest">appNotest</a></code></li>
-<li><code><a title="conftest.appProd" href="#conftest.appProd">appProd</a></code></li>
 <li><code><a title="conftest.clientAuth" href="#conftest.clientAuth">clientAuth</a></code></li>
 <li><code><a title="conftest.clientCoord" href="#conftest.clientCoord">clientCoord</a></code></li>
 <li><code><a title="conftest.clientEditor" href="#conftest.clientEditor">clientEditor</a></code></li>
@@ -924,25 +759,12 @@ def clientsPower(app):
 <li><code><a title="conftest.clientMycoord" href="#conftest.clientMycoord">clientMycoord</a></code></li>
 <li><code><a title="conftest.clientOffice" href="#conftest.clientOffice">clientOffice</a></code></li>
 <li><code><a title="conftest.clientOwner" href="#conftest.clientOwner">clientOwner</a></code></li>
-<li><code><a title="conftest.clientProd" href="#conftest.clientProd">clientProd</a></code></li>
 <li><code><a title="conftest.clientPublic" href="#conftest.clientPublic">clientPublic</a></code></li>
 <li><code><a title="conftest.clientRoot" href="#conftest.clientRoot">clientRoot</a></code></li>
 <li><code><a title="conftest.clientSystem" href="#conftest.clientSystem">clientSystem</a></code></li>
 <li><code><a title="conftest.clients" href="#conftest.clients">clients</a></code></li>
 <li><code><a title="conftest.clientsMy" href="#conftest.clientsMy">clientsMy</a></code></li>
 <li><code><a title="conftest.clientsPower" href="#conftest.clientsPower">clientsPower</a></code></li>
-<li><code><a title="conftest.makeClient" href="#conftest.makeClient">makeClient</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="conftest.Client" href="#conftest.Client">Client</a></code></h4>
-<ul class="">
-<li><code><a title="conftest.Client.get" href="#conftest.Client.get">get</a></code></li>
-<li><code><a title="conftest.Client.post" href="#conftest.Client.post">post</a></code></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>

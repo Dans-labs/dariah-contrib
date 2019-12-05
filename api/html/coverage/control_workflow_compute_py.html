@@ -36,7 +36,7 @@
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
             
-                <span class="par run hide_run shortkey_p button_toggle_par">5 partial</span>
+                <span class="par run hide_run shortkey_p button_toggle_par">6 partial</span>
             
         </h2>
     </div>
@@ -199,7 +199,7 @@
 <p id="n128" class="stm mis"><a href="#n128">128</a></p>
 <p id="n129" class="stm run hide_run"><a href="#n129">129</a></p>
 <p id="n130" class="stm run hide_run"><a href="#n130">130</a></p>
-<p id="n131" class="stm run hide_run"><a href="#n131">131</a></p>
+<p id="n131" class="stm par run hide_run"><a href="#n131">131</a></p>
 <p id="n132" class="stm run hide_run"><a href="#n132">132</a></p>
 <p id="n133" class="pln"><a href="#n133">133</a></p>
 <p id="n134" class="stm run hide_run"><a href="#n134">134</a></p>
@@ -868,7 +868,7 @@
 <p id="t128" class="stm mis">                <span class="key">continue</span><span class="strut">&nbsp;</span></p>
 <p id="t129" class="stm run hide_run">            <span class="nam">score</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">score</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="num">0</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t130" class="stm run hide_run">            <span class="nam">prevMax</span> <span class="op">=</span> <span class="nam">maxScoreByCrit</span><span class="op">.</span><span class="nam">setdefault</span><span class="op">(</span><span class="nam">criteriaId</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t131" class="stm run hide_run">            <span class="key">if</span> <span class="nam">prevMax</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">score</span> <span class="op">></span> <span class="nam">prevMax</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t131" class="stm par run hide_run"><span class="annotate short">131&#x202F;&#x219B;&#x202F;125</span><span class="annotate long">line 131 didn't jump to line 125, because the condition on line 131 was never false</span>            <span class="key">if</span> <span class="nam">prevMax</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">score</span> <span class="op">></span> <span class="nam">prevMax</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t132" class="stm run hide_run">                <span class="nam">maxScoreByCrit</span><span class="op">[</span><span class="nam">criteriaId</span><span class="op">]</span> <span class="op">=</span> <span class="nam">score</span><span class="strut">&nbsp;</span></p>
 <p id="t133" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t134" class="stm run hide_run">        <span class="nam">self</span><span class="op">.</span><span class="nam">maxScoreByCrit</span> <span class="op">=</span> <span class="nam">maxScoreByCrit</span><span class="strut">&nbsp;</span></p>
@@ -1414,7 +1414,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-03 17:41
+            created at 2019-12-05 19:12
         </p>
     </div>
 </div>
