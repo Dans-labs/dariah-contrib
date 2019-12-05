@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # LEVEL 0
 # All these functions:
 #   do not any cd
@@ -54,7 +55,7 @@ function givehelp {
     echo "testc       : run all tests with coverage"
 }
 
-# WHERE ARE WE ?
+# ON WHAT MACHINE ARE WE ?
 
 APP="dariah-contrib"
 
