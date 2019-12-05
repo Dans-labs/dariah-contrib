@@ -422,7 +422,7 @@ elif [[ "$1" == "mongostop" ]]; then
 elif [[ "$1" == "serve" ]]; then
     serve
 elif [[ "$1" == "activate36" ]]; then
-    source /opt/rh/rh-python36/enable
+    scl enable rh-python36 bash
 elif [[ "$1" == "servetest" ]]; then
     servetest
 elif [[ "$1" == "ship" ]]; then
