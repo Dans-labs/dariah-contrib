@@ -241,6 +241,13 @@ function docsmk {
     fi
 }
 
+function gitpullforce {
+    cd $root
+    git fetch origin
+    git checkout master
+    git reset --hard origin/master
+}
+
 function gitsave {
     cd $root
     git add --all .
@@ -354,7 +361,7 @@ function testrun {
 function updateprocess {
     # servestop
     cd $root
-    git pull origin master
+    gitpullforce
     activate36
     python3 -m compileall server
     # servestart
