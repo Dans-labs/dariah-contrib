@@ -64,6 +64,7 @@ Getting to know all users.
 
 import magic  # noqa
 from conftest import USER_LIST, POWER_USERS
+from example import AUTH, AUTH_EMAIL, EMAIL, PUBLIC, USER
 from helpers import (
     viewField
 )
@@ -83,26 +84,22 @@ def test_start(clientOffice):
 
 def test_users(clientOffice):
     assert len(USER_LIST) == 11
-    users = valueTables[&#34;user&#34;]
+    users = valueTables[USER]
     for user in USER_LIST:
-        if user == &#34;public&#34;:
+        if user == PUBLIC:
             assert user not in users
         else:
             assert user in users
 
 
 def test_readEmail(clients):
-    table = &#34;user&#34;
-    field = &#34;email&#34;
-    entity = &#34;auth&#34;
-    eid = valueTables[table][entity][0]
-    expect = f&#34;auth@test.eu&#34;
+    eid = valueTables[USER][AUTH]
     for (user, client) in clients.items():
-        (text, fields) = viewField(client, table, eid, field)
+        (text, fields) = viewField(client, USER, eid, EMAIL)
         if user in POWER_USERS:
-            assertFieldValue(fields, field, expect)
+            assertFieldValue(fields, EMAIL, AUTH_EMAIL)
         else:
-            assertFieldValue(fields, field, None)</code></pre>
+            assertFieldValue(fields, EMAIL, None)</code></pre>
 </details>
 </section>
 <section>
@@ -122,17 +119,13 @@ def test_readEmail(clients):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_readEmail(clients):
-    table = &#34;user&#34;
-    field = &#34;email&#34;
-    entity = &#34;auth&#34;
-    eid = valueTables[table][entity][0]
-    expect = f&#34;auth@test.eu&#34;
+    eid = valueTables[USER][AUTH]
     for (user, client) in clients.items():
-        (text, fields) = viewField(client, table, eid, field)
+        (text, fields) = viewField(client, USER, eid, EMAIL)
         if user in POWER_USERS:
-            assertFieldValue(fields, field, expect)
+            assertFieldValue(fields, EMAIL, AUTH_EMAIL)
         else:
-            assertFieldValue(fields, field, None)</code></pre>
+            assertFieldValue(fields, EMAIL, None)</code></pre>
 </details>
 </dd>
 <dt id="test_20_users10.test_start"><code class="name flex">
@@ -159,9 +152,9 @@ def test_readEmail(clients):
 </summary>
 <pre><code class="python">def test_users(clientOffice):
     assert len(USER_LIST) == 11
-    users = valueTables[&#34;user&#34;]
+    users = valueTables[USER]
     for user in USER_LIST:
-        if user == &#34;public&#34;:
+        if user == PUBLIC:
             assert user not in users
         else:
             assert user in users</code></pre>

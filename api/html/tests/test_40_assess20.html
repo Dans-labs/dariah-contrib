@@ -75,7 +75,9 @@ from control.utils import pick as G
 from example import (
     CONTRIB,
     ASSESS,
+    TITLE,
     TYPE,
+    TYPE1,
     TYPE2,
 )
 from helpers import (
@@ -118,10 +120,9 @@ def test_addAssessment(clientOwner):
 def test_addAssessment2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
-    field = &#34;typeContribution&#34;
+    aTitle = G(G(recordInfo, ASSESS), TITLE)
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE2&#34;], TYPE2), True
+        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE2&#34;], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -133,7 +134,7 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
+        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)</code></pre>
@@ -172,10 +173,9 @@ def test_addAssessment2(clientOwner):
 <pre><code class="python">def test_addAssessment2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    aTitle = G(G(recordInfo, ASSESS), &#34;title&#34;)
-    field = &#34;typeContribution&#34;
+    aTitle = G(G(recordInfo, ASSESS), TITLE)
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE2&#34;], TYPE2), True
+        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE2&#34;], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -187,7 +187,7 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids[&#34;TYPE&#34;], TYPE), True
+        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)</code></pre>

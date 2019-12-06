@@ -113,8 +113,18 @@ from control.utils import pick as G, now
 from conftest import USERS
 from example import (
     BELGIUM,
+    CONTACT_PERSON_NAME,
+    CONTACT_PERSON_EMAIL,
     CONTRIB,
+    COUNTRY,
+    EDITOR,
+    MYCOORD,
+    OWNER,
+    OWNER_EMAIL,
+    OWNER_NAME,
     TITLE,
+    TITLE1,
+    YEAR,
 )
 from helpers import forall
 from starters import start
@@ -153,18 +163,16 @@ def test_addDelAll(clients):
 def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo = recordInfo.setdefault(CONTRIB, {})
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid
+    for (k, v) in zip((&#34;text&#34;, &#34;fields&#34;, &#34;msgs&#34;, &#34;eid&#34;), (text, fields, msgs, eid)):
+        contribInfo[k] = v
 
 
 def test_sidebar2(clients):
     amounts = {
         &#34;All contributions&#34;: [1],
-        &#34;My contributions&#34;: [({&#34;owner&#34;}, 1)],
+        &#34;My contributions&#34;: [({OWNER}, 1)],
         f&#34;{BELGIUM} contributions&#34;: [1],
-        &#34;Contributions to be selected&#34;: [({&#34;mycoord&#34;}, 1)],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)
 
@@ -172,11 +180,11 @@ def test_sidebar2(clients):
 @pytest.mark.parametrize(
     (&#34;field&#34;, &#34;value&#34;),
     (
-        (&#34;title&#34;, TITLE),
-        (&#34;year&#34;, str(now().year)),
-        (&#34;country&#34;, &#34;BE🇧🇪&#34;),
-        (&#34;contactPersonName&#34;, &#34;Owner of Contribution&#34;),
-        (&#34;contactPersonEmail&#34;, &#34;owner@test.eu&#34;),
+        (TITLE, TITLE1),
+        (YEAR, str(now().year)),
+        (COUNTRY, BELGIUM),
+        (CONTACT_PERSON_NAME, OWNER_NAME),
+        (CONTACT_PERSON_EMAIL, OWNER_EMAIL),
     ),
 )
 def test_fields(field, value):
@@ -205,9 +213,9 @@ def test_makeEditorOwner(clientOwner):
 def test_sidebar3(clients):
     amounts = {
         &#34;All contributions&#34;: [1],
-        &#34;My contributions&#34;: [({&#34;owner&#34;, &#34;editor&#34;}, 1)],
+        &#34;My contributions&#34;: [({OWNER, EDITOR}, 1)],
         f&#34;{BELGIUM} contributions&#34;: [1],
-        &#34;Contributions to be selected&#34;: [({&#34;mycoord&#34;}, 1)],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)</code></pre>
 </details>
@@ -251,10 +259,8 @@ def test_sidebar3(clients):
 <pre><code class="python">def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo = recordInfo.setdefault(CONTRIB, {})
-    contribInfo[&#34;text&#34;] = text
-    contribInfo[&#34;fields&#34;] = fields
-    contribInfo[&#34;msgs&#34;] = msgs
-    contribInfo[&#34;eid&#34;] = eid</code></pre>
+    for (k, v) in zip((&#34;text&#34;, &#34;fields&#34;, &#34;msgs&#34;, &#34;eid&#34;), (text, fields, msgs, eid)):
+        contribInfo[k] = v</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib10.test_fields"><code class="name flex">
@@ -269,11 +275,11 @@ def test_sidebar3(clients):
 <pre><code class="python">@pytest.mark.parametrize(
     (&#34;field&#34;, &#34;value&#34;),
     (
-        (&#34;title&#34;, TITLE),
-        (&#34;year&#34;, str(now().year)),
-        (&#34;country&#34;, &#34;BE🇧🇪&#34;),
-        (&#34;contactPersonName&#34;, &#34;Owner of Contribution&#34;),
-        (&#34;contactPersonEmail&#34;, &#34;owner@test.eu&#34;),
+        (TITLE, TITLE1),
+        (YEAR, str(now().year)),
+        (COUNTRY, BELGIUM),
+        (CONTACT_PERSON_NAME, OWNER_NAME),
+        (CONTACT_PERSON_EMAIL, OWNER_EMAIL),
     ),
 )
 def test_fields(field, value):
@@ -343,9 +349,9 @@ def test_fields(field, value):
 <pre><code class="python">def test_sidebar2(clients):
     amounts = {
         &#34;All contributions&#34;: [1],
-        &#34;My contributions&#34;: [({&#34;owner&#34;}, 1)],
+        &#34;My contributions&#34;: [({OWNER}, 1)],
         f&#34;{BELGIUM} contributions&#34;: [1],
-        &#34;Contributions to be selected&#34;: [({&#34;mycoord&#34;}, 1)],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)</code></pre>
 </details>
@@ -362,9 +368,9 @@ def test_fields(field, value):
 <pre><code class="python">def test_sidebar3(clients):
     amounts = {
         &#34;All contributions&#34;: [1],
-        &#34;My contributions&#34;: [({&#34;owner&#34;, &#34;editor&#34;}, 1)],
+        &#34;My contributions&#34;: [({OWNER, EDITOR}, 1)],
         f&#34;{BELGIUM} contributions&#34;: [1],
-        &#34;Contributions to be selected&#34;: [({&#34;mycoord&#34;}, 1)],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)</code></pre>
 </details>
