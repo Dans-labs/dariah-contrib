@@ -95,9 +95,12 @@ in alphabetical order of the file names.
 ### Tests: Reviews: filling out and deciding.
 
 `test_50_review10`
+:   Checking out the sidebar for each user when an assessment is under review.
+
+`test_50_review20`
 :   Starting a review, filling it out, and deciding.
 
-`test_50_assess20`
+`test_50_assess30`
 :   Revising and resubmitting assessments.
 
 ### Tests: contributions: selection.

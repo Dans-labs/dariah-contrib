@@ -52,8 +52,18 @@ from control.utils import pick as G, now
 from conftest import USERS
 from example import (
     BELGIUM,
+    CONTACT_PERSON_NAME,
+    CONTACT_PERSON_EMAIL,
     CONTRIB,
+    COUNTRY,
+    EDITOR,
+    MYCOORD,
+    OWNER,
+    OWNER_EMAIL,
+    OWNER_NAME,
     TITLE,
+    TITLE1,
+    YEAR,
 )
 from helpers import forall
 from starters import start
@@ -92,18 +102,16 @@ def test_addDelAll(clients):
 def test_addOwner(clientOwner):
     (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
     contribInfo = recordInfo.setdefault(CONTRIB, {})
-    contribInfo["text"] = text
-    contribInfo["fields"] = fields
-    contribInfo["msgs"] = msgs
-    contribInfo["eid"] = eid
+    for (k, v) in zip(("text", "fields", "msgs", "eid"), (text, fields, msgs, eid)):
+        contribInfo[k] = v
 
 
 def test_sidebar2(clients):
     amounts = {
         "All contributions": [1],
-        "My contributions": [({"owner"}, 1)],
+        "My contributions": [({OWNER}, 1)],
         f"{BELGIUM} contributions": [1],
-        "Contributions to be selected": [({"mycoord"}, 1)],
+        "Contributions to be selected": [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)
 
@@ -111,11 +119,11 @@ def test_sidebar2(clients):
 @pytest.mark.parametrize(
     ("field", "value"),
     (
-        ("title", TITLE),
-        ("year", str(now().year)),
-        ("country", "BE🇧🇪"),
-        ("contactPersonName", "Owner of Contribution"),
-        ("contactPersonEmail", "owner@test.eu"),
+        (TITLE, TITLE1),
+        (YEAR, str(now().year)),
+        (COUNTRY, BELGIUM),
+        (CONTACT_PERSON_NAME, OWNER_NAME),
+        (CONTACT_PERSON_EMAIL, OWNER_EMAIL),
     ),
 )
 def test_fields(field, value):
@@ -144,8 +152,8 @@ def test_makeEditorOwner(clientOwner):
 def test_sidebar3(clients):
     amounts = {
         "All contributions": [1],
-        "My contributions": [({"owner", "editor"}, 1)],
+        "My contributions": [({OWNER, EDITOR}, 1)],
         f"{BELGIUM} contributions": [1],
-        "Contributions to be selected": [({"mycoord"}, 1)],
+        "Contributions to be selected": [({MYCOORD}, 1)],
     }
     sidebar(clients, amounts)

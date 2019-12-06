@@ -72,6 +72,23 @@ def fieldEditRe(eid, field):
     )
 
 
+def valueListRe(table):
+    """Given a table name, return a `re` that finds pairs of id and title strings.
+
+    The text is a list display of value records, and we peel the ids from the
+    `<detail>` elements and the titles from the `<summary>` within them.
+
+    Parameters
+    ----------
+    table: string
+    """
+
+    return re.compile(
+        f"""<details itemkey=['"]{table}/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>""",
+        re.S,
+    )
+
+
 def detailRe(dtable):
     """Given a detail table name, return a `re` that looks for the detail records.
 
@@ -322,22 +339,23 @@ def findCaptions(text):
     return captionRe.findall(text)
 
 
-def findUsers(text):
-    """Get the users from a response.
+def findValues(table, text):
+    """Get the values from the response of a list view on that table.
 
     Parameters
     ----------
+    table: string
     text: string
         The response text.
 
     Returns
     -------
     dict
-        keyed by lower case eppns, valued by tuples of eid and name of the user.
+        keyed by the titles of the records and valued by their ids.
     """
 
     return {
-        name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
+        name: eid for (eid, name) in valueListRe(table).findall(text)
     }
 
 

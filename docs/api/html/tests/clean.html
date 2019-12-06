@@ -43,7 +43,7 @@ from bson.objectid import ObjectId
 from hashlib import md5
 
 import magic  # noqa
-from config import Config as C
+from config import Config as C, Names as N
 from control.utils import now
 
 
@@ -201,17 +201,17 @@ def backoffice():
                 elif field == &#34;creator&#34;:
                     newRow[field] = userMapping[value]
                 elif (
-                    table == &#34;package&#34;
-                    and field == &#34;typeContribution&#34;
-                    or table == &#34;criteria&#34;
-                    and field == &#34;typeContribution&#34;
+                    table == N.package
+                    and field == N.typeContribution
+                    or table == N.criteria
+                    and field == N.typeContribution
                 ):
                     newRow[field] = [relIndex[field][val] for val in value]
                 elif (
-                    table == &#34;criteria&#34;
-                    and field == &#34;package&#34;
-                    or table == &#34;score&#34;
-                    and field == &#34;criteria&#34;
+                    table == N.criteria
+                    and field == N.package
+                    or table == N.score
+                    and field == N.criteria
                 ):
                     newRow[field] = relIndex[field][value]
                 else:
@@ -295,17 +295,17 @@ if __name__ == &#34;__main__&#34;:
                 elif field == &#34;creator&#34;:
                     newRow[field] = userMapping[value]
                 elif (
-                    table == &#34;package&#34;
-                    and field == &#34;typeContribution&#34;
-                    or table == &#34;criteria&#34;
-                    and field == &#34;typeContribution&#34;
+                    table == N.package
+                    and field == N.typeContribution
+                    or table == N.criteria
+                    and field == N.typeContribution
                 ):
                     newRow[field] = [relIndex[field][val] for val in value]
                 elif (
-                    table == &#34;criteria&#34;
-                    and field == &#34;package&#34;
-                    or table == &#34;score&#34;
-                    and field == &#34;criteria&#34;
+                    table == N.criteria
+                    and field == N.package
+                    or table == N.score
+                    and field == N.criteria
                 ):
                     newRow[field] = relIndex[field][value]
                 else:

@@ -2,19 +2,20 @@
 platform darwin -- Python 3.7.2, pytest-3.10.0, py-1.7.0, pluggy-0.8.0
 rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile: pytest.ini
 plugins: ordering-0.6
-collected 134 items
+collected 138 items
 
-tests/test_10_factory10.py ...                                        [  3/134]
-tests/test_20_users10.py ...                                          [  6/134]
-tests/test_30_contrib10.py .............                              [ 19/134]
-tests/test_30_contrib20.py ....................................       [ 55/134]
-tests/test_30_contrib30.py ..............................             [ 85/134]
-tests/test_30_contrib40.py ....                                       [ 89/134]
-tests/test_40_assess10.py .................                           [106/134]
-tests/test_40_assess20.py ...                                         [109/134]
-tests/test_40_assess30.py .........................                   [134/134]
+tests/test_10_factory10.py ...                                        [  3/138]
+tests/test_20_users10.py ...                                          [  6/138]
+tests/test_30_contrib10.py .............                              [ 19/138]
+tests/test_30_contrib20.py ....................................       [ 55/138]
+tests/test_30_contrib30.py ..............................             [ 85/138]
+tests/test_30_contrib40.py ....                                       [ 89/138]
+tests/test_40_assess10.py .................                           [106/138]
+tests/test_40_assess20.py ...                                         [109/138]
+tests/test_40_assess30.py ............................                [137/138]
+tests/test_50_review10.py .                                           [138/138]
 
-========================= 134 passed in 33.95 seconds ==========================
+========================= 138 passed in 38.28 seconds ==========================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
-      1838        112        3.7       16.4
+      2204        114        3.6       19.3

@@ -79,14 +79,25 @@ import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS, POWER_USERS
 from example import (
+    ASSESS,
     BELGIUM,
     CONTRIB,
-    ASSESS,
-    UNDEF_VALUE,
     DUMMY_ID,
+    EDITOR,
+    EXPERT,
+    FINAL,
+    MYCOORD,
+    OWNER,
+    REVIEWER_E,
+    REVIEWER_F,
+    TITLE,
+    TITLE_A,
+    TITLE_A2,
     TYPE,
-    ATITLE,
-    NEW_A_TITLE,
+    TYPE1,
+    TYPEA,
+    UNDEF_VALUE,
+    USER,
 )
 from helpers import (
     forall,
@@ -129,7 +140,7 @@ def test_start(clientOffice, clientOwner):
 def test_resetType(clientOwner, clientOffice):
     eid = G(G(recordInfo, CONTRIB), "eid")
     assertModifyField(
-        clientOwner, CONTRIB, eid, "typeContribution", (None, UNDEF_VALUE), True
+        clientOwner, CONTRIB, eid, TYPE, (None, UNDEF_VALUE), True
     )
 
 
@@ -155,9 +166,8 @@ def test_tryStartAll(clients, url):
 
 def test_tryStartAgainAll(clients):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    field = "typeContribution"
     assertModifyField(
-        clients["owner"], CONTRIB, eid, field, (ids["TYPE"], TYPE), True
+        clients[OWNER], CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True
     )
 
     def assertIt(cl, exp):
@@ -184,11 +194,11 @@ def test_tryStartAgainOwner(clientOwner):
 def test_sidebar(clients):
     amounts = {
         "All contributions": [1],
-        "My contributions": [({"owner", "editor"}, 1)],
+        "My contributions": [({OWNER, EDITOR}, 1)],
         f"{BELGIUM} contributions": [1],
-        "Contributions to be selected": [({"mycoord"}, 1)],
-        "Contributions I am assessing": [({"owner"}, 1)],
-        "My assessments": [({"owner"}, 1)],
+        "Contributions to be selected": [({MYCOORD}, 1)],
+        "Contributions I am assessing": [({OWNER}, 1)],
+        "My assessments": [({OWNER}, 1)],
         "All assessments": [(POWER_USERS, 1)],
     }
     sidebar(clients, amounts)
@@ -202,11 +212,11 @@ def test_editor(clientOwner):
 def test_sidebar2(clients):
     amounts = {
         "All contributions": [1],
-        "My contributions": [({"owner", "editor"}, 1)],
+        "My contributions": [({OWNER, EDITOR}, 1)],
         f"{BELGIUM} contributions": [1],
-        "Contributions to be selected": [({"mycoord"}, 1)],
-        "Contributions I am assessing": [({"owner", "editor"}, 1)],
-        "My assessments": [({"owner", "editor"}, 1)],
+        "Contributions to be selected": [({MYCOORD}, 1)],
+        "Contributions I am assessing": [({OWNER, EDITOR}, 1)],
+        "My assessments": [({OWNER, EDITOR}, 1)],
         "All assessments": [(POWER_USERS, 1)],
     }
     sidebar(clients, amounts)
@@ -214,9 +224,8 @@ def test_sidebar2(clients):
 
 def test_inspectTitleAll(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    field = "title"
-    cTitle = G(G(recordInfo, CONTRIB), field)
-    aTitle = ATITLE.format(cTitle=cTitle)
+    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    aTitle = TITLE_A.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     inspectTitleAll(clients, ASSESS, aId, expect)
@@ -224,23 +233,20 @@ def test_inspectTitleAll(clients):
 
 def test_inspectTypeAll(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    field = "assessmentType"
 
     def assertIt(cl, exp):
-        assertFieldValue((cl, ASSESS, aId), field, exp)
+        assertFieldValue((cl, ASSESS, aId), TYPEA, exp)
 
     expect = {user: None for user in USERS}
-    expect.update({user: TYPE for user in RIGHTFUL_USERS})
+    expect.update({user: TYPE1 for user in RIGHTFUL_USERS})
     forall(clients, expect, assertIt)
 
 
 def test_modifyTypeAll(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    field = "assessmentType"
-    newValue = ids["TYPE2"]
 
     def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, (newValue, None), exp)
+        assertModifyField(cl, ASSESS, aId, TYPEA, (ids["TYPE2"], None), exp)
 
     expect = {user: False for user in USERS}
     forall(clients, expect, assertIt)
@@ -248,15 +254,13 @@ def test_modifyTypeAll(clients):
 
 def test_modifyTitleAll(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    field = "title"
-    cTitle = G(G(recordInfo, CONTRIB), field)
-    aTitle = ATITLE.format(cTitle=cTitle)
-    newValue = NEW_A_TITLE
+    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    aTitle = TITLE_A.format(cTitle=cTitle)
 
     def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, newValue, exp)
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp)
         if exp:
-            assertModifyField(cl, ASSESS, aId, field, aTitle, exp)
+            assertModifyField(cl, ASSESS, aId, TITLE, aTitle, exp)
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in RIGHTFUL_USERS})
@@ -264,14 +268,14 @@ def test_modifyTitleAll(clients):
 
 
 @pytest.mark.parametrize(
-    ("field", "user"),
+    ("field", USER),
     (
-        ("reviewerE", "expert"),
-        ("reviewerF", "final"),
+        (REVIEWER_E, EXPERT),
+        (REVIEWER_F, FINAL),
     ),
 )
 def test_assignReviewers(clients, field, user):
-    users = G(valueTables, "user")
+    users = G(valueTables, USER)
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}

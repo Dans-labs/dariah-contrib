@@ -67,9 +67,22 @@ import magic  # noqa
 from control.utils import pick as G
 from example import (
     DB,
+    DISCIPLINE,
     CONTRIB,
-    VCC12,
+    COUNTRY,
     EXAMPLE,
+    KEYWORD,
+    TADIRAH_ACTIVITY,
+    TADIRAH_OBJECT,
+    TADIRAH_TECHNIQUE,
+    TYPE,
+    TYPE1,
+    TYPE2,
+    VCC,
+    VCC1,
+    VCC2,
+    VCC12,
+    YEAR,
 )
 from helpers import modifyField
 from starters import (
@@ -100,15 +113,15 @@ def test_start(clientOffice, clientOwner):
 @pytest.mark.parametrize(
     ("field",),
     (
-        ("year",),
-        ("country",),
-        ("vcc",),
-        ("typeContribution",),
-        ("tadirahObject",),
-        ("tadirahActivity",),
-        ("tadirahTechnique",),
-        ("discipline",),
-        ("keyword",),
+        (YEAR,),
+        (COUNTRY,),
+        (VCC,),
+        (TYPE,),
+        (TADIRAH_OBJECT,),
+        (TADIRAH_ACTIVITY,),
+        (TADIRAH_TECHNIQUE,),
+        (DISCIPLINE,),
+        (KEYWORD,),
     ),
 )
 def test_valueEdit(clientOwner, field):
@@ -120,82 +133,70 @@ def test_valueEdit(clientOwner, field):
 
 
 def test_modifyVcc(clientOwner):
-    field = "vcc"
     eid = G(G(recordInfo, CONTRIB), "eid")
-    vccs = valueTables["vcc"]
-    vcc12 = [vccs["vcc1"], vccs["vcc2"]]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (vcc12, VCC12), True)
+    vccs = valueTables[VCC]
+    vcc12 = [vccs[VCC1], vccs[VCC2]]
+    assertModifyField(clientOwner, CONTRIB, eid, VCC, (vcc12, VCC12), True)
 
 
 def test_modifyVccWrong(clientOwner):
-    field = "vcc"
     eid = G(G(recordInfo, CONTRIB), "eid")
-    vccs = valueTables["vcc"]
-    wrongValue = list(valueTables["tadirahObject"].values())[0]
+    vccs = valueTables[VCC]
+    wrongValue = list(valueTables[TADIRAH_OBJECT].values())[0]
     vccVal = [wrongValue, vccs["vcc2"]]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
+    assertModifyField(clientOwner, CONTRIB, eid, VCC, (vccVal, None), False)
 
 
 def test_modifyVccError(clientOwner):
-    field = "vcc"
     eid = G(G(recordInfo, CONTRIB), "eid")
-    vccs = valueTables["vcc"]
-    vccVal = ["monkey", vccs["vcc2"]]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (vccVal, None), False)
+    vccs = valueTables[VCC]
+    vccVal = ["monkey", vccs[VCC2]]
+    assertModifyField(clientOwner, CONTRIB, eid, VCC, (vccVal, None), False)
 
 
 def test_modifyTypeEx1(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    field = "typeContribution"
-    newValue = EXAMPLE[field][-2]
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+        clientOwner, CONTRIB, eid, TYPE, (valueTables[TYPE][TYPE2], TYPE2), True
     )
 
 
 def test_modifyTypeMult(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    types = valueTables["typeContribution"]
-    field = "typeContribution"
-    oldValue = EXAMPLE["typeContribution"][-2]
-    otherValue = "service - data hosting"
-    newValue = (types[oldValue], types[otherValue])
-    assertModifyField(clientOwner, CONTRIB, eid, field, (newValue, None), False)
+    types = valueTables[TYPE]
+    newValue = (types[TYPE2], types[TYPE1])
+    assertModifyField(clientOwner, CONTRIB, eid, TYPE, (newValue, None), False)
 
 
 def test_modifyTypeEx2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    field = "typeContribution"
-    newValue = EXAMPLE[field][-2]
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (valueTables[field][newValue], newValue), True
+        clientOwner, CONTRIB, eid, TYPE, (valueTables[TYPE][TYPE2], TYPE2), True
     )
 
 
 def test_modifyTypeWrong(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    field = "typeContribution"
-    wrongValue = list(valueTables["tadirahObject"].values())[0]
-    assertModifyField(clientOwner, CONTRIB, eid, field, wrongValue, False)
+    wrongValue = list(valueTables[TADIRAH_OBJECT].values())[0]
+    assertModifyField(clientOwner, CONTRIB, eid, TYPE, wrongValue, False)
 
 
 def test_modifyTypeTypo(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    types = valueTables["typeContribution"]
+    types = valueTables[TYPE]
     fieldx = "xxxContribution"
-    newValue = "activity - resource creation"
-    (text, fields) = modifyField(clientOwner, CONTRIB, eid, fieldx, types[newValue])
+    (text, fields) = modifyField(clientOwner, CONTRIB, eid, fieldx, types[TYPE2])
     assert text == f"No field {CONTRIB}:{fieldx}"
 
 
 @pytest.mark.parametrize(
     ("field",),
     (
-        ("tadirahObject",),
-        ("tadirahActivity",),
-        ("tadirahTechnique",),
-        ("discipline",),
-        ("keyword",),
+        (TADIRAH_OBJECT,),
+        (TADIRAH_ACTIVITY,),
+        (TADIRAH_TECHNIQUE,),
+        (DISCIPLINE,),
+        (KEYWORD,),
     ),
 )
 def test_modifyMeta(clientOwner, field):
@@ -212,11 +213,11 @@ def test_modifyMeta(clientOwner, field):
 @pytest.mark.parametrize(
     ("field",),
     (
-        ("vcc",),
-        ("typeContribution",),
-        ("tadirahObject",),
-        ("tadirahActivity",),
-        ("tadirahTechnique",),
+        (VCC,),
+        (TYPE,),
+        (TADIRAH_OBJECT,),
+        (TADIRAH_ACTIVITY,),
+        (TADIRAH_TECHNIQUE,),
     ),
 )
 def test_addMetaWrong(clientOwner, field):
@@ -227,7 +228,7 @@ def test_addMetaWrong(clientOwner, field):
 
 
 @pytest.mark.parametrize(
-    ("field", "value"), (("discipline", "ddd"), ("keyword", "kkk"),),
+    ("field", "value"), ((DISCIPLINE, "ddd"), (KEYWORD, "kkk"),),
 )
 def test_addMetaRight(clientOwner, clientOffice, field, value):
     eid = G(G(recordInfo, CONTRIB), "eid")

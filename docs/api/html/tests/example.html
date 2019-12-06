@@ -36,19 +36,62 @@ WELCOME = &#34;Welcome to the DARIAH contribution tool&#34;
 OVERVIEW = &#34;Country selection&#34;
 
 ASSESS = &#34;assessment&#34;
-CRITERIA_ENTRY = &#34;criteriaEntry&#34;
 CONTRIB = &#34;contrib&#34;
+CRITERIA = &#34;criteria&#34;
+CRITERIA_ENTRY = &#34;criteriaEntry&#34;
+CONTACT_PERSON_NAME = &#34;contactPersonName&#34;
+CONTACT_PERSON_EMAIL = &#34;contactPersonEmail&#34;
+COST_BARE = &#34;costBare&#34;
+COST_TOTAL = &#34;costTotal&#34;
+COST_DESCRIPTION = &#34;costDescription&#34;
+COUNTRY = &#34;country&#34;
+DESCRIPTION = &#34;description&#34;
+DISCIPLINE = &#34;discipline&#34;
+EMAIL = &#34;email&#34;
+EVIDENCE = &#34;evidence&#34;
+KEYWORD = &#34;keyword&#34;
+PACKAGE = &#34;package&#34;
+REVIEW = &#34;review&#34;
+REVIEWER_E = &#34;reviewerE&#34;
+REVIEWER_F = &#34;reviewerF&#34;
+SCORE = &#34;score&#34;
+TADIRAH_ACTIVITY = &#34;tadirahActivity&#34;
+TADIRAH_OBJECT = &#34;tadirahObject&#34;
+TADIRAH_TECHNIQUE = &#34;tadirahTechnique&#34;
+TITLE = &#34;title&#34;
+TYPE = &#34;typeContribution&#34;
+TYPEA = &#34;assessmentType&#34;
+USER = &#34;user&#34;
+VCC = &#34;vcc&#34;
+YEAR = &#34;year&#34;
+
+AUTH = &#34;auth&#34;
+AUTH_EMAIL = &#34;auth@test.eu&#34;
+COORD = &#34;coord&#34;
+OFFICE = &#34;office&#34;
+OWNER = &#34;owner&#34;
+OWNER_EMAIL = &#34;owner@test.eu&#34;
+OWNER_NAME = &#34;Owner of Contribution&#34;
+EDITOR = &#34;editor&#34;
+EXPERT = &#34;expert&#34;
+FINAL = &#34;final&#34;
+MYCOORD = &#34;mycoord&#34;
+PUBLIC = &#34;public&#34;
+ROOT = &#34;root&#34;
+SYSTEM = &#34;system&#34;
+
+INCOMPLETE = &#34;incomplete&#34;
+COMPLETE = &#34;complete&#34;
+COMPLETE_WITHDRAWN = &#34;completeWithdrawn&#34;
 
 DUMMY_ID = &#34;00000000ffa4bbd9fe000f15&#34;
 
 UNDEF_VALUE = &#34;○&#34;
 
-TITLE = &#34;No Title Yet&#34;
-ATITLE = &#34;assessment of {cTitle}&#34;
-NEW_A_TITLE = &#34;My contribution assessed&#34;
-
-TYPE = &#34;service - data hosting&#34;
-TYPE2 = &#34;activity - software development&#34;
+TITLE1 = &#34;No Title Yet&#34;
+TITLE2 = &#34;Contribution (Modified)&#34;
+TITLE_A = &#34;assessment of {cTitle}&#34;
+TITLE_A2 = &#34;My contribution assessed&#34;
 
 CHECKS = dict(
     description=(
@@ -65,7 +108,10 @@ CHECKS = dict(
     ),
 )
 
+ELLIPS_DIV = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
 
+VCC1 = &#34;vcc1&#34;
+VCC2 = &#34;vcc2&#34;
 VCC12 = &#34;vcc1,vcc2&#34;
 URL_C = &#34;urlContribution&#34;
 URL_A = &#34;urlAcademic&#34;
@@ -79,19 +125,19 @@ CAPTIONS = (
     (&#34;Contributions I am assessing&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
     (
         &#34;Contributions to be selected&#34;,
-        {&#34;coord&#34;, &#34;mycoord&#34;},
+        {COORD, MYCOORD},
         0,
         &#34;contribution&#34;,
         &#34;contributions&#34;,
     ),
     (&#34;All assessments&#34;, POWER_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;My assessments&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
-    (&#34;Assessments needing reviewers&#34;, {&#34;office&#34;}, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments needing reviewers&#34;, {OFFICE}, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;Assessments in review by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;Assessments reviewed by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;All reviews&#34;, POWER_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
     (&#34;My reviews&#34;, AUTH_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
-    (&#34;countries&#34;, POWER_USERS, 51, &#34;country&#34;, None),
+    (&#34;countries&#34;, POWER_USERS, 51, COUNTRY, None),
     (&#34;criteria&#34;, POWER_USERS, 7, &#34;criteria&#34;, None),
     (&#34;disciplines&#34;, POWER_USERS, 3, None, None),
     (&#34;keywords&#34;, POWER_USERS, 2, None, None),
@@ -104,9 +150,9 @@ CAPTIONS = (
     (&#34;users&#34;, POWER_USERS, 11, None, None),
     (&#34;vccs&#34;, POWER_USERS, 2, None, None),
     (&#34;years&#34;, POWER_USERS, 20, None, None),
-    (&#34;decisions&#34;, {&#34;system&#34;, &#34;root&#34;}, 3, None, None),
-    (&#34;permission groups&#34;, {&#34;system&#34;, &#34;root&#34;}, 9, None, None),
-    (&#34;Recompute workflow table&#34;, {&#34;system&#34;, &#34;root&#34;}, None, WELCOME, None),
+    (&#34;decisions&#34;, {SYSTEM, ROOT}, 3, None, None),
+    (&#34;permission groups&#34;, {SYSTEM, ROOT}, 9, None, None),
+    (&#34;Recompute workflow table&#34;, {SYSTEM, ROOT}, None, WELCOME, None),
 )
 &#34;&#34;&#34;Sidebar entries.
 
@@ -143,7 +189,7 @@ USER_COUNTRY = dict(
 )
 &#34;&#34;&#34;Where the test users come from.&#34;&#34;&#34;
 
-N_CRITERIA_ENTRIES = {
+CRITERIA_ENTRIES_N = {
     &#34;service - data hosting&#34;: 2,
     &#34;service - processing service&#34;: 2,
     &#34;activity - resource creation&#34;: 4,
@@ -246,7 +292,10 @@ dynamic
         &#34;\n&#34;
     ),
 )
-&#34;&#34;&#34;Lots of values in several fields of a contribution.&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;Lots of values in several fields of a contribution.&#34;&#34;&#34;
+
+TYPE1 = EXAMPLE[TYPE][0]
+TYPE2 = EXAMPLE[TYPE][3]</code></pre>
 </details>
 </section>
 <section>

@@ -9,19 +9,62 @@ WELCOME = "Welcome to the DARIAH contribution tool"
 OVERVIEW = "Country selection"
 
 ASSESS = "assessment"
-CRITERIA_ENTRY = "criteriaEntry"
 CONTRIB = "contrib"
+CRITERIA = "criteria"
+CRITERIA_ENTRY = "criteriaEntry"
+CONTACT_PERSON_NAME = "contactPersonName"
+CONTACT_PERSON_EMAIL = "contactPersonEmail"
+COST_BARE = "costBare"
+COST_TOTAL = "costTotal"
+COST_DESCRIPTION = "costDescription"
+COUNTRY = "country"
+DESCRIPTION = "description"
+DISCIPLINE = "discipline"
+EMAIL = "email"
+EVIDENCE = "evidence"
+KEYWORD = "keyword"
+PACKAGE = "package"
+REVIEW = "review"
+REVIEWER_E = "reviewerE"
+REVIEWER_F = "reviewerF"
+SCORE = "score"
+TADIRAH_ACTIVITY = "tadirahActivity"
+TADIRAH_OBJECT = "tadirahObject"
+TADIRAH_TECHNIQUE = "tadirahTechnique"
+TITLE = "title"
+TYPE = "typeContribution"
+TYPEA = "assessmentType"
+USER = "user"
+VCC = "vcc"
+YEAR = "year"
+
+AUTH = "auth"
+AUTH_EMAIL = "auth@test.eu"
+COORD = "coord"
+OFFICE = "office"
+OWNER = "owner"
+OWNER_EMAIL = "owner@test.eu"
+OWNER_NAME = "Owner of Contribution"
+EDITOR = "editor"
+EXPERT = "expert"
+FINAL = "final"
+MYCOORD = "mycoord"
+PUBLIC = "public"
+ROOT = "root"
+SYSTEM = "system"
+
+INCOMPLETE = "incomplete"
+COMPLETE = "complete"
+COMPLETE_WITHDRAWN = "completeWithdrawn"
 
 DUMMY_ID = "00000000ffa4bbd9fe000f15"
 
 UNDEF_VALUE = "○"
 
-TITLE = "No Title Yet"
-ATITLE = "assessment of {cTitle}"
-NEW_A_TITLE = "My contribution assessed"
-
-TYPE = "service - data hosting"
-TYPE2 = "activity - software development"
+TITLE1 = "No Title Yet"
+TITLE2 = "Contribution (Modified)"
+TITLE_A = "assessment of {cTitle}"
+TITLE_A2 = "My contribution assessed"
 
 CHECKS = dict(
     description=(
@@ -38,7 +81,10 @@ CHECKS = dict(
     ),
 )
 
+ELLIPS_DIV = "<div>...</div>"
 
+VCC1 = "vcc1"
+VCC2 = "vcc2"
 VCC12 = "vcc1,vcc2"
 URL_C = "urlContribution"
 URL_A = "urlAcademic"
@@ -52,19 +98,19 @@ CAPTIONS = (
     ("Contributions I am assessing", AUTH_USERS, 0, "contribution", "contributions"),
     (
         "Contributions to be selected",
-        {"coord", "mycoord"},
+        {COORD, MYCOORD},
         0,
         "contribution",
         "contributions",
     ),
     ("All assessments", POWER_USERS, 0, "assessment", "assessments"),
     ("My assessments", AUTH_USERS, 0, "assessment", "assessments"),
-    ("Assessments needing reviewers", {"office"}, 0, "assessment", "assessments"),
+    ("Assessments needing reviewers", {OFFICE}, 0, "assessment", "assessments"),
     ("Assessments in review by me", AUTH_USERS, 0, "assessment", "assessments"),
     ("Assessments reviewed by me", AUTH_USERS, 0, "assessment", "assessments"),
     ("All reviews", POWER_USERS, 0, "review", "reviews"),
     ("My reviews", AUTH_USERS, 0, "review", "reviews"),
-    ("countries", POWER_USERS, 51, "country", None),
+    ("countries", POWER_USERS, 51, COUNTRY, None),
     ("criteria", POWER_USERS, 7, "criteria", None),
     ("disciplines", POWER_USERS, 3, None, None),
     ("keywords", POWER_USERS, 2, None, None),
@@ -77,9 +123,9 @@ CAPTIONS = (
     ("users", POWER_USERS, 11, None, None),
     ("vccs", POWER_USERS, 2, None, None),
     ("years", POWER_USERS, 20, None, None),
-    ("decisions", {"system", "root"}, 3, None, None),
-    ("permission groups", {"system", "root"}, 9, None, None),
-    ("Recompute workflow table", {"system", "root"}, None, WELCOME, None),
+    ("decisions", {SYSTEM, ROOT}, 3, None, None),
+    ("permission groups", {SYSTEM, ROOT}, 9, None, None),
+    ("Recompute workflow table", {SYSTEM, ROOT}, None, WELCOME, None),
 )
 """Sidebar entries.
 
@@ -116,7 +162,7 @@ USER_COUNTRY = dict(
 )
 """Where the test users come from."""
 
-N_CRITERIA_ENTRIES = {
+CRITERIA_ENTRIES_N = {
     "service - data hosting": 2,
     "service - processing service": 2,
     "activity - resource creation": 4,
@@ -220,3 +266,6 @@ dynamic
     ),
 )
 """Lots of values in several fields of a contribution."""
+
+TYPE1 = EXAMPLE[TYPE][0]
+TYPE2 = EXAMPLE[TYPE][3]

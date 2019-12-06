@@ -134,7 +134,7 @@ function mongostart {
         service mongod start
     else
         if [[ `ps aux | grep -v grep | grep mongod` ]]; then
-            echo "mongo daemon already running"
+            :
         else
             mongod -f /usr/local/etc/mongod.conf --fork
         fi
@@ -147,7 +147,7 @@ function mongostop {
     else
         pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
         if [[ "$pid" == "" ]]; then
-            echo "mongo daemon already stopped"
+            :
         else
             kill $pid
             echo "mongo daemon stopped"
@@ -227,16 +227,19 @@ function datamanage {
 
 function dbdevinit {
     cd $root/import
+    mongostart
     python3 mongoFromFm.py development
 }
 
 function dbrootreset {
     cd $root/server
+    mongostart
     python3 root.py "$MODE" "$1" --only
 }
 
 function dbtestinit {
     cd $root/server/tests
+    mongostart
     python3 clean.py
 }
 

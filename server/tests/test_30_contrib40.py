@@ -28,14 +28,13 @@ from control.utils import pick as G
 from conftest import USERS, RIGHTFUL_USERS
 from example import (
     CONTRIB,
+    COST_BARE,
+    COST_TOTAL,
+    COST_DESCRIPTION,
     EXAMPLE,
 )
-from helpers import (
-    forall,
-)
-from starters import (
-    start,
-)
+from helpers import forall
+from starters import start
 from subtest import (
     assertFieldValue,
     assertModifyField,
@@ -60,24 +59,24 @@ def test_start(clientOffice, clientOwner):
 
 def test_modifyCost(clientOwner, clientOffice):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    field = "costTotal"
-    value = EXAMPLE["costBare"]
-    expect = EXAMPLE["costTotal"]
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
+    value = EXAMPLE[COST_BARE]
+    expect = EXAMPLE[COST_TOTAL]
+    assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
 
-    field = "costDescription"
-    value = EXAMPLE["costDescription"][0]
+    value = EXAMPLE[COST_DESCRIPTION][0]
     expect = value.strip()
-    assertModifyField(clientOwner, CONTRIB, eid, field, (value, expect), True)
+    assertModifyField(
+        clientOwner, CONTRIB, eid, COST_DESCRIPTION, (value, expect), True
+    )
 
 
 @pytest.mark.parametrize(
-    ("field",), (("costTotal",), ("costDescription",),),
+    ("field",), ((COST_TOTAL,), (COST_DESCRIPTION,),),
 )
 def test_viewCost(clients, field):
     eid = G(G(recordInfo, CONTRIB), "eid")
     value = EXAMPLE[field]
-    if field == "costDescription":
+    if field == COST_DESCRIPTION:
         value = value[0]
     valueStrip = value.strip()
 

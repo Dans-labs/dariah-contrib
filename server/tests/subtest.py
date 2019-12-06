@@ -14,7 +14,10 @@ from conftest import USERS
 from example import (
     ASSESS,
     CAPTIONS,
+    EDITOR,
+    TITLE,
     UNDEF_VALUE,
+    USER,
     USER_COUNTRY,
 )
 from helpers import (
@@ -68,6 +71,38 @@ def assertAddItem(client, table, expect):
     return (text, fields, msgs, eid)
 
 
+def assertCaptions(client, expect):
+    """Check whether a response text shows a certain set of captions.
+
+    Parameters
+    ----------
+    client: fixture
+    expect: set of string
+    """
+
+    url = "/"
+    (text, status, msgs) = accessUrl(client, url)
+    captionsFound = {caption: url for (caption, url) in findCaptions(text)}
+    for caption in captionsFound:
+        assert caption in expect
+    for caption in expect:
+        assert caption in captionsFound
+    for (caption, url) in captionsFound.items():
+        (expNumber, expItem) = expect[caption]
+        serverprint(f"CAPTION {caption}: {client.user} CLICKS {url}")
+        (text, status, msgs) = accessUrl(client, url)
+        if expNumber is None:
+            expItem in text
+        else:
+            (n, item) = findMainN(text)[0]
+            nX = f"=/={expNumber}" if n != str(expNumber) else E
+            iX = f"=/={expItem}" if item != expItem else E
+            if iX or nX:
+                serverprint(f"CAPTION {caption}: {n}{nX} {item}{iX}")
+            assert n == str(expNumber)
+            assert item == expItem
+
+
 def assertDelItem(client, table, eid, expect):
     """Deletes an item from a table.
 
@@ -98,9 +133,9 @@ def assertEditor(client, table, eid, valueTables, expect, clear=False):
     if clear:
         value = ([], "")
     else:
-        users = valueTables["user"]
-        (editorId, editorName) = users["editor"]
-        value = ([editorId], editorName)
+        users = valueTables[USER]
+        editorId = users[EDITOR]
+        value = ([editorId], EDITOR)
     assertModifyField(client, table, eid, "editors", value, expect)
 
 
@@ -185,44 +220,17 @@ def assertStage(client, table, eid, expect):
     client: fixture
     table: string
     eid: ObjectId | string
-    expect: string
+    expect: string | set of string
+        If a set, we expect one of the values in the set
     """
 
     (text, fields, msgs, dummy) = findItem(client, table, eid)
     stageFound = findStages(text)[0]
-    assert stageFound == expect
-    return (text, fields, msgs, eid)
-
-
-def assertCaptions(client, expect):
-    """Check whether a response text shows a certain set of captions.
-
-    Parameters
-    ----------
-    client: fixture
-    expect: set of string
-    """
-
-    url = "/"
-    (text, status, msgs) = accessUrl(client, url)
-    captionsFound = {caption: url for (caption, url) in findCaptions(text)}
-    for caption in captionsFound:
-        assert caption in expect
-    for caption in expect:
-        assert caption in captionsFound
-    for (caption, url) in captionsFound.items():
-        (expNumber, expItem) = expect[caption]
-        (text, status, msgs) = accessUrl(client, url)
-        if expNumber is None:
-            expItem in text
-        else:
-            (n, item) = findMainN(text)[0]
-            nX = f"=/={expNumber}" if n != str(expNumber) else E
-            iX = f"=/={expItem}" if item != expItem else E
-            if iX or nX:
-                serverprint(f"CAPTION {caption}: {n}{nX} {item}{iX}")
-            assert n == str(expNumber)
-            assert item == expItem
+    if type(expect) is set:
+        assert stageFound in expect
+    else:
+        assert stageFound == expect
+    return (text, fields, msgs, eid, stageFound)
 
 
 def assertStartAssessment(client, cId, expect):
@@ -283,10 +291,8 @@ def inspectTitleAll(clients, table, eid, expect):
         The expected values, keyed per user
     """
 
-    field = "title"
-
     def assertIt(cl, exp):
-        assertFieldValue((cl, table, eid), field, exp)
+        assertFieldValue((cl, table, eid), TITLE, exp)
 
     forall(clients, expect, assertIt)
 
@@ -312,7 +318,7 @@ def assignReviewers(clients, assessInfo, users, aId, field, user, expect):
     """
 
     aId = G(assessInfo, "eid")
-    value = G(users, user)[0]
+    value = G(users, user)
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, field, (value, user), exp)

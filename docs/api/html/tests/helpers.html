@@ -99,6 +99,23 @@ def fieldEditRe(eid, field):
     )
 
 
+def valueListRe(table):
+    &#34;&#34;&#34;Given a table name, return a `re` that finds pairs of id and title strings.
+
+    The text is a list display of value records, and we peel the ids from the
+    `&lt;detail&gt;` elements and the titles from the `&lt;summary&gt;` within them.
+
+    Parameters
+    ----------
+    table: string
+    &#34;&#34;&#34;
+
+    return re.compile(
+        f&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{table}/([^&#39;&#34;]*)[&#39;&#34;].*?&lt;summary&gt;.*?&lt;span.*?&gt;([^&lt;]*)&lt;/span&gt;&#34;&#34;&#34;,
+        re.S,
+    )
+
+
 def detailRe(dtable):
     &#34;&#34;&#34;Given a detail table name, return a `re` that looks for the detail records.
 
@@ -349,22 +366,23 @@ def findCaptions(text):
     return captionRe.findall(text)
 
 
-def findUsers(text):
-    &#34;&#34;&#34;Get the users from a response.
+def findValues(table, text):
+    &#34;&#34;&#34;Get the values from the response of a list view on that table.
 
     Parameters
     ----------
+    table: string
     text: string
         The response text.
 
     Returns
     -------
     dict
-        keyed by lower case eppns, valued by tuples of eid and name of the user.
+        keyed by the titles of the records and valued by their ids.
     &#34;&#34;&#34;
 
     return {
-        name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
+        name: eid for (eid, name) in valueListRe(table).findall(text)
     }
 
 
@@ -1009,41 +1027,44 @@ of the item will be read off.</p>
     return stageRe.findall(text)</code></pre>
 </details>
 </dd>
-<dt id="helpers.findUsers"><code class="name flex">
-<span>def <span class="ident">findUsers</span></span>(<span>text)</span>
+<dt id="helpers.findValues"><code class="name flex">
+<span>def <span class="ident">findValues</span></span>(<span>table, text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the users from a response.</p>
+<section class="desc"><p>Get the values from the response of a list view on that table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
 <dd>The response text.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>dict</code></dt>
-<dd>keyed by lower case eppns, valued by tuples of eid and name of the user.</dd>
+<dd>keyed by the titles of the records and valued by their ids.</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def findUsers(text):
-    &#34;&#34;&#34;Get the users from a response.
+<pre><code class="python">def findValues(table, text):
+    &#34;&#34;&#34;Get the values from the response of a list view on that table.
 
     Parameters
     ----------
+    table: string
     text: string
         The response text.
 
     Returns
     -------
     dict
-        keyed by lower case eppns, valued by tuples of eid and name of the user.
+        keyed by the titles of the records and valued by their ids.
     &#34;&#34;&#34;
 
     return {
-        name.split()[0].lower(): (eid, name) for (eid, name) in userRe.findall(text)
+        name: eid for (eid, name) in valueListRe(table).findall(text)
     }</code></pre>
 </details>
 </dd>
@@ -1202,6 +1223,39 @@ Will be wrapped into JSON with a proper header.</dd>
     return text</code></pre>
 </details>
 </dd>
+<dt id="helpers.valueListRe"><code class="name flex">
+<span>def <span class="ident">valueListRe</span></span>(<span>table)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Given a table name, return a <code>re</code> that finds pairs of id and title strings.</p>
+<p>The text is a list display of value records, and we peel the ids from the
+<code>&lt;detail&gt;</code> elements and the titles from the <code>&lt;summary&gt;</code> within them.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def valueListRe(table):
+    &#34;&#34;&#34;Given a table name, return a `re` that finds pairs of id and title strings.
+
+    The text is a list display of value records, and we peel the ids from the
+    `&lt;detail&gt;` elements and the titles from the `&lt;summary&gt;` within them.
+
+    Parameters
+    ----------
+    table: string
+    &#34;&#34;&#34;
+
+    return re.compile(
+        f&#34;&#34;&#34;&lt;details itemkey=[&#39;&#34;]{table}/([^&#39;&#34;]*)[&#39;&#34;].*?&lt;summary&gt;.*?&lt;span.*?&gt;([^&lt;]*)&lt;/span&gt;&#34;&#34;&#34;,
+        re.S,
+    )</code></pre>
+</details>
+</dd>
 <dt id="helpers.viewField"><code class="name flex">
 <span>def <span class="ident">viewField</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
@@ -1282,12 +1336,13 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.findMaterial" href="#helpers.findMaterial">findMaterial</a></code></li>
 <li><code><a title="helpers.findMsg" href="#helpers.findMsg">findMsg</a></code></li>
 <li><code><a title="helpers.findStages" href="#helpers.findStages">findStages</a></code></li>
-<li><code><a title="helpers.findUsers" href="#helpers.findUsers">findUsers</a></code></li>
+<li><code><a title="helpers.findValues" href="#helpers.findValues">findValues</a></code></li>
 <li><code><a title="helpers.forall" href="#helpers.forall">forall</a></code></li>
 <li><code><a title="helpers.getAid" href="#helpers.getAid">getAid</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>
+<li><code><a title="helpers.valueListRe" href="#helpers.valueListRe">valueListRe</a></code></li>
 <li><code><a title="helpers.viewField" href="#helpers.viewField">viewField</a></code></li>
 <li><code><a title="helpers.warningRe" href="#helpers.warningRe">warningRe</a></code></li>
 </ul>

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>test_30_contrib40 API documentation</title>
-<meta name="description" content="Test scenario for contributions …" />
+<title>test_50_review10 API documentation</title>
+<meta name="description" content="Test scenario for reviews …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,10 +17,10 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>test_30_contrib40</code></h1>
+<h1 class="title">Module <code>test_50_review10</code></h1>
 </header>
 <section id="section-intro">
-<p>Test scenario for contributions.</p>
+<p>Test scenario for reviews.</p>
 <h2 id="domain">Domain</h2>
 <ul>
 <li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
@@ -28,21 +28,16 @@
 <li>The user table</li>
 <li>The country table</li>
 <li>One contribution record</li>
+<li>One assessment record</li>
+<li>The assessment submitted and reviewers assigned.</li>
 </ul>
 <h2 id="acts">Acts</h2>
-<p>Checking the visibility of sensitive fields.</p>
-<dl>
-<dt><a title="test_30_contrib40.test_modifyCost" href="#test_30_contrib40.test_modifyCost"><code>test_modifyCost()</code></a></dt>
-<dd><strong>owner</strong> sets the cost field to an example value.</dd>
-<dt><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost"><code>test_viewCost()</code></a></dt>
-<dd>all users try to look at the costTotal and costDescription fields,
-but only some succeed.</dd>
-</dl>
+<p>Filling out reviews.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Test scenario for contributions.
+<pre><code class="python">&#34;&#34;&#34;Test scenario for reviews.
 
 ## Domain
 
@@ -51,42 +46,22 @@ but only some succeed.</dd>
 *   The user table
 *   The country table
 *   One contribution record
+*   One assessment record
+*   The assessment submitted and reviewers assigned.
 
 ## Acts
 
-Checking the visibility of sensitive fields.
-
-`test_modifyCost`
-:   **owner** sets the cost field to an example value.
-
-`test_viewCost`
-:   all users try to look at the costTotal and costDescription fields,
-    but only some succeed.
+Filling out reviews.
 
 &#34;&#34;&#34;
 
-import pytest
-
 import magic  # noqa
-from control.utils import pick as G
-from conftest import USERS, RIGHTFUL_USERS
-from example import (
-    CONTRIB,
-    COST_BARE,
-    COST_TOTAL,
-    COST_DESCRIPTION,
-    EXAMPLE,
-)
-from helpers import forall
 from starters import start
-from subtest import (
-    assertFieldValue,
-    assertModifyField,
-)
-
 
 recordInfo = {}
 valueTables = {}
+cIds = []
+ids = {}
 
 
 def test_start(clientOffice, clientOwner):
@@ -94,43 +69,14 @@ def test_start(clientOffice, clientOwner):
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
-        contrib=True,
+        assessment=True,
         countries=True,
+        assign=True,
         valueTables=valueTables,
         recordInfo=recordInfo,
-    )
-
-
-def test_modifyCost(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    value = EXAMPLE[COST_BARE]
-    expect = EXAMPLE[COST_TOTAL]
-    assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
-
-    value = EXAMPLE[COST_DESCRIPTION][0]
-    expect = value.strip()
-    assertModifyField(
-        clientOwner, CONTRIB, eid, COST_DESCRIPTION, (value, expect), True
-    )
-
-
-@pytest.mark.parametrize(
-    (&#34;field&#34;,), ((COST_TOTAL,), (COST_DESCRIPTION,),),
-)
-def test_viewCost(clients, field):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    value = EXAMPLE[field]
-    if field == COST_DESCRIPTION:
-        value = value[0]
-    valueStrip = value.strip()
-
-    def assertIt(cl, exp):
-        assertFieldValue((cl, CONTRIB, eid), field, exp)
-
-    expect = {user: None for user in USERS}
-    expect.update({user: valueStrip for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=valueStrip))
-    forall(clients, expect, assertIt)</code></pre>
+        ids=ids,
+        cIds=cIds,
+    )</code></pre>
 </details>
 </section>
 <section>
@@ -140,29 +86,7 @@ def test_viewCost(clients, field):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_30_contrib40.test_modifyCost"><code class="name flex">
-<span>def <span class="ident">test_modifyCost</span></span>(<span>clientOwner, clientOffice)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_modifyCost(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    value = EXAMPLE[COST_BARE]
-    expect = EXAMPLE[COST_TOTAL]
-    assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
-
-    value = EXAMPLE[COST_DESCRIPTION][0]
-    expect = value.strip()
-    assertModifyField(
-        clientOwner, CONTRIB, eid, COST_DESCRIPTION, (value, expect), True
-    )</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib40.test_start"><code class="name flex">
+<dt id="test_50_review10.test_start"><code class="name flex">
 <span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
 </code></dt>
 <dd>
@@ -176,39 +100,14 @@ def test_viewCost(clients, field):
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
-        contrib=True,
+        assessment=True,
         countries=True,
+        assign=True,
         valueTables=valueTables,
         recordInfo=recordInfo,
+        ids=ids,
+        cIds=cIds,
     )</code></pre>
-</details>
-</dd>
-<dt id="test_30_contrib40.test_viewCost"><code class="name flex">
-<span>def <span class="ident">test_viewCost</span></span>(<span>clients, field)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@pytest.mark.parametrize(
-    (&#34;field&#34;,), ((COST_TOTAL,), (COST_DESCRIPTION,),),
-)
-def test_viewCost(clients, field):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    value = EXAMPLE[field]
-    if field == COST_DESCRIPTION:
-        value = value[0]
-    valueStrip = value.strip()
-
-    def assertIt(cl, exp):
-        assertFieldValue((cl, CONTRIB, eid), field, exp)
-
-    expect = {user: None for user in USERS}
-    expect.update({user: valueStrip for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=valueStrip))
-    forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
 </dl>
@@ -227,9 +126,7 @@ def test_viewCost(clients, field):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="test_30_contrib40.test_modifyCost" href="#test_30_contrib40.test_modifyCost">test_modifyCost</a></code></li>
-<li><code><a title="test_30_contrib40.test_start" href="#test_30_contrib40.test_start">test_start</a></code></li>
-<li><code><a title="test_30_contrib40.test_viewCost" href="#test_30_contrib40.test_viewCost">test_viewCost</a></code></li>
+<li><code><a title="test_50_review10.test_start" href="#test_50_review10.test_start">test_start</a></code></li>
 </ul>
 </li>
 </ul>

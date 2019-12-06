@@ -52,15 +52,15 @@ Filling out an assessment.
     the assessment is complete, not yet submitted.
 
 `test_withdrawAssessment`
-:   **owner** tries to withdraw the assessment, unsuccessfully, because it has not
-    been submitted.
+:   **owner** tries to withdraw the assessment, unsuccessfully,
+    because it has not been submitted.
 
 `test_inspectTitleAll2`
 :   We check of the assessment is still private to **owner**.
 
 `test_resubmitAssessment`
-:   **owner** tries to re-submit the assessment, unsuccessfully, because it has not
-    been submitted.
+:   **owner** tries to re-submit the assessment, unsuccessfully,
+    because it has not been submitted.
 
 `test_submitAssessmentRevised`
 :   **owner** tries to submit the assessment as revision, unsuccessfully.
@@ -73,18 +73,26 @@ Filling out an assessment.
     The office user succeeds because of a workflow condition:
     the assessment is submitted.
 
+`test_sidebar`
+:   All users check the entries in the sidebar.
+    The office user should now see an entrie for assessment needing reviewers.
+
 `test_inspectTitleAll3`
 :   We check of the assessment is still private to **owner**.
 
-*   **owner** tries to submit the assessment, unsuccessfully, because it has already
-    been submitted.
+*   **owner** tries to submit the assessment, unsuccessfully,
+    because it has already been submitted.
 *   **owner** tries to withdraw the assessment, successfully.
 *   **owner** tries to submit the assessment as revision, unsuccessfully.
 *   **owner** tries to resubmit the assessment successfully.
 *   We check of the assessment is still private to **owner**.
 
 `test_withdrawAssessment2`
-:   **owner** tries to withdraw the assessment, successfully been submitted.
+:   **owner** tries to withdraw the assessment, successfully.
+
+`test_sidebar2`
+:   All users check the entries in the sidebar.
+    The office user should not not see any entrie for assessment needing reviewers.
 
 `test_assignReviewers3`
 :   All users try to assign reviewers to this assessment.
@@ -101,18 +109,38 @@ Filling out an assessment.
 :   All users try to assign reviewers to this assessment.
     The office user succeeds because of a workflow condition:
     the assessment is submitted.
+
+`test_withdrawAssessment2`
+:   **owner** tries to withdraw the assessment, successfully.
+
 """
 
 import pytest
 
 import magic  # noqa
 from control.utils import pick as G
-from conftest import USERS, RIGHTFUL_USERS
+from conftest import USERS, POWER_USERS, RIGHTFUL_USERS
 from example import (
     ASSESS,
+    BELGIUM,
+    COMPLETE,
     CRITERIA_ENTRY,
-    N_CRITERIA_ENTRIES,
-    TYPE,
+    CRITERIA_ENTRIES_N,
+    EDITOR,
+    ELLIPS_DIV,
+    EVIDENCE,
+    EXPERT,
+    FINAL,
+    INCOMPLETE,
+    MYCOORD,
+    OFFICE,
+    OWNER,
+    REVIEWER_E,
+    REVIEWER_F,
+    SCORE,
+    TITLE,
+    TYPE1,
+    USER,
 )
 from helpers import (
     findDetails,
@@ -120,15 +148,14 @@ from helpers import (
     forall,
     getRelatedValues,
 )
-from starters import (
-    start,
-)
+from starters import start
 from subtest import (
     assertModifyField,
     assertStage,
     assertStatus,
     inspectTitleAll,
     assignReviewers,
+    sidebar,
 )
 
 recordInfo = {}
@@ -152,18 +179,15 @@ def test_start(clientOffice, clientOwner):
 
 def test_criteriaEntries(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    ellips = "<div>...</div>"
-    dtable = "criteriaEntry"
-    expEntries = N_CRITERIA_ENTRIES[TYPE]
 
     def assertIt(cl, exp):
         (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
-        criteriaEntries = findDetails(text, dtable)
+        criteriaEntries = findDetails(text, CRITERIA_ENTRY)
         nEntries = len(criteriaEntries)
         if exp:
-            assert nEntries == expEntries
+            assert nEntries == CRITERIA_ENTRIES_N[TYPE1]
             for (cId, material) in criteriaEntries:
-                assert ellips in material
+                assert ELLIPS_DIV in material
         else:
             assert nEntries == 0
 
@@ -174,18 +198,16 @@ def test_criteriaEntries(clients):
 
 def test_fillEvidenceAll(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    dtable = "criteriaEntry"
-    field = "evidence"
-    clientOwner = clients["owner"]
-    (text, fields, msgs, dummy) = assertStage(clientOwner, ASSESS, aId, "incomplete")
-    criteriaEntries = findDetails(text, dtable)
+    clientOwner = clients[OWNER]
+    (text, fields, msgs, *dummy) = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
+    criteriaEntries = findDetails(text, CRITERIA_ENTRY)
     cId = criteriaEntries[0][0]
 
     def assertIt(cl, exp):
         theEvidence = [f"evidence for  1", "see the internet"]
         theEvidenceRep = ",".join(theEvidence)
         assertModifyField(
-            cl, CRITERIA_ENTRY, cId, field, (theEvidence, theEvidenceRep), exp
+            cl, CRITERIA_ENTRY, cId, EVIDENCE, (theEvidence, theEvidenceRep), exp
         )
 
     expect = {user: False for user in USERS}
@@ -195,45 +217,44 @@ def test_fillEvidenceAll(clients):
 
 def test_fillEvidenceOwner(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    ellips = "<div>...</div>"
 
-    (text, fields, msgs, dummy) = assertStage(clientOwner, ASSESS, aId, "incomplete")
+    (text, fields, msgs, *dummy) = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
 
-    dtable = "criteriaEntry"
-    criteriaEntries = findDetails(text, dtable)
-    expEntries = N_CRITERIA_ENTRIES[TYPE]
-    assert len(criteriaEntries) == expEntries
+    criteriaEntries = findDetails(text, CRITERIA_ENTRY)
+    assert len(criteriaEntries) == CRITERIA_ENTRIES_N[TYPE1]
 
     for (i, (cId, material)) in enumerate(criteriaEntries):
-        assert ellips in material
+        assert ELLIPS_DIV in material
         theEvidence = [f"evidence for {i + 1}", "see the internet"]
         theEvidenceRep = ",".join(theEvidence)
-        field = "evidence"
         assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (theEvidence, theEvidenceRep), True
+            clientOwner,
+            CRITERIA_ENTRY,
+            cId,
+            EVIDENCE,
+            (theEvidence, theEvidenceRep),
+            True,
         )
         cIds.append(cId)
 
 
 def test_fillScore(clientOwner):
     cId = cIds[0]
-    field = "score"
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
+    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, SCORE)
     (scoreValue, scoreId) = sorted(scores.items())[0]
     assertModifyField(
-        clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True
+        clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True
     )
 
 
 def test_fillScoreWrong(clientOwner):
     cId = cIds[0]
     cIdx = cIds[1]
-    field = "score"
     (text, fields, msgs, eid) = findItem(clientOwner, CRITERIA_ENTRY, cId)
-    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, field)
+    scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, SCORE)
     (scoreValue, scoreId) = sorted(scores.items())[0]
     assertModifyField(
-        clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), False
+        clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), False
     )
 
 
@@ -245,30 +266,25 @@ def test_submitAssessment(clientOwner):
 
 def test_complete(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    field = "score"
     nCId = len(cIds)
 
     for (i, cId) in enumerate(cIds):
-        scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, field)
+        scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, SCORE)
         (scoreValue, scoreId) = sorted(scores.items())[1]
         if i == nCId - 1:
-            assertStage(clientOwner, ASSESS, aId, "incomplete")
+            assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
 
         assertModifyField(
-            clientOwner, CRITERIA_ENTRY, cId, field, (scoreId, scoreValue), True
+            clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True
         )
-    assertStage(clientOwner, ASSESS, aId, "complete")
+    assertStage(clientOwner, ASSESS, aId, COMPLETE)
 
 
 @pytest.mark.parametrize(
-    ("field", "user"),
-    (
-        ("reviewerE", "expert"),
-        ("reviewerF", "final"),
-    ),
+    ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers(clients, field, user):
-    users = G(valueTables, "user")
+    users = G(valueTables, USER)
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
@@ -283,7 +299,7 @@ def test_withdrawAssessment(clientOwner):
 
 def test_inspectTitleAll2(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), "title")
+    aTitle = G(G(recordInfo, ASSESS), TITLE)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     inspectTitleAll(clients, ASSESS, aId, expect)
@@ -308,24 +324,34 @@ def test_submitAssessment2(clientOwner):
 
 
 @pytest.mark.parametrize(
-    ("field", "user"),
-    (
-        ("reviewerE", "expert"),
-        ("reviewerF", "final"),
-    ),
+    ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers2(clients, field, user):
-    users = G(valueTables, "user")
+    users = G(valueTables, USER)
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    expect["office"] = True
+    expect[OFFICE] = True
     assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+
+
+def test_sidebar(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({OWNER, EDITOR}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({MYCOORD}, 1)],
+        "Contributions I am assessing": [({OWNER, EDITOR}, 1)],
+        "My assessments": [({OWNER, EDITOR}, 1)],
+        "All assessments": [(POWER_USERS, 1)],
+        "Assessments needing reviewers": [({OFFICE}, 1)],
+    }
+    sidebar(clients, amounts)
 
 
 def test_inspectTitleAll3(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), "title")
+    aTitle = G(G(recordInfo, ASSESS), TITLE)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update(dict(mycoord=aTitle))
@@ -338,15 +364,24 @@ def test_withdrawAssessment2(clientOwner):
     assertStatus(clientOwner, url, True)
 
 
+def test_sidebar2(clients):
+    amounts = {
+        "All contributions": [1],
+        "My contributions": [({OWNER, EDITOR}, 1)],
+        f"{BELGIUM} contributions": [1],
+        "Contributions to be selected": [({MYCOORD}, 1)],
+        "Contributions I am assessing": [({OWNER, EDITOR}, 0)],
+        "My assessments": [({OWNER, EDITOR}, 1)],
+        "All assessments": [(POWER_USERS, 1)],
+    }
+    sidebar(clients, amounts)
+
+
 @pytest.mark.parametrize(
-    ("field", "user"),
-    (
-        ("reviewerE", "expert"),
-        ("reviewerF", "final"),
-    ),
+    ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers3(clients, field, user):
-    users = G(valueTables, "user")
+    users = G(valueTables, USER)
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
@@ -366,16 +401,18 @@ def test_resubmitAssessment2(clientOwner):
 
 
 @pytest.mark.parametrize(
-    ("field", "user"),
-    (
-        ("reviewerE", "expert"),
-        ("reviewerF", "final"),
-    ),
+    ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers4(clients, field, user):
-    users = G(valueTables, "user")
+    users = G(valueTables, USER)
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    expect["office"] = True
+    expect[OFFICE] = True
     assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+
+
+def test_withdrawAssessment3(clientOwner):
+    aId = G(G(recordInfo, ASSESS), "eid")
+    url = f"/api/task/withdrawAssessment/{aId}"
+    assertStatus(clientOwner, url, True)

@@ -14,7 +14,7 @@ from bson.objectid import ObjectId
 from hashlib import md5
 
 import magic  # noqa
-from config import Config as C
+from config import Config as C, Names as N
 from control.utils import now
 
 
@@ -172,17 +172,17 @@ def backoffice():
                 elif field == "creator":
                     newRow[field] = userMapping[value]
                 elif (
-                    table == "package"
-                    and field == "typeContribution"
-                    or table == "criteria"
-                    and field == "typeContribution"
+                    table == N.package
+                    and field == N.typeContribution
+                    or table == N.criteria
+                    and field == N.typeContribution
                 ):
                     newRow[field] = [relIndex[field][val] for val in value]
                 elif (
-                    table == "criteria"
-                    and field == "package"
-                    or table == "score"
-                    and field == "criteria"
+                    table == N.criteria
+                    and field == N.package
+                    or table == N.score
+                    and field == N.criteria
                 ):
                     newRow[field] = relIndex[field][value]
                 else:

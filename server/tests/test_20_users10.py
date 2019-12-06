@@ -21,6 +21,7 @@ Getting to know all users.
 
 import magic  # noqa
 from conftest import USER_LIST, POWER_USERS
+from example import AUTH, AUTH_EMAIL, EMAIL, PUBLIC, USER
 from helpers import (
     viewField
 )
@@ -40,23 +41,19 @@ def test_start(clientOffice):
 
 def test_users(clientOffice):
     assert len(USER_LIST) == 11
-    users = valueTables["user"]
+    users = valueTables[USER]
     for user in USER_LIST:
-        if user == "public":
+        if user == PUBLIC:
             assert user not in users
         else:
             assert user in users
 
 
 def test_readEmail(clients):
-    table = "user"
-    field = "email"
-    entity = "auth"
-    eid = valueTables[table][entity][0]
-    expect = f"auth@test.eu"
+    eid = valueTables[USER][AUTH]
     for (user, client) in clients.items():
-        (text, fields) = viewField(client, table, eid, field)
+        (text, fields) = viewField(client, USER, eid, EMAIL)
         if user in POWER_USERS:
-            assertFieldValue(fields, field, expect)
+            assertFieldValue(fields, EMAIL, AUTH_EMAIL)
         else:
-            assertFieldValue(fields, field, None)
+            assertFieldValue(fields, EMAIL, None)

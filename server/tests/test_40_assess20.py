@@ -28,7 +28,9 @@ from control.utils import pick as G
 from example import (
     CONTRIB,
     ASSESS,
+    TITLE,
     TYPE,
+    TYPE1,
     TYPE2,
 )
 from helpers import (
@@ -71,10 +73,9 @@ def test_addAssessment(clientOwner):
 def test_addAssessment2(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
     aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), "title")
-    field = "typeContribution"
+    aTitle = G(G(recordInfo, ASSESS), TITLE)
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids["TYPE2"], TYPE2), True
+        clientOwner, CONTRIB, eid, TYPE, (ids["TYPE2"], TYPE2), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
@@ -86,7 +87,7 @@ def test_addAssessment2(clientOwner):
     assertDelItem(clientOwner, ASSESS, otherAid, True)
 
     assertModifyField(
-        clientOwner, CONTRIB, eid, field, (ids["TYPE"], TYPE), True
+        clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True
     )
     (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)
