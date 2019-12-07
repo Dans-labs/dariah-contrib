@@ -72,9 +72,16 @@ class Value(Related):
         If the value is a singleton list, and if the value list is extensible,
         we insert the new value into the value table, and return the new id.
 
-        Otherwise, the value must be the string representation of id of a value
-        in the value table. Possibly not just any value, but a value in a subset
-        defined by a constraint.
+        Otherwise, the value must be either:
+
+        *   the string representation of id of a value
+        *   or a value in the relevant value table.
+
+        In all cases the MongoDb object id of that value is returned.
+
+        If a `constrain` is given only values in a subset defined by a constraint
+        qualify. This happens when we look for score records that are bound to a
+        criterion.
 
         Parameters
         ----------
@@ -93,14 +100,14 @@ class Value(Related):
         table = self.name
 
         valType = type(editVal)
+        valuesInv = (
+            getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+            if constrain is None
+            else db.getValueInv(table, constrain)
+        )
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
-                valuesInv = (
-                    getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-                    if constrain is None
-                    else db.getValueInv(table, constrain)
-                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible
@@ -109,18 +116,16 @@ class Value(Related):
             raise ConversionError
 
         values = (
-            getattr(db, f&#34;&#34;&#34;{table}&#34;&#34;&#34;, {})
+            getattr(db, table, {})
             if constrain is None
             else db.getValueIds(table, constrain)
         )
-        try:
-            valId = castObjectId(editVal)
-        except Exception:
+        valId = castObjectId(editVal)
+        if valId is None:
+            valId = G(valuesInv, editVal)
+        if valId not in values:
             raise ConversionError
-
-        if valId in values:
-            return valId
-        raise ConversionError
+        return valId
 
     def toEdit(self, val):
         return val
@@ -291,9 +296,16 @@ class Value(Related):
         If the value is a singleton list, and if the value list is extensible,
         we insert the new value into the value table, and return the new id.
 
-        Otherwise, the value must be the string representation of id of a value
-        in the value table. Possibly not just any value, but a value in a subset
-        defined by a constraint.
+        Otherwise, the value must be either:
+
+        *   the string representation of id of a value
+        *   or a value in the relevant value table.
+
+        In all cases the MongoDb object id of that value is returned.
+
+        If a `constrain` is given only values in a subset defined by a constraint
+        qualify. This happens when we look for score records that are bound to a
+        criterion.
 
         Parameters
         ----------
@@ -312,14 +324,14 @@ class Value(Related):
         table = self.name
 
         valType = type(editVal)
+        valuesInv = (
+            getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+            if constrain is None
+            else db.getValueInv(table, constrain)
+        )
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
-                valuesInv = (
-                    getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-                    if constrain is None
-                    else db.getValueInv(table, constrain)
-                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible
@@ -328,18 +340,16 @@ class Value(Related):
             raise ConversionError
 
         values = (
-            getattr(db, f&#34;&#34;&#34;{table}&#34;&#34;&#34;, {})
+            getattr(db, table, {})
             if constrain is None
             else db.getValueIds(table, constrain)
         )
-        try:
-            valId = castObjectId(editVal)
-        except Exception:
+        valId = castObjectId(editVal)
+        if valId is None:
+            valId = G(valuesInv, editVal)
+        if valId not in values:
             raise ConversionError
-
-        if valId in values:
-            return valId
-        raise ConversionError
+        return valId
 
     def toEdit(self, val):
         return val
@@ -476,9 +486,15 @@ errors defaults to 'strict'.</p></section>
 <section class="desc"><p>Convert a value to an object id by looking it up in a value table.</p>
 <p>If the value is a singleton list, and if the value list is extensible,
 we insert the new value into the value table, and return the new id.</p>
-<p>Otherwise, the value must be the string representation of id of a value
-in the value table. Possibly not just any value, but a value in a subset
-defined by a constraint.</p>
+<p>Otherwise, the value must be either:</p>
+<ul>
+<li>the string representation of id of a value</li>
+<li>or a value in the relevant value table.</li>
+</ul>
+<p>In all cases the MongoDb object id of that value is returned.</p>
+<p>If a <code>constrain</code> is given only values in a subset defined by a constraint
+qualify. This happens when we look for score records that are bound to a
+criterion.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>editVal</code></strong> :&ensp;<code>string</code></dt>
@@ -497,9 +513,16 @@ See <a title="control.db.Db.getValueRecords" href="../db.html#control.db.Db.getV
     If the value is a singleton list, and if the value list is extensible,
     we insert the new value into the value table, and return the new id.
 
-    Otherwise, the value must be the string representation of id of a value
-    in the value table. Possibly not just any value, but a value in a subset
-    defined by a constraint.
+    Otherwise, the value must be either:
+
+    *   the string representation of id of a value
+    *   or a value in the relevant value table.
+
+    In all cases the MongoDb object id of that value is returned.
+
+    If a `constrain` is given only values in a subset defined by a constraint
+    qualify. This happens when we look for score records that are bound to a
+    criterion.
 
     Parameters
     ----------
@@ -518,14 +541,14 @@ See <a title="control.db.Db.getValueRecords" href="../db.html#control.db.Db.getV
     table = self.name
 
     valType = type(editVal)
+    valuesInv = (
+        getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
+        if constrain is None
+        else db.getValueInv(table, constrain)
+    )
     if valType is list or valType is tuple:
         if extensible and editVal:
             editVal = editVal[0]
-            valuesInv = (
-                getattr(db, f&#34;&#34;&#34;{table}Inv&#34;&#34;&#34;, {})
-                if constrain is None
-                else db.getValueInv(table, constrain)
-            )
             if editVal in valuesInv:
                 return valuesInv[editVal]
             fieldName = N.rep if extensible is True else extensible
@@ -534,18 +557,16 @@ See <a title="control.db.Db.getValueRecords" href="../db.html#control.db.Db.getV
         raise ConversionError
 
     values = (
-        getattr(db, f&#34;&#34;&#34;{table}&#34;&#34;&#34;, {})
+        getattr(db, table, {})
         if constrain is None
         else db.getValueIds(table, constrain)
     )
-    try:
-        valId = castObjectId(editVal)
-    except Exception:
+    valId = castObjectId(editVal)
+    if valId is None:
+        valId = G(valuesInv, editVal)
+    if valId not in values:
         raise ConversionError
-
-    if valId in values:
-        return valId
-    raise ConversionError</code></pre>
+    return valId</code></pre>
 </details>
 </dd>
 </dl>

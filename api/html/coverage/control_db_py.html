@@ -8,7 +8,7 @@
     
     
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for control/db.py: 82%</title>
+    <title>Coverage for control/db.py: 84%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -24,15 +24,15 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>control/db.py</b> :
-            <span class="pc_cov">82%</span>
+            <span class="pc_cov">84%</span>
         </h1>
 
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
 
         <h2 class="stats">
             315 statements &nbsp;
-            <span class="run hide_run shortkey_r button_toggle_run">269 run</span>
-            <span class="mis shortkey_m button_toggle_mis">46 missing</span>
+            <span class="run hide_run shortkey_r button_toggle_run">272 run</span>
+            <span class="mis shortkey_m button_toggle_mis">43 missing</span>
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
             
@@ -889,13 +889,13 @@
 <p id="n818" class="pln"><a href="#n818">818</a></p>
 <p id="n819" class="pln"><a href="#n819">819</a></p>
 <p id="n820" class="pln"><a href="#n820">820</a></p>
-<p id="n821" class="stm mis"><a href="#n821">821</a></p>
+<p id="n821" class="stm run hide_run"><a href="#n821">821</a></p>
 <p id="n822" class="pln"><a href="#n822">822</a></p>
 <p id="n823" class="pln"><a href="#n823">823</a></p>
 <p id="n824" class="pln"><a href="#n824">824</a></p>
 <p id="n825" class="pln"><a href="#n825">825</a></p>
-<p id="n826" class="stm mis"><a href="#n826">826</a></p>
-<p id="n827" class="stm mis"><a href="#n827">827</a></p>
+<p id="n826" class="stm run hide_run"><a href="#n826">826</a></p>
+<p id="n827" class="stm run hide_run"><a href="#n827">827</a></p>
 <p id="n828" class="pln"><a href="#n828">828</a></p>
 <p id="n829" class="pln"><a href="#n829">829</a></p>
 <p id="n830" class="pln"><a href="#n830">830</a></p>
@@ -2203,13 +2203,13 @@
 <p id="t818" class="pln"><span class="str">            Keyed by values, valued by ids.</span><span class="strut">&nbsp;</span></p>
 <p id="t819" class="pln"><span class="str">        """</span><span class="strut">&nbsp;</span></p>
 <p id="t820" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t821" class="stm mis">        <span class="nam">records</span> <span class="op">=</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t821" class="stm run hide_run">        <span class="nam">records</span> <span class="op">=</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
 <p id="t822" class="pln">            <span class="nam">r</span><span class="strut">&nbsp;</span></p>
 <p id="t823" class="pln">            <span class="key">for</span> <span class="nam">r</span> <span class="key">in</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">valueTable</span><span class="op">,</span> <span class="op">{</span><span class="op">}</span><span class="op">)</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t824" class="pln">            <span class="key">if</span> <span class="nam">G</span><span class="op">(</span><span class="nam">r</span><span class="op">,</span> <span class="nam">constrain</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">)</span> <span class="op">==</span> <span class="nam">constrain</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t825" class="pln">        <span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t826" class="stm mis">        <span class="nam">eids</span> <span class="op">=</span> <span class="op">{</span><span class="nam">G</span><span class="op">(</span><span class="nam">r</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">_id</span><span class="op">)</span> <span class="key">for</span> <span class="nam">r</span> <span class="key">in</span> <span class="nam">records</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
-<p id="t827" class="stm mis">        <span class="key">return</span> <span class="op">{</span><span class="strut">&nbsp;</span></p>
+<p id="t826" class="stm run hide_run">        <span class="nam">eids</span> <span class="op">=</span> <span class="op">{</span><span class="nam">G</span><span class="op">(</span><span class="nam">r</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">_id</span><span class="op">)</span> <span class="key">for</span> <span class="nam">r</span> <span class="key">in</span> <span class="nam">records</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
+<p id="t827" class="stm run hide_run">        <span class="key">return</span> <span class="op">{</span><span class="strut">&nbsp;</span></p>
 <p id="t828" class="pln">            <span class="nam">value</span><span class="op">:</span> <span class="nam">eid</span><span class="strut">&nbsp;</span></p>
 <p id="t829" class="pln">            <span class="key">for</span> <span class="op">(</span><span class="nam">value</span><span class="op">,</span> <span class="nam">eid</span><span class="op">)</span> <span class="key">in</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="str">f"""{valueTable}Inv"""</span><span class="op">,</span> <span class="op">{</span><span class="op">}</span><span class="op">)</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t830" class="pln">            <span class="key">if</span> <span class="nam">eid</span> <span class="key">in</span> <span class="nam">eids</span><span class="strut">&nbsp;</span></p>
@@ -2704,7 +2704,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-05 19:12
+            created at 2019-12-07 21:05
         </p>
     </div>
 </div>
