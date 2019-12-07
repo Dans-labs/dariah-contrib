@@ -189,8 +189,15 @@ class WorkflowItem:
             See below.
         """
 
+        db = context.db
         auth = context.auth
         user = auth.user
+
+        self.db = db
+        """*object* The `control.db.Db` singleton
+
+        Provides methods to deal with values  from the table `decision`.
+        """
 
         self.auth = auth
         """*object* The `control.auth.Auth` singleton
@@ -511,7 +518,7 @@ class WorkflowItem:
         contrib, assessment, review.
         They are typically triggered by big workflow buttons on the interface.
 
-        When the request to execute such a task reachees the server, it will
+        When the request to execute such a task reaches the server, it will
         check whether the current user is allowed to execute this task
         on the records in question.
 
@@ -521,6 +528,15 @@ class WorkflowItem:
         !!! note
             If you try to run a task on a kind of record that it is not
             designed for, it will be detected and no permission will be given.
+
+        !!! note
+            Some tasks are designed to set a field to a value.
+            If that field already has that value, the task will not be permitted.
+            This already rules out a lot of things and relieves the burden of
+            prohibiting non-sensical tasks.
+
+        It may be that the task is only permitted for some limited time from now on.
+        Then a timedelta object with the amount of time left is returned.
 
         Parameters
         ----------
@@ -534,8 +550,10 @@ class WorkflowItem:
 
         Returns
         -------
-        boolean
+        boolean | timedelta
         """
+
+        db = self.db
         auth = self.auth
         uid = self.uid
 
@@ -548,6 +566,15 @@ class WorkflowItem:
         if uid is None or table not in USER_TABLES:
             return False
 
+        taskField = (
+            N.selected
+            if table == N.contrib
+            else N.submitted
+            if table == N.assessment
+            else N.decision
+            if table == N.review
+            else None
+        )
         myKind = self.myKind
 
         (
@@ -559,6 +586,7 @@ class WorkflowItem:
             stageDate,
             creators,
             countryId,
+            taskValue,
         ) = self.info(
             table,
             N.locked,
@@ -569,8 +597,18 @@ class WorkflowItem:
             N.stageDate,
             N.creators,
             N.country,
+            taskField,
             kind=kind,
         )
+
+        operator = G(taskInfo, N.operator)
+        value = G(taskInfo, N.value)
+        if operator == N.set:
+            if taskField == N.decision:
+                value = G(db.decisionInv, value)
+            print("XXX", value, taskValue)
+            if value == taskValue:
+                return False
 
         (contribId,) = self.info(N.contrib, N._id)
 
@@ -586,8 +624,8 @@ class WorkflowItem:
         remaining = False
         if decisionDelay and stageDate:
             remaining = stageDate + decisionDelay - justNow
-            if remaining >= timedelta(hours=0):
-                remaining = True
+            if remaining <= timedelta(hours=0):
+                remaining = False
 
         if frozen and not remaining:
             return False
@@ -615,7 +653,7 @@ class WorkflowItem:
 
             return False
 
-        if frozen or done:
+        if (frozen or done) and not remaining:
             return False
 
         if table == N.assessment:
@@ -630,19 +668,20 @@ class WorkflowItem:
                 return False
 
             if task == N.submitAssessment:
-                return stage == N.complete
+                return stage == N.complete and answer
 
             if task == N.resubmitAssessment:
-                return stage == N.completeWithdrawn
+                return stage == N.completeWithdrawn and answer
 
             if task == N.submitRevised:
-                return stage == N.completeRevised
+                return stage == N.completeRevised and answer
 
             if task == N.withdrawAssessment:
-                return stage in {N.submitted, N.submittedRevised} and stage not in {
-                    N.incompleteWithdrawn,
-                    N.completeWithdrawn,
-                }
+                return (
+                    stage in {N.submitted, N.submittedRevised}
+                    and stage not in {N.incompleteWithdrawn, N.completeWithdrawn}
+                    and answer
+                )
 
             return False
 
@@ -651,7 +690,7 @@ class WorkflowItem:
             if not kind or kind != taskKind or kind != myKind:
                 return False
 
-            answer = not locked or remaining
+            answer = remaining or not locked or remaining
             if not answer:
                 return False
 
@@ -660,7 +699,7 @@ class WorkflowItem:
                 N.expertReviewAccept,
                 N.expertReviewReject,
             }:
-                return kind == N.expert
+                return kind == N.expert and answer
 
             if task in {
                 N.finalReviewRevise,
@@ -668,7 +707,7 @@ class WorkflowItem:
                 N.finalReviewReject,
             }:
                 (expertStage,) = self.info(table, N.stage, kind=N.expert)
-                return kind == N.final and not not expertStage
+                return kind == N.final and not not expertStage and answer
 
             return False
 

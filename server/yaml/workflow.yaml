@@ -161,7 +161,7 @@ tasks:
     cls: info
     operator: set
     table: assessment
-    field: dateSubmitted
+    field: submitted
     date: dateSubmitted
     delay: 1
     value: "now"

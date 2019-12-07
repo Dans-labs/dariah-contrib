@@ -45,9 +45,16 @@ class Value(Related):
         If the value is a singleton list, and if the value list is extensible,
         we insert the new value into the value table, and return the new id.
 
-        Otherwise, the value must be the string representation of id of a value
-        in the value table. Possibly not just any value, but a value in a subset
-        defined by a constraint.
+        Otherwise, the value must be either:
+
+        *   the string representation of id of a value
+        *   or a value in the relevant value table.
+
+        In all cases the MongoDb object id of that value is returned.
+
+        If a `constrain` is given only values in a subset defined by a constraint
+        qualify. This happens when we look for score records that are bound to a
+        criterion.
 
         Parameters
         ----------
@@ -66,14 +73,14 @@ class Value(Related):
         table = self.name
 
         valType = type(editVal)
+        valuesInv = (
+            getattr(db, f"""{table}Inv""", {})
+            if constrain is None
+            else db.getValueInv(table, constrain)
+        )
         if valType is list or valType is tuple:
             if extensible and editVal:
                 editVal = editVal[0]
-                valuesInv = (
-                    getattr(db, f"""{table}Inv""", {})
-                    if constrain is None
-                    else db.getValueInv(table, constrain)
-                )
                 if editVal in valuesInv:
                     return valuesInv[editVal]
                 fieldName = N.rep if extensible is True else extensible
@@ -82,18 +89,16 @@ class Value(Related):
             raise ConversionError
 
         values = (
-            getattr(db, f"""{table}""", {})
+            getattr(db, table, {})
             if constrain is None
             else db.getValueIds(table, constrain)
         )
-        try:
-            valId = castObjectId(editVal)
-        except Exception:
+        valId = castObjectId(editVal)
+        if valId is None:
+            valId = G(valuesInv, editVal)
+        if valId not in values:
             raise ConversionError
-
-        if valId in values:
-            return valId
-        raise ConversionError
+        return valId
 
     def toEdit(self, val):
         return val
