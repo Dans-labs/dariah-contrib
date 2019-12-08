@@ -51,7 +51,9 @@ EMAIL = &#34;email&#34;
 EVIDENCE = &#34;evidence&#34;
 KEYWORD = &#34;keyword&#34;
 PACKAGE = &#34;package&#34;
+REP = &#34;rep&#34;
 REVIEW = &#34;review&#34;
+REVIEW_ENTRY = &#34;reviewEntry&#34;
 REVIEWER_E = &#34;reviewerE&#34;
 REVIEWER_F = &#34;reviewerF&#34;
 SCORE = &#34;score&#34;
@@ -84,6 +86,9 @@ INCOMPLETE = &#34;incomplete&#34;
 COMPLETE = &#34;complete&#34;
 COMPLETE_WITHDRAWN = &#34;completeWithdrawn&#34;
 
+START_ASSESSMENT = &#34;startAssessment&#34;
+START_REVIEW = &#34;startReview&#34;
+
 DUMMY_ID = &#34;00000000ffa4bbd9fe000f15&#34;
 
 UNDEF_VALUE = &#34;○&#34;
@@ -93,20 +98,20 @@ TITLE2 = &#34;Contribution (Modified)&#34;
 TITLE_A = &#34;assessment of {cTitle}&#34;
 TITLE_A2 = &#34;My contribution assessed&#34;
 
-CHECKS = dict(
-    description=(
+CHECKS = {
+    DESCRIPTION: (
         &#34;&lt;h1&gt;Data hosting.&lt;/h1&gt;&#34;,
         &#34;&lt;p&gt;This tool&#34;,
         &#34;&lt;li&gt;How, we&#34;,
         &#34;&lt;li&gt;More details&#34;,
     ),
-    costDescription=(
+    COST_DESCRIPTION: (
         &#34;&lt;h1&gt;Cost of data hosting.&lt;/h1&gt;&#34;,
         &#34;&lt;p&gt;There are&#34;,
         &#34;&lt;li&gt;The amount,&#34;,
         &#34;&lt;li&gt;More cost details&#34;,
     ),
-)
+}
 
 ELLIPS_DIV = &#34;&lt;div&gt;...&lt;/div&gt;&#34;
 
@@ -164,6 +169,9 @@ The test functions may fill in other amounts when testing in situations where
 additional records have been created.
 &#34;&#34;&#34;
 
+REVIEW_CAPTION = CAPTIONS[10]
+
+
 BELGIUM = &#34;BE🇧🇪&#34;
 LUXEMBURG = &#34;LU🇱🇺&#34;
 GERMANY = &#34;DE🇩🇪&#34;
@@ -174,19 +182,19 @@ PORTUGAL = &#34;PT🇵🇹&#34;
 POLAND = &#34;PL🇵🇱&#34;
 NETHERLANDS = &#34;NL🇳🇱&#34;
 
-USER_COUNTRY = dict(
-    public=None,
-    auth=GERMANY,
-    owner=BELGIUM,
-    editor=IRELAND,
-    mycoord=BELGIUM,
-    coord=LUXEMBURG,
-    expert=FRANCE,
-    final=ITALY,
-    office=PORTUGAL,
-    system=POLAND,
-    root=NETHERLANDS,
-)
+USER_COUNTRY = {
+    PUBLIC: None,
+    AUTH: GERMANY,
+    OWNER: BELGIUM,
+    EDITOR: IRELAND,
+    MYCOORD: BELGIUM,
+    COORD: LUXEMBURG,
+    EXPERT: FRANCE,
+    FINAL: ITALY,
+    OFFICE: PORTUGAL,
+    SYSTEM: POLAND,
+    ROOT: NETHERLANDS,
+}
 &#34;&#34;&#34;Where the test users come from.&#34;&#34;&#34;
 
 CRITERIA_ENTRIES_N = {
@@ -197,8 +205,8 @@ CRITERIA_ENTRIES_N = {
     &#34;legacy - infrastructure&#34;: 1,
 }
 
-EXAMPLE = dict(
-    description=[
+EXAMPLE = {
+    DESCRIPTION: [
         &#34;&#34;&#34;
 # Data hosting.
 
@@ -208,9 +216,9 @@ This tool hosts data.
 *   More details will follow.
 &#34;&#34;&#34;
     ],
-    costBare=&#34;103.456&#34;,
-    costTotal=f&#34;{EURO} 103.456&#34;,
-    costDescription=[
+    COST_BARE: &#34;103.456&#34;,
+    COST_TOTAL: f&#34;{EURO} 103.456&#34;,
+    COST_DESCRIPTION: [
         &#34;&#34;&#34;
 # Cost of data hosting.
 
@@ -220,8 +228,8 @@ There are costs.
 *   More cost details will follow.
 &#34;&#34;&#34;
     ],
-    year=tuple(str(yr) for yr in range(2010, 2030)),
-    country=f&#34;&#34;&#34;
+    YEAR: tuple(str(yr) for yr in range(2010, 2030)),
+    COUNTRY: f&#34;&#34;&#34;
 AT🇦🇹
 {BELGIUM}
 HR🇭🇷
@@ -242,13 +250,13 @@ SI🇸🇮
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    vcc=&#34;&#34;&#34;
+    VCC: &#34;&#34;&#34;
 vcc1
 vcc2
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    typeContribution=&#34;&#34;&#34;
+    TYPE: &#34;&#34;&#34;
 service - data hosting
 service - processing service
 activity - resource creation
@@ -257,20 +265,20 @@ legacy - infrastructure
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    tadirahObject=&#34;&#34;&#34;
+    TADIRAH_OBJECT: &#34;&#34;&#34;
 object1
 object2
 object3
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    tadirahActivity=&#34;&#34;&#34;
+    TADIRAH_ACTIVITY: &#34;&#34;&#34;
 activity1
 activity2
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    tadirahTechnique=&#34;&#34;&#34;
+    TADIRAH_TECHNIQUE: &#34;&#34;&#34;
 technique1
 technique2
 technique3
@@ -278,20 +286,20 @@ technique4
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    discipline=&#34;&#34;&#34;
+    DISCIPLINE: &#34;&#34;&#34;
 alpha
 beta
 gamma
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-    keyword=&#34;&#34;&#34;
+    KEYWORD: &#34;&#34;&#34;
 static
 dynamic
 &#34;&#34;&#34;.strip().split(
         &#34;\n&#34;
     ),
-)
+}
 &#34;&#34;&#34;Lots of values in several fields of a contribution.&#34;&#34;&#34;
 
 TYPE1 = EXAMPLE[TYPE][0]
