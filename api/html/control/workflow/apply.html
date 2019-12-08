@@ -1031,6 +1031,10 @@ class WorkflowItem:
     def tasks(self, table, kind=None):
         &#34;&#34;&#34;Present the currently available tasks as buttons on the interface.
 
+        !!! hint &#34;easy comments&#34;
+            We also include a comment `&lt;!-- task~!taskName:eid --&gt;
+            for the ease of testing.
+
         Parameters
         ----------
         table: string
@@ -1076,7 +1080,7 @@ class WorkflowItem:
                 [taskMsg, taskUntil],
                 f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
                 cls=f&#34;large task {taskCls}&#34;,
-            )
+            ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
             taskParts.append(taskPart)
 
         return H.join(taskParts)
@@ -2057,6 +2061,10 @@ details of the current user can be read off.</dd>
     def tasks(self, table, kind=None):
         &#34;&#34;&#34;Present the currently available tasks as buttons on the interface.
 
+        !!! hint &#34;easy comments&#34;
+            We also include a comment `&lt;!-- task~!taskName:eid --&gt;
+            for the ease of testing.
+
         Parameters
         ----------
         table: string
@@ -2102,7 +2110,7 @@ details of the current user can be read off.</dd>
                 [taskMsg, taskUntil],
                 f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
                 cls=f&#34;large task {taskCls}&#34;,
-            )
+            ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
             taskParts.append(taskPart)
 
         return H.join(taskParts)
@@ -3434,6 +3442,11 @@ contrib, assessment, or review.</dd>
 </code></dt>
 <dd>
 <section class="desc"><p>Present the currently available tasks as buttons on the interface.</p>
+<div class="admonition hint">
+<p class="admonition-title">easy comments</p>
+<p>We also include a comment `<!-- task~!taskName:eid -->
+for the ease of testing.</p>
+</div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -3453,6 +3466,10 @@ tasks: contrib, assessment, or review.</dd>
 </summary>
 <pre><code class="python">def tasks(self, table, kind=None):
     &#34;&#34;&#34;Present the currently available tasks as buttons on the interface.
+
+    !!! hint &#34;easy comments&#34;
+        We also include a comment `&lt;!-- task~!taskName:eid --&gt;
+        for the ease of testing.
 
     Parameters
     ----------
@@ -3499,7 +3516,7 @@ tasks: contrib, assessment, or review.</dd>
             [taskMsg, taskUntil],
             f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
             cls=f&#34;large task {taskCls}&#34;,
-        )
+        ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
         taskParts.append(taskPart)
 
     return H.join(taskParts)</code></pre>

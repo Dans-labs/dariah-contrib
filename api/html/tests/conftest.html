@@ -381,6 +381,16 @@ def clientsMy(app):
 
 
 @pytest.fixture
+def clientsReviewer(app):
+    &#34;&#34;&#34;A dictionary of client fixtures for the reviewer users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    &#34;&#34;&#34;
+
+    return {user: makeClient(app, user) for user in (&#34;expert&#34;, &#34;final&#34;)}
+
+
+@pytest.fixture
 def clientsPower(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the power users.
 
@@ -723,6 +733,26 @@ def clientsPower(app):
     return {user: makeClient(app, user) for user in POWER_USERS}</code></pre>
 </details>
 </dd>
+<dt id="conftest.clientsReviewer"><code class="name flex">
+<span>def <span class="ident">clientsReviewer</span></span>(<span>app)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A dictionary of client fixtures for the reviewer users.</p>
+<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture
+def clientsReviewer(app):
+    &#34;&#34;&#34;A dictionary of client fixtures for the reviewer users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    &#34;&#34;&#34;
+
+    return {user: makeClient(app, user) for user in (&#34;expert&#34;, &#34;final&#34;)}</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -770,6 +800,7 @@ def clientsPower(app):
 <li><code><a title="conftest.clients" href="#conftest.clients">clients</a></code></li>
 <li><code><a title="conftest.clientsMy" href="#conftest.clientsMy">clientsMy</a></code></li>
 <li><code><a title="conftest.clientsPower" href="#conftest.clientsPower">clientsPower</a></code></li>
+<li><code><a title="conftest.clientsReviewer" href="#conftest.clientsReviewer">clientsReviewer</a></code></li>
 </ul>
 </li>
 </ul>

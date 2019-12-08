@@ -33,6 +33,22 @@
 </ul>
 <h2 id="acts">Acts</h2>
 <p>Filling out reviews.</p>
+<dl>
+<dt><a title="test_50_review10.test_sidebar" href="#test_50_review10.test_sidebar"><code>test_sidebar()</code></a></dt>
+<dd>Check the sidebar entries.</dd>
+<dt><a title="test_50_review10.test_viewAssessment" href="#test_50_review10.test_viewAssessment"><code>test_viewAssessment()</code></a></dt>
+<dd>View the assessment and check for the <code>start review</code> button.
+Only <strong>expert</strong> and <strong>final</strong> should see it.</dd>
+<dt><a title="test_50_review10.test_tryStartReviewAll" href="#test_50_review10.test_tryStartReviewAll"><code>test_tryStartReviewAll()</code></a></dt>
+<dd>All users try to start a review for the assessment. Only <strong>expert</strong> and <strong>final</strong>
+succeed and they delete the assessment again.</dd>
+<dt><a title="test_50_review10.test_tryStartReview" href="#test_50_review10.test_tryStartReview"><code>test_tryStartReview()</code></a></dt>
+<dd><strong>expert</strong> and <strong>final</strong> start their review again.</dd>
+<dt><code>test_reviewEntries</code></dt>
+<dd>All users try to see the review entries.
+Only <strong>owner</strong>, <strong>editor</strong>, <strong>expert</strong>, <strong>final</strong>, <strong>mycoord</strong> and the
+powerusers succeed.</dd>
+</dl>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -53,10 +69,54 @@
 
 Filling out reviews.
 
+`test_sidebar`
+:   Check the sidebar entries.
+
+`test_viewAssessment`
+:   View the assessment and check for the `start review` button.
+    Only **expert** and **final** should see it.
+
+`test_tryStartReviewAll`
+:   All users try to start a review for the assessment. Only **expert** and **final**
+    succeed and they delete the assessment again.
+
+`test_tryStartReview`
+:   **expert** and **final** start their review again.
+
+`test_reviewEntries`
+:   All users try to see the review entries.
+    Only **owner**, **editor**, **expert**, **final**, **mycoord** and the
+    powerusers succeed.
 &#34;&#34;&#34;
 
 import magic  # noqa
+from control.utils import pick as G
+from conftest import USERS, RIGHTFUL_USERS, POWER_USERS
+from example import (
+    ASSESS,
+    BELGIUM,
+    CRITERIA_ENTRY,
+    CRITERIA_ENTRIES_N,
+    EDITOR,
+    ELLIPS_DIV,
+    EXPERT,
+    FINAL,
+    MYCOORD,
+    OWNER,
+    REVIEW,
+    REVIEW_ENTRY,
+    START_REVIEW,
+    TYPE1,
+)
+from helpers import (
+    findDetails,
+    # findReviewEntries,
+    findTasks,
+    forall,
+    getItem,
+)
 from starters import start
+from subtest import assertDelItem, assertStartTask, sidebar
 
 recordInfo = {}
 valueTables = {}
@@ -76,7 +136,96 @@ def test_start(clientOffice, clientOwner):
         recordInfo=recordInfo,
         ids=ids,
         cIds=cIds,
-    )</code></pre>
+    )
+
+
+def test_sidebar(clients):
+    amounts = {
+        &#34;All contributions&#34;: [1],
+        &#34;My contributions&#34;: [({OWNER, EDITOR}, 1)],
+        f&#34;{BELGIUM} contributions&#34;: [1],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
+        &#34;Contributions I am assessing&#34;: [({OWNER, EDITOR}, 1)],
+        &#34;My assessments&#34;: [({OWNER, EDITOR}, 1)],
+        &#34;All assessments&#34;: [(POWER_USERS, 1)],
+        &#34;Assessments in review by me&#34;: [({EXPERT, FINAL}, 1)],
+    }
+    sidebar(clients, amounts)
+
+
+def test_viewAssessment(clients):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        (text, fields, msgs, dummy) = getItem(cl, ASSESS, aId)
+        tasks = findTasks(text)
+        if exp:
+            assert len(tasks) == 1
+            assert tasks[0] == exp
+
+    expect = {user: () for user in USERS}
+    expect.update({user: (START_REVIEW, aId) for user in (EXPERT, FINAL)})
+    forall(clients, expect, assertIt)
+
+
+def test_tryStartReviewAll(clients):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        if exp:
+            assert len(rIds) == 1
+            assertDelItem(cl, REVIEW, rIds[0], True)
+        else:
+            assert len(rIds) == 0
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in {EXPERT, FINAL}})
+    forall(clients, expect, assertIt)
+
+
+def test_tryStartReview(clientsReviewer):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        user = cl.user
+        if exp:
+            assert len(rIds) == 1
+            reviewInfo = recordInfo.setdefault(REVIEW, {user: {}})
+            reviewInfo[user][&#34;eid&#34;] = rIds[0]
+        else:
+            assert len(rIds) == 0
+
+    expect = {user: True for user in {EXPERT, FINAL}}
+    forall(clientsReviewer, expect, assertIt)
+
+
+def Xest_reviewEntries(clients):
+    rIdInfo = G(G(recordInfo, REVIEW), &#34;eid&#34;)
+    rEid = G(rIdInfo, EXPERT)
+    rFid = G(rIdInfo, FINAL)
+    assert rEid is not None
+    assert rFid is not None
+
+    def assertIt(cl, exp):
+        for crId in cIds:
+            (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
+            reviewEntries = findReviewEntries(text)
+        for rId in (rEid, rFid):
+            (text, fields, msgs, dummy) = getItem(cl, REVIEW, rId)
+            reviewEntries = findDetails(text, REVIEW_ENTRY)
+            nEntries = len(reviewEntries)
+            if exp:
+                assert nEntries == CRITERIA_ENTRIES_N[TYPE1]
+                for (rId, material) in reviewEntries:
+                    assert ELLIPS_DIV in material
+            else:
+                assert nEntries == 0
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in RIGHTFUL_USERS | {EXPERT, FINAL, MYCOORD}})
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </section>
 <section>
@@ -86,6 +235,65 @@ def test_start(clientOffice, clientOwner):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="test_50_review10.Xest_reviewEntries"><code class="name flex">
+<span>def <span class="ident">Xest_reviewEntries</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Xest_reviewEntries(clients):
+    rIdInfo = G(G(recordInfo, REVIEW), &#34;eid&#34;)
+    rEid = G(rIdInfo, EXPERT)
+    rFid = G(rIdInfo, FINAL)
+    assert rEid is not None
+    assert rFid is not None
+
+    def assertIt(cl, exp):
+        for crId in cIds:
+            (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
+            reviewEntries = findReviewEntries(text)
+        for rId in (rEid, rFid):
+            (text, fields, msgs, dummy) = getItem(cl, REVIEW, rId)
+            reviewEntries = findDetails(text, REVIEW_ENTRY)
+            nEntries = len(reviewEntries)
+            if exp:
+                assert nEntries == CRITERIA_ENTRIES_N[TYPE1]
+                for (rId, material) in reviewEntries:
+                    assert ELLIPS_DIV in material
+            else:
+                assert nEntries == 0
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in RIGHTFUL_USERS | {EXPERT, FINAL, MYCOORD}})
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review10.test_sidebar"><code class="name flex">
+<span>def <span class="ident">test_sidebar</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_sidebar(clients):
+    amounts = {
+        &#34;All contributions&#34;: [1],
+        &#34;My contributions&#34;: [({OWNER, EDITOR}, 1)],
+        f&#34;{BELGIUM} contributions&#34;: [1],
+        &#34;Contributions to be selected&#34;: [({MYCOORD}, 1)],
+        &#34;Contributions I am assessing&#34;: [({OWNER, EDITOR}, 1)],
+        &#34;My assessments&#34;: [({OWNER, EDITOR}, 1)],
+        &#34;All assessments&#34;: [(POWER_USERS, 1)],
+        &#34;Assessments in review by me&#34;: [({EXPERT, FINAL}, 1)],
+    }
+    sidebar(clients, amounts)</code></pre>
+</details>
+</dd>
 <dt id="test_50_review10.test_start"><code class="name flex">
 <span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
 </code></dt>
@@ -110,6 +318,81 @@ def test_start(clientOffice, clientOwner):
     )</code></pre>
 </details>
 </dd>
+<dt id="test_50_review10.test_tryStartReview"><code class="name flex">
+<span>def <span class="ident">test_tryStartReview</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_tryStartReview(clientsReviewer):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        user = cl.user
+        if exp:
+            assert len(rIds) == 1
+            reviewInfo = recordInfo.setdefault(REVIEW, {user: {}})
+            reviewInfo[user][&#34;eid&#34;] = rIds[0]
+        else:
+            assert len(rIds) == 0
+
+    expect = {user: True for user in {EXPERT, FINAL}}
+    forall(clientsReviewer, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review10.test_tryStartReviewAll"><code class="name flex">
+<span>def <span class="ident">test_tryStartReviewAll</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_tryStartReviewAll(clients):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        if exp:
+            assert len(rIds) == 1
+            assertDelItem(cl, REVIEW, rIds[0], True)
+        else:
+            assert len(rIds) == 0
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in {EXPERT, FINAL}})
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review10.test_viewAssessment"><code class="name flex">
+<span>def <span class="ident">test_viewAssessment</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_viewAssessment(clients):
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+
+    def assertIt(cl, exp):
+        (text, fields, msgs, dummy) = getItem(cl, ASSESS, aId)
+        tasks = findTasks(text)
+        if exp:
+            assert len(tasks) == 1
+            assert tasks[0] == exp
+
+    expect = {user: () for user in USERS}
+    expect.update({user: (START_REVIEW, aId) for user in (EXPERT, FINAL)})
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -126,7 +409,12 @@ def test_start(clientOffice, clientOwner):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_50_review10.Xest_reviewEntries" href="#test_50_review10.Xest_reviewEntries">Xest_reviewEntries</a></code></li>
+<li><code><a title="test_50_review10.test_sidebar" href="#test_50_review10.test_sidebar">test_sidebar</a></code></li>
 <li><code><a title="test_50_review10.test_start" href="#test_50_review10.test_start">test_start</a></code></li>
+<li><code><a title="test_50_review10.test_tryStartReview" href="#test_50_review10.test_tryStartReview">test_tryStartReview</a></code></li>
+<li><code><a title="test_50_review10.test_tryStartReviewAll" href="#test_50_review10.test_tryStartReviewAll">test_tryStartReviewAll</a></code></li>
+<li><code><a title="test_50_review10.test_viewAssessment" href="#test_50_review10.test_viewAssessment">test_viewAssessment</a></code></li>
 </ul>
 </li>
 </ul>

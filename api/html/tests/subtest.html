@@ -48,6 +48,9 @@ from example import (
     ASSESS,
     CAPTIONS,
     EDITOR,
+    REVIEW,
+    START_ASSESSMENT,
+    START_REVIEW,
     TITLE,
     UNDEF_VALUE,
     USER,
@@ -59,11 +62,11 @@ from helpers import (
     findCaptions,
     findMsg,
     findEid,
-    findItem,
     findMainN,
     findStages,
     forall,
-    getAid,
+    getEid,
+    getItem,
     modifyField,
 )
 
@@ -191,7 +194,7 @@ def assertFieldValue(source, field, expect):
 
     if type(source) is tuple:
         (client, table, eid) = source
-        (text, fields, msgs, dummy) = findItem(client, table, eid)
+        (text, fields, msgs, dummy) = getItem(client, table, eid)
     else:
         fields = source
 
@@ -223,7 +226,7 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     &#34;&#34;&#34;
 
     if not expect:
-        fields = findItem(client, table, eid)[1]
+        fields = getItem(client, table, eid)[1]
         oldValue = fields[field] if field in fields else None
 
     if type(newValue) is tuple:
@@ -236,7 +239,7 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     if not expect:
         assert field not in fields
 
-    (text, fields, msgs, eid) = findItem(client, table, eid)
+    (text, fields, msgs, eid) = getItem(client, table, eid)
 
     if expect:
         assertFieldValue(fields, field, newValueRep)
@@ -257,7 +260,7 @@ def assertStage(client, table, eid, expect):
         If a set, we expect one of the values in the set
     &#34;&#34;&#34;
 
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
+    (text, fields, msgs, dummy) = getItem(client, table, eid)
     stageFound = findStages(text)[0]
     if type(expect) is set:
         assert stageFound in expect
@@ -266,31 +269,40 @@ def assertStage(client, table, eid, expect):
     return (text, fields, msgs, eid, stageFound)
 
 
-def assertStartAssessment(client, cId, expect):
-    &#34;&#34;&#34;Issues the startAssessment workflow command.
+def assertStartTask(client, task, eid, expect):
+    &#34;&#34;&#34;Issues a start workflow command.
 
-    The response texts will be analysed into messages and fields, the aId
-    of the new assessment will be read off.
+    There are `startAssessment` and `startReview` tasks.
+    They take as argument the eid of a contribution or review, respectively.
+    They create an assessment or review, respectively.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new item will be read off.
 
     Parameters
     ----------
     client: fixture
-    cId: string(ObjectId)
-        The contribution id for which the assessment must be started.
+    eid: string(ObjectId)
+        The id that is the argumenent for the workflow task.
     expect: boolean
 
     Returns
     -------
-    aIds: list of str(ObjectId)
-        The ids of all assessments of the contribution after the act.
+    eids: list of str(ObjectId)
+        The ids of all items in the mylist view of the user after the act.
+        The items are taken from the assessments or reviews, respectively.
     &#34;&#34;&#34;
 
-    assertStatus(client, f&#34;/api/task/startAssessment/{cId}&#34;, expect)
+    table = (
+        ASSESS if task == START_ASSESSMENT else REVIEW if task == START_REVIEW else None
+    )
+    assert table is not None
+    assertStatus(client, f&#34;/api/task/{task}/{eid}&#34;, expect)
     if expect:
-        aIds = getAid(client, multiple=True)
+        eids = getEid(client, table, multiple=True)
     else:
-        aIds = []
-    return aIds
+        eids = []
+    return eids
 
 
 def assertStatus(client, url, expect):
@@ -645,7 +657,7 @@ The expected value for this field.</p></section>
 
     if type(source) is tuple:
         (client, table, eid) = source
-        (text, fields, msgs, dummy) = findItem(client, table, eid)
+        (text, fields, msgs, dummy) = getItem(client, table, eid)
     else:
         fields = source
 
@@ -707,7 +719,7 @@ and the second component is the value we read back from the modified record</dd>
     &#34;&#34;&#34;
 
     if not expect:
-        fields = findItem(client, table, eid)[1]
+        fields = getItem(client, table, eid)[1]
         oldValue = fields[field] if field in fields else None
 
     if type(newValue) is tuple:
@@ -720,7 +732,7 @@ and the second component is the value we read back from the modified record</dd>
     if not expect:
         assert field not in fields
 
-    (text, fields, msgs, eid) = findItem(client, table, eid)
+    (text, fields, msgs, eid) = getItem(client, table, eid)
 
     if expect:
         assertFieldValue(fields, field, newValueRep)
@@ -761,7 +773,7 @@ and the second component is the value we read back from the modified record</dd>
         If a set, we expect one of the values in the set
     &#34;&#34;&#34;
 
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
+    (text, fields, msgs, dummy) = getItem(client, table, eid)
     stageFound = findStages(text)[0]
     if type(expect) is set:
         assert stageFound in expect
@@ -770,56 +782,69 @@ and the second component is the value we read back from the modified record</dd>
     return (text, fields, msgs, eid, stageFound)</code></pre>
 </details>
 </dd>
-<dt id="subtest.assertStartAssessment"><code class="name flex">
-<span>def <span class="ident">assertStartAssessment</span></span>(<span>client, cId, expect)</span>
+<dt id="subtest.assertStartTask"><code class="name flex">
+<span>def <span class="ident">assertStartTask</span></span>(<span>client, task, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Issues the startAssessment workflow command.</p>
-<p>The response texts will be analysed into messages and fields, the aId
-of the new assessment will be read off.</p>
+<section class="desc"><p>Issues a start workflow command.</p>
+<p>There are <code>startAssessment</code> and <code>startReview</code> tasks.
+They take as argument the eid of a contribution or review, respectively.
+They create an assessment or review, respectively.</p>
+<p>The response texts will be analysed into messages and fields, the eid
+of the new item will be read off.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>The contribution id for which the assessment must be started.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id that is the argumenent for the workflow task.</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>aIds</code></strong> :&ensp;<code>list</code> of <code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The ids of all assessments of the contribution after the act.</dd>
+<dt><strong><code>eids</code></strong> :&ensp;<code>list</code> of <code>str</code>(<code>ObjectId</code>)</dt>
+<dd>The ids of all items in the mylist view of the user after the act.
+The items are taken from the assessments or reviews, respectively.</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def assertStartAssessment(client, cId, expect):
-    &#34;&#34;&#34;Issues the startAssessment workflow command.
+<pre><code class="python">def assertStartTask(client, task, eid, expect):
+    &#34;&#34;&#34;Issues a start workflow command.
 
-    The response texts will be analysed into messages and fields, the aId
-    of the new assessment will be read off.
+    There are `startAssessment` and `startReview` tasks.
+    They take as argument the eid of a contribution or review, respectively.
+    They create an assessment or review, respectively.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new item will be read off.
 
     Parameters
     ----------
     client: fixture
-    cId: string(ObjectId)
-        The contribution id for which the assessment must be started.
+    eid: string(ObjectId)
+        The id that is the argumenent for the workflow task.
     expect: boolean
 
     Returns
     -------
-    aIds: list of str(ObjectId)
-        The ids of all assessments of the contribution after the act.
+    eids: list of str(ObjectId)
+        The ids of all items in the mylist view of the user after the act.
+        The items are taken from the assessments or reviews, respectively.
     &#34;&#34;&#34;
 
-    assertStatus(client, f&#34;/api/task/startAssessment/{cId}&#34;, expect)
+    table = (
+        ASSESS if task == START_ASSESSMENT else REVIEW if task == START_REVIEW else None
+    )
+    assert table is not None
+    assertStatus(client, f&#34;/api/task/{task}/{eid}&#34;, expect)
     if expect:
-        aIds = getAid(client, multiple=True)
+        eids = getEid(client, table, multiple=True)
     else:
-        aIds = []
-    return aIds</code></pre>
+        eids = []
+    return eids</code></pre>
 </details>
 </dd>
 <dt id="subtest.assertStatus"><code class="name flex">
@@ -1031,7 +1056,7 @@ The set of users can be left out, then all users are implied.</dd>
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="subtest.assertAddItem" href="#subtest.assertAddItem">assertAddItem</a></code></li>
 <li><code><a title="subtest.assertCaptions" href="#subtest.assertCaptions">assertCaptions</a></code></li>
 <li><code><a title="subtest.assertDelItem" href="#subtest.assertDelItem">assertDelItem</a></code></li>
@@ -1039,7 +1064,7 @@ The set of users can be left out, then all users are implied.</dd>
 <li><code><a title="subtest.assertFieldValue" href="#subtest.assertFieldValue">assertFieldValue</a></code></li>
 <li><code><a title="subtest.assertModifyField" href="#subtest.assertModifyField">assertModifyField</a></code></li>
 <li><code><a title="subtest.assertStage" href="#subtest.assertStage">assertStage</a></code></li>
-<li><code><a title="subtest.assertStartAssessment" href="#subtest.assertStartAssessment">assertStartAssessment</a></code></li>
+<li><code><a title="subtest.assertStartTask" href="#subtest.assertStartTask">assertStartTask</a></code></li>
 <li><code><a title="subtest.assertStatus" href="#subtest.assertStatus">assertStatus</a></code></li>
 <li><code><a title="subtest.assignReviewers" href="#subtest.assignReviewers">assignReviewers</a></code></li>
 <li><code><a title="subtest.inspectTitleAll" href="#subtest.inspectTitleAll">inspectTitleAll</a></code></li>
