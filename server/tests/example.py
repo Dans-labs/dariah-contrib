@@ -24,7 +24,9 @@ EMAIL = "email"
 EVIDENCE = "evidence"
 KEYWORD = "keyword"
 PACKAGE = "package"
+REP = "rep"
 REVIEW = "review"
+REVIEW_ENTRY = "reviewEntry"
 REVIEWER_E = "reviewerE"
 REVIEWER_F = "reviewerF"
 SCORE = "score"
@@ -57,6 +59,9 @@ INCOMPLETE = "incomplete"
 COMPLETE = "complete"
 COMPLETE_WITHDRAWN = "completeWithdrawn"
 
+START_ASSESSMENT = "startAssessment"
+START_REVIEW = "startReview"
+
 DUMMY_ID = "00000000ffa4bbd9fe000f15"
 
 UNDEF_VALUE = "○"
@@ -66,20 +71,20 @@ TITLE2 = "Contribution (Modified)"
 TITLE_A = "assessment of {cTitle}"
 TITLE_A2 = "My contribution assessed"
 
-CHECKS = dict(
-    description=(
+CHECKS = {
+    DESCRIPTION: (
         "<h1>Data hosting.</h1>",
         "<p>This tool",
         "<li>How, we",
         "<li>More details",
     ),
-    costDescription=(
+    COST_DESCRIPTION: (
         "<h1>Cost of data hosting.</h1>",
         "<p>There are",
         "<li>The amount,",
         "<li>More cost details",
     ),
-)
+}
 
 ELLIPS_DIV = "<div>...</div>"
 
@@ -137,6 +142,9 @@ The test functions may fill in other amounts when testing in situations where
 additional records have been created.
 """
 
+REVIEW_CAPTION = CAPTIONS[10]
+
+
 BELGIUM = "BE🇧🇪"
 LUXEMBURG = "LU🇱🇺"
 GERMANY = "DE🇩🇪"
@@ -147,19 +155,19 @@ PORTUGAL = "PT🇵🇹"
 POLAND = "PL🇵🇱"
 NETHERLANDS = "NL🇳🇱"
 
-USER_COUNTRY = dict(
-    public=None,
-    auth=GERMANY,
-    owner=BELGIUM,
-    editor=IRELAND,
-    mycoord=BELGIUM,
-    coord=LUXEMBURG,
-    expert=FRANCE,
-    final=ITALY,
-    office=PORTUGAL,
-    system=POLAND,
-    root=NETHERLANDS,
-)
+USER_COUNTRY = {
+    PUBLIC: None,
+    AUTH: GERMANY,
+    OWNER: BELGIUM,
+    EDITOR: IRELAND,
+    MYCOORD: BELGIUM,
+    COORD: LUXEMBURG,
+    EXPERT: FRANCE,
+    FINAL: ITALY,
+    OFFICE: PORTUGAL,
+    SYSTEM: POLAND,
+    ROOT: NETHERLANDS,
+}
 """Where the test users come from."""
 
 CRITERIA_ENTRIES_N = {
@@ -170,8 +178,8 @@ CRITERIA_ENTRIES_N = {
     "legacy - infrastructure": 1,
 }
 
-EXAMPLE = dict(
-    description=[
+EXAMPLE = {
+    DESCRIPTION: [
         """
 # Data hosting.
 
@@ -181,9 +189,9 @@ This tool hosts data.
 *   More details will follow.
 """
     ],
-    costBare="103.456",
-    costTotal=f"{EURO} 103.456",
-    costDescription=[
+    COST_BARE: "103.456",
+    COST_TOTAL: f"{EURO} 103.456",
+    COST_DESCRIPTION: [
         """
 # Cost of data hosting.
 
@@ -193,8 +201,8 @@ There are costs.
 *   More cost details will follow.
 """
     ],
-    year=tuple(str(yr) for yr in range(2010, 2030)),
-    country=f"""
+    YEAR: tuple(str(yr) for yr in range(2010, 2030)),
+    COUNTRY: f"""
 AT🇦🇹
 {BELGIUM}
 HR🇭🇷
@@ -215,13 +223,13 @@ SI🇸🇮
 """.strip().split(
         "\n"
     ),
-    vcc="""
+    VCC: """
 vcc1
 vcc2
 """.strip().split(
         "\n"
     ),
-    typeContribution="""
+    TYPE: """
 service - data hosting
 service - processing service
 activity - resource creation
@@ -230,20 +238,20 @@ legacy - infrastructure
 """.strip().split(
         "\n"
     ),
-    tadirahObject="""
+    TADIRAH_OBJECT: """
 object1
 object2
 object3
 """.strip().split(
         "\n"
     ),
-    tadirahActivity="""
+    TADIRAH_ACTIVITY: """
 activity1
 activity2
 """.strip().split(
         "\n"
     ),
-    tadirahTechnique="""
+    TADIRAH_TECHNIQUE: """
 technique1
 technique2
 technique3
@@ -251,20 +259,20 @@ technique4
 """.strip().split(
         "\n"
     ),
-    discipline="""
+    DISCIPLINE: """
 alpha
 beta
 gamma
 """.strip().split(
         "\n"
     ),
-    keyword="""
+    KEYWORD: """
 static
 dynamic
 """.strip().split(
         "\n"
     ),
-)
+}
 """Lots of values in several fields of a contribution."""
 
 TYPE1 = EXAMPLE[TYPE][0]

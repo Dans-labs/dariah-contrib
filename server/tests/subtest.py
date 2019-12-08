@@ -15,6 +15,9 @@ from example import (
     ASSESS,
     CAPTIONS,
     EDITOR,
+    REVIEW,
+    START_ASSESSMENT,
+    START_REVIEW,
     TITLE,
     UNDEF_VALUE,
     USER,
@@ -26,11 +29,11 @@ from helpers import (
     findCaptions,
     findMsg,
     findEid,
-    findItem,
     findMainN,
     findStages,
     forall,
-    getAid,
+    getEid,
+    getItem,
     modifyField,
 )
 
@@ -158,7 +161,7 @@ def assertFieldValue(source, field, expect):
 
     if type(source) is tuple:
         (client, table, eid) = source
-        (text, fields, msgs, dummy) = findItem(client, table, eid)
+        (text, fields, msgs, dummy) = getItem(client, table, eid)
     else:
         fields = source
 
@@ -190,7 +193,7 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     """
 
     if not expect:
-        fields = findItem(client, table, eid)[1]
+        fields = getItem(client, table, eid)[1]
         oldValue = fields[field] if field in fields else None
 
     if type(newValue) is tuple:
@@ -203,7 +206,7 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     if not expect:
         assert field not in fields
 
-    (text, fields, msgs, eid) = findItem(client, table, eid)
+    (text, fields, msgs, eid) = getItem(client, table, eid)
 
     if expect:
         assertFieldValue(fields, field, newValueRep)
@@ -224,7 +227,7 @@ def assertStage(client, table, eid, expect):
         If a set, we expect one of the values in the set
     """
 
-    (text, fields, msgs, dummy) = findItem(client, table, eid)
+    (text, fields, msgs, dummy) = getItem(client, table, eid)
     stageFound = findStages(text)[0]
     if type(expect) is set:
         assert stageFound in expect
@@ -233,31 +236,40 @@ def assertStage(client, table, eid, expect):
     return (text, fields, msgs, eid, stageFound)
 
 
-def assertStartAssessment(client, cId, expect):
-    """Issues the startAssessment workflow command.
+def assertStartTask(client, task, eid, expect):
+    """Issues a start workflow command.
 
-    The response texts will be analysed into messages and fields, the aId
-    of the new assessment will be read off.
+    There are `startAssessment` and `startReview` tasks.
+    They take as argument the eid of a contribution or review, respectively.
+    They create an assessment or review, respectively.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the new item will be read off.
 
     Parameters
     ----------
     client: fixture
-    cId: string(ObjectId)
-        The contribution id for which the assessment must be started.
+    eid: string(ObjectId)
+        The id that is the argumenent for the workflow task.
     expect: boolean
 
     Returns
     -------
-    aIds: list of str(ObjectId)
-        The ids of all assessments of the contribution after the act.
+    eids: list of str(ObjectId)
+        The ids of all items in the mylist view of the user after the act.
+        The items are taken from the assessments or reviews, respectively.
     """
 
-    assertStatus(client, f"/api/task/startAssessment/{cId}", expect)
+    table = (
+        ASSESS if task == START_ASSESSMENT else REVIEW if task == START_REVIEW else None
+    )
+    assert table is not None
+    assertStatus(client, f"/api/task/{task}/{eid}", expect)
     if expect:
-        aIds = getAid(client, multiple=True)
+        eids = getEid(client, table, multiple=True)
     else:
-        aIds = []
-    return aIds
+        eids = []
+    return eids
 
 
 def assertStatus(client, url, expect):

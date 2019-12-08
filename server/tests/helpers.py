@@ -6,7 +6,6 @@ import re
 from flask import json
 from control.utils import serverprint
 from conftest import USER_LIST
-from example import ASSESS
 
 
 materialRe = re.compile(
@@ -15,6 +14,7 @@ materialRe = re.compile(
 fieldRe = re.compile("""<!-- ([a-zA-Z0-9]+)=(.*?) -->""", re.S)
 mainNRe = re.compile("""<!-- mainN~([0-9]+)~(.*?) -->""", re.S)
 stageRe = re.compile("""<!-- stage:(.*?) -->""", re.S)
+taskRe = re.compile("""<!-- task!([a-zA-Z0-9]+):([a-f0-9]+) -->""", re.S)
 captionRe = re.compile(r"""<!-- caption\^([^>]*?) --><a [^>]*href=['"]([^'"]*)['"]""", re.S)
 msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
 eidRe = re.compile("""<details itemkey=['"][a-zA-Z0-9_]+/([^/'"]*)['"]""", re.S)
@@ -25,103 +25,23 @@ userRe = re.compile(
 valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
 
 
-def forall(cls, expect, assertFunc, *args):
-    """Executes an assert function for a subset of all clients.
+def accessUrl(client, url, redirect=False):
+    """Get the response on accessing a url."""
 
-    The subset is determined by `expect`, which holds expected outcomes
-    for the clients.
+    response = client.get(url, follow_redirects=redirect)
+    text = response.get_data(as_text=True)
+    status = response.status_code
+    msgs = findMsg(text)
+    return (text, status, msgs)
 
-    Parameters
-    ----------
-    cls: fixture
-        Contains a dict of all clients: `conftest.clients`
-    assertFunc: function
-        The function to be applied for each client.
-        It will be passed all the `args` and a relevant part of `expect`
-    expect: dict
-        Keyed by user (eppn), contains the expected value for that user.
+
+def checkWarning(text, label):
+    """Whether there is a warned item with `label`.
+
+    See `reWarning`.
     """
 
-    for user in USER_LIST:
-        if user not in expect:
-            continue
-        exp = expect[user]
-        serverprint(f"USER {user} EXPECTS {exp}")
-        assertFunc(cls[user], *args, exp)
-
-
-def fieldEditRe(eid, field):
-    """Given a field name, return a `re` that looks for the value of that field.
-
-    Parameters
-    ----------
-    eid: string(ObjectId)
-        The id of the record whose field data we are searching
-    field: string
-    """
-
-    return re.compile(
-        r"""
-    <span\ [^>]*?eid=['"]{eid}['"]\s+field=['"]{field}['"].*?
-    <div\ wtype=['"]related['"]\ .*?
-    <div\ class=['"]wvalue['"]>(.*?)</div>
-    """.format(
-            eid=eid, field=field
-        ),
-        re.S | re.X,
-    )
-
-
-def valueListRe(table):
-    """Given a table name, return a `re` that finds pairs of id and title strings.
-
-    The text is a list display of value records, and we peel the ids from the
-    `<detail>` elements and the titles from the `<summary>` within them.
-
-    Parameters
-    ----------
-    table: string
-    """
-
-    return re.compile(
-        f"""<details itemkey=['"]{table}/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>""",
-        re.S,
-    )
-
-
-def detailRe(dtable):
-    """Given a detail table name, return a `re` that looks for the detail records.
-
-    Parameters
-    ----------
-    dtable: string
-    """
-
-    return re.compile(
-        r"""<details itemkey=['"]{dtable}/([^'"]+)['"][^>]*>(.*?)</details>""".format(
-            dtable=dtable
-        ),
-        re.S,
-    )
-
-
-def warningRe(label):
-    """Given a label, return a `re` that looks for warned items with that label.
-
-    A warned item is an item with a CSS class `warning` in it.
-
-    Parameters
-    ----------
-    label: string
-        Usually the title of an item
-    """
-
-    return re.compile(
-        r"""\bclass=['"][^'"]*\bwarning\b[^'"]*['"][^>]*>{label}<""".format(
-            label=label
-        ),
-        re.S,
-    )
+    return not not reWarning(label).search(text)
 
 
 def findDetails(text, dtable):
@@ -145,7 +65,7 @@ def findDetails(text, dtable):
     """
 
     result = []
-    for (eid, mat) in detailRe(dtable).findall(text):
+    for (eid, mat) in reDetail(dtable).findall(text):
         result.append((eid, mat))
     return result
 
@@ -194,70 +114,6 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
-def findItem(client, table, eid):
-    """Looks up an item directly.
-
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
-
-    Returns
-    -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the item.
-    """
-
-    url = f"/{table}/item/{eid}"
-    response = client.get(url)
-    text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
-    msgs = findMsg(text)
-    eid = findEid(text)
-    return (text, fields, msgs, eid)
-
-
-def findItemEid(client, table, action=None):
-    """Looks up an item from a view on a table.
-
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
-
-    Returns
-    -------
-    eid: str(ObjectId)
-        The id of the item.
-    """
-
-    actionStr = "" if action is None else f"?action={action}"
-    response = client.get(f"/{table}/list{actionStr}")
-    text = response.get_data(as_text=True)
-    eid = findEid(text)
-    return eid
-
-
 def findMaterial(text):
     """Get the text of the material div. """
 
@@ -299,6 +155,25 @@ def findStages(text):
     """
 
     return stageRe.findall(text)
+
+
+def findTasks(text):
+    """Get the workflow tasks from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return taskRe.findall(text)
 
 
 def findMainN(text):
@@ -355,25 +230,138 @@ def findValues(table, text):
     """
 
     return {
-        name: eid for (eid, name) in valueListRe(table).findall(text)
+        name: eid for (eid, name) in reValueList(table).findall(text)
     }
 
 
-def getAid(cl, multiple=False):
-    """Gets the id(s) of the assessment(s) in the mylist view."""
+def forall(cls, expect, assertFunc, *args):
+    """Executes an assert function for a subset of all clients.
 
-    url = f"/{ASSESS}/list?action=my"
-    (text, status, msgs) = accessUrl(cl, url, redirect=True)
+    The subset is determined by `expect`, which holds expected outcomes
+    for the clients.
+
+    Parameters
+    ----------
+    cls: fixture
+        Contains a dict of all clients: `conftest.clients`
+    assertFunc: function
+        The function to be applied for each client.
+        It will be passed all the `args` and a relevant part of `expect`
+    expect: dict
+        Keyed by user (eppn), contains the expected value for that user.
+    """
+
+    for user in USER_LIST:
+        if user not in expect:
+            continue
+        exp = expect[user]
+        serverprint(f"USER {user} EXPECTS {exp}")
+        assertFunc(cls[user], *args, exp)
+
+
+def getEid(client, table, multiple=False):
+    """Gets the id(s) of the records(s) in the mylist view.
+
+    !!! caution
+        Not all tables have a `mylist` view. Only contributions, assessments
+        and reviews.
+
+    Parameters
+    ----------
+    table: string
+    """
+
+    url = f"/{table}/list?action=my"
+    (text, status, msgs) = accessUrl(client, url, redirect=True)
     return findEid(text, multiple=multiple)
 
 
-def checkWarning(text, label):
-    """Whether there is a warned item with `label`.
+def getItem(client, table, eid):
+    """Looks up an item directly.
 
-    See `warningRe`.
+    The response texts will be analysed into messages and fields, the eid
+    of the item will be read off.
+
+    We assume that there is still only one item in the view.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    action: string, optional `None`
+        The view on the table, such as `my`, `our`.
+
+    Returns
+    -------
+    text: string
+        The complete response text
+    fields: dict
+        All fields and their values
+    msgs: list
+        All entries that have been flashed (and arrived in the flash bar)
+    eid: str(ObjectId)
+        The id of the item.
     """
 
-    return not not warningRe(label).search(text)
+    url = f"/{table}/item/{eid}"
+    response = client.get(url)
+    text = response.get_data(as_text=True)
+    fields = {field: value for (field, value) in fieldRe.findall(text)}
+    msgs = findMsg(text)
+    eid = findEid(text)
+    return (text, fields, msgs, eid)
+
+
+def getItemEid(client, table, action=None):
+    """Looks up an item from a view on a table.
+
+    The response texts will be analysed into messages and fields, the eid
+    of the item will be read off.
+
+    We assume that there is still only one item in the view.
+
+    Parameters
+    ----------
+    client: fixture
+    table: string
+    action: string, optional `None`
+        The view on the table, such as `my`, `our`.
+
+    Returns
+    -------
+    eid: str(ObjectId)
+        The id of the item.
+    """
+
+    actionStr = "" if action is None else f"?action={action}"
+    response = client.get(f"/{table}/list{actionStr}")
+    text = response.get_data(as_text=True)
+    eid = findEid(text)
+    return eid
+
+
+def getRelatedValues(client, table, eid, field):
+    """Get an editable view on a field that represents a related value.""
+
+    We check the contents.
+    """
+    url = f"/api/{table}/item/{eid}/field/{field}?action=edit"
+    response = client.get(url)
+    text = response.get_data(as_text=True)
+    thisRe = reEditField(eid, field)
+    valueStr = thisRe.findall(text)
+    values = valueRe.findall(valueStr[0])
+    valueDict = {value: eid for (eid, value) in values}
+    return valueDict
+
+
+def modifyField(client, table, eid, field, newValue):
+    """Post data to update a field and analyse the response for the effect."""
+
+    url = f"/api/{table}/item/{eid}/field/{field}?action=view"
+    text = postJson(client, url, newValue)
+    fields = findFields(text)
+    return (text, fields)
 
 
 def postJson(client, url, value):
@@ -401,13 +389,78 @@ def postJson(client, url, value):
     return text
 
 
-def modifyField(client, table, eid, field, newValue):
-    """Post data to update a field and analyse the response for the effect."""
+def reDetail(dtable):
+    """Given a detail table name, return a `re` that looks for the detail records.
 
-    url = f"/api/{table}/item/{eid}/field/{field}?action=view"
-    text = postJson(client, url, newValue)
-    fields = findFields(text)
-    return (text, fields)
+    Parameters
+    ----------
+    dtable: string
+    """
+
+    return re.compile(
+        r"""<details itemkey=['"]{dtable}/([^'"]+)['"][^>]*>(.*?)</details>""".format(
+            dtable=dtable
+        ),
+        re.S,
+    )
+
+
+def reEditField(eid, field):
+    """Given a field name, return a `re` that looks for the value of that field.
+
+    Parameters
+    ----------
+    eid: string(ObjectId)
+        The id of the record whose field data we are searching
+    field: string
+    """
+
+    return re.compile(
+        r"""
+    <span\ [^>]*?eid=['"]{eid}['"]\s+field=['"]{field}['"].*?
+    <div\ wtype=['"]related['"]\ .*?
+    <div\ class=['"]wvalue['"]>(.*?)</div>
+    """.format(
+            eid=eid, field=field
+        ),
+        re.S | re.X,
+    )
+
+
+def reValueList(table):
+    """Given a table name, return a `re` that finds pairs of id and title strings.
+
+    The text is a list display of value records, and we peel the ids from the
+    `<detail>` elements and the titles from the `<summary>` within them.
+
+    Parameters
+    ----------
+    table: string
+    """
+
+    return re.compile(
+        f"""<details itemkey=['"]{table}/([^'"]*)['"].*?<summary>.*?<span.*?>([^<]*)</span>""",
+        re.S,
+    )
+
+
+def reWarning(label):
+    """Given a label, return a `re` that looks for warned items with that label.
+
+    A warned item is an item with a CSS class `warning` in it.
+
+    Parameters
+    ----------
+    label: string
+        Usually the title of an item
+    """
+
+    return re.compile(
+        r"""\bclass=['"][^'"]*\bwarning\b[^'"]*['"][^>]*>{label}<""".format(
+            label=label
+        ),
+        re.S,
+    )
 
 
 def viewField(client, table, eid, field):
@@ -418,28 +471,3 @@ def viewField(client, table, eid, field):
     text = response.get_data(as_text=True)
     fields = findFields(text)
     return (text, fields)
-
-
-def accessUrl(client, url, redirect=False):
-    """Get the response on accessing a url."""
-
-    response = client.get(url, follow_redirects=redirect)
-    text = response.get_data(as_text=True)
-    status = response.status_code
-    msgs = findMsg(text)
-    return (text, status, msgs)
-
-
-def getRelatedValues(client, table, eid, field):
-    """Get an editable view on a field that represents a related value.""
-
-    We check the contents.
-    """
-    url = f"/api/{table}/item/{eid}/field/{field}?action=edit"
-    response = client.get(url)
-    text = response.get_data(as_text=True)
-    thisRe = fieldEditRe(eid, field)
-    valueStr = thisRe.findall(text)
-    values = valueRe.findall(valueStr[0])
-    valueDict = {value: eid for (eid, value) in values}
-    return valueDict

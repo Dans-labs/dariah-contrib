@@ -53,10 +53,14 @@ from example import (
     COST_DESCRIPTION,
     COUNTRY,
     DESCRIPTION,
+    EDITOR,
     EXAMPLE,
     LUXEMBURG,
     MYCOORD,
+    OFFICE,
     OWNER,
+    ROOT,
+    SYSTEM,
     TITLE,
     TITLE1,
     TITLE2,
@@ -66,10 +70,7 @@ from example import (
 )
 from helpers import forall
 from starters import start
-from subtest import (
-    assertFieldValue,
-    assertModifyField,
-)
+from subtest import assertFieldValue, assertModifyField
 
 
 recordInfo = {}
@@ -119,7 +120,7 @@ def test_modifyTitleAll(clients):
             assertModifyField(cl, CONTRIB, eid, TITLE, TITLE1, exp)
 
     expect = {user: False for user in USERS}
-    expect.update(dict(owner=True, editor=True, office=True, system=True, root=True))
+    expect.update({user: True for user in {OWNER, EDITOR, OFFICE, SYSTEM, ROOT}})
     forall(clients, expect, assertIt)
 
 
@@ -136,16 +137,13 @@ def test_modifyDescription(clientsMy, field, value):
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, value.strip()), exp)
 
-    expect = dict(owner=True, editor=True)
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clientsMy, expect, assertIt)
 
 
 @pytest.mark.parametrize(
     ("field", "checks"),
-    (
-        (DESCRIPTION, CHECKS[DESCRIPTION]),
-        (COST_DESCRIPTION, CHECKS[COST_DESCRIPTION]),
-    ),
+    ((DESCRIPTION, CHECKS[DESCRIPTION]), (COST_DESCRIPTION, CHECKS[COST_DESCRIPTION]),),
 )
 def test_descriptionMarkdown(clientsMy, field, checks):
     eid = G(G(recordInfo, CONTRIB), "eid")
@@ -156,7 +154,7 @@ def test_descriptionMarkdown(clientsMy, field, checks):
         for check in checks:
             assert check in text
 
-    expect = dict(owner=True, editor=True)
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clientsMy, expect, assertIt)
 
 
@@ -176,7 +174,7 @@ def test_modifyCost(clientsMy, value, expectVal):
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, COST_TOTAL, (value, expectVal), exp)
 
-    expect = dict(owner=True, editor=True)
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clientsMy, expect, assertIt)
 
 
@@ -198,7 +196,7 @@ def test_modifyEmail(clientsMy, value, expectVal):
             cl, CONTRIB, eid, CONTACT_PERSON_EMAIL, (value, expectVal), exp
         )
 
-    expect = dict(owner=True, editor=True)
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clientsMy, expect, assertIt)
 
 
@@ -240,5 +238,5 @@ def test_modifyUrl(clientsMy, field, value, expectVal):
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)
 
-    expect = dict(owner=True, editor=True)
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clientsMy, expect, assertIt)

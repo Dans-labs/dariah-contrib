@@ -28,6 +28,7 @@ from control.utils import pick as G
 from example import (
     CONTRIB,
     ASSESS,
+    START_ASSESSMENT,
     TITLE,
     TYPE,
     TYPE1,
@@ -35,7 +36,7 @@ from example import (
 )
 from helpers import (
     checkWarning,
-    findItem,
+    getItem,
 )
 from starters import (
     start,
@@ -43,7 +44,7 @@ from starters import (
 from subtest import (
     assertDelItem,
     assertModifyField,
-    assertStartAssessment,
+    assertStartTask,
 )
 
 recordInfo = {}
@@ -67,7 +68,7 @@ def test_start(clientOffice, clientOwner):
 
 def test_addAssessment(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    assertStartAssessment(clientOwner, eid, False)
+    assertStartTask(clientOwner, START_ASSESSMENT, eid, False)
 
 
 def test_addAssessment2(clientOwner):
@@ -77,10 +78,10 @@ def test_addAssessment2(clientOwner):
     assertModifyField(
         clientOwner, CONTRIB, eid, TYPE, (ids["TYPE2"], TYPE2), True
     )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
     assert checkWarning(text, aTitle)
 
-    aIds = assertStartAssessment(clientOwner, eid, True)
+    aIds = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
     assert len(aIds) == 2
 
     otherAid = [i for i in aIds if i != aId][0]
@@ -89,5 +90,5 @@ def test_addAssessment2(clientOwner):
     assertModifyField(
         clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True
     )
-    (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+    (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
     assert not checkWarning(text, aTitle)

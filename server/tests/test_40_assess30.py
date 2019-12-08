@@ -14,7 +14,8 @@
 Filling out an assessment.
 
 `test_criteriaEntries`
-:   All users try to see the criteria entries. Only **owner** and **editor** succeed.
+:   All users try to see the criteria entries.
+    Only **owner**, **editor** and the power users succeed.
 
 `test_fillEvidenceAll`
 :   All users try to fill out the evidence for the first entry.
@@ -142,12 +143,7 @@ from example import (
     TYPE1,
     USER,
 )
-from helpers import (
-    findDetails,
-    findItem,
-    forall,
-    getRelatedValues,
-)
+from helpers import findDetails, forall, getItem, getRelatedValues
 from starters import start
 from subtest import (
     assertModifyField,
@@ -181,7 +177,7 @@ def test_criteriaEntries(clients):
     aId = G(G(recordInfo, ASSESS), "eid")
 
     def assertIt(cl, exp):
-        (text, fields, msgs, dummy) = findItem(cl, ASSESS, aId)
+        (text, fields, msgs, dummy) = getItem(cl, ASSESS, aId)
         criteriaEntries = findDetails(text, CRITERIA_ENTRY)
         nEntries = len(criteriaEntries)
         if exp:
@@ -250,7 +246,7 @@ def test_fillScore(clientOwner):
 def test_fillScoreWrong(clientOwner):
     cId = cIds[0]
     cIdx = cIds[1]
-    (text, fields, msgs, eid) = findItem(clientOwner, CRITERIA_ENTRY, cId)
+    (text, fields, msgs, eid) = getItem(clientOwner, CRITERIA_ENTRY, cId)
     scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, SCORE)
     (scoreValue, scoreId) = sorted(scores.items())[0]
     assertModifyField(
@@ -354,7 +350,7 @@ def test_inspectTitleAll3(clients):
     aTitle = G(G(recordInfo, ASSESS), TITLE)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=aTitle))
+    expect.update({MYCOORD: aTitle})
     inspectTitleAll(clients, ASSESS, aId, expect)
 
 

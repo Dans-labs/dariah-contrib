@@ -208,6 +208,16 @@ def clientsMy(app):
 
 
 @pytest.fixture
+def clientsReviewer(app):
+    """A dictionary of client fixtures for the reviewer users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    """
+
+    return {user: makeClient(app, user) for user in ("expert", "final")}
+
+
+@pytest.fixture
 def clientsPower(app):
     """A dictionary of client fixtures for the power users.
 

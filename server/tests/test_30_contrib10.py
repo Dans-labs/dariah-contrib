@@ -58,21 +58,19 @@ from example import (
     COUNTRY,
     EDITOR,
     MYCOORD,
+    OFFICE,
     OWNER,
     OWNER_EMAIL,
     OWNER_NAME,
+    ROOT,
+    SYSTEM,
     TITLE,
     TITLE1,
     YEAR,
 )
 from helpers import forall
 from starters import start
-from subtest import (
-    assertAddItem,
-    assertDelItem,
-    assertEditor,
-    sidebar,
-)
+from subtest import assertAddItem, assertDelItem, assertEditor, sidebar
 
 
 recordInfo = {}
@@ -140,7 +138,7 @@ def test_makeEditorAll(clients):
             assertEditor(cl, CONTRIB, eid, valueTables, exp, clear=True)
 
     expect = {user: False for user in USERS}
-    expect.update(dict(owner=True, office=True, system=True, root=True))
+    expect.update({user: True for user in {OWNER, OFFICE, SYSTEM, ROOT}})
     forall(clients, expect, assertIt)
 
 

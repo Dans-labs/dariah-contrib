@@ -943,6 +943,10 @@ class WorkflowItem:
     def tasks(self, table, kind=None):
         """Present the currently available tasks as buttons on the interface.
 
+        !!! hint "easy comments"
+            We also include a comment `<!-- task~!taskName:eid -->
+            for the ease of testing.
+
         Parameters
         ----------
         table: string
@@ -988,7 +992,7 @@ class WorkflowItem:
                 [taskMsg, taskUntil],
                 f"""/api/task/{task}/{eid}""",
                 cls=f"large task {taskCls}",
-            )
+            ) + f"""<!-- task!{task}:{eid} -->"""
             taskParts.append(taskPart)
 
         return H.join(taskParts)

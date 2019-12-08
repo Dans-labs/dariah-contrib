@@ -72,6 +72,7 @@ from example import (
     COUNTRY,
     EXAMPLE,
     KEYWORD,
+    REP,
     TADIRAH_ACTIVITY,
     TADIRAH_OBJECT,
     TADIRAH_TECHNIQUE,
@@ -85,14 +86,8 @@ from example import (
     YEAR,
 )
 from helpers import modifyField
-from starters import (
-    start,
-    getValueTable,
-)
-from subtest import (
-    assertModifyField,
-    assertDelItem,
-)
+from starters import start, getValueTable
+from subtest import assertModifyField, assertDelItem
 
 
 recordInfo = {}
@@ -212,13 +207,7 @@ def test_modifyMeta(clientOwner, field):
 
 @pytest.mark.parametrize(
     ("field",),
-    (
-        (VCC,),
-        (TYPE,),
-        (TADIRAH_OBJECT,),
-        (TADIRAH_ACTIVITY,),
-        (TADIRAH_TECHNIQUE,),
-    ),
+    ((VCC,), (TYPE,), (TADIRAH_OBJECT,), (TADIRAH_ACTIVITY,), (TADIRAH_TECHNIQUE,),),
 )
 def test_addMetaWrong(clientOwner, field):
     eid = G(G(recordInfo, CONTRIB), "eid")
@@ -238,5 +227,5 @@ def test_addMetaRight(clientOwner, clientOffice, field, value):
 
     client = MongoClient()
     mongo = client[DB]
-    mid = list(mongo[field].find(dict(rep=value)))[0]["_id"]
+    mid = list(mongo[field].find({REP: value}))[0]["_id"]
     assertDelItem(clientOffice, field, mid, True)

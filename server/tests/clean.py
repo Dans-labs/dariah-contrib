@@ -86,9 +86,9 @@ class MongoId(IdIndex):
 mongo = MongoId()
 allData = collections.defaultdict(list)
 valueDict = collections.defaultdict(dict)
-countryMapping = dict()
-userMapping = dict()
-groupMapping = dict()
+countryMapping = {}
+userMapping = {}
+groupMapping = {}
 
 
 def countryTable():

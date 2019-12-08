@@ -31,7 +31,7 @@ Starting an assessment.
 `test_tryStartAgainAll`
 :   We assign a type to the contribution.
     All users try the task `startAssessment` with the proper contribution.
-    Only the owner and editor succeed, and they deletes the assessment again.
+    Only the owner and editor succeed, and they delete the assessment again.
 
     !!!  caution
         The power users are not allowed to start an assessment of a contribution
@@ -90,6 +90,7 @@ from example import (
     OWNER,
     REVIEWER_E,
     REVIEWER_F,
+    START_ASSESSMENT,
     TITLE,
     TITLE_A,
     TITLE_A2,
@@ -99,18 +100,14 @@ from example import (
     UNDEF_VALUE,
     USER,
 )
-from helpers import (
-    forall,
-)
-from starters import (
-    start,
-)
+from helpers import forall
+from starters import start
 from subtest import (
     assertDelItem,
     assertEditor,
     assertFieldValue,
     assertModifyField,
-    assertStartAssessment,
+    assertStartTask,
     assertStatus,
     inspectTitleAll,
     assignReviewers,
@@ -139,18 +136,16 @@ def test_start(clientOffice, clientOwner):
 
 def test_resetType(clientOwner, clientOffice):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (None, UNDEF_VALUE), True
-    )
+    assertModifyField(clientOwner, CONTRIB, eid, TYPE, (None, UNDEF_VALUE), True)
 
 
 @pytest.mark.parametrize(
     ("url",),
     (
         ("/api/task/startAssessmentXXX",),
-        ("/api/task/startAssessment",),
-        (f"/api/task/startAssessment/{DUMMY_ID}",),
-        (f"/api/task/startAssessment/{{eid}}",),
+        (f"/api/task/{START_ASSESSMENT}",),
+        (f"/api/task/{START_ASSESSMENT}/{DUMMY_ID}",),
+        (f"/api/task/{START_ASSESSMENT}/{{eid}}",),
     ),
 )
 def test_tryStartAll(clients, url):
@@ -166,12 +161,10 @@ def test_tryStartAll(clients, url):
 
 def test_tryStartAgainAll(clients):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    assertModifyField(
-        clients[OWNER], CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True
-    )
+    assertModifyField(clients[OWNER], CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True)
 
     def assertIt(cl, exp):
-        aIds = assertStartAssessment(cl, eid, exp)
+        aIds = assertStartTask(cl, START_ASSESSMENT, eid, exp)
         if exp:
             assert len(aIds) == 1
             assertDelItem(cl, ASSESS, aIds[0], True)
@@ -179,13 +172,13 @@ def test_tryStartAgainAll(clients):
             assert len(aIds) == 0
 
     expect = {user: False for user in USERS}
-    expect.update(dict(owner=True, editor=True))
+    expect = {user: True for user in {OWNER, EDITOR}}
     forall(clients, expect, assertIt)
 
 
 def test_tryStartAgainOwner(clientOwner):
     eid = G(G(recordInfo, CONTRIB), "eid")
-    aIds = assertStartAssessment(clientOwner, eid, True)
+    aIds = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
     assert len(aIds) == 1
     assessInfo = recordInfo.setdefault(ASSESS, {})
     assessInfo["eid"] = aIds[0]
@@ -268,11 +261,7 @@ def test_modifyTitleAll(clients):
 
 
 @pytest.mark.parametrize(
-    ("field", USER),
-    (
-        (REVIEWER_E, EXPERT),
-        (REVIEWER_F, FINAL),
-    ),
+    ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers(clients, field, user):
     users = G(valueTables, USER)

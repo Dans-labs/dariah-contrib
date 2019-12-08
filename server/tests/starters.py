@@ -41,6 +41,7 @@ from example import (
     REVIEWER_E,
     REVIEWER_F,
     SCORE,
+    START_ASSESSMENT,
     TITLE,
     TYPE,
     TYPE1,
@@ -49,9 +50,9 @@ from example import (
 )
 from helpers import (
     findDetails,
-    findItem,
-    findItemEid,
     findValues,
+    getItem,
+    getItemEid,
     getRelatedValues,
 )
 from subtest import (
@@ -59,7 +60,7 @@ from subtest import (
     assertEditor,
     assertModifyField,
     assertStage,
-    assertStartAssessment,
+    assertStartTask,
     assertStatus,
 )
 
@@ -151,15 +152,15 @@ def findOrMakeItem(client, kind, cId=None):
         the id of the contribution/assessment
     """
 
-    eid = findItemEid(client, kind)
+    eid = getItemEid(client, kind)
     if eid:
         if kind == CONTRIB:
-            return findItem(client, kind, eid)
+            return getItem(client, kind, eid)
         return [eid]
 
     if kind == CONTRIB:
         return assertAddItem(client, kind, True)
-    return assertStartAssessment(client, cId, True)
+    return assertStartTask(client, START_ASSESSMENT, cId, True)
 
 
 def start(
@@ -284,7 +285,7 @@ def start(
             startAssign(aId)
 
     def startFillout(aId):
-        (text, fields, msgs, dummy) = findItem(clientOwner, ASSESS, aId)
+        (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
         criteriaEntries = findDetails(text, CRITERIA_ENTRY)
         nCId = len(criteriaEntries)
         assert nCId == CRITERIA_ENTRIES_N[TYPE1]

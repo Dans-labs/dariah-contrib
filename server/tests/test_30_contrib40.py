@@ -32,6 +32,7 @@ from example import (
     COST_TOTAL,
     COST_DESCRIPTION,
     EXAMPLE,
+    MYCOORD,
 )
 from helpers import forall
 from starters import start
@@ -85,5 +86,5 @@ def test_viewCost(clients, field):
 
     expect = {user: None for user in USERS}
     expect.update({user: valueStrip for user in RIGHTFUL_USERS})
-    expect.update(dict(mycoord=valueStrip))
+    expect.update({MYCOORD: valueStrip})
     forall(clients, expect, assertIt)

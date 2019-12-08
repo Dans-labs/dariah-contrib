@@ -43,10 +43,10 @@ and those in
 to model tables and fields, with their permissions.
 It has base classes
 (
-[table](/{{apidocs}}/table.html),
-[record](/{{apidocs}}/record.html),
-[field](/{{apidocs}}/field.html),
-[details](/{{apidocs}}/details.html)
+[table](../{{apidocs}}/table.html),
+[record](../{{apidocs}}/record.html),
+[field](../{{apidocs}}/field.html),
+[details](../{{apidocs}}/details.html)
 ) to deal with most situations, but special tables may use
 their own derived classes.
 
@@ -157,53 +157,53 @@ For each field there is a key under which some specs are written.
 
         ??? details "text"
             A string of characters, usually just a one-liner.
-            See [text](/{{apidocs}}/typ/text.html#control.typ.text.Text).
+            See [text](../{{apidocs}}/typ/text.html#control.typ.text.Text).
 
         ??? details "url"
             A syntactically valid URL: i.e. a string of text that can be
             interpreted as a URL. A validation routine will check this.
-            See [url](/{{apidocs}}/typ/text.html#control.typ.text.Url).
+            See [url](../{{apidocs}}/typ/text.html#control.typ.text.Url).
 
         ??? details "email"
             A syntactically valid email address. A validation routine will check
             this.
-            See [email](/{{apidocs}}/typ/text.html#control.typ.text.Email).
+            See [email](../{{apidocs}}/typ/text.html#control.typ.text.Email).
 
         ??? details "markdown"
             A string of characters, which may extend to several pages,
             formatted as Markdown text.
-            See [markdown](/{{apidocs}}/typ/text.html#control.typ.text.Markdown).
+            See [markdown](../{{apidocs}}/typ/text.html#control.typ.text.Markdown).
 
         ??? details "bool2"
             `true` or `false`.
-            See [bool2](/{{apidocs}}/typ/bool.html#control.typ.bool.Bool2).
+            See [bool2](../{{apidocs}}/typ/bool.html#control.typ.bool.Bool2).
 
         ??? details "bool3"
             `true` , `null`, or `false`.
-            See [bool3](/{{apidocs}}/typ/bool.html#control.typ.bool.Bool3).
+            See [bool3](../{{apidocs}}/typ/bool.html#control.typ.bool.Bool3).
 
         ??? details "int"
             An integer number.
-            See [int](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Int).
+            See [int](../{{apidocs}}/typ/numeric.html#control.typ.numeric.Int).
 
         ??? details "decimal"
             An decimal number.
-            See [decimal](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Decimal).
+            See [decimal](../{{apidocs}}/typ/numeric.html#control.typ.numeric.Decimal).
 
         ??? details "money"
             An decimal number with an implicit monetary unit: €.
-            See [money](/{{apidocs}}/typ/numeric.html#control.typ.numeric.Money).
+            See [money](../{{apidocs}}/typ/numeric.html#control.typ.numeric.Money).
 
         ??? details "datetime"
             A date time, mostly represented in its
             [ISO 8601]({{iso8601}})
             format.
-            See [datetime](/{{apidocs}}/typ/datetime.html).
+            See [datetime](../{{apidocs}}/typ/datetime.html).
 
         ??? details "Related values"
             When a field refers to other records, there is much more to specify.
             In this case `type` is the name of a value table.
-            See [related](/{{apidocs}}/typ/related.html).
+            See [related](../{{apidocs}}/typ/related.html).
 
     ??? details "multiple"
         Whether there is only one value allowed for this field,

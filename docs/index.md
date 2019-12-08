@@ -69,7 +69,7 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
 ??? abstract "Apidocs"
     The technical documentation of the Python code is largely in so-called
     *docstrings* within the code. But you can see them nicely formatted
-    [here ...](/{{apidocs}}/)
+    [here ...]({{apidocs}}/)
 
 ??? abstract "Code base"
     A few remarks on our code and their languages.
@@ -90,14 +90,14 @@ and assess community contributions to the [DARIAH]({{dariah}}) .
     [Flask documentation]({{flask}}/tutorial/tests).
 
     The tests have been documented by docstrings.
-    [Here ...](/{{apidoctests}}/conftest.html)
+    [Here ...]({{apidoctests}}/conftest.html)
 
     Do the test coverage all the code? Here you can see the source code with
     the lines that have not been executed during tests highlighted.
     [Here ...](/api/html/coverage/index.html)
 
     The latest test results.
-    [Here ...](/{{apidoctests}}/results.txt)
+    [Here ...]({{apidoctests}}/results.txt)
 
 ## Author
 
