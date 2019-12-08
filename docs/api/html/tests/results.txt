@@ -6,4 +6,16 @@ collected 142 items
 
 tests/test_10_factory10.py ...                                        [  3/142]
 tests/test_20_users10.py ...                                          [  6/142]
-tests/test_30_contrib10.py ..
+tests/test_30_contrib10.py .............                              [ 19/142]
+tests/test_30_contrib20.py ....................................       [ 55/142]
+tests/test_30_contrib30.py ..............................             [ 85/142]
+tests/test_30_contrib40.py ....                                       [ 89/142]
+tests/test_40_assess10.py .................                           [106/142]
+tests/test_40_assess20.py ...                                         [109/142]
+tests/test_40_assess30.py ............................                [137/142]
+tests/test_50_review10.py .....                                       [142/142]
+
+========================= 142 passed in 41.99 seconds ==========================
+
+  REQUESTS       URLS  USERS/URL    REQ/URL
+      2393        118        3.6       20.3

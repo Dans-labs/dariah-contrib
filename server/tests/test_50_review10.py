@@ -131,14 +131,14 @@ def test_tryStartReviewAll(clients):
 
 def test_tryStartReview(clientsReviewer):
     aId = G(G(recordInfo, ASSESS), "eid")
+    recordInfo.setdefault(REVIEW, {})
 
     def assertIt(cl, exp):
         rIds = assertStartTask(cl, START_REVIEW, aId, exp)
         user = cl.user
         if exp:
             assert len(rIds) == 1
-            reviewInfo = recordInfo.setdefault(REVIEW, {user: {}})
-            reviewInfo[user]["eid"] = rIds[0]
+            recordInfo[REVIEW].setdefault(user, {})["eid"] = rIds[0]
         else:
             assert len(rIds) == 0
 
@@ -156,7 +156,7 @@ def Xest_reviewEntries(clients):
     def assertIt(cl, exp):
         for crId in cIds:
             (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
-            reviewEntries = findReviewEntries(text)
+            # reviewEntries = findReviewEntries(text)
         for rId in (rEid, rFid):
             (text, fields, msgs, dummy) = getItem(cl, REVIEW, rId)
             reviewEntries = findDetails(text, REVIEW_ENTRY)
