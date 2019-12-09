@@ -31,7 +31,9 @@
 import re
 
 from flask import json
-from control.utils import serverprint
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from control.utils import pick as G, serverprint
 from conftest import USER_LIST
 
 
@@ -50,6 +52,14 @@ userRe = re.compile(
     re.S,
 )
 valueRe = re.compile(&#34;&#34;&#34;eid=[&#39;&#34;](.*?)[&#39;&#34;][^&gt;]*&gt;(.*?)(?:&amp;#xa;)?&lt;&#34;&#34;&#34;, re.S)
+reviewRe = re.compile(
+    &#34;&#34;&#34;&lt;!-- begin reviewer ([A-Za-z0-9]+) --&gt;&#34;&#34;&#34;
+    &#34;&#34;&#34;(.*?)&#34;&#34;&#34;
+    r&#34;&#34;&#34;&lt;!-- end reviewer \1 --&gt;&#34;&#34;&#34;
+    , re.S
+)
+reviewEntryIdRe = re.compile(&#34;&#34;&#34;&lt;span [^&gt;]*?table=[&#39;&#34;]reviewEntry[&#39;&#34;][^&gt;]*&gt;&#34;&#34;&#34;, re.S)
+idRe = re.compile(&#34;&#34;&#34;eid=[&#39;&#34;]([^&#39;&#34;]*)[&#39;&#34;]&#34;&#34;&#34;, re.S)
 
 
 def accessUrl(client, url, redirect=False):
@@ -69,6 +79,25 @@ def checkWarning(text, label):
     &#34;&#34;&#34;
 
     return not not reWarning(label).search(text)
+
+
+def findCaptions(text):
+    &#34;&#34;&#34;Get the captions from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return captionRe.findall(text)
 
 
 def findDetails(text, dtable):
@@ -141,6 +170,25 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
+def findMainN(text):
+    &#34;&#34;&#34;Get the number of main records from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    &#34;&#34;&#34;
+
+    return mainNRe.findall(text)
+
+
 def findMaterial(text):
     &#34;&#34;&#34;Get the text of the material div. &#34;&#34;&#34;
 
@@ -163,6 +211,34 @@ def findMsg(text):
     &#34;&#34;&#34;
 
     return set(msgRe.findall(text))
+
+
+def findReviewEntries(text):
+    &#34;&#34;&#34;Get review entries from a criteria entry record.
+
+    Parameters
+    ----------
+    text: string
+        The response text of a request for an item view on a criteriaEntry record.
+
+    Returns
+    -------
+    dict
+        Keyed by `expert` or `final`. The values are the review comments of that
+        reviewer on this criteria entry.
+    &#34;&#34;&#34;
+
+    result = {}
+    for (kind, material) in reviewRe.findall(text):
+        reId = None
+        spans = reviewEntryIdRe.findall(text)
+        if spans:
+            reIds = idRe.findall(spans[0])
+            if reIds:
+                reId = reIds[0]
+        fields = findFields(material)
+        result[kind] = (reId, fields)
+    return result
 
 
 def findStages(text):
@@ -201,44 +277,6 @@ def findTasks(text):
     &#34;&#34;&#34;
 
     return taskRe.findall(text)
-
-
-def findMainN(text):
-    &#34;&#34;&#34;Get the number of main records from a response.
-
-    !!! hint
-        They are neatly packaged in comment lines!
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-
-    Returns
-    -------
-    list of string
-    &#34;&#34;&#34;
-
-    return mainNRe.findall(text)
-
-
-def findCaptions(text):
-    &#34;&#34;&#34;Get the captions from a response.
-
-    !!! hint
-        They are neatly packaged in comment lines!
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-
-    Returns
-    -------
-    list of string
-    &#34;&#34;&#34;
-
-    return captionRe.findall(text)
 
 
 def findValues(table, text):
@@ -380,6 +418,35 @@ def getRelatedValues(client, table, eid, field):
     values = valueRe.findall(valueStr[0])
     valueDict = {value: eid for (eid, value) in values}
     return valueDict
+
+
+def getScores(cId):
+    &#34;&#34;&#34;Get relevant scores directly from Mongo DB.
+
+    Parameters
+    ----------
+    cId: string(ObjectId)
+        The id of a criteria entry record whose set of possible scores we
+        want to retrieve.
+
+    Returns
+    -------
+    dict
+        Keyed by the title of the score, values are their ids.
+    &#34;&#34;&#34;
+    client = MongoClient()
+    mongo = client.dariah_test
+    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], &#34;criteria&#34;)
+    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    result = {}
+    for record in scores:
+        score = G(record, &#34;score&#34;)
+        if score is None:
+            return &#34;○&#34;
+        level = G(record, &#34;level&#34;) or &#34;○&#34;
+        title = f&#34;&#34;&#34;{score} - {level}&#34;&#34;&#34;
+        result[title] = str(G(record, &#34;_id&#34;))
+    return result
 
 
 def modifyField(client, table, eid, field, newValue):
@@ -823,6 +890,54 @@ Otherwise, return <code>None</code></p>
     return set(msgRe.findall(text))</code></pre>
 </details>
 </dd>
+<dt id="helpers.findReviewEntries"><code class="name flex">
+<span>def <span class="ident">findReviewEntries</span></span>(<span>text)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get review entries from a criteria entry record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
+<dd>The response text of a request for an item view on a criteriaEntry record.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Keyed by <code>expert</code> or <code>final</code>. The values are the review comments of that
+reviewer on this criteria entry.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def findReviewEntries(text):
+    &#34;&#34;&#34;Get review entries from a criteria entry record.
+
+    Parameters
+    ----------
+    text: string
+        The response text of a request for an item view on a criteriaEntry record.
+
+    Returns
+    -------
+    dict
+        Keyed by `expert` or `final`. The values are the review comments of that
+        reviewer on this criteria entry.
+    &#34;&#34;&#34;
+
+    result = {}
+    for (kind, material) in reviewRe.findall(text):
+        reId = None
+        spans = reviewEntryIdRe.findall(text)
+        if spans:
+            reIds = idRe.findall(spans[0])
+            if reIds:
+                reId = reIds[0]
+        fields = findFields(material)
+        result[kind] = (reId, fields)
+    return result</code></pre>
+</details>
+</dd>
 <dt id="helpers.findStages"><code class="name flex">
 <span>def <span class="ident">findStages</span></span>(<span>text)</span>
 </code></dt>
@@ -1177,6 +1292,55 @@ of the item will be read off.</p>
     return valueDict</code></pre>
 </details>
 </dd>
+<dt id="helpers.getScores"><code class="name flex">
+<span>def <span class="ident">getScores</span></span>(<span>cId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get relevant scores directly from Mongo DB.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of a criteria entry record whose set of possible scores we
+want to retrieve.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Keyed by the title of the score, values are their ids.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getScores(cId):
+    &#34;&#34;&#34;Get relevant scores directly from Mongo DB.
+
+    Parameters
+    ----------
+    cId: string(ObjectId)
+        The id of a criteria entry record whose set of possible scores we
+        want to retrieve.
+
+    Returns
+    -------
+    dict
+        Keyed by the title of the score, values are their ids.
+    &#34;&#34;&#34;
+    client = MongoClient()
+    mongo = client.dariah_test
+    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], &#34;criteria&#34;)
+    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    result = {}
+    for record in scores:
+        score = G(record, &#34;score&#34;)
+        if score is None:
+            return &#34;○&#34;
+        level = G(record, &#34;level&#34;) or &#34;○&#34;
+        title = f&#34;&#34;&#34;{score} - {level}&#34;&#34;&#34;
+        result[title] = str(G(record, &#34;_id&#34;))
+    return result</code></pre>
+</details>
+</dd>
 <dt id="helpers.modifyField"><code class="name flex">
 <span>def <span class="ident">modifyField</span></span>(<span>client, table, eid, field, newValue)</span>
 </code></dt>
@@ -1420,6 +1584,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.findMainN" href="#helpers.findMainN">findMainN</a></code></li>
 <li><code><a title="helpers.findMaterial" href="#helpers.findMaterial">findMaterial</a></code></li>
 <li><code><a title="helpers.findMsg" href="#helpers.findMsg">findMsg</a></code></li>
+<li><code><a title="helpers.findReviewEntries" href="#helpers.findReviewEntries">findReviewEntries</a></code></li>
 <li><code><a title="helpers.findStages" href="#helpers.findStages">findStages</a></code></li>
 <li><code><a title="helpers.findTasks" href="#helpers.findTasks">findTasks</a></code></li>
 <li><code><a title="helpers.findValues" href="#helpers.findValues">findValues</a></code></li>
@@ -1428,6 +1593,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.getItem" href="#helpers.getItem">getItem</a></code></li>
 <li><code><a title="helpers.getItemEid" href="#helpers.getItemEid">getItemEid</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
+<li><code><a title="helpers.getScores" href="#helpers.getScores">getScores</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>
 <li><code><a title="helpers.reDetail" href="#helpers.reDetail">reDetail</a></code></li>

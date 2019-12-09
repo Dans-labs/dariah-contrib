@@ -160,17 +160,25 @@ date +%s | sha256sum | base64 | head -c 32 &gt; dariah_jwt.secret
 cd /opt/web-apps
 date +%s | shasum -a 256 | base64 | head -c 32 &gt; dariah_jwt.secret
 ```
-</pre></div> </td></tr></table> <h2 id=web-server>Web server<a class=headerlink href=#web-server title="Permanent link">&para;</a></h2> <p>??? explanation "production" The production web server is <strong>httpd (Apache)</strong>. Flask connects to it through <a href=https://modwsgi.readthedocs.io/en/develop>mod_wsgi</a> (take care to use a version that speaks Python3). This connection is defined in the default config file. See <a href=https://github.com/Dans-labs/dariah-contrib/blob/master/server/default_example.conf>default_example.conf</a> .</p> <table class=codehilitetable><tr><td class=linenos><div class=linenodiv><pre>1
-2
-3
-4
-5
-6</pre></div></td><td class=code><div class=codehilite><pre><span></span>*   `/etc/httpd/config.d/`
-*   `default.conf` (config for this site)
-*   `shib.conf` (config for shibboleth authentication)
-*   ...
+</pre></div> </td></tr></table> <h2 id=web-server>Web server<a class=headerlink href=#web-server title="Permanent link">&para;</a></h2> <p>??? explanation "production" The production web server is <a href>gunicorn</a>. Flask is a <strong>wsgi</strong> app can can be called straight away by <strong>gunicorn</strong>. In development, you can just call gunicorn from the command line with the right arguments (see <code>build.sh</code>).</p> <table class=codehilitetable><tr><td class=linenos><div class=linenodiv><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class=code><div class=codehilite><pre><span></span>In production we install a service that runs Flask under gunicorn.
 
-The app starts/stops when Apache starts/stops.
+```
+./build.sh install
+```
+
+does this, when run on the production server.
+
+See the same script under the commands `guni` and `gunistop` to see how the 
+service is started and stopped.
 </pre></div> </td></tr></table> <p>??? explanation "development" In development, <a href=https://flask.palletsprojects.com/en/1.1.x/ >flask</a> runs its own little web server. You can run the development server by saying, in the top level directory of the repo clone:</p> <table class=codehilitetable><tr><td class=linenos><div class=linenodiv><pre>1
 2
 3

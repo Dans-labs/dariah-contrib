@@ -32,6 +32,7 @@ from control.record import Record
 CW = C.web
 
 MESSAGES = CW.messages
+Qu = H.icon(CW.unknown[N.user], asChar=True)
 
 
 class ReviewEntryR(Record):
@@ -58,16 +59,25 @@ class ReviewEntryR(Record):
         creatorId = G(record, N.creator)
 
         youRep = f&#34;&#34;&#34; ({N.you})&#34;&#34;&#34; if creatorId == uid else E
-        lastModified = self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+        lastModified = G(record, N.modified)
+        lastModifiedRep = (
+            self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+            if lastModified
+            else Qu
+        )
 
-        return H.span(f&#34;&#34;&#34;{lastModified}{youRep}&#34;&#34;&#34;, cls=f&#34;rentrytitle&#34;)
+        return H.span(f&#34;&#34;&#34;{lastModifiedRep}{youRep}&#34;&#34;&#34;, cls=f&#34;rentrytitle&#34;)
 
     def bodyCompact(self, **kwargs):
         perm = self.perm
 
         theTitle = self.title()
-        comments = H.div(
-            self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+        comments = (
+            &#34;&#34;&#34;&lt;!-- begin review comment --&gt;&#34;&#34;&#34;
+            + H.div(
+                self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+            )
+            + &#34;&#34;&#34;&lt;!-- end review comment --&gt;&#34;&#34;&#34;
         )
 
         return H.div([theTitle, comments], cls=f&#34;reviewentry&#34;)</code></pre>
@@ -136,16 +146,25 @@ that spawns a record object.</p>
         creatorId = G(record, N.creator)
 
         youRep = f&#34;&#34;&#34; ({N.you})&#34;&#34;&#34; if creatorId == uid else E
-        lastModified = self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+        lastModified = G(record, N.modified)
+        lastModifiedRep = (
+            self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+            if lastModified
+            else Qu
+        )
 
-        return H.span(f&#34;&#34;&#34;{lastModified}{youRep}&#34;&#34;&#34;, cls=f&#34;rentrytitle&#34;)
+        return H.span(f&#34;&#34;&#34;{lastModifiedRep}{youRep}&#34;&#34;&#34;, cls=f&#34;rentrytitle&#34;)
 
     def bodyCompact(self, **kwargs):
         perm = self.perm
 
         theTitle = self.title()
-        comments = H.div(
-            self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+        comments = (
+            &#34;&#34;&#34;&lt;!-- begin review comment --&gt;&#34;&#34;&#34;
+            + H.div(
+                self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+            )
+            + &#34;&#34;&#34;&lt;!-- end review comment --&gt;&#34;&#34;&#34;
         )
 
         return H.div([theTitle, comments], cls=f&#34;reviewentry&#34;)</code></pre>
@@ -169,8 +188,12 @@ that spawns a record object.</p>
     perm = self.perm
 
     theTitle = self.title()
-    comments = H.div(
-        self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+    comments = (
+        &#34;&#34;&#34;&lt;!-- begin review comment --&gt;&#34;&#34;&#34;
+        + H.div(
+            self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+        )
+        + &#34;&#34;&#34;&lt;!-- end review comment --&gt;&#34;&#34;&#34;
     )
 
     return H.div([theTitle, comments], cls=f&#34;reviewentry&#34;)</code></pre>

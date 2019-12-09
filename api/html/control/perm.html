@@ -71,7 +71,8 @@ def checkTable(
     neither are fields in those records.
 
     However, this holds for the generic interface. Individual tables and records
-    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    and fields may be regulated in addition by
+    `control.workflow.apply.WorkflowItem` conditions,
     which can open up and close off material.
 
     Parameters
@@ -260,7 +261,7 @@ def sysadmin(user):
     return group in {SYSTEM, ROOT}
 
 
-def getPerms(table, permRecord, require):
+def getPermField(table, permRecord, require):
     &#34;&#34;&#34;Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -365,11 +366,21 @@ def permRecord(context, table, record):
 
     sameCountry = refCountry is not None and refCountry == uCountry
     isAuth = group != UNAUTH and uid is not None
-    isCreator = uid == G(record, N.creator)
-    isEditor = uid in (G(record, N.editors) or set())
+    isCreator = uid is not None and uid == G(record, N.creator)
+    isEditor = uid is not None and uid in (G(record, N.editors) or set())
     isCoordinated = isAuth and sameCountry and group == COORD
+    isACreator = uid is not None and uid == G(aRecord, N.creator)
+    isAEditor = uid is not None and uid in (G(aRecord, N.editors) or set())
+    isReviewer = uid is not None and uid in reviewers
 
-    isOur = isCoordinated or isCreator or isEditor or uid in reviewers
+    isOur = table in ALLOW_OUR and (
+        isCoordinated
+        or isCreator
+        or isEditor
+        or isACreator
+        or isAEditor
+        or isReviewer
+    )
 
     return {
         N.group: group,
@@ -516,7 +527,8 @@ For each table the minimal role is stated that can access the table.</p>
 <p>If a table is not permitted, then its records are also not permitted,
 neither are fields in those records.</p>
 <p>However, this holds for the generic interface. Individual tables and records
-and fields may be regulated in addition by <code>control.compute.Workflow</code> conditions,
+and fields may be regulated in addition by
+<a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a> conditions,
 which can open up and close off material.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -549,7 +561,8 @@ user can play on the basis of his/her identity.</dd>
     neither are fields in those records.
 
     However, this holds for the generic interface. Individual tables and records
-    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    and fields may be regulated in addition by
+    `control.workflow.apply.WorkflowItem` conditions,
     which can open up and close off material.
 
     Parameters
@@ -638,8 +651,8 @@ user can play on the basis of his/her identity.</dd>
     return isCoord and (countryId is None or uCountry == countryId)</code></pre>
 </details>
 </dd>
-<dt id="control.perm.getPerms"><code class="name flex">
-<span>def <span class="ident">getPerms</span></span>(<span>table, permRecord, require)</span>
+<dt id="control.perm.getPermField"><code class="name flex">
+<span>def <span class="ident">getPermField</span></span>(<span>table, permRecord, require)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Determine read/edit permissions for a field in a record in a table.</p>
@@ -670,7 +683,7 @@ coming from the table specific .yaml files with field specifications.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getPerms(table, permRecord, require):
+<pre><code class="python">def getPermField(table, permRecord, require):
     &#34;&#34;&#34;Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -846,11 +859,21 @@ As creator/editor/reviewer/coordinator?</dd>
 
     sameCountry = refCountry is not None and refCountry == uCountry
     isAuth = group != UNAUTH and uid is not None
-    isCreator = uid == G(record, N.creator)
-    isEditor = uid in (G(record, N.editors) or set())
+    isCreator = uid is not None and uid == G(record, N.creator)
+    isEditor = uid is not None and uid in (G(record, N.editors) or set())
     isCoordinated = isAuth and sameCountry and group == COORD
+    isACreator = uid is not None and uid == G(aRecord, N.creator)
+    isAEditor = uid is not None and uid in (G(aRecord, N.editors) or set())
+    isReviewer = uid is not None and uid in reviewers
 
-    isOur = isCoordinated or isCreator or isEditor or uid in reviewers
+    isOur = table in ALLOW_OUR and (
+        isCoordinated
+        or isCreator
+        or isEditor
+        or isACreator
+        or isAEditor
+        or isReviewer
+    )
 
     return {
         N.group: group,
@@ -958,7 +981,7 @@ As creator/editor/reviewer/coordinator?</dd>
 <li><code><a title="control.perm.checkPerm" href="#control.perm.checkPerm">checkPerm</a></code></li>
 <li><code><a title="control.perm.checkTable" href="#control.perm.checkTable">checkTable</a></code></li>
 <li><code><a title="control.perm.coordinator" href="#control.perm.coordinator">coordinator</a></code></li>
-<li><code><a title="control.perm.getPerms" href="#control.perm.getPerms">getPerms</a></code></li>
+<li><code><a title="control.perm.getPermField" href="#control.perm.getPermField">getPermField</a></code></li>
 <li><code><a title="control.perm.officeuser" href="#control.perm.officeuser">officeuser</a></code></li>
 <li><code><a title="control.perm.permRecord" href="#control.perm.permRecord">permRecord</a></code></li>
 <li><code><a title="control.perm.superuser" href="#control.perm.superuser">superuser</a></code></li>

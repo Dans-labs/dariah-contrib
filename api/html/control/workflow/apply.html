@@ -442,7 +442,7 @@ class WorkflowItem:
         This method determines the record is readable by the current user.
 
         If the record is not part of the workflow, `None` is returned, and
-        the normal permission rules applay.
+        the normal permission rules apply.
 
         !!! note
             It also depends on the current user.
@@ -694,7 +694,6 @@ class WorkflowItem:
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            print(&#34;XXX&#34;, value, taskValue)
             if value == taskValue:
                 return False
 
@@ -1472,7 +1471,7 @@ details of the current user can be read off.</dd>
         This method determines the record is readable by the current user.
 
         If the record is not part of the workflow, `None` is returned, and
-        the normal permission rules applay.
+        the normal permission rules apply.
 
         !!! note
             It also depends on the current user.
@@ -1724,7 +1723,6 @@ details of the current user can be read off.</dd>
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            print(&#34;XXX&#34;, value, taskValue)
             if value == taskValue:
                 return False
 
@@ -2402,7 +2400,7 @@ some fields may be open to authenticated users or
 the public.</p>
 <p>This method determines the record is readable by the current user.</p>
 <p>If the record is not part of the workflow, <code>None</code> is returned, and
-the normal permission rules applay.</p>
+the normal permission rules apply.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>It also depends on the current user.
@@ -2468,7 +2466,7 @@ Otherwise, we check for the readability of this field in the record.</dd>
     This method determines the record is readable by the current user.
 
     If the record is not part of the workflow, `None` is returned, and
-    the normal permission rules applay.
+    the normal permission rules apply.
 
     !!! note
         It also depends on the current user.
@@ -3138,7 +3136,6 @@ the task acts on: contrib, assessment, or review.</dd>
     if operator == N.set:
         if taskField == N.decision:
             value = G(db.decisionInv, value)
-        print(&#34;XXX&#34;, value, taskValue)
         if value == taskValue:
             return False
 
