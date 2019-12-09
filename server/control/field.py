@@ -10,7 +10,7 @@ from flask import request, abort
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.utils import pick as G, bencode, cap1, E, BLANK, ONE, COMMA
-from control.perm import getPerms
+from control.perm import getPermField
 from control.typ.value import ConversionError
 
 CT = C.tables
@@ -197,7 +197,7 @@ class Field:
 
         readonly = self.readonly if readonly is None else readonly
 
-        (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
         if mayRead is not None:
             self.mayRead = mayRead
         if mayEdit is not None:
@@ -299,7 +299,7 @@ class Field:
         self.value = G(record, field)
         self.perm = recordObj.perm
         perm = self.perm
-        (self.mayRead, self.mayEdit) = getPerms(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
 
         good = True
         if field == N.editors and table in CASCADE_SPECS:

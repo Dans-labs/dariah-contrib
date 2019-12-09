@@ -116,6 +116,7 @@ class Record:
         """
 
         self.setPerm()
+
         self.setWorkflow()
         self.mayDelete = self.getDelPerm()
         """*boolean* Whether the user may delete the record.

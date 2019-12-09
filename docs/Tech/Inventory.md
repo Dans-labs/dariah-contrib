@@ -30,6 +30,7 @@ with an ✗.
 ???+ abstract "Server side"
     *   [python]({{python}}) data-oriented scripting language
     *   [flask]({{flask}}) micro web framework
+    *   [gunicorn]({{gunicorn}}) task runner, acting as webserver behind a proxy
     *   [wsgi]({{wsgi}}) bridge between the python language and webservers
 
 ???+ abstract "Database"

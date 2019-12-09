@@ -163,17 +163,22 @@ fixed place. Here is the command to generate and store the key.
 
 ## Web server
 
-??? explanation "production" The production web server is **httpd (Apache)**. Flask
-connects to it through [mod_wsgi]({{wsgi}}) (take care to use a version that speaks
-Python3). This connection is defined in the default config file. See
-[default_example.conf]({{repBase}}/server/default_example.conf) .
+??? explanation "production" The production web server is
+    [gunicorn]().
+    Flask is a **wsgi** app can can be called straight away by **gunicorn**.
+    In development, you can just call gunicorn from the command line with the right
+    arguments (see `build.sh`).
 
-    *   `/etc/httpd/config.d/`
-    *   `default.conf` (config for this site)
-    *   `shib.conf` (config for shibboleth authentication)
-    *   ...
+    In production we install a service that runs Flask under gunicorn.
 
-    The app starts/stops when Apache starts/stops.
+    ```
+    ./build.sh install
+    ```
+
+    does this, when run on the production server.
+
+    See the same script under the commands `guni` and `gunistop` to see how the 
+    service is started and stopped.
 
 ??? explanation "development" In development, [flask]({{flask}}) runs its own little web
 server. You can run the development server by saying, in the top level directory of the

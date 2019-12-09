@@ -76,10 +76,12 @@ class CriteriaEntryD(Details):
 
         return H.div(
             [
-                H.div(
+                f&#34;&#34;&#34;&lt;!-- begin reviewer {dest} --&gt;&#34;&#34;&#34;
+                + H.div(
                     [H.div(cap1(dest), cls=&#34;head&#34;), G(byReviewer, dest)],
                     cls=f&#34;reviewentries {dest}&#34;,
                 )
+                + f&#34;&#34;&#34;&lt;!-- end reviewer {dest} --&gt;&#34;&#34;&#34;
                 for dest in reviewer
             ],
             cls=&#34;reviewers&#34;,
@@ -168,10 +170,12 @@ that spawns a detail record object.</p>
 
         return H.div(
             [
-                H.div(
+                f&#34;&#34;&#34;&lt;!-- begin reviewer {dest} --&gt;&#34;&#34;&#34;
+                + H.div(
                     [H.div(cap1(dest), cls=&#34;head&#34;), G(byReviewer, dest)],
                     cls=f&#34;reviewentries {dest}&#34;,
                 )
+                + f&#34;&#34;&#34;&lt;!-- end reviewer {dest} --&gt;&#34;&#34;&#34;
                 for dest in reviewer
             ],
             cls=&#34;reviewers&#34;,

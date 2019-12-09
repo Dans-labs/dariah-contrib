@@ -94,6 +94,7 @@ extra:
   flask: https://flask.palletsprojects.com/en/1.1.x/
   flexbox: https://css-tricks.com/snippets/css/a-guide-to-flexbox/
   githubBase: https://github.com/
+  gunicorn: https://docs.gunicorn.org/en/stable/index.html
   hsl: https://en.wikipedia.org/wiki/HSL_and_HSV
   html: https://developer.mozilla.org/en-US/docs/Web/HTML
   ide: https://en.wikipedia.org/wiki/Integrated_development_environment 

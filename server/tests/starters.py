@@ -22,12 +22,12 @@ This is the *clean slate*.
 
 The starter functions may insert a few records in the database and fetch
 a few value tables for usage in test functions.
-
 """
 
-from control.utils import pick as G
+from control.utils import pick as G, E
 from example import (
     ASSESS,
+    COMMENTS,
     COMPLETE,
     COMPLETE_WITHDRAWN,
     CONTRIB,
@@ -38,10 +38,14 @@ from example import (
     EVIDENCE,
     EXPERT,
     FINAL,
+    REVIEW,
+    REVIEW_ENTRY,
     REVIEWER_E,
     REVIEWER_F,
     SCORE,
     START_ASSESSMENT,
+    START_REVIEW,
+    SUBMITTED,
     TITLE,
     TYPE,
     TYPE1,
@@ -50,10 +54,12 @@ from example import (
 )
 from helpers import (
     findDetails,
+    findReviewEntries,
     findValues,
     getItem,
     getItemEid,
     getRelatedValues,
+    getScores,
 )
 from subtest import (
     assertAddItem,
@@ -122,21 +128,24 @@ def getValueTable(client, table, eid, valueTable, dest, direct=False):
     return dest[valueTable]
 
 
-def findOrMakeItem(client, kind, cId=None):
-    """Finds or makes a contribution/assessment.
+def findOrMakeItem(client, table, cId=None, aId=None):
+    """Finds or makes a contribution/assessment/review.
 
-    Either previous tests have made a contribution/assessment, and then we have
+    Either previous tests have made a contribution/assessment/review, and then we have
     to find it.
-    Or there are no contributions/assessments yet, and then we have to make one.
+    Or there are no contributions/assessments/reviews yet, and then we have to make one.
 
     Parameters
     ----------
     client: fixture
-    kind: string
-        Either `contrib` or `assessment`
+    table: string
+        Either `contrib` or `assessment` or `review`
     cId: string(ObjectId), optional `None`
         If we make an assessment, the id of the contribution for which it is an
         assessment
+    aId: string(ObjectId), optional `None`
+        If we make a review, the id of the assessment for which it is a
+        review
 
     Returns
     -------
@@ -152,20 +161,28 @@ def findOrMakeItem(client, kind, cId=None):
         the id of the contribution/assessment
     """
 
-    eid = getItemEid(client, kind)
+    eid = getItemEid(client, table)
     if eid:
-        if kind == CONTRIB:
-            return getItem(client, kind, eid)
-        return [eid]
+        if table == CONTRIB:
+            return getItem(client, table, eid)
+        if table == ASSESS:
+            return [eid]
+        if table == REVIEW:
+            return [eid]
 
-    if kind == CONTRIB:
-        return assertAddItem(client, kind, True)
-    return assertStartTask(client, START_ASSESSMENT, cId, True)
+    if table == CONTRIB:
+        return assertAddItem(client, table, True)
+    if table == ASSESS:
+        return assertStartTask(client, START_ASSESSMENT, cId, True)
+    if table == REVIEW:
+        return assertStartTask(client, START_REVIEW, aId, True)
 
 
 def start(
     clientOffice=None,
     clientOwner=None,
+    clientExpert=None,
+    clientFinal=None,
     users=False,
     types=False,
     countries=False,
@@ -174,6 +191,7 @@ def start(
     fillout=False,
     submit=False,
     assign=False,
+    review=False,
     valueTables=None,
     recordInfo=None,
     ids=None,
@@ -230,6 +248,8 @@ def start(
         Whether to submit the completed assessment
     assign: boolean, optional `False`
         Whether to assign reviewers
+    review: boolean, optional `False`
+        Whether to start and fillout both reviews
     valueTables: dict, optional `None`
         Where the retrieved data for the value tables end up
     recordInfo: dict, optional `None`
@@ -240,6 +260,8 @@ def start(
         A resulting list of ids of criteria entries
     """
 
+    if review:
+        assign = True
     if assign:
         submit = True
         users = True
@@ -263,11 +285,33 @@ def start(
         ids["TYPE1"] = typeValues[TYPE1]
         ids["TYPE2"] = typeValues[TYPE2]
 
+    def doReview(aId):
+        recordInfo.setdefault(REVIEW, {})
+
+        for cl in (clientExpert, clientFinal):
+            rIds = findOrMakeItem(cl, REVIEW, aId=aId)
+            assert len(rIds) == 1
+            rId = rIds[0]
+            user = cl.user
+            recordInfo[REVIEW].setdefault(user, {})["eid"] = rId
+            for (i, cId) in enumerate(cIds):
+                (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
+                reviewEntries = findReviewEntries(text)
+                rId = reviewEntries[user][0]
+                newValue = [f"{user}'s comment on criteria {i + 1}"]
+                newValueRep = ",".join(newValue)
+                assertModifyField(
+                    cl, REVIEW_ENTRY, rId, COMMENTS, (newValue, newValueRep), True
+                )
+
     def startAssign(aId):
         users = G(valueTables, USER)
         for (field, user) in ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL)):
             value = G(users, user)
             assertModifyField(clientOffice, ASSESS, aId, field, (value, user), True)
+
+        if review:
+            doReview(aId)
 
     def startSubmit(aId, stage):
         command = (
@@ -275,11 +319,14 @@ def start(
             if stage == COMPLETE
             else "resubmit"
             if stage == COMPLETE_WITHDRAWN
+            else E
+            if stage == SUBMITTED
             else None
         )
         assert command is not None
-        url = f"/api/task/{command}Assessment/{aId}"
-        assertStatus(clientOwner, url, True)
+        if command:
+            url = f"/api/task/{command}Assessment/{aId}"
+            assertStatus(clientOwner, url, True)
 
         if assign:
             startAssign(aId)
@@ -292,7 +339,7 @@ def start(
 
         for (i, (cId, material)) in enumerate(criteriaEntries):
             assert ELLIPS_DIV in material
-            scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, SCORE)
+            scores = getScores(cId)
             (scoreValue, scoreId) = sorted(scores.items())[1]
             assertModifyField(
                 clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True,
@@ -308,7 +355,9 @@ def start(
                 True,
             )
             cIds.append(cId)
-        result = assertStage(clientOwner, ASSESS, aId, {COMPLETE, COMPLETE_WITHDRAWN})
+        result = assertStage(
+            clientOwner, ASSESS, aId, {COMPLETE, COMPLETE_WITHDRAWN, SUBMITTED}
+        )
         stage = result[4]
 
         if submit:

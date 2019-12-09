@@ -34,7 +34,7 @@ root | root | unique authenticated user that can assign office users and system 
 :   Wrap the Flask test-`client` in something more capable.
 
 `clean`
-:   Provides a clean slate test database`
+:   Provides a clean slate test database.
 
 `starters`
 :   Provide test functions with a well-defined initial state.
@@ -95,10 +95,10 @@ in alphabetical order of the file names.
 ### Tests: Reviews: filling out and deciding.
 
 `test_50_review10`
-:   Checking out the sidebar for each user when an assessment is under review.
+:   Starting reviews and filling them out.
 
 `test_50_review20`
-:   Starting a review, filling it out, and deciding.
+:   Checking visibility of reviews and making review decisions.
 
 `test_50_assess30`
 :   Revising and resubmitting assessments.

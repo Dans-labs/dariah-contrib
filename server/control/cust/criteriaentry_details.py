@@ -50,10 +50,12 @@ class CriteriaEntryD(Details):
 
         return H.div(
             [
-                H.div(
+                f"""<!-- begin reviewer {dest} -->"""
+                + H.div(
                     [H.div(cap1(dest), cls="head"), G(byReviewer, dest)],
                     cls=f"reviewentries {dest}",
                 )
+                + f"""<!-- end reviewer {dest} -->"""
                 for dest in reviewer
             ],
             cls="reviewers",

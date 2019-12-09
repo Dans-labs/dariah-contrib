@@ -40,7 +40,8 @@ def checkTable(
     neither are fields in those records.
 
     However, this holds for the generic interface. Individual tables and records
-    and fields may be regulated in addition by `control.compute.Workflow` conditions,
+    and fields may be regulated in addition by
+    `control.workflow.apply.WorkflowItem` conditions,
     which can open up and close off material.
 
     Parameters
@@ -229,7 +230,7 @@ def sysadmin(user):
     return group in {SYSTEM, ROOT}
 
 
-def getPerms(table, permRecord, require):
+def getPermField(table, permRecord, require):
     """Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -334,11 +335,21 @@ def permRecord(context, table, record):
 
     sameCountry = refCountry is not None and refCountry == uCountry
     isAuth = group != UNAUTH and uid is not None
-    isCreator = uid == G(record, N.creator)
-    isEditor = uid in (G(record, N.editors) or set())
+    isCreator = uid is not None and uid == G(record, N.creator)
+    isEditor = uid is not None and uid in (G(record, N.editors) or set())
     isCoordinated = isAuth and sameCountry and group == COORD
+    isACreator = uid is not None and uid == G(aRecord, N.creator)
+    isAEditor = uid is not None and uid in (G(aRecord, N.editors) or set())
+    isReviewer = uid is not None and uid in reviewers
 
-    isOur = isCoordinated or isCreator or isEditor or uid in reviewers
+    isOur = table in ALLOW_OUR and (
+        isCoordinated
+        or isCreator
+        or isEditor
+        or isACreator
+        or isAEditor
+        or isReviewer
+    )
 
     return {
         N.group: group,

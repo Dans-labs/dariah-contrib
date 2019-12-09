@@ -33,6 +33,8 @@ function givehelp {
     echo "    Production only:"
     echo "      prod db = dariah"
     echo "<task>:"
+    echo "gunistop    : stop serving with gunicorn"
+    echo "install     : install the app as a service running with gunicorn"
     echo "update      : fetch new code and deploy it on the server"
     echo "activate36  : activate python36 in a spawned shell"
     echo ""
@@ -93,7 +95,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    update|activate36)
+    activate36|gunistop|install|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
@@ -278,10 +280,30 @@ function gitsave {
     git push origin master
 }
 
+function guniasservice {
+    cd $root
+    id -u guni
+    if [[ "$?" == "1" ]]; then
+        adduser --no-create-home --system guni
+    fi
+    cp dariah-contrib.service /etc/systemd/system/
+    chmod 755 /etc/systemd/system/dariah-contrib.service
+    systemctl daemon-reload
+    cd server
+    chown -R guni:guni .
+
+}
+
 function gunirun {
     cd $root/server
     mongostart
-    if [[ "$1" == "test" ]]; then
+    if [[ "$1" == "stop" ]]; then
+        if [[ "$ON_DANS" == "1" ]]; then
+            systemctl stop dariah.contrib.service
+        else
+            echo "gunicorn does not run as service on $HOSTNAME"
+        fi
+    elif [[ "$1" == "test" ]]; then
         mode="test"
     else
         mode=$MODE
@@ -302,10 +324,15 @@ function gunirun {
         maxw=''
     fi
     host='-b 127.0.0.1:8001'
-    logfile='--access-logfile -'
-    fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
-    logformat="--access-logformat '$fmt'" 
-    gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+    if [[ "$ON_DANS" == "1" ]]; then
+        systemctl start dariah.contrib.service
+    else
+        logfile="--access-logfile -"
+        fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
+        logformat="--access-logformat '$fmt'" 
+        gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+    fi
+    
 }
 
 function serverun {
@@ -382,12 +409,13 @@ function testrun {
 }
 
 function updateprocess {
-    # servestop
     cd $root
     gitpullforce
+    chown -R guni:guni .
+    systemctl stop dariah-contrib.service
     activate36here
     python3 -m compileall server
-    # servestart
+    systemctl start dariah-contrib.service
 }
 
 # LEVEL 2
@@ -463,6 +491,14 @@ function gunitest {
     gunirun "test" "$@"
 }
 
+function gunistop {
+    gunirun "stop"
+}
+
+function install {
+    guniasservice
+}
+
 function serve {
     serverun "" "$@"
 }
@@ -533,12 +569,16 @@ elif [[ "$1" == "docsship" ]]; then
 elif [[ "$1" == "guni" ]]; then
     shift
     guni "$@"
+elif [[ "$1" == "gunistop" ]]; then
+    gunistop
 elif [[ "$1" == "gits" ]]; then
     shift
     gits "$@"
 elif [[ "$1" == "gunitest" ]]; then
     shift
     gunitest "$@"
+elif [[ "$1" == "install" ]]; then
+    install
 elif [[ "$1" == "mongostart" ]]; then
     mongostart
 elif [[ "$1" == "mongostop" ]]; then

@@ -6,6 +6,7 @@ from control.record import Record
 CW = C.web
 
 MESSAGES = CW.messages
+Qu = H.icon(CW.unknown[N.user], asChar=True)
 
 
 class ReviewEntryR(Record):
@@ -32,16 +33,25 @@ class ReviewEntryR(Record):
         creatorId = G(record, N.creator)
 
         youRep = f""" ({N.you})""" if creatorId == uid else E
-        lastModified = self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+        lastModified = G(record, N.modified)
+        lastModifiedRep = (
+            self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
+            if lastModified
+            else Qu
+        )
 
-        return H.span(f"""{lastModified}{youRep}""", cls=f"rentrytitle")
+        return H.span(f"""{lastModifiedRep}{youRep}""", cls=f"rentrytitle")
 
     def bodyCompact(self, **kwargs):
         perm = self.perm
 
         theTitle = self.title()
-        comments = H.div(
-            self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+        comments = (
+            """<!-- begin review comment -->"""
+            + H.div(
+                self.field(N.comments).wrap(withLabel=False, asEdit=G(perm, N.isEdit)),
+            )
+            + """<!-- end review comment -->"""
         )
 
         return H.div([theTitle, comments], cls=f"reviewentry")

@@ -32,18 +32,26 @@ Filling out reviews.
 :   All users try to see the review entries.
     Only **owner**, **editor**, **expert**, **final**, **mycoord** and the
     powerusers succeed.
+    Moreover, **expert** and **final** see an empty comments field in their column.
+
+`test_reviewEntryFillFirstAll`
+:   All users try to fill in the first review comment.
+    Only **expert** and **final** succeed.
+    After that, they reset their comment to the empty string.
+
+`test_reviewEntryFill`
+:   **expert** and **final** fill out their review entries.
 """
 
 import magic  # noqa
-from control.utils import pick as G
+from control.utils import pick as G, E
 from conftest import USERS, RIGHTFUL_USERS, POWER_USERS
 from example import (
     ASSESS,
     BELGIUM,
+    COMMENTS,
     CRITERIA_ENTRY,
-    CRITERIA_ENTRIES_N,
     EDITOR,
-    ELLIPS_DIV,
     EXPERT,
     FINAL,
     MYCOORD,
@@ -51,17 +59,20 @@ from example import (
     REVIEW,
     REVIEW_ENTRY,
     START_REVIEW,
-    TYPE1,
 )
 from helpers import (
-    findDetails,
-    # findReviewEntries,
+    findReviewEntries,
     findTasks,
     forall,
     getItem,
 )
 from starters import start
-from subtest import assertDelItem, assertStartTask, sidebar
+from subtest import (
+    assertDelItem,
+    assertModifyField,
+    assertStartTask,
+    sidebar,
+)
 
 recordInfo = {}
 valueTables = {}
@@ -146,28 +157,67 @@ def test_tryStartReview(clientsReviewer):
     forall(clientsReviewer, expect, assertIt)
 
 
-def Xest_reviewEntries(clients):
-    rIdInfo = G(G(recordInfo, REVIEW), "eid")
-    rEid = G(rIdInfo, EXPERT)
-    rFid = G(rIdInfo, FINAL)
+def test_reviewEntries(clients):
+    reviewInfo = G(recordInfo, REVIEW)
+    rEid = G(G(reviewInfo, EXPERT), "eid")
+    rFid = G(G(reviewInfo, FINAL), "eid")
     assert rEid is not None
     assert rFid is not None
 
     def assertIt(cl, exp):
+        user = cl.user
         for crId in cIds:
             (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
-            # reviewEntries = findReviewEntries(text)
-        for rId in (rEid, rFid):
-            (text, fields, msgs, dummy) = getItem(cl, REVIEW, rId)
-            reviewEntries = findDetails(text, REVIEW_ENTRY)
-            nEntries = len(reviewEntries)
+            reviewEntries = findReviewEntries(text)
             if exp:
-                assert nEntries == CRITERIA_ENTRIES_N[TYPE1]
-                for (rId, material) in reviewEntries:
-                    assert ELLIPS_DIV in material
-            else:
-                assert nEntries == 0
+                assert EXPERT in reviewEntries
+                assert FINAL in reviewEntries
+            if user in {EXPERT, FINAL}:
+                assert COMMENTS in reviewEntries[user][1]
+                assert reviewEntries[user][1][COMMENTS] == E
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in RIGHTFUL_USERS | {EXPERT, FINAL, MYCOORD}})
     forall(clients, expect, assertIt)
+
+
+def test_reviewEntryFillFirstAll(clients):
+    cIdFirst = cIds[0]
+    reId = {}
+    for user in {EXPERT, FINAL}:
+        (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
+        reviewEntries = findReviewEntries(text)
+        reId[user] = reviewEntries[user][0]
+
+    def assertIt(cl, exp):
+        user = cl.user
+        for (kind, rId) in reId.items():
+            thisExp = exp and (kind == user or user in POWER_USERS)
+            newValue = [f"{user}'s comment"]
+            newValueRep = ",".join(newValue)
+            assertModifyField(
+                cl, REVIEW_ENTRY, rId, COMMENTS, (newValue, newValueRep), thisExp
+            )
+            if thisExp:
+                assertModifyField(cl, REVIEW_ENTRY, rId, COMMENTS, ([], E), True)
+
+    expect = {user: False for user in USERS}
+    expect.update({user: True for user in {EXPERT, FINAL} | POWER_USERS})
+    forall(clients, expect, assertIt)
+
+
+def test_reviewEntryFill(clientsReviewer):
+    def assertIt(cl, exp):
+        user = cl.user
+        for (i, cId) in enumerate(cIds):
+            (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
+            reviewEntries = findReviewEntries(text)
+            rId = reviewEntries[user][0]
+            newValue = [f"{user}'s comment on criteria {i + 1}"]
+            newValueRep = ",".join(newValue)
+            assertModifyField(
+                cl, REVIEW_ENTRY, rId, COMMENTS, (newValue, newValueRep), exp
+            )
+
+    expect = {user: True for user in {EXPERT, FINAL}}
+    forall(clientsReviewer, expect, assertIt)

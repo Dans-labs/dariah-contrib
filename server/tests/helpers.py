@@ -4,7 +4,9 @@
 import re
 
 from flask import json
-from control.utils import serverprint
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from control.utils import pick as G, serverprint
 from conftest import USER_LIST
 
 
@@ -23,6 +25,14 @@ userRe = re.compile(
     re.S,
 )
 valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
+reviewRe = re.compile(
+    """<!-- begin reviewer ([A-Za-z0-9]+) -->"""
+    """(.*?)"""
+    r"""<!-- end reviewer \1 -->"""
+    , re.S
+)
+reviewEntryIdRe = re.compile("""<span [^>]*?table=['"]reviewEntry['"][^>]*>""", re.S)
+idRe = re.compile("""eid=['"]([^'"]*)['"]""", re.S)
 
 
 def accessUrl(client, url, redirect=False):
@@ -42,6 +52,25 @@ def checkWarning(text, label):
     """
 
     return not not reWarning(label).search(text)
+
+
+def findCaptions(text):
+    """Get the captions from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return captionRe.findall(text)
 
 
 def findDetails(text, dtable):
@@ -114,6 +143,25 @@ def findFields(text):
     return {field: value for (field, value) in fieldRe.findall(text)}
 
 
+def findMainN(text):
+    """Get the number of main records from a response.
+
+    !!! hint
+        They are neatly packaged in comment lines!
+
+    Parameters
+    ----------
+    text: string
+        The response text.
+
+    Returns
+    -------
+    list of string
+    """
+
+    return mainNRe.findall(text)
+
+
 def findMaterial(text):
     """Get the text of the material div. """
 
@@ -136,6 +184,34 @@ def findMsg(text):
     """
 
     return set(msgRe.findall(text))
+
+
+def findReviewEntries(text):
+    """Get review entries from a criteria entry record.
+
+    Parameters
+    ----------
+    text: string
+        The response text of a request for an item view on a criteriaEntry record.
+
+    Returns
+    -------
+    dict
+        Keyed by `expert` or `final`. The values are the review comments of that
+        reviewer on this criteria entry.
+    """
+
+    result = {}
+    for (kind, material) in reviewRe.findall(text):
+        reId = None
+        spans = reviewEntryIdRe.findall(text)
+        if spans:
+            reIds = idRe.findall(spans[0])
+            if reIds:
+                reId = reIds[0]
+        fields = findFields(material)
+        result[kind] = (reId, fields)
+    return result
 
 
 def findStages(text):
@@ -174,44 +250,6 @@ def findTasks(text):
     """
 
     return taskRe.findall(text)
-
-
-def findMainN(text):
-    """Get the number of main records from a response.
-
-    !!! hint
-        They are neatly packaged in comment lines!
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-
-    Returns
-    -------
-    list of string
-    """
-
-    return mainNRe.findall(text)
-
-
-def findCaptions(text):
-    """Get the captions from a response.
-
-    !!! hint
-        They are neatly packaged in comment lines!
-
-    Parameters
-    ----------
-    text: string
-        The response text.
-
-    Returns
-    -------
-    list of string
-    """
-
-    return captionRe.findall(text)
 
 
 def findValues(table, text):
@@ -353,6 +391,35 @@ def getRelatedValues(client, table, eid, field):
     values = valueRe.findall(valueStr[0])
     valueDict = {value: eid for (eid, value) in values}
     return valueDict
+
+
+def getScores(cId):
+    """Get relevant scores directly from Mongo DB.
+
+    Parameters
+    ----------
+    cId: string(ObjectId)
+        The id of a criteria entry record whose set of possible scores we
+        want to retrieve.
+
+    Returns
+    -------
+    dict
+        Keyed by the title of the score, values are their ids.
+    """
+    client = MongoClient()
+    mongo = client.dariah_test
+    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], "criteria")
+    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    result = {}
+    for record in scores:
+        score = G(record, "score")
+        if score is None:
+            return "○"
+        level = G(record, "level") or "○"
+        title = f"""{score} - {level}"""
+        result[title] = str(G(record, "_id"))
+    return result
 
 
 def modifyField(client, table, eid, field, newValue):

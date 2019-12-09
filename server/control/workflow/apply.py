@@ -354,7 +354,7 @@ class WorkflowItem:
         This method determines the record is readable by the current user.
 
         If the record is not part of the workflow, `None` is returned, and
-        the normal permission rules applay.
+        the normal permission rules apply.
 
         !!! note
             It also depends on the current user.
@@ -606,7 +606,6 @@ class WorkflowItem:
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            print("XXX", value, taskValue)
             if value == taskValue:
                 return False
 

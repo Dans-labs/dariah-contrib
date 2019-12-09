@@ -136,12 +136,15 @@ from example import (
     MYCOORD,
     OFFICE,
     OWNER,
+    RESUBMIT_ASSESSMENT,
     REVIEWER_E,
     REVIEWER_F,
     SCORE,
+    SUBMIT_ASSESSMENT,
     TITLE,
     TYPE1,
     USER,
+    WITHDRAW_ASSESSMENT,
 )
 from helpers import findDetails, forall, getItem, getRelatedValues
 from starters import start
@@ -256,7 +259,7 @@ def test_fillScoreWrong(clientOwner):
 
 def test_submitAssessment(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/submitAssessment/{aId}"
+    url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
@@ -289,7 +292,7 @@ def test_assignReviewers(clients, field, user):
 
 def test_withdrawAssessment(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/withdrawAssessment/{aId}"
+    url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
@@ -303,7 +306,7 @@ def test_inspectTitleAll2(clients):
 
 def test_resubmitAssessment(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/resubmitAssessment/{aId}"
+    url = f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
@@ -315,7 +318,7 @@ def test_submitAssessmentRevised(clientOwner):
 
 def test_submitAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/submitAssessment/{aId}"
+    url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
 
@@ -356,7 +359,7 @@ def test_inspectTitleAll3(clients):
 
 def test_withdrawAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/withdrawAssessment/{aId}"
+    url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
 
@@ -392,7 +395,7 @@ def test_submitAssessmentRevised2(clientOwner):
 
 def test_resubmitAssessment2(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/resubmitAssessment/{aId}"
+    url = f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
 
@@ -410,5 +413,5 @@ def test_assignReviewers4(clients, field, user):
 
 def test_withdrawAssessment3(clientOwner):
     aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/withdrawAssessment/{aId}"
+    url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
