@@ -210,15 +210,15 @@ class Workflow:
         wfIds = {}
         for record in wfRecords:
             wfIds.setdefault(id(record), []).append(record)
-        print("WORKFLOW CHECKING DUPLICATES: ...")
+        serverprint("WORKFLOW: CHECKING DUPLICATES: ...")
         good = True
         for (wfId, records) in wfIds.items():
             if len(records) > 1:
-                print(f"DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:")
-                print(records[0])
+                serverprint(f"WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:")
+                serverprint(records[0])
                 good = False
         if good:
-            print("NO DUPLICATES")
+            serverprint("WORKFLOW: NO DUPLICATES")
         else:
             sys.exit(4)
 
@@ -325,7 +325,7 @@ class Workflow:
         assessmentWf = (
             self.computeWorkflowAssessment(assessmentValid, frozen)
             if assessmentValid
-            else{}
+            else {}
         )
 
         locked = G(assessmentWf, N.locked, default=False)
