@@ -4,6 +4,8 @@
 *   Adjust workflow after user actions
 """
 
+import sys
+
 from config import Config as C, Names as N
 from control.utils import getLast, pick as G, serverprint, creators
 
@@ -198,10 +200,28 @@ class Workflow:
         wfRecords = []
         for mainRecord in G(entries, MAIN_TABLE, default={}).values():
             info = self.computeWorkflow(record=mainRecord)
-            wfRecords.append(info)
+            if info:
+                wfRecords.append(info)
 
         nWf = len(wfRecords)
         serverprint(f"WORKFLOW: Store {nWf} workflow records")
+        # check whether the wfRecords are distinct objects, otherwise we'll
+        # get a bulk-write error
+        wfIds = {}
+        for record in wfRecords:
+            wfIds.setdefault(id(record), []).append(record)
+        print("WORKFLOW CHECKING DUPLICATES: ...")
+        good = True
+        for (wfId, records) in wfIds.items():
+            if len(records) > 1:
+                print(f"DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:")
+                print(records[0])
+                good = False
+        if good:
+            print("NO DUPLICATES")
+        else:
+            sys.exit(4)
+
         if wfRecords:
             db.insertWorkflowMany(wfRecords)
         serverprint("WORKFLOW: Initialization done")
