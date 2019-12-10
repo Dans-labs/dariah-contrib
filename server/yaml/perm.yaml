@@ -20,6 +20,7 @@ names:
   - isEdit
   - isOwn
   - isOur
+  - isReviewer
   - local
   - mayEdit
   - mayRead

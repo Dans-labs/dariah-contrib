@@ -54,6 +54,18 @@ def checkWarning(text, label):
     return not not reWarning(label).search(text)
 
 
+def checkCreator(table, eid, user):
+    """Checks whether a user is the creator of a record.
+
+    Parameters
+    ----------
+    table: string
+
+    Returns
+    -------
+    """
+
+
 def findCaptions(text):
     """Get the captions from a response.
 
@@ -103,6 +115,7 @@ def findEid(text, multiple=False):
     """Get the entity id(s) from a response.
 
     If the response shows a record, dig out its entity id.
+
     Otherwise, return `None`
 
     Parameters
@@ -203,14 +216,13 @@ def findReviewEntries(text):
 
     result = {}
     for (kind, material) in reviewRe.findall(text):
-        reId = None
-        spans = reviewEntryIdRe.findall(text)
+        spans = reviewEntryIdRe.findall(material)
         if spans:
             reIds = idRe.findall(spans[0])
             if reIds:
                 reId = reIds[0]
-        fields = findFields(material)
-        result[kind] = (reId, fields)
+                fields = findFields(material)
+                result[kind] = (reId, fields)
     return result
 
 
@@ -367,15 +379,14 @@ def getItemEid(client, table, action=None):
 
     Returns
     -------
-    eid: str(ObjectId)
-        The id of the item.
+    eid: str(ObjectId) | `None`
+        The id of the item if it can be found.
     """
 
     actionStr = "" if action is None else f"?action={action}"
     response = client.get(f"/{table}/list{actionStr}")
     text = response.get_data(as_text=True)
-    eid = findEid(text)
-    return eid
+    return findEid(text)
 
 
 def getRelatedValues(client, table, eid, field):

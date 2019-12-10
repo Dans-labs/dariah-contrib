@@ -359,5 +359,6 @@ def permRecord(context, table, record):
         N.sameCountry: sameCountry,
         N.isCoordinated: isCoordinated,
         N.isOur: isOur,
+        N.isReviewer: isReviewer,
         N.contribId: G(cRecord, N._id),
     }

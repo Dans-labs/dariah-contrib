@@ -53,6 +53,7 @@ from example import (
     USER,
 )
 from helpers import (
+    checkCreator,
     findDetails,
     findReviewEntries,
     findValues,
@@ -135,6 +136,10 @@ def findOrMakeItem(client, table, cId=None, aId=None):
     to find it.
     Or there are no contributions/assessments/reviews yet, and then we have to make one.
 
+    In case of a review, we look for reviews made by the client, and if no such review
+    exists, we let the client make one.
+    We just check by means of an under-water query to the MongoDb.
+
     Parameters
     ----------
     client: fixture
@@ -168,7 +173,8 @@ def findOrMakeItem(client, table, cId=None, aId=None):
         if table == ASSESS:
             return [eid]
         if table == REVIEW:
-            return [eid]
+            if checkCreator(REVIEW, eid, client.user):
+                return [eid]
 
     if table == CONTRIB:
         return assertAddItem(client, table, True)
@@ -289,6 +295,7 @@ def start(
         recordInfo.setdefault(REVIEW, {})
 
         for cl in (clientExpert, clientFinal):
+            user = cl.user
             rIds = findOrMakeItem(cl, REVIEW, aId=aId)
             assert len(rIds) == 1
             rId = rIds[0]
@@ -298,6 +305,7 @@ def start(
                 (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
                 reviewEntries = findReviewEntries(text)
                 rId = reviewEntries[user][0]
+                print("CCC", i, user, reviewEntries, rId)
                 newValue = [f"{user}'s comment on criteria {i + 1}"]
                 newValueRep = ",".join(newValue)
                 assertModifyField(

@@ -90,7 +90,7 @@ def test_reviewEntryView(clients):
                 None
                 if exp is None
                 else value
-                if kind == user or user in POWER_USERS
+                if user in {EXPERT, FINAL} | POWER_USERS
                 else None
             )
             assertFieldValue((cl, REVIEW_ENTRY, rId), COMMENTS, expValue)
@@ -100,7 +100,7 @@ def test_reviewEntryView(clients):
     forall(clients, expect, assertIt)
 
 
-def test_decideExpertAll(clients):
+def Xest_decideExpertAll(clients):
     rId = G(G(G(recordInfo, REVIEW), EXPERT), "eid")
     url = f"/api/task/{EXPERT_REVIEW_ACCEPT}/{rId}"
 

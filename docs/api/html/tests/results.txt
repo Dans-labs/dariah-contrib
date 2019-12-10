@@ -2,21 +2,240 @@
 platform darwin -- Python 3.7.2, pytest-3.10.0, py-1.7.0, pluggy-0.8.0
 rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile: pytest.ini
 plugins: ordering-0.6
-collected 148 items
+collected 2 items
 
-tests/test_10_factory10.py ...                                        [  3/148]
-tests/test_20_users10.py ...                                          [  6/148]
-tests/test_30_contrib10.py .............                              [ 19/148]
-tests/test_30_contrib20.py ....................................       [ 55/148]
-tests/test_30_contrib30.py ..............................             [ 85/148]
-tests/test_30_contrib40.py ....                                       [ 89/148]
-tests/test_40_assess10.py .................                           [106/148]
-tests/test_40_assess20.py ...                                         [109/148]
-tests/test_40_assess30.py ............................                [137/148]
-tests/test_50_review10.py ........                                    [145/148]
-tests/test_50_review20.py ...                                         [148/148]
+tests/test_50_review20.py F
 
-========================= 148 passed in 43.31 seconds ==========================
+=================================== FAILURES ===================================
+__________________________________ test_start __________________________________
 
-  REQUESTS       URLS  USERS/URL    REQ/URL
-      2576        128        3.9       20.1
+clientOffice = <client.Client object at 0x7fe9c831fac8>
+clientOwner = <client.Client object at 0x7fe9a8a4da20>
+clientExpert = <client.Client object at 0x7fe9c8342ac8>
+clientFinal = <client.Client object at 0x7fe9c83426a0>
+
+    def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            clientExpert=clientExpert,
+            clientFinal=clientFinal,
+            users=True,
+            assessment=True,
+            countries=True,
+            review=True,
+            valueTables=valueTables,
+            recordInfo=recordInfo,
+            ids=ids,
+>           cIds=cIds,
+        )
+
+tests/test_50_review20.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/starters.py:407: in start
+    startContrib()
+tests/starters.py:404: in startContrib
+    startAssessment(eid, cTitle)
+tests/starters.py:386: in startAssessment
+    startFillout(aId)
+tests/starters.py:371: in startFillout
+    startSubmit(aId, stage)
+tests/starters.py:339: in startSubmit
+    startAssign(aId)
+tests/starters.py:321: in startAssign
+    doReview(aId)
+tests/starters.py:298: in doReview
+    rIds = findOrMakeItem(cl, REVIEW, kind=user, aId=aId)
+tests/starters.py:169: in findOrMakeItem
+    eid = getItemEid(client, table, kind=kind)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = <client.Client object at 0x7fe9c83426a0>, table = 'review'
+kind = 'final', action = None
+
+    def getItemEid(client, table, kind=None, action=None):
+        """Looks up an item from a view on a table.
+    
+        The response texts will be analysed into messages and fields, the eid
+        of the item will be read off.
+    
+        If `kind` is passed, we only do so if the kind of the item matches it.
+        In this way we can ask for an `expert` review or a `final` review.
+    
+        We assume that there is still only one item in the view.
+    
+        Parameters
+        ----------
+        client: fixture
+        table: string
+        kind: {expert, final}, optional `None`
+        action: string, optional `None`
+            The view on the table, such as `my`, `our`.
+    
+        Returns
+        -------
+        eid: str(ObjectId) | `None`
+            The id of the item if it can be found.
+        """
+    
+        actionStr = "" if action is None else f"?action={action}"
+        response = client.get(f"/{table}/list{actionStr}")
+        text = response.get_data(as_text=True)
+        eid = findEid(text)
+        if kind is None or eid is None:
+            return eid
+        response = client.get(f"/api/{table}/item{eid}")
+        text = response.get_data(as_text=True)
+        if kind == "final":
+            print(text)
+>           assert False
+E           AssertionError
+
+tests/helpers.py:389: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+MONGO: new connection to dariah_test
+UPDATED package, criteria, typeContribution
+COLLECTED country,criteria,decision,discipline,keyword,package,permissionGroup,score,tadirahActivity,tadirahObject,tadirahTechnique,typeContribution,user,vcc,year
+WORKFLOW: Drop exisiting table
+WORKFLOW: Read user (entry) tables
+WORKFLOW: Link masters and details
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+WORKFLOW: Compute workflow info
+WORKFLOW: Store 0 workflow records
+WORKFLOW: Initialization done
+MONGO: connection closed
+----------------------------- Captured stdout call -----------------------------
+MONGO: new connection to dariah_test
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+WORKFLOW: New workflow info 5def63b8d7e8adcf01292a6e
+TTT contrib <span class=' '>No Title Yet</span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT contrib <span class=' '>No Title Yet</span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT contrib <span class=' '>No Title Yet</span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT assessment <span class='small '>on <span>2019-12-10 by <span lab='owner' class='tag medium '>owner</span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span class='symbol i-none '>○</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span class='symbol i-none '>○</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+TTT assessment <span class='small '>on <span>2019-12-10 by <span lab='owner' class='tag medium '>owner</span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span class='symbol i-none '>○</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span class='symbol i-none '>○</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-missing '>☒</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT assessment <span class='small '>on <span>2019-12-10 by <span lab='owner' class='tag medium '>owner</span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT assessment <span class='small '>on <span>2019-12-10 by <span lab='owner' class='tag medium '>owner</span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT assessment <span class='small '>on <span>2019-12-10 by <span lab='owner' class='tag medium '>owner</span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+WORKFLOW: contrib: lookup details from assessment
+WORKFLOW: contrib: lookup details from review
+WORKFLOW: assessment: lookup details from criteriaEntry
+WORKFLOW: assessment: lookup details from review
+WORKFLOW: assessment: lookup details from reviewEntry
+WORKFLOW: criteriaEntry: lookup details from reviewEntry
+WORKFLOW: review: lookup details from reviewEntry
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>0.&#xa;<span class=' '>Details of underlying software</span></span><span class='col2'><span lab='2 - partial' class='tag medium '>2 - Partial</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT reviewEntry <span class='rentrytitle'>expert on 2019-12-10 09:22:00 (you)</span>
+CCC 0 expert {'expert': ('5def63b8d7e8adcf01292a75', {'comments': ''})} 5def63b8d7e8adcf01292a75
+TTT reviewEntry <span class='rentrytitle'>expert on 2019-12-10 09:22:00 (you)</span>
+TTT criteriaEntry <span class='centrytitle criteria'><span class='col1'>1.&#xa;<span class=' '>Support Contact Information</span></span><span class='col2'><span lab='2 - basic' class='tag medium '>2 - Basic</span></span><span class='right small'>evidence&#xa;<span class='symbol i-check '>✔︎</span></span></span>
+TTT reviewEntry <span class='rentrytitle'>expert on 2019-12-10 09:22:00 (you)</span>
+CCC 1 expert {'expert': ('5def63b8d7e8adcf01292a76', {'comments': ''})} 5def63b8d7e8adcf01292a76
+TTT reviewEntry <span class='rentrytitle'>expert on 2019-12-10 09:22:00 (you)</span>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>Redirecting...</title>
+<h1>Redirecting...</h1>
+<p>You should be redirected automatically to target URL: <a href="/">/</a>.  If not click the link.
+=========================== 1 failed in 0.81 seconds ===========================

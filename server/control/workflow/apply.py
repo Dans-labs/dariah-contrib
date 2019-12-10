@@ -380,7 +380,7 @@ class WorkflowItem:
         #### Review, Review Entry
 
         Review has no decision and there is no final decision
-        :   authors, editors
+        :   authors, editors, the other reviewer
 
         Review in question has a decision, but still no final positive decision
         :   authors/editors, other reviewer, authors/editors of the assessment,
@@ -452,7 +452,7 @@ class WorkflowItem:
                     N.reviewReject,
                 }
                 or rStage in {N.reviewRevise, N.reviewReject}
-                else perm[N.isEdit]
+                else perm[N.isReviewer] or perm[N.isEdit]
             )
             return result
         return None
