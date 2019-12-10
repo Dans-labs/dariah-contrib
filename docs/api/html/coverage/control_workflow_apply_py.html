@@ -1512,7 +1512,7 @@
 <p id="t380" class="pln"><span class="str">        #### Review, Review Entry</span><span class="strut">&nbsp;</span></p>
 <p id="t381" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t382" class="pln"><span class="str">        Review has no decision and there is no final decision</span><span class="strut">&nbsp;</span></p>
-<p id="t383" class="pln"><span class="str">        :   authors, editors</span><span class="strut">&nbsp;</span></p>
+<p id="t383" class="pln"><span class="str">        :   authors, editors, the other reviewer</span><span class="strut">&nbsp;</span></p>
 <p id="t384" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t385" class="pln"><span class="str">        Review in question has a decision, but still no final positive decision</span><span class="strut">&nbsp;</span></p>
 <p id="t386" class="pln"><span class="str">        :   authors/editors, other reviewer, authors/editors of the assessment,</span><span class="strut">&nbsp;</span></p>
@@ -1584,7 +1584,7 @@
 <p id="t452" class="pln">                    <span class="nam">N</span><span class="op">.</span><span class="nam">reviewReject</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
 <p id="t453" class="pln">                <span class="op">}</span><span class="strut">&nbsp;</span></p>
 <p id="t454" class="pln">                <span class="key">or</span> <span class="nam">rStage</span> <span class="key">in</span> <span class="op">{</span><span class="nam">N</span><span class="op">.</span><span class="nam">reviewRevise</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">reviewReject</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
-<p id="t455" class="pln">                <span class="key">else</span> <span class="nam">perm</span><span class="op">[</span><span class="nam">N</span><span class="op">.</span><span class="nam">isEdit</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t455" class="pln">                <span class="key">else</span> <span class="nam">perm</span><span class="op">[</span><span class="nam">N</span><span class="op">.</span><span class="nam">isReviewer</span><span class="op">]</span> <span class="key">or</span> <span class="nam">perm</span><span class="op">[</span><span class="nam">N</span><span class="op">.</span><span class="nam">isEdit</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t456" class="pln">            <span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t457" class="stm run hide_run">            <span class="key">return</span> <span class="nam">result</span><span class="strut">&nbsp;</span></p>
 <p id="t458" class="stm mis">        <span class="key">return</span> <span class="key">None</span><span class="strut">&nbsp;</span></p>
@@ -2198,7 +2198,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-09 23:08
+            created at 2019-12-10 14:29
         </p>
     </div>
 </div>

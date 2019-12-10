@@ -557,7 +557,6 @@ class Record:
 
         itemKey = f"""{table}/{G(record, N._id)}"""
         theTitle = self.title()
-        print("TTT", table, theTitle)
 
         if expanded == -1:
             return H.details(

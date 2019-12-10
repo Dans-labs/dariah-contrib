@@ -33,6 +33,7 @@ function givehelp {
     echo "    Production only:"
     echo "      prod db = dariah"
     echo "<task>:"
+    echo "gunistatus    : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
     echo "update      : fetch new code and deploy it on the server"
@@ -95,7 +96,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    activate36|gunistop|install|update)
+    activate36|gunistatus|gunistop|install|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
@@ -491,6 +492,10 @@ function gunitest {
     gunirun "test" "$@"
 }
 
+function gunistatus {
+    gunirun "status"
+}
+
 function gunistop {
     gunirun "stop"
 }
@@ -569,6 +574,8 @@ elif [[ "$1" == "docsship" ]]; then
 elif [[ "$1" == "guni" ]]; then
     shift
     guni "$@"
+elif [[ "$1" == "gunistatus" ]]; then
+    gunistatus
 elif [[ "$1" == "gunistop" ]]; then
     gunistop
 elif [[ "$1" == "gits" ]]; then

@@ -64,6 +64,12 @@ def checkCreator(table, eid, user):
     Returns
     -------
     """
+    client = MongoClient()
+    mongo = client.dariah_test
+    userId = G(list(mongo.user.find(dict(eppn=user)))[0], "_id")
+    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
+    print("CHECKCREATOR", eid, user, userId, records)
+    return len(records) > 0
 
 
 def findCaptions(text):
@@ -362,13 +368,11 @@ def getItem(client, table, eid):
     return (text, fields, msgs, eid)
 
 
-def getItemEid(client, table, action=None):
-    """Looks up an item from a view on a table.
+def getItemEids(client, table, action=None):
+    """Looks up item eids from a view on a table.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields, the eids
+    of the items will be read off.
 
     Parameters
     ----------
@@ -379,14 +383,14 @@ def getItemEid(client, table, action=None):
 
     Returns
     -------
-    eid: str(ObjectId) | `None`
-        The id of the item if it can be found.
+    eid: list of str(ObjectId)
+        The ids of the item that can be found.
     """
 
     actionStr = "" if action is None else f"?action={action}"
     response = client.get(f"/{table}/list{actionStr}")
     text = response.get_data(as_text=True)
-    return findEid(text)
+    return findEid(text, multiple=True)
 
 
 def getRelatedValues(client, table, eid, field):

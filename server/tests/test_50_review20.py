@@ -100,7 +100,7 @@ def test_reviewEntryView(clients):
     forall(clients, expect, assertIt)
 
 
-def Xest_decideExpertAll(clients):
+def test_decideExpertAll(clients):
     rId = G(G(G(recordInfo, REVIEW), EXPERT), "eid")
     url = f"/api/task/{EXPERT_REVIEW_ACCEPT}/{rId}"
 

@@ -58,7 +58,7 @@ from helpers import (
     findReviewEntries,
     findValues,
     getItem,
-    getItemEid,
+    getItemEids,
     getRelatedValues,
     getScores,
 )
@@ -166,15 +166,16 @@ def findOrMakeItem(client, table, cId=None, aId=None):
         the id of the contribution/assessment
     """
 
-    eid = getItemEid(client, table)
-    if eid:
+    eids = getItemEids(client, table)
+    if eids:
         if table == CONTRIB:
-            return getItem(client, table, eid)
+            return getItem(client, table, eids[0])
         if table == ASSESS:
-            return [eid]
+            return [eids[0]]
         if table == REVIEW:
-            if checkCreator(REVIEW, eid, client.user):
-                return [eid]
+            for eid in eids:
+                if checkCreator(REVIEW, eid, client.user):
+                    return [eid]
 
     if table == CONTRIB:
         return assertAddItem(client, table, True)
@@ -296,6 +297,7 @@ def start(
 
         for cl in (clientExpert, clientFinal):
             user = cl.user
+            print("MAKE OR FIND REVIEW", user)
             rIds = findOrMakeItem(cl, REVIEW, aId=aId)
             assert len(rIds) == 1
             rId = rIds[0]
@@ -305,7 +307,6 @@ def start(
                 (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
                 reviewEntries = findReviewEntries(text)
                 rId = reviewEntries[user][0]
-                print("CCC", i, user, reviewEntries, rId)
                 newValue = [f"{user}'s comment on criteria {i + 1}"]
                 newValueRep = ",".join(newValue)
                 assertModifyField(

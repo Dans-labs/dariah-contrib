@@ -45,7 +45,7 @@ Filling out reviews.
 
 import magic  # noqa
 from control.utils import pick as G, E
-from conftest import USERS, RIGHTFUL_USERS, POWER_USERS
+from conftest import USERS, POWER_USERS
 from example import (
     ASSESS,
     BELGIUM,
@@ -170,14 +170,16 @@ def test_reviewEntries(clients):
             (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
             reviewEntries = findReviewEntries(text)
             if exp:
-                assert EXPERT in reviewEntries
-                assert FINAL in reviewEntries
-            if user in {EXPERT, FINAL}:
-                assert COMMENTS in reviewEntries[user][1]
-                assert reviewEntries[user][1][COMMENTS] == E
+                if user in {EXPERT, FINAL}:
+                    assert user in reviewEntries
+                    assert COMMENTS in reviewEntries[user][1]
+                    assert reviewEntries[user][1][COMMENTS] == E
+                elif user in POWER_USERS:
+                    assert EXPERT in reviewEntries
+                    assert FINAL in reviewEntries
 
     expect = {user: False for user in USERS}
-    expect.update({user: True for user in RIGHTFUL_USERS | {EXPERT, FINAL, MYCOORD}})
+    expect.update({user: True for user in POWER_USERS | {EXPERT, FINAL}})
     forall(clients, expect, assertIt)
 
 
