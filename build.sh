@@ -287,6 +287,11 @@ function guniasservice {
     if [[ "$?" == "1" ]]; then
         adduser --no-create-home --system guni
     fi
+    logdir="/var/log/dariah-contrib"
+    if [ ! -d "$logdir" ]; then
+        mkdir "$logdir"
+    fi
+    chown -R guni:guni "$logdir"
     cp dariah-contrib.service /etc/systemd/system/
     chmod 755 /etc/systemd/system/dariah-contrib.service
     systemctl daemon-reload
