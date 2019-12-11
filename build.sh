@@ -33,7 +33,9 @@ function givehelp {
     echo "    Production only:"
     echo "      prod db = dariah"
     echo "<task>:"
-    echo "gunistatus    : see the status of the gunicorn service"
+    echo "gunilog a   : see the access log of the gunicorn service"
+    echo "gunilog e   : see the error log of the gunicorn service"
+    echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
     echo "update      : fetch new code and deploy it on the server"
@@ -87,32 +89,6 @@ else
     BACKUP=$BACKUP_DEV
 fi
 
-# IS THE COMMAND SUPPORTED ON THIS MACHINE ?
-
-mayrun="1"
-
-case "$1" in
-    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stats)
-        if [[ "$ON_DANS" == "1" ]]; then
-            mayrun="0"
-        fi;;
-    activate36|gunistatus|gunistop|install|update)
-        if [[ "$ON_DANS" == "0" ]]; then
-            mayrun="0"
-        fi;;
-    databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
-        mayrun="1";;
-    *)
-        mayrun="-1";;
-esac
-
-if [[ "$mayrun" == "-1" ]]; then
-    givehelp "$@"
-    exit
-elif [[ "$mayrun" == "0" ]]; then
-    echo "not supported on $HOSTNAME"
-    exit
-fi
 
 # FUNCTIONS
 
@@ -300,6 +276,18 @@ function guniasservice {
 
 }
 
+function gunilog {
+    logdir=/var/log/dariah-contrib
+    if [[ "$1" == "a" ]]; then
+        logfile="access.log"
+    elif [[ "$1" == "e" ]]; then
+        logfile="error.log"
+    else
+        logfile="$1"
+    fi
+    less "$logdir/$logfile"
+}
+
 function gunirun {
     cd $root/server
     mongostart
@@ -471,11 +459,11 @@ function dbwftest {
 function docs {
     stats
     docsapiall
-    docsmk "$1"
+    docsmk "serve"
 }
 
 function docsship {
-    docs "deploy"
+    docsmk "deploy"
     gitsave "docs update: $*"
 }
 
@@ -499,8 +487,8 @@ function guni {
     gunirun "" "$@"
 }
 
-function gunitest {
-    gunirun "test" "$@"
+function gunilog {
+    gunilog "$@"
 }
 
 function gunistatus {
@@ -511,11 +499,16 @@ function gunistop {
     gunirun "stop"
 }
 
+function gunitest {
+    gunirun "test" "$@"
+}
+
 function install {
     guniasservice
 }
 
 function serve {
+    echo "serve" $@
     serverun "" "$@"
 }
 
@@ -529,7 +522,7 @@ function ship {
         echo "SHIPPING ABORTED! ($testerror)"
         return
     fi
-    docs "deploy"
+    docsmk "deploy"
     gitsave "ship: $*"
 }
 
@@ -553,73 +546,33 @@ function update {
 #   does not do any explicit cd
 #   parses arguments and calls level 2 functions or gives help
 
+# IS THE COMMAND SUPPORTED ON THIS MACHINE ?
 
-if [[ "$1" == "databu" ]]; then
-    shift
-    databu "$@"
-elif [[ "$1" == "datarest" ]]; then
-    shift
-    datarest "$@"
-elif [[ "$1" == "dataxf" ]]; then
-    shift
-    dataxf "$@"
-elif [[ "$1" == "dbinitdev" ]]; then
-    dbinitdev
-elif [[ "$1" == "dbinittest" ]]; then
-    dbinittest
-elif [[ "$1" == "dbroottest" ]]; then
-    dbroottest
-elif [[ "$1" == "dbroot" ]]; then
-    dbroot
-elif [[ "$1" == "dbwf" ]]; then
-    dbwf
-elif [[ "$1" == "dbwftest" ]]; then
-    dbwftest
-elif [[ "$1" == "docs" ]]; then
-    docs "serve"
-elif [[ "$1" == "docsapi" ]]; then
-    docsapi
-elif [[ "$1" == "docsship" ]]; then
-    shift
-    docsship "$@"
-elif [[ "$1" == "guni" ]]; then
-    shift
-    guni "$@"
-elif [[ "$1" == "gunistatus" ]]; then
-    gunistatus
-elif [[ "$1" == "gunistop" ]]; then
-    gunistop
-elif [[ "$1" == "gits" ]]; then
-    shift
-    gits "$@"
-elif [[ "$1" == "gunitest" ]]; then
-    shift
-    gunitest "$@"
-elif [[ "$1" == "install" ]]; then
-    install
-elif [[ "$1" == "mongostart" ]]; then
-    mongostart
-elif [[ "$1" == "mongostop" ]]; then
-    mongostop
-elif [[ "$1" == "serve" ]]; then
-    serve
-elif [[ "$1" == "activate36" ]]; then
-    activate36
-elif [[ "$1" == "servetest" ]]; then
-    servetest
-elif [[ "$1" == "ship" ]]; then
-    shift
-    ship "$@"
-elif [[ "$1" == "stats" ]]; then
-    stats
-elif [[ "$1" == "test" ]]; then
-    shift
-    test "$@"
-elif [[ "$1" == "testc" ]]; then
-    shift
-    testc "$@"
-elif [[ "$1" == "update" ]]; then
-    update
-else
+mayrun="1"
+
+case "$1" in
+    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stats)
+        if [[ "$ON_DANS" == "1" ]]; then
+            mayrun="0"
+        fi;;
+    activate36|gunilog|gunistatus|gunistop|install|update)
+        if [[ "$ON_DANS" == "0" ]]; then
+            mayrun="0"
+        fi;;
+    databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
+        mayrun="1";;
+    *)
+        mayrun="-1";;
+esac
+
+if [[ "$mayrun" == "-1" ]]; then
     givehelp "$@"
+    exit
+elif [[ "$mayrun" == "0" ]]; then
+    echo "not supported on $HOSTNAME"
+    exit
+else
+    command="$1"
+    shift
+    $command "$@"
 fi
