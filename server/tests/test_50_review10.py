@@ -25,7 +25,7 @@ Filling out reviews.
 :   All users try to start a review for the assessment. Only **expert** and **final**
     succeed and they delete the assessment again.
 
-`test_tryStartReview`
+`test_startReview`
 :   **expert** and **final** start their review again.
 
 `test_reviewEntries`
@@ -65,6 +65,7 @@ from helpers import (
     findTasks,
     forall,
     getItem,
+    getREIds,
 )
 from starters import start
 from subtest import (
@@ -140,18 +141,15 @@ def test_tryStartReviewAll(clients):
     forall(clients, expect, assertIt)
 
 
-def test_tryStartReview(clientsReviewer):
+def test_startReview(clientsReviewer):
     aId = G(G(recordInfo, ASSESS), "eid")
     recordInfo.setdefault(REVIEW, {})
 
     def assertIt(cl, exp):
         rIds = assertStartTask(cl, START_REVIEW, aId, exp)
         user = cl.user
-        if exp:
-            assert len(rIds) == 1
-            recordInfo[REVIEW].setdefault(user, {})["eid"] = rIds[0]
-        else:
-            assert len(rIds) == 0
+        assert len(rIds) == 1
+        recordInfo[REVIEW].setdefault(user, {})["eid"] = rIds[0]
 
     expect = {user: True for user in {EXPERT, FINAL}}
     forall(clientsReviewer, expect, assertIt)
@@ -185,11 +183,7 @@ def test_reviewEntries(clients):
 
 def test_reviewEntryFillFirstAll(clients):
     cIdFirst = cIds[0]
-    reId = {}
-    for user in {EXPERT, FINAL}:
-        (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
-        reviewEntries = findReviewEntries(text)
-        reId[user] = reviewEntries[user][0]
+    reId = getREIds(clients, cIdFirst)
 
     def assertIt(cl, exp):
         user = cl.user

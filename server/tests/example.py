@@ -3,6 +3,7 @@
 from control.utils import EURO
 from conftest import USERS, AUTH_USERS, POWER_USERS
 
+_ID = "_id"
 DB = "dariah_test"
 
 WELCOME = "Welcome to the DARIAH contribution tool"
@@ -24,7 +25,9 @@ DISCIPLINE = "discipline"
 EMAIL = "email"
 EVIDENCE = "evidence"
 KEYWORD = "keyword"
+LEVEL = "level"
 PACKAGE = "package"
+REMARKS = "remarks"
 REP = "rep"
 REVIEW = "review"
 REVIEW_ENTRY = "reviewEntry"
@@ -61,8 +64,30 @@ COMPLETE = "complete"
 COMPLETE_WITHDRAWN = "completeWithdrawn"
 SUBMITTED = "submitted"
 
-EXPERT_REVIEW_ACCEPT = "expertReviewAccept"
+ACCEPT = "Accept"
+REJECT = "Reject"
+REVISE = "Revise"
+REVOKE = "Revoke"
+
 RESUBMIT_ASSESSMENT = "resubmitAssessment"
+REVIEW_DECISION = {
+    ACCEPT: {
+        EXPERT: "expertReviewAccept",
+        FINAL: "finalReviewAccept",
+    },
+    REJECT: {
+        EXPERT: "expertReviewReject",
+        FINAL: "finalReviewReject",
+    },
+    REVISE: {
+        EXPERT: "expertReviewRevise",
+        FINAL: "finalReviewRevise",
+    },
+    REVOKE: {
+        EXPERT: "expertReviewRevoke",
+        FINAL: "finalReviewRevoke",
+    },
+}
 START_ASSESSMENT = "startAssessment"
 START_REVIEW = "startReview"
 SUBMIT_ASSESSMENT = "submitAssessment"
@@ -76,6 +101,11 @@ TITLE1 = "No Title Yet"
 TITLE2 = "Contribution (Modified)"
 TITLE_A = "assessment of {cTitle}"
 TITLE_A2 = "My contribution assessed"
+
+REMARKS1 = "remarks"
+
+EVIDENCE1 = "modified evidence"
+COMMENTS1 = "modified comment"
 
 CHECKS = {
     DESCRIPTION: (

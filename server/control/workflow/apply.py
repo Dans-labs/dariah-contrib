@@ -365,7 +365,7 @@ class WorkflowItem:
 
         #### Assessment, Criteria Entry
 
-        Not submitted:
+        Not submitted and not in revision:
         : authors and editors only
 
         Submitted, review not yet complete, or negative outcome
@@ -374,7 +374,7 @@ class WorkflowItem:
         Review with positive outcome
         :   public
 
-        Negative outcome
+        In revision, or review with a negative outcome
         :   authors, editors, reviewers, national coordinator only
 
         #### Review, Review Entry
@@ -432,7 +432,13 @@ class WorkflowItem:
                 True
                 if rStage == N.reviewAccept
                 else perm[N.isOur]
-                if stage in {N.submitted, N.submittedRevised}
+                if stage
+                in {
+                    N.submitted,
+                    N.incompleteRevised,
+                    N.completeRevised,
+                    N.submittedRevised,
+                }
                 else perm[N.isEdit]
             )
 
@@ -693,20 +699,28 @@ class WorkflowItem:
             if not answer:
                 return False
 
+            (finalStage,) = self.info(table, N.stage, kind=N.final)
+            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
+            xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+
             if task in {
                 N.expertReviewRevise,
                 N.expertReviewAccept,
                 N.expertReviewReject,
-            }:
-                return kind == N.expert and answer
+                N.expertReviewRevoke,
+            } - {xExpertStage}:
+                return kind == N.expert and not finalStage and answer
 
             if task in {
                 N.finalReviewRevise,
                 N.finalReviewAccept,
                 N.finalReviewReject,
-            }:
-                (expertStage,) = self.info(table, N.stage, kind=N.expert)
-                return kind == N.final and not not expertStage and answer
+                N.finalReviewRevoke,
+            } - {xFinalStage}:
+                return (
+                    kind == N.final and not not (expertStage or finalStage) and answer
+                )
 
             return False
 
@@ -987,11 +1001,14 @@ class WorkflowItem:
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
-            taskPart = H.a(
-                [taskMsg, taskUntil],
-                f"""/api/task/{task}/{eid}""",
-                cls=f"large task {taskCls}",
-            ) + f"""<!-- task!{task}:{eid} -->"""
+            taskPart = (
+                H.a(
+                    [taskMsg, taskUntil],
+                    f"""/api/task/{task}/{eid}""",
+                    cls=f"large task {taskCls}",
+                )
+                + f"""<!-- task!{task}:{eid} -->"""
+            )
             taskParts.append(taskPart)
 
         return H.join(taskParts)

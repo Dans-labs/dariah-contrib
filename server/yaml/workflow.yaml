@@ -215,6 +215,17 @@ tasks:
     date: dateDecided
     delay: 2
     value: Reject
+  expertReviewRevoke:
+    kind: expert
+    msg: Revoke
+    acro: revoke
+    cls: warning
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 24
+    value: null
   finalReviewRevise:
     kind: final
     msg: Require revision
@@ -248,6 +259,17 @@ tasks:
     date: dateDecided
     delay: 24
     value: Reject
+  finalReviewRevoke:
+    kind: final
+    msg: Revoke
+    acro: revoke
+    cls: warning
+    operator: set
+    table: review
+    field: decision
+    date: dateDecided
+    delay: 24
+    value: null
 
 workflow:
   - complete

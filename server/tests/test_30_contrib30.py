@@ -66,6 +66,7 @@ import pytest
 import magic  # noqa
 from control.utils import pick as G
 from example import (
+    _ID,
     DB,
     DISCIPLINE,
     CONTRIB,
@@ -227,5 +228,5 @@ def test_addMetaRight(clientOwner, clientOffice, field, value):
 
     client = MongoClient()
     mongo = client[DB]
-    mid = list(mongo[field].find({REP: value}))[0]["_id"]
+    mid = list(mongo[field].find({REP: value}))[0][_ID]
     assertDelItem(clientOffice, field, mid, True)

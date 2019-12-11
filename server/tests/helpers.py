@@ -8,6 +8,18 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from control.utils import pick as G, serverprint
 from conftest import USER_LIST
+from example import (
+    _ID,
+    CRITERIA,
+    CRITERIA_ENTRY,
+    EXPERT,
+    FINAL,
+    LEVEL,
+    REVIEW,
+    REVIEW_ENTRY,
+    SCORE,
+    UNDEF_VALUE,
+)
 
 
 materialRe = re.compile(
@@ -17,7 +29,9 @@ fieldRe = re.compile("""<!-- ([a-zA-Z0-9]+)=(.*?) -->""", re.S)
 mainNRe = re.compile("""<!-- mainN~([0-9]+)~(.*?) -->""", re.S)
 stageRe = re.compile("""<!-- stage:(.*?) -->""", re.S)
 taskRe = re.compile("""<!-- task!([a-zA-Z0-9]+):([a-f0-9]+) -->""", re.S)
-captionRe = re.compile(r"""<!-- caption\^([^>]*?) --><a [^>]*href=['"]([^'"]*)['"]""", re.S)
+captionRe = re.compile(
+    r"""<!-- caption\^([^>]*?) --><a [^>]*href=['"]([^'"]*)['"]""", re.S
+)
 msgRe = re.compile("""<div class="msgitem.*?>(.*?)</div>""", re.S)
 eidRe = re.compile("""<details itemkey=['"][a-zA-Z0-9_]+/([^/'"]*)['"]""", re.S)
 userRe = re.compile(
@@ -28,10 +42,12 @@ valueRe = re.compile("""eid=['"](.*?)['"][^>]*>(.*?)(?:&#xa;)?<""", re.S)
 reviewRe = re.compile(
     """<!-- begin reviewer ([A-Za-z0-9]+) -->"""
     """(.*?)"""
-    r"""<!-- end reviewer \1 -->"""
-    , re.S
+    r"""<!-- end reviewer \1 -->""",
+    re.S,
 )
-reviewEntryIdRe = re.compile("""<span [^>]*?table=['"]reviewEntry['"][^>]*>""", re.S)
+reviewEntryIdRe = re.compile(
+    f"""<span [^>]*?table=['"]{REVIEW_ENTRY}['"][^>]*>""", re.S
+)
 idRe = re.compile("""eid=['"]([^'"]*)['"]""", re.S)
 
 
@@ -66,7 +82,7 @@ def checkCreator(table, eid, user):
     """
     client = MongoClient()
     mongo = client.dariah_test
-    userId = G(list(mongo.user.find(dict(eppn=user)))[0], "_id")
+    userId = G(list(mongo.user.find(dict(eppn=user)))[0], _ID)
     records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
     print("CHECKCREATOR", eid, user, userId, records)
     return len(records) > 0
@@ -285,9 +301,7 @@ def findValues(table, text):
         keyed by the titles of the records and valued by their ids.
     """
 
-    return {
-        name: eid for (eid, name) in reValueList(table).findall(text)
-    }
+    return {name: eid for (eid, name) in reValueList(table).findall(text)}
 
 
 def forall(cls, expect, assertFunc, *args):
@@ -393,6 +407,51 @@ def getItemEids(client, table, action=None):
     return findEid(text, multiple=True)
 
 
+def getREIds(clients, cId, direct=None):
+    """Get the review entries associated with a criteria entry.
+
+    Parameters
+    ----------
+    clients: dict
+        Keyed by user eppns, values by the corresponding client fixtures
+    cId: string(ObjectId)
+        The id of the criteria entry in question
+    direct: tuple of ObjectId, optional, `None`
+        If `None`, the review entries ids are peeled from a response text.
+        If present, it is a pair of review ids, the first of an expert review,
+        the second of a final review. These ids are used in a MongoDB query to get
+        the corresponding review entries.
+
+    Returns
+    -------
+    dict
+        Keyed by reviewer (`expert` or `final`), the values are the ids of the
+        corresponding review entries.
+    """
+
+    reId = {}
+    if direct:
+        client = MongoClient()
+        mongo = client.dariah_test
+        (rEId, rFId) = direct
+        reId = {u: G(
+            list(
+                mongo[REVIEW_ENTRY].find(
+                    {REVIEW: ObjectId(reid), CRITERIA_ENTRY: ObjectId(cId)}
+                )
+            )[0],
+            _ID,
+        ) for (u, reid) in zip((EXPERT, FINAL), direct)}
+    else:
+        for user in {EXPERT, FINAL}:
+            (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cId)
+            print(text)
+            reviewEntries = findReviewEntries(text)
+            print(reviewEntries)
+            reId[user] = reviewEntries[user][0]
+    return reId
+
+
 def getRelatedValues(client, table, eid, field):
     """Get an editable view on a field that represents a related value.""
 
@@ -424,16 +483,16 @@ def getScores(cId):
     """
     client = MongoClient()
     mongo = client.dariah_test
-    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], "criteria")
+    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
     scores = mongo.score.find(dict(criteria=ObjectId(crId)))
     result = {}
     for record in scores:
-        score = G(record, "score")
+        score = G(record, SCORE)
         if score is None:
-            return "○"
-        level = G(record, "level") or "○"
+            return UNDEF_VALUE
+        level = G(record, LEVEL) or UNDEF_VALUE
         title = f"""{score} - {level}"""
-        result[title] = str(G(record, "_id"))
+        result[title] = str(G(record, _ID))
     return result
 
 

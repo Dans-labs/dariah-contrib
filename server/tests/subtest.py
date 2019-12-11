@@ -16,6 +16,7 @@ from example import (
     CAPTIONS,
     EDITOR,
     REVIEW,
+    REVIEW_DECISION,
     START_ASSESSMENT,
     START_REVIEW,
     TITLE,
@@ -213,6 +214,27 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     else:
         if field in fields:
             assertFieldValue(fields, field, oldValue)
+
+
+def assertReviewDecisions(clients, recordInfo, kinds, decisions, expect):
+    reviewInfo = G(recordInfo, REVIEW)
+    for kind in kinds:
+        rId = G(G(reviewInfo, kind), "eid")
+        expectKind = (
+            True if expect is True else False if expect is False else G(expect, kind)
+        )
+        for decision in decisions:
+            decisionStr = G(G(REVIEW_DECISION, decision), kind)
+            url = f"/api/task/{decisionStr}/{rId}"
+            exp = (
+                True
+                if expectKind is True
+                else False
+                if expectKind is False
+                else G(expectKind, decision)
+            )
+            serverprint(f"REVIEW DECISION {decision} by {kind} expects {exp}")
+            assertStatus(G(clients, kind), url, exp)
 
 
 def assertStage(client, table, eid, expect):
