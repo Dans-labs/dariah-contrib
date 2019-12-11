@@ -276,18 +276,6 @@ function guniasservice {
 
 }
 
-function gunilog {
-    logdir=/var/log/dariah-contrib
-    if [[ "$1" == "a" ]]; then
-        logfile="access.log"
-    elif [[ "$1" == "e" ]]; then
-        logfile="error.log"
-    else
-        logfile="$1"
-    fi
-    less "$logdir/$logfile"
-}
-
 function gunirun {
     cd $root/server
     mongostart
@@ -333,6 +321,18 @@ function gunirun {
         gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
     fi
     
+}
+
+function gunishow {
+    logdir=/var/log/dariah-contrib
+    if [[ "$1" == "a" ]]; then
+        logfile="access.log"
+    elif [[ "$1" == "e" ]]; then
+        logfile="error.log"
+    else
+        logfile="$1"
+    fi
+    less "$logdir/$logfile"
 }
 
 function serverun {
@@ -415,6 +415,7 @@ function updateprocess {
     systemctl stop dariah-contrib.service
     activate36here
     python3 -m compileall server
+    guniasservice
     systemctl start dariah-contrib.service
 }
 
@@ -488,7 +489,7 @@ function guni {
 }
 
 function gunilog {
-    gunilog "$@"
+    gunishow "$@"
 }
 
 function gunistatus {
