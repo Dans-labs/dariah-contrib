@@ -2,21 +2,21 @@
 platform darwin -- Python 3.7.2, pytest-3.10.0, py-1.7.0, pluggy-0.8.0
 rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile: pytest.ini
 plugins: ordering-0.6
-collected 148 items
+collected 152 items
 
-tests/test_10_factory10.py ...                                        [  3/148]
-tests/test_20_users10.py ...                                          [  6/148]
-tests/test_30_contrib10.py .............                              [ 19/148]
-tests/test_30_contrib20.py ....................................       [ 55/148]
-tests/test_30_contrib30.py ..............................             [ 85/148]
-tests/test_30_contrib40.py ....                                       [ 89/148]
-tests/test_40_assess10.py .................                           [106/148]
-tests/test_40_assess20.py ...                                         [109/148]
-tests/test_40_assess30.py ............................                [137/148]
-tests/test_50_review10.py ........                                    [145/148]
-tests/test_50_review20.py ...                                         [148/148]
+tests/test_10_factory10.py ...                                        [  3/152]
+tests/test_20_users10.py ...                                          [  6/152]
+tests/test_30_contrib10.py .............                              [ 19/152]
+tests/test_30_contrib20.py ....................................       [ 55/152]
+tests/test_30_contrib30.py ..............................             [ 85/152]
+tests/test_30_contrib40.py ....                                       [ 89/152]
+tests/test_40_assess10.py .................                           [106/152]
+tests/test_40_assess20.py ...                                         [109/152]
+tests/test_40_assess30.py ............................                [137/152]
+tests/test_50_review10.py ........                                    [145/152]
+tests/test_50_review20.py .......                                     [152/152]
 
-========================= 148 passed in 45.06 seconds ==========================
+========================= 152 passed in 48.98 seconds ==========================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
-      2585        128        3.9       20.2
+      2893        139        4.4       20.8
