@@ -142,7 +142,7 @@ def test_reviewEntryView(clients):
                 None
                 if exp is None
                 else value
-                if kind == user or user in POWER_USERS
+                if user in {EXPERT, FINAL} | POWER_USERS
                 else None
             )
             assertFieldValue((cl, REVIEW_ENTRY, rId), COMMENTS, expValue)
@@ -217,7 +217,7 @@ def test_decideExpertAll(clients):
                 None
                 if exp is None
                 else value
-                if kind == user or user in POWER_USERS
+                if user in {EXPERT, FINAL} | POWER_USERS
                 else None
             )
             assertFieldValue((cl, REVIEW_ENTRY, rId), COMMENTS, expValue)

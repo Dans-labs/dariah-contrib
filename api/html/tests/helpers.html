@@ -81,6 +81,24 @@ def checkWarning(text, label):
     return not not reWarning(label).search(text)
 
 
+def checkCreator(table, eid, user):
+    &#34;&#34;&#34;Checks whether a user is the creator of a record.
+
+    Parameters
+    ----------
+    table: string
+
+    Returns
+    -------
+    &#34;&#34;&#34;
+    client = MongoClient()
+    mongo = client.dariah_test
+    userId = G(list(mongo.user.find(dict(eppn=user)))[0], &#34;_id&#34;)
+    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
+    print(&#34;CHECKCREATOR&#34;, eid, user, userId, records)
+    return len(records) &gt; 0
+
+
 def findCaptions(text):
     &#34;&#34;&#34;Get the captions from a response.
 
@@ -130,6 +148,7 @@ def findEid(text, multiple=False):
     &#34;&#34;&#34;Get the entity id(s) from a response.
 
     If the response shows a record, dig out its entity id.
+
     Otherwise, return `None`
 
     Parameters
@@ -230,14 +249,13 @@ def findReviewEntries(text):
 
     result = {}
     for (kind, material) in reviewRe.findall(text):
-        reId = None
-        spans = reviewEntryIdRe.findall(text)
+        spans = reviewEntryIdRe.findall(material)
         if spans:
             reIds = idRe.findall(spans[0])
             if reIds:
                 reId = reIds[0]
-        fields = findFields(material)
-        result[kind] = (reId, fields)
+                fields = findFields(material)
+                result[kind] = (reId, fields)
     return result
 
 
@@ -377,13 +395,11 @@ def getItem(client, table, eid):
     return (text, fields, msgs, eid)
 
 
-def getItemEid(client, table, action=None):
-    &#34;&#34;&#34;Looks up an item from a view on a table.
+def getItemEids(client, table, action=None):
+    &#34;&#34;&#34;Looks up item eids from a view on a table.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields, the eids
+    of the items will be read off.
 
     Parameters
     ----------
@@ -394,15 +410,14 @@ def getItemEid(client, table, action=None):
 
     Returns
     -------
-    eid: str(ObjectId)
-        The id of the item.
+    eid: list of str(ObjectId)
+        The ids of the item that can be found.
     &#34;&#34;&#34;
 
     actionStr = &#34;&#34; if action is None else f&#34;?action={action}&#34;
     response = client.get(f&#34;/{table}/list{actionStr}&#34;)
     text = response.get_data(as_text=True)
-    eid = findEid(text)
-    return eid
+    return findEid(text, multiple=True)
 
 
 def getRelatedValues(client, table, eid, field):
@@ -593,6 +608,39 @@ def viewField(client, table, eid, field):
     return (text, status, msgs)</code></pre>
 </details>
 </dd>
+<dt id="helpers.checkCreator"><code class="name flex">
+<span>def <span class="ident">checkCreator</span></span>(<span>table, eid, user)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Checks whether a user is the creator of a record.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def checkCreator(table, eid, user):
+    &#34;&#34;&#34;Checks whether a user is the creator of a record.
+
+    Parameters
+    ----------
+    table: string
+
+    Returns
+    -------
+    &#34;&#34;&#34;
+    client = MongoClient()
+    mongo = client.dariah_test
+    userId = G(list(mongo.user.find(dict(eppn=user)))[0], &#34;_id&#34;)
+    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
+    print(&#34;CHECKCREATOR&#34;, eid, user, userId, records)
+    return len(records) &gt; 0</code></pre>
+</details>
+</dd>
 <dt id="helpers.checkWarning"><code class="name flex">
 <span>def <span class="ident">checkWarning</span></span>(<span>text, label)</span>
 </code></dt>
@@ -713,8 +761,8 @@ Each chunk consists of the following parts:</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Get the entity id(s) from a response.</p>
-<p>If the response shows a record, dig out its entity id.
-Otherwise, return <code>None</code></p>
+<p>If the response shows a record, dig out its entity id.</p>
+<p>Otherwise, return <code>None</code></p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
@@ -732,6 +780,7 @@ Otherwise, return <code>None</code></p>
     &#34;&#34;&#34;Get the entity id(s) from a response.
 
     If the response shows a record, dig out its entity id.
+
     Otherwise, return `None`
 
     Parameters
@@ -927,14 +976,13 @@ reviewer on this criteria entry.</dd>
 
     result = {}
     for (kind, material) in reviewRe.findall(text):
-        reId = None
-        spans = reviewEntryIdRe.findall(text)
+        spans = reviewEntryIdRe.findall(material)
         if spans:
             reIds = idRe.findall(spans[0])
             if reIds:
                 reId = reIds[0]
-        fields = findFields(material)
-        result[kind] = (reId, fields)
+                fields = findFields(material)
+                result[kind] = (reId, fields)
     return result</code></pre>
 </details>
 </dd>
@@ -1213,14 +1261,13 @@ of the item will be read off.</p>
     return (text, fields, msgs, eid)</code></pre>
 </details>
 </dd>
-<dt id="helpers.getItemEid"><code class="name flex">
-<span>def <span class="ident">getItemEid</span></span>(<span>client, table, action=None)</span>
+<dt id="helpers.getItemEids"><code class="name flex">
+<span>def <span class="ident">getItemEids</span></span>(<span>client, table, action=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Looks up an item from a view on a table.</p>
-<p>The response texts will be analysed into messages and fields, the eid
-of the item will be read off.</p>
-<p>We assume that there is still only one item in the view.</p>
+<section class="desc"><p>Looks up item eids from a view on a table.</p>
+<p>The response texts will be analysed into messages and fields, the eids
+of the items will be read off.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
@@ -1232,20 +1279,18 @@ of the item will be read off.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The id of the item.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>list</code> of <code>str</code>(<code>ObjectId</code>)</dt>
+<dd>The ids of the item that can be found.</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getItemEid(client, table, action=None):
-    &#34;&#34;&#34;Looks up an item from a view on a table.
+<pre><code class="python">def getItemEids(client, table, action=None):
+    &#34;&#34;&#34;Looks up item eids from a view on a table.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields, the eids
+    of the items will be read off.
 
     Parameters
     ----------
@@ -1256,15 +1301,14 @@ of the item will be read off.</p>
 
     Returns
     -------
-    eid: str(ObjectId)
-        The id of the item.
+    eid: list of str(ObjectId)
+        The ids of the item that can be found.
     &#34;&#34;&#34;
 
     actionStr = &#34;&#34; if action is None else f&#34;?action={action}&#34;
     response = client.get(f&#34;/{table}/list{actionStr}&#34;)
     text = response.get_data(as_text=True)
-    eid = findEid(text)
-    return eid</code></pre>
+    return findEid(text, multiple=True)</code></pre>
 </details>
 </dd>
 <dt id="helpers.getRelatedValues"><code class="name flex">
@@ -1576,6 +1620,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="helpers.accessUrl" href="#helpers.accessUrl">accessUrl</a></code></li>
+<li><code><a title="helpers.checkCreator" href="#helpers.checkCreator">checkCreator</a></code></li>
 <li><code><a title="helpers.checkWarning" href="#helpers.checkWarning">checkWarning</a></code></li>
 <li><code><a title="helpers.findCaptions" href="#helpers.findCaptions">findCaptions</a></code></li>
 <li><code><a title="helpers.findDetails" href="#helpers.findDetails">findDetails</a></code></li>
@@ -1591,7 +1636,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.forall" href="#helpers.forall">forall</a></code></li>
 <li><code><a title="helpers.getEid" href="#helpers.getEid">getEid</a></code></li>
 <li><code><a title="helpers.getItem" href="#helpers.getItem">getItem</a></code></li>
-<li><code><a title="helpers.getItemEid" href="#helpers.getItemEid">getItemEid</a></code></li>
+<li><code><a title="helpers.getItemEids" href="#helpers.getItemEids">getItemEids</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
 <li><code><a title="helpers.getScores" href="#helpers.getScores">getScores</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
