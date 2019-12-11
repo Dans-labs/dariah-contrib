@@ -35,6 +35,7 @@ function givehelp {
     echo "<task>:"
     echo "gunilog a   : see the access log of the gunicorn service"
     echo "gunilog e   : see the error log of the gunicorn service"
+    echo "gunilog E   : see the error journal of the gunicorn service"
     echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
@@ -329,6 +330,8 @@ function gunishow {
         logfile="access.log"
     elif [[ "$1" == "e" ]]; then
         logfile="error.log"
+    elif [[ "$1" == "E" ]]; then
+        journalctl -xe
     else
         logfile="$1"
     fi
