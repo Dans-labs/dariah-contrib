@@ -47,11 +47,10 @@ update production | no | yes
 
 This app needs [Python]({{python}}) , version at least 3.6.3.
 
-??? details "development" Install it from {{pythondl}}.
-
+??? details "development"
+    Install it from {{pythondl}}.
     The list of Python dependencies to be `pip`-installed is in
-    [requirements.txt]({{repBase}}/requirements.txt)
-    .
+    [requirements.txt]({{repBase}}/requirements.txt).
 
     Install them like so:
 
@@ -59,7 +58,8 @@ This app needs [Python]({{python}}) , version at least 3.6.3.
     pip3 install pymongo flask
     ```
 
-??? details "production" Python can be installed by means of the package manager.
+??? details "production"
+    Python can be installed by means of the package manager.
 
     ```sh
     yum install rh-python36 rh-python36-python-pymongo rh-python36-mod_wsgi
@@ -81,7 +81,11 @@ This app needs [Python]({{python}}) , version at least 3.6.3.
 
 This app works with database [Mongo DB]({{mongodb}}) version 4.0.3 or higher.
 
-??? abstract "On the mac" ??? details "Installing" `sh brew install MongoDB`
+??? abstract "On the mac"
+    ??? details "Installing"
+        ```sh
+        brew install MongoDB
+        ```
 
     ??? details "Upgrading"
         ```sh
@@ -136,20 +140,22 @@ For the _server_ application code we use [Flask]({{flask}}) , a Python3 micro fr
 to route URLs to functions that perform requests and return responses. It contains a
 development web server.
 
-??? details "What the server code does" The code for the server is at its heart a
-mapping between routes (URL patterns) and functions (request => response transformers).
-The app source code for the server resides in [serve.py]({{repBase}}/server/serve.py) and
-other `.py` files in [controllers]({{repBase}}/server/control) imported by it.
-See also the 
-[API docs of the controllers](../{{apidocs}}).
+??? details "What the server code does"
+    The code for the server is at its heart a
+    mapping between routes (URL patterns) and functions (request => response transformers).
+    The app source code for the server resides in [serve.py]({{repBase}}/server/serve.py) and
+    other `.py` files in [controllers]({{repBase}}/server/control) imported by it.
+    See also the 
+    [API docs of the controllers](../{{apidocs}}).
 
     The module
     [index.py]({{repe}}/server/server/index.py)
     defines routes and associates functions to be executed for those routes.
     These functions take a request, and turn it into a response.
 
-??? details "Sessions and a secret key" The server needs a secret key, we store it in a
-fixed place. Here is the command to generate and store the key.
+??? details "Sessions and a secret key"
+    The server needs a secret key, we store it in a
+    fixed place. Here is the command to generate and store the key.
 
     ```sh tab="server"
     cd /opt/web-apps
@@ -163,7 +169,8 @@ fixed place. Here is the command to generate and store the key.
 
 ## Web server
 
-??? explanation "production" The production web server is
+??? explanation "production"
+    The production web server is
     [gunicorn]().
     Flask is a **wsgi** app can can be called straight away by **gunicorn**.
     In development, you can just call gunicorn from the command line with the right
@@ -180,9 +187,10 @@ fixed place. Here is the command to generate and store the key.
     See the same script under the commands `guni` and `gunistop` to see how the 
     service is started and stopped.
 
-??? explanation "development" In development, [flask]({{flask}}) runs its own little web
-server. You can run the development server by saying, in the top level directory of the
-repo clone:
+??? explanation "development"
+    In development, [flask]({{flask}}) runs its own little web
+    server. You can run the development server by saying, in the top level directory of the
+    repo clone:
 
     ```sh
     ./build.sh serve
@@ -219,8 +227,9 @@ By GitHub clone we mean a clone of [Dans-labs/{{repoName}}]({{repo}}) .
 
 The absolute location is not important.
 
-??? abstract "Production server" For the production server we assume everything resides
-in `/opt`, on the development machine the location does not matter.
+??? abstract "Production server"
+    For the production server we assume everything resides
+    in `/opt`, on the development machine the location does not matter.
 
     On production we need in that location:
 
@@ -234,8 +243,9 @@ in `/opt`, on the development machine the location does not matter.
             can be generated with
             [gen_jwt_secret.sh]({{repBase}}/server/gen_jwt_secret.sh)
 
-??? abstract "Development machine" On the development machine we need just the GitHub
-clone and
+??? abstract "Development machine"
+    On the development machine we need just the GitHub
+    clone and
 
     *   `{{repoName}}`
         Root of the GitHub clone.

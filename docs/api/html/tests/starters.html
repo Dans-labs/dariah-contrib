@@ -96,11 +96,12 @@ from example import (
     USER,
 )
 from helpers import (
+    checkCreator,
     findDetails,
     findReviewEntries,
     findValues,
     getItem,
-    getItemEid,
+    getItemEids,
     getRelatedValues,
     getScores,
 )
@@ -178,6 +179,10 @@ def findOrMakeItem(client, table, cId=None, aId=None):
     to find it.
     Or there are no contributions/assessments/reviews yet, and then we have to make one.
 
+    In case of a review, we look for reviews made by the client, and if no such review
+    exists, we let the client make one.
+    We just check by means of an under-water query to the MongoDb.
+
     Parameters
     ----------
     client: fixture
@@ -204,14 +209,16 @@ def findOrMakeItem(client, table, cId=None, aId=None):
         the id of the contribution/assessment
     &#34;&#34;&#34;
 
-    eid = getItemEid(client, table)
-    if eid:
+    eids = getItemEids(client, table)
+    if eids:
         if table == CONTRIB:
-            return getItem(client, table, eid)
+            return getItem(client, table, eids[0])
         if table == ASSESS:
-            return [eid]
+            return [eids[0]]
         if table == REVIEW:
-            return [eid]
+            for eid in eids:
+                if checkCreator(REVIEW, eid, client.user):
+                    return [eid]
 
     if table == CONTRIB:
         return assertAddItem(client, table, True)
@@ -332,6 +339,8 @@ def start(
         recordInfo.setdefault(REVIEW, {})
 
         for cl in (clientExpert, clientFinal):
+            user = cl.user
+            print(&#34;MAKE OR FIND REVIEW&#34;, user)
             rIds = findOrMakeItem(cl, REVIEW, aId=aId)
             assert len(rIds) == 1
             rId = rIds[0]
@@ -458,6 +467,9 @@ def start(
 <p>Either previous tests have made a contribution/assessment/review, and then we have
 to find it.
 Or there are no contributions/assessments/reviews yet, and then we have to make one.</p>
+<p>In case of a review, we look for reviews made by the client, and if no such review
+exists, we let the client make one.
+We just check by means of an under-water query to the MongoDb.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
@@ -495,6 +507,10 @@ review</dd>
     to find it.
     Or there are no contributions/assessments/reviews yet, and then we have to make one.
 
+    In case of a review, we look for reviews made by the client, and if no such review
+    exists, we let the client make one.
+    We just check by means of an under-water query to the MongoDb.
+
     Parameters
     ----------
     client: fixture
@@ -521,14 +537,16 @@ review</dd>
         the id of the contribution/assessment
     &#34;&#34;&#34;
 
-    eid = getItemEid(client, table)
-    if eid:
+    eids = getItemEids(client, table)
+    if eids:
         if table == CONTRIB:
-            return getItem(client, table, eid)
+            return getItem(client, table, eids[0])
         if table == ASSESS:
-            return [eid]
+            return [eids[0]]
         if table == REVIEW:
-            return [eid]
+            for eid in eids:
+                if checkCreator(REVIEW, eid, client.user):
+                    return [eid]
 
     if table == CONTRIB:
         return assertAddItem(client, table, True)
@@ -824,6 +842,8 @@ results.</p>
         recordInfo.setdefault(REVIEW, {})
 
         for cl in (clientExpert, clientFinal):
+            user = cl.user
+            print(&#34;MAKE OR FIND REVIEW&#34;, user)
             rIds = findOrMakeItem(cl, REVIEW, aId=aId)
             assert len(rIds) == 1
             rId = rIds[0]

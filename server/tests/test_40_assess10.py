@@ -172,7 +172,7 @@ def test_tryStartAgainAll(clients):
             assert len(aIds) == 0
 
     expect = {user: False for user in USERS}
-    expect = {user: True for user in {OWNER, EDITOR}}
+    expect.update({user: True for user in {OWNER, EDITOR}})
     forall(clients, expect, assertIt)
 
 
