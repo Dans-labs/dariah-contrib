@@ -1,6 +1,24 @@
 staticRoot: ../static/
 indexPage: index.html
 
+limits:
+  action: 20
+  anything: 50
+  assessed: 2
+  default: 50
+  deid: 30
+  dtable: 20
+  eid: 30
+  env: 10000
+  field: 20
+  filename: 100
+  json: 1000000
+  keys: 100
+  masterId: 30
+  reviewed: 2
+  table: 20
+  task: 40
+
 wrongType:
   url: http(s)://letters.domain
   email: name@letters.domain
@@ -215,7 +233,6 @@ listActions:
   - select
 
 names:
-  - action
   - addClass
   - body
   - icon

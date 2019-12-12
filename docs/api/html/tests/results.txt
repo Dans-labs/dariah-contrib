@@ -16,7 +16,7 @@ tests/test_40_assess30.py ............................                [137/152]
 tests/test_50_review10.py ........                                    [145/152]
 tests/test_50_review20.py .......                                     [152/152]
 
-========================= 152 passed in 48.98 seconds ==========================
+========================= 152 passed in 38.54 seconds ==========================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
       2893        139        4.4       20.8

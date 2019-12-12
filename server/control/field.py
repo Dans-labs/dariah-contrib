@@ -27,6 +27,8 @@ CASCADE_SPECS = CT.cascade
 WORKFLOW_FIELDS = CF.fields
 
 REFRESH = CW.messages[N.refresh]
+LIMITS = CW.limits
+LIMIT_JSON = G(LIMITS, N.json, default=1000000)
 
 
 class Field:
@@ -443,6 +445,9 @@ class Field:
         mayEdit = self.mayEdit
 
         if action is not None and not asMaster:
+            contentLength = request.content_length
+            if contentLength is not None and contentLength > LIMIT_JSON:
+                abort(400)
             data = request.get_json()
             if data is not None and N.save in data:
                 if mayEdit:
@@ -450,7 +455,7 @@ class Field:
                 else:
                     good = False
                 if not good:
-                    return abort(400)
+                    abort(400)
 
         if action == N.save:
             return E

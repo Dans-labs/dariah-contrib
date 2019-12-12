@@ -5,7 +5,7 @@
 *   Authorization
 """
 
-from flask import request, session
+from flask import request, session, abort
 from control.utils import (
     pick as G,
     utf8FromLatin1,
@@ -34,6 +34,9 @@ CW = C.web
 
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
+
+LIMITS = CW.limits
+LIMIT_JSON = G(LIMITS, N.json, default=1000000)
 
 Qc = H.icon(CW.unknown[N.country], asChar=True)
 Qu = H.icon(CW.unknown[N.user], asChar=True)
@@ -240,7 +243,11 @@ class Auth:
         authUser = self.authUser
         unauthUser = self.unauthUser
 
+        contentLength = request.content_length
+        if contentLength is not None and contentLength > LIMIT_JSON:
+            abort(400)
         env = request.environ
+        print(env)
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)

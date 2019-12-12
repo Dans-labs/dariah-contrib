@@ -199,7 +199,6 @@ names:
   - bool
   - constrain
   - constrained
-  - eid
   - isUserTable
   - isUserEntryTable
   - itemLabels
