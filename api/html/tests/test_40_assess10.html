@@ -359,7 +359,7 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
 </details>
 </section>
 <section>
@@ -386,7 +386,7 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess10.test_editor"><code class="name flex">

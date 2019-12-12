@@ -453,7 +453,7 @@ class WorkflowItem:
 
         #### Assessment, Criteria Entry
 
-        Not submitted:
+        Not submitted and not in revision:
         : authors and editors only
 
         Submitted, review not yet complete, or negative outcome
@@ -462,7 +462,7 @@ class WorkflowItem:
         Review with positive outcome
         :   public
 
-        Negative outcome
+        In revision, or review with a negative outcome
         :   authors, editors, reviewers, national coordinator only
 
         #### Review, Review Entry
@@ -520,7 +520,13 @@ class WorkflowItem:
                 True
                 if rStage == N.reviewAccept
                 else perm[N.isOur]
-                if stage in {N.submitted, N.submittedRevised}
+                if stage
+                in {
+                    N.submitted,
+                    N.incompleteRevised,
+                    N.completeRevised,
+                    N.submittedRevised,
+                }
                 else perm[N.isEdit]
             )
 
@@ -781,20 +787,28 @@ class WorkflowItem:
             if not answer:
                 return False
 
+            (finalStage,) = self.info(table, N.stage, kind=N.final)
+            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
+            xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+
             if task in {
                 N.expertReviewRevise,
                 N.expertReviewAccept,
                 N.expertReviewReject,
-            }:
-                return kind == N.expert and answer
+                N.expertReviewRevoke,
+            } - {xExpertStage}:
+                return kind == N.expert and not finalStage and answer
 
             if task in {
                 N.finalReviewRevise,
                 N.finalReviewAccept,
                 N.finalReviewReject,
-            }:
-                (expertStage,) = self.info(table, N.stage, kind=N.expert)
-                return kind == N.final and not not expertStage and answer
+                N.finalReviewRevoke,
+            } - {xFinalStage}:
+                return (
+                    kind == N.final and not not (expertStage or finalStage) and answer
+                )
 
             return False
 
@@ -1075,11 +1089,14 @@ class WorkflowItem:
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
-            taskPart = H.a(
-                [taskMsg, taskUntil],
-                f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
-                cls=f&#34;large task {taskCls}&#34;,
-            ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+            taskPart = (
+                H.a(
+                    [taskMsg, taskUntil],
+                    f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
+                    cls=f&#34;large task {taskCls}&#34;,
+                )
+                + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+            )
             taskParts.append(taskPart)
 
         return H.join(taskParts)
@@ -1482,7 +1499,7 @@ details of the current user can be read off.</dd>
 
         #### Assessment, Criteria Entry
 
-        Not submitted:
+        Not submitted and not in revision:
         : authors and editors only
 
         Submitted, review not yet complete, or negative outcome
@@ -1491,7 +1508,7 @@ details of the current user can be read off.</dd>
         Review with positive outcome
         :   public
 
-        Negative outcome
+        In revision, or review with a negative outcome
         :   authors, editors, reviewers, national coordinator only
 
         #### Review, Review Entry
@@ -1549,7 +1566,13 @@ details of the current user can be read off.</dd>
                 True
                 if rStage == N.reviewAccept
                 else perm[N.isOur]
-                if stage in {N.submitted, N.submittedRevised}
+                if stage
+                in {
+                    N.submitted,
+                    N.incompleteRevised,
+                    N.completeRevised,
+                    N.submittedRevised,
+                }
                 else perm[N.isEdit]
             )
 
@@ -1810,20 +1833,28 @@ details of the current user can be read off.</dd>
             if not answer:
                 return False
 
+            (finalStage,) = self.info(table, N.stage, kind=N.final)
+            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
+            xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+
             if task in {
                 N.expertReviewRevise,
                 N.expertReviewAccept,
                 N.expertReviewReject,
-            }:
-                return kind == N.expert and answer
+                N.expertReviewRevoke,
+            } - {xExpertStage}:
+                return kind == N.expert and not finalStage and answer
 
             if task in {
                 N.finalReviewRevise,
                 N.finalReviewAccept,
                 N.finalReviewReject,
-            }:
-                (expertStage,) = self.info(table, N.stage, kind=N.expert)
-                return kind == N.final and not not expertStage and answer
+                N.finalReviewRevoke,
+            } - {xFinalStage}:
+                return (
+                    kind == N.final and not not (expertStage or finalStage) and answer
+                )
 
             return False
 
@@ -2104,11 +2135,14 @@ details of the current user can be read off.</dd>
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
-            taskPart = H.a(
-                [taskMsg, taskUntil],
-                f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
-                cls=f&#34;large task {taskCls}&#34;,
-            ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+            taskPart = (
+                H.a(
+                    [taskMsg, taskUntil],
+                    f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
+                    cls=f&#34;large task {taskCls}&#34;,
+                )
+                + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+            )
             taskParts.append(taskPart)
 
         return H.join(taskParts)
@@ -2410,13 +2444,13 @@ workflow conditions.</p>
 <p>Here are the rules:</p>
 <h4 id="assessment-criteria-entry">Assessment, Criteria Entry</h4>
 <dl>
-<dt>Not submitted:</dt>
+<dt>Not submitted and not in revision:</dt>
 <dd>authors and editors only</dd>
 <dt>Submitted, review not yet complete, or negative outcome</dt>
 <dd>authors, editors, reviewers, national coordinator only</dd>
 <dt>Review with positive outcome</dt>
 <dd>public</dd>
-<dt>Negative outcome</dt>
+<dt>In revision, or review with a negative outcome</dt>
 <dd>authors, editors, reviewers, national coordinator only</dd>
 </dl>
 <h4 id="review-review-entry">Review, Review Entry</h4>
@@ -2477,7 +2511,7 @@ Otherwise, we check for the readability of this field in the record.</dd>
 
     #### Assessment, Criteria Entry
 
-    Not submitted:
+    Not submitted and not in revision:
     : authors and editors only
 
     Submitted, review not yet complete, or negative outcome
@@ -2486,7 +2520,7 @@ Otherwise, we check for the readability of this field in the record.</dd>
     Review with positive outcome
     :   public
 
-    Negative outcome
+    In revision, or review with a negative outcome
     :   authors, editors, reviewers, national coordinator only
 
     #### Review, Review Entry
@@ -2544,7 +2578,13 @@ Otherwise, we check for the readability of this field in the record.</dd>
             True
             if rStage == N.reviewAccept
             else perm[N.isOur]
-            if stage in {N.submitted, N.submittedRevised}
+            if stage
+            in {
+                N.submitted,
+                N.incompleteRevised,
+                N.completeRevised,
+                N.submittedRevised,
+            }
             else perm[N.isEdit]
         )
 
@@ -3223,20 +3263,28 @@ the task acts on: contrib, assessment, or review.</dd>
         if not answer:
             return False
 
+        (finalStage,) = self.info(table, N.stage, kind=N.final)
+        (expertStage,) = self.info(table, N.stage, kind=N.expert)
+        xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
+        xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+
         if task in {
             N.expertReviewRevise,
             N.expertReviewAccept,
             N.expertReviewReject,
-        }:
-            return kind == N.expert and answer
+            N.expertReviewRevoke,
+        } - {xExpertStage}:
+            return kind == N.expert and not finalStage and answer
 
         if task in {
             N.finalReviewRevise,
             N.finalReviewAccept,
             N.finalReviewReject,
-        }:
-            (expertStage,) = self.info(table, N.stage, kind=N.expert)
-            return kind == N.final and not not expertStage and answer
+            N.finalReviewRevoke,
+        } - {xFinalStage}:
+            return (
+                kind == N.final and not not (expertStage or finalStage) and answer
+            )
 
         return False
 
@@ -3509,11 +3557,14 @@ tasks: contrib, assessment, or review.</dd>
         taskMsg = G(taskInfo, N.msg)
         taskCls = G(taskInfo, N.cls)
 
-        taskPart = H.a(
-            [taskMsg, taskUntil],
-            f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
-            cls=f&#34;large task {taskCls}&#34;,
-        ) + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+        taskPart = (
+            H.a(
+                [taskMsg, taskUntil],
+                f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
+                cls=f&#34;large task {taskCls}&#34;,
+            )
+            + f&#34;&#34;&#34;&lt;!-- task!{task}:{eid} --&gt;&#34;&#34;&#34;
+        )
         taskParts.append(taskPart)
 
     return H.join(taskParts)</code></pre>

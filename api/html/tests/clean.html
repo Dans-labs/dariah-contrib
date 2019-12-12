@@ -244,7 +244,7 @@ def importMongo():
     sys.stdout.write(&#34;DONE\n&#34;)
 
 
-def main():
+def clean():
     countryTable()
     groupTable()
     userTable()
@@ -256,7 +256,7 @@ def main():
 
 
 if __name__ == &#34;__main__&#34;:
-    main()</code></pre>
+    clean()</code></pre>
 </details>
 </section>
 <section>
@@ -318,6 +318,26 @@ if __name__ == &#34;__main__&#34;:
         if keyField == &#34;key&#34;:
             for row in allData[table]:
                 del row[&#34;key&#34;]</code></pre>
+</details>
+</dd>
+<dt id="clean.clean"><code class="name flex">
+<span>def <span class="ident">clean</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clean():
+    countryTable()
+    groupTable()
+    userTable()
+    relTables()
+    yearTable()
+    decisionTable()
+    backoffice()
+    importMongo()</code></pre>
 </details>
 </dd>
 <dt id="clean.countryTable"><code class="name flex">
@@ -418,26 +438,6 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def info(x):
     sys.stdout.write(&#34;{}\n&#34;.format(x))</code></pre>
-</details>
-</dd>
-<dt id="clean.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def main():
-    countryTable()
-    groupTable()
-    userTable()
-    relTables()
-    yearTable()
-    decisionTable()
-    backoffice()
-    importMongo()</code></pre>
 </details>
 </dd>
 <dt id="clean.relTables"><code class="name flex">
@@ -668,12 +668,12 @@ if __name__ == &#34;__main__&#34;:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="clean.backoffice" href="#clean.backoffice">backoffice</a></code></li>
+<li><code><a title="clean.clean" href="#clean.clean">clean</a></code></li>
 <li><code><a title="clean.countryTable" href="#clean.countryTable">countryTable</a></code></li>
 <li><code><a title="clean.decisionTable" href="#clean.decisionTable">decisionTable</a></code></li>
 <li><code><a title="clean.groupTable" href="#clean.groupTable">groupTable</a></code></li>
 <li><code><a title="clean.importMongo" href="#clean.importMongo">importMongo</a></code></li>
 <li><code><a title="clean.info" href="#clean.info">info</a></code></li>
-<li><code><a title="clean.main" href="#clean.main">main</a></code></li>
 <li><code><a title="clean.relTables" href="#clean.relTables">relTables</a></code></li>
 <li><code><a title="clean.toHexMongo" href="#clean.toHexMongo">toHexMongo</a></code></li>
 <li><code><a title="clean.toHexName" href="#clean.toHexName">toHexName</a></code></li>
