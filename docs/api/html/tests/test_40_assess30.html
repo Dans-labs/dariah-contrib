@@ -114,8 +114,6 @@ the assessment is withdrawn.</dd>
 <dd>All users try to assign reviewers to this assessment.
 The office user succeeds because of a workflow condition:
 the assessment is submitted.</dd>
-<dt><a title="test_40_assess30.test_withdrawAssessment2" href="#test_40_assess30.test_withdrawAssessment2"><code>test_withdrawAssessment2()</code></a></dt>
-<dd><strong>owner</strong> tries to withdraw the assessment, successfully.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -233,10 +231,6 @@ Filling out an assessment.
 :   All users try to assign reviewers to this assessment.
     The office user succeeds because of a workflow condition:
     the assessment is submitted.
-
-`test_withdrawAssessment2`
-:   **owner** tries to withdraw the assessment, successfully.
-
 &#34;&#34;&#34;
 
 import pytest
@@ -410,7 +404,7 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_withdrawAssessment(clientOwner):
@@ -454,7 +448,7 @@ def test_assignReviewers2(clients, field, user):
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_sidebar(clients):
@@ -507,7 +501,7 @@ def test_assignReviewers3(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_submitAssessmentRevised2(clientOwner):
@@ -531,13 +525,7 @@ def test_assignReviewers4(clients, field, user):
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
-
-
-def test_withdrawAssessment3(clientOwner):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    url = f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;
-    assertStatus(clientOwner, url, True)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
 </details>
 </section>
 <section>
@@ -564,7 +552,7 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_assignReviewers2"><code class="name flex">
@@ -585,7 +573,7 @@ def test_assignReviewers2(clients, field, user):
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_assignReviewers3"><code class="name flex">
@@ -605,7 +593,7 @@ def test_assignReviewers3(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_assignReviewers4"><code class="name flex">
@@ -626,7 +614,7 @@ def test_assignReviewers4(clients, field, user):
     aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)</code></pre>
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_complete"><code class="name flex">
@@ -1002,21 +990,6 @@ def test_assignReviewers4(clients, field, user):
     assertStatus(clientOwner, url, True)</code></pre>
 </details>
 </dd>
-<dt id="test_40_assess30.test_withdrawAssessment3"><code class="name flex">
-<span>def <span class="ident">test_withdrawAssessment3</span></span>(<span>clientOwner)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_withdrawAssessment3(clientOwner):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    url = f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;
-    assertStatus(clientOwner, url, True)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -1056,7 +1029,6 @@ def test_assignReviewers4(clients, field, user):
 <li><code><a title="test_40_assess30.test_submitAssessmentRevised2" href="#test_40_assess30.test_submitAssessmentRevised2">test_submitAssessmentRevised2</a></code></li>
 <li><code><a title="test_40_assess30.test_withdrawAssessment" href="#test_40_assess30.test_withdrawAssessment">test_withdrawAssessment</a></code></li>
 <li><code><a title="test_40_assess30.test_withdrawAssessment2" href="#test_40_assess30.test_withdrawAssessment2">test_withdrawAssessment2</a></code></li>
-<li><code><a title="test_40_assess30.test_withdrawAssessment3" href="#test_40_assess30.test_withdrawAssessment3">test_withdrawAssessment3</a></code></li>
 </ul>
 </li>
 </ul>

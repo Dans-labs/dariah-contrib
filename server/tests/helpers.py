@@ -196,13 +196,6 @@ def findMainN(text):
     return mainNRe.findall(text)
 
 
-def findMaterial(text):
-    """Get the text of the material div. """
-
-    results = materialRe.findall(text)
-    return results[0].strip() if results else None
-
-
 def findMsg(text):
     """Get flashed messages from a response.
 
@@ -325,9 +318,7 @@ def forall(cls, expect, assertFunc, *args):
             continue
         exp = expect[user]
         serverprint(f"USER {user} EXPECTS {exp}")
-        print(f"BEFORE {user} {assertFunc} {cls[user]}, {args}, {exp}")
         assertFunc(cls[user], *args, exp)
-        print(f"AFTER {user} {assertFunc}")
 
 
 def getEid(client, table, multiple=False):

@@ -20,6 +20,7 @@ limits:
   keys: 100
   masterId: 30
   method: 50
+  request: 1000000
   reverse: 3
   reviewed: 2
   sortcol: 100

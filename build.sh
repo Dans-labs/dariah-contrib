@@ -467,6 +467,8 @@ function docs {
 }
 
 function docsship {
+    stats
+    docsapiall
     docsmk "deploy"
     gitsave "docs update: $*"
 }

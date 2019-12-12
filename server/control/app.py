@@ -2,6 +2,7 @@
 """
 
 import os
+from itertools import chain
 
 from flask import (
     Flask,
@@ -96,8 +97,11 @@ def redirectResult(url, good):
 def checkBounds(**kwargs):
     """Aggressive check on the arguments passed in an url and/or request.
 
-    Each argument in `kwargs` must have a name that is allowed and its value should
-    have a length under an appropriate limit,
+    First the total length of the request is counted.
+    If it is too much, the request will be aborted.
+
+    Each argument in request.args and `kwargs` must have a name that is allowed
+    and its value should have a length under an appropriate limit,
     configured in `web.yaml`. There is always a fallback limit.
 
     !!! caution "Security"
@@ -122,13 +126,17 @@ def checkBounds(**kwargs):
     """
 
     default = G(LIMITS, N.default, default=50)
+    maxLen = G(LIMITS, N.request, default=default)
 
-    n = len(kwargs)
+    if request.content_length and request.content_length > maxLen:
+        abort(400)
+
+    n = len(request.args)
     boundN = G(LIMITS, N.keys, default=default)
     if len(kwargs) > boundN:
         serverprint(f"""OUT-OF-BOUNDS: {n} > {boundN} KEYS IN {kwargs}""")
         abort(400)
-    for (k, v) in kwargs.items():
+    for (k, v) in chain.from_iterable((kwargs.items(), request.args.items())):
         if k not in LIMITS:
             abort(400)
         valN = G(LIMITS, k, default=default)
@@ -201,7 +209,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""/whoami""")
     def serveWhoami():
-        checkBounds(**request.args)
+        checkBounds()
         if auth.authenticated():
             return G(auth.user, N.eppn)
         else:
@@ -210,7 +218,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/{N.static}/<path:filepath>""")
     def serveStatic(filepath):
         checkBounds(filepath=filepath)
-        checkBounds(**request.args)
 
         path = f"""{STATIC_ROOT}/{filepath}"""
         if os.path.isfile(path):
@@ -221,7 +228,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/{N.favicons}/<path:filepath>""")
     def serveFavicons(filepath):
         checkBounds(filepath=filepath)
-        checkBounds(**request.args)
 
         path = f"""{STATIC_ROOT}/{N.favicons}/{filepath}"""
         if os.path.isfile(path):
@@ -233,7 +239,7 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/{N.index}""")
     @app.route(f"""/{INDEX}""")
     def serveIndex():
-        checkBounds(**request.args)
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -245,7 +251,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{OVERVIEW}""")
     def serveOverview():
-        checkBounds(**request.args)
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -256,7 +262,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{OVERVIEW}.tsv""")
     def serveOverviewTsv():
-        checkBounds(**request.args)
+        checkBounds()
         context = getContext()
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
@@ -265,7 +271,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{SLOGOUT}""")
     def serveSlogout():
-        checkBounds(**request.args)
+        checkBounds()
         if auth.authenticated():
             auth.deauthenticate()
             flash("logged out from DARIAH")
@@ -275,7 +281,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{LOGIN}""")
     def serveLogin():
-        checkBounds(**request.args)
+        checkBounds()
         if auth.authenticated():
             flash("you are already logged in")
         good = True
@@ -288,7 +294,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{LOGOUT}""")
     def serveLogout():
-        checkBounds(**request.args)
+        checkBounds()
         if auth.authenticated():
             auth.deauthenticate()
             flash("logged out")
@@ -300,7 +306,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f"""{WORKFLOW}""")
     def serveWorkflow():
-        checkBounds(**request.args)
+        checkBounds()
         context = getContext()
         auth.authenticate()
         nWf = context.resetWorkflow()
@@ -315,7 +321,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/task/<string:task>/<string:eid>""")
     def serveTask(task, eid):
         checkBounds(task=task, eid=eid)
-        checkBounds(**request.args)
 
         context = getContext()
         auth.authenticate()
@@ -329,7 +334,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/<string:table>/{N.insert}""")
     def serveTableInsert(table):
         checkBounds(table=table)
-        checkBounds(**request.args)
 
         newPath = f"""/{table}/{N.list}"""
         if table in ALL_TABLES and table not in MASTERS:
@@ -350,7 +354,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/<string:table>/<string:eid>/<string:dtable>/{N.insert}""")
     def serveTableInsertDetail(table, eid, dtable):
         checkBounds(table=table, eid=eid, dtable=dtable)
-        checkBounds(**request.args)
 
         newPath = f"""/{table}/{N.item}/{eid}"""
         dEid = None
@@ -364,9 +367,7 @@ def appFactory(regime, test, debug, **kwargs):
             if tablePerm(table):
                 dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
-                newPath = (
-                    f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{dEid}"""
-                )
+                newPath = f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{dEid}"""
         if dEid:
             flash(f"{dtable} item added")
         else:
@@ -388,7 +389,7 @@ def appFactory(regime, test, debug, **kwargs):
         return serveTable(table, None)
 
     def serveTable(table, eid):
-        checkBounds(**request.args)
+        checkBounds()
         action = G(request.args, N.action)
         actionRep = f"?action={action}" if action else E
         eidRep = f"""/{eid}""" if eid else E
@@ -420,7 +421,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/<string:table>/{N.delete}/<string:eid>""")
     def serveRecordDelete(table, eid):
         checkBounds(table=table, eid=eid)
-        checkBounds(**request.args)
 
         if table in ALL_TABLES:
             context = getContext()
@@ -446,7 +446,6 @@ def appFactory(regime, test, debug, **kwargs):
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
         checkBounds(table=table, masterId=masterId, dtable=dtable, eid=eid)
-        checkBounds(**request.args)
 
         newPath = f"""/{table}/{N.item}/{masterId}"""
         good = False
@@ -475,7 +474,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>""")
     def serveRecord(table, eid):
         checkBounds(table=table, eid=eid)
-        checkBounds(**request.args)
 
         if table in ALL_TABLES:
             context = getContext()
@@ -491,7 +489,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/api/<string:table>/{N.item}/<string:eid>/{N.title}""")
     def serveRecordTitle(table, eid):
         checkBounds(table=table, eid=eid)
-        checkBounds(**request.args)
 
         if table in ALL_TABLES:
             context = getContext()
@@ -512,7 +509,6 @@ def appFactory(regime, test, debug, **kwargs):
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
         checkBounds(table=table, eid=eid, dtable=dtable, deid=deid)
-        checkBounds(**request.args)
 
         path = f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}"""
         if table in ALL_TABLES:
@@ -537,7 +533,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/<string:table>/{N.item}/<string:eid>""")
     def serveRecordPageDet(table, eid):
         checkBounds(table=table, eid=eid)
-        checkBounds(**request.args)
 
         path = f"""/{table}/{N.item}/{eid}"""
         if table in ALL_TABLES:
@@ -572,7 +567,6 @@ def appFactory(regime, test, debug, **kwargs):
     )
     def serveField(table, eid, field):
         checkBounds(table=table, eid=eid, field=field)
-        checkBounds(**request.args)
 
         action = G(request.args, N.action)
         if action in FIELD_ACTIONS:
@@ -594,7 +588,6 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/<path:anything>""")
     def serveNotFound(anything=None):
         checkBounds(anything=anything)
-        checkBounds(**request.args)
 
         flash(f"Cannot find {anything}", "error")
         abort(400)

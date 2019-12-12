@@ -219,15 +219,6 @@ def isIterable(value):
     return type(value) is not str and hasattr(value, ITER)
 
 
-def asIterable(value):
-    """Turn a value into a singleton iterable if it is not yet an iterable.
-
-    We mean: non-string iterables here.
-    """
-
-    return value if isIterable(value) else [value]
-
-
 def asString(value):
     """Join an iterable of strings into a string.
 

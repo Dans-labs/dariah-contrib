@@ -250,15 +250,6 @@ def isIterable(value):
     return type(value) is not str and hasattr(value, ITER)
 
 
-def asIterable(value):
-    &#34;&#34;&#34;Turn a value into a singleton iterable if it is not yet an iterable.
-
-    We mean: non-string iterables here.
-    &#34;&#34;&#34;
-
-    return value if isIterable(value) else [value]
-
-
 def asString(value):
     &#34;&#34;&#34;Join an iterable of strings into a string.
 
@@ -407,25 +398,6 @@ def thinM(chunks):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="control.utils.asIterable"><code class="name flex">
-<span>def <span class="ident">asIterable</span></span>(<span>value)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Turn a value into a singleton iterable if it is not yet an iterable.</p>
-<p>We mean: non-string iterables here.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def asIterable(value):
-    &#34;&#34;&#34;Turn a value into a singleton iterable if it is not yet an iterable.
-
-    We mean: non-string iterables here.
-    &#34;&#34;&#34;
-
-    return value if isIterable(value) else [value]</code></pre>
-</details>
-</dd>
 <dt id="control.utils.asString"><code class="name flex">
 <span>def <span class="ident">asString</span></span>(<span>value)</span>
 </code></dt>
@@ -1053,7 +1025,6 @@ those from the identity provider..</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="control.utils.asIterable" href="#control.utils.asIterable">asIterable</a></code></li>
 <li><code><a title="control.utils.asString" href="#control.utils.asString">asString</a></code></li>
 <li><code><a title="control.utils.bdecode" href="#control.utils.bdecode">bdecode</a></code></li>
 <li><code><a title="control.utils.bencode" href="#control.utils.bencode">bencode</a></code></li>

@@ -56,6 +56,11 @@ root | root | unique authenticated user that can assign office users and system 
 The following files can be run individually, or as part of an all-tests-run,
 in alphabetical order of the file names.
 
+### Tests: app
+
+`test_00_app10`
+:   Checking the app urls and weird deviations from them.
+
 ### Tests: setup
 
 `test_10_factory10`
@@ -107,11 +112,6 @@ in alphabetical order of the file names.
 
 `test_60_contrib10`
 :   Selecting contributions.
-
-### Tests: security
-
-`test_90_security10`
-:   Checking the response to forged requests.
 
 """
 

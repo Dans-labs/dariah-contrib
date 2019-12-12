@@ -42,7 +42,7 @@ Only <strong>expert</strong> and <strong>final</strong> should see it.</dd>
 <dt><a title="test_50_review10.test_tryStartReviewAll" href="#test_50_review10.test_tryStartReviewAll"><code>test_tryStartReviewAll()</code></a></dt>
 <dd>All users try to start a review for the assessment. Only <strong>expert</strong> and <strong>final</strong>
 succeed and they delete the assessment again.</dd>
-<dt><a title="test_50_review10.test_tryStartReview" href="#test_50_review10.test_tryStartReview"><code>test_tryStartReview()</code></a></dt>
+<dt><a title="test_50_review10.test_startReview" href="#test_50_review10.test_startReview"><code>test_startReview()</code></a></dt>
 <dd><strong>expert</strong> and <strong>final</strong> start their review again.</dd>
 <dt><a title="test_50_review10.test_reviewEntries" href="#test_50_review10.test_reviewEntries"><code>test_reviewEntries()</code></a></dt>
 <dd>All users try to see the review entries.
@@ -87,7 +87,7 @@ Filling out reviews.
 :   All users try to start a review for the assessment. Only **expert** and **final**
     succeed and they delete the assessment again.
 
-`test_tryStartReview`
+`test_startReview`
 :   **expert** and **final** start their review again.
 
 `test_reviewEntries`
@@ -127,6 +127,7 @@ from helpers import (
     findTasks,
     forall,
     getItem,
+    getREIds,
 )
 from starters import start
 from subtest import (
@@ -202,18 +203,15 @@ def test_tryStartReviewAll(clients):
     forall(clients, expect, assertIt)
 
 
-def test_tryStartReview(clientsReviewer):
+def test_startReview(clientsReviewer):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     recordInfo.setdefault(REVIEW, {})
 
     def assertIt(cl, exp):
         rIds = assertStartTask(cl, START_REVIEW, aId, exp)
         user = cl.user
-        if exp:
-            assert len(rIds) == 1
-            recordInfo[REVIEW].setdefault(user, {})[&#34;eid&#34;] = rIds[0]
-        else:
-            assert len(rIds) == 0
+        assert len(rIds) == 1
+        recordInfo[REVIEW].setdefault(user, {})[&#34;eid&#34;] = rIds[0]
 
     expect = {user: True for user in {EXPERT, FINAL}}
     forall(clientsReviewer, expect, assertIt)
@@ -236,7 +234,7 @@ def test_reviewEntries(clients):
                     assert user in reviewEntries
                     assert COMMENTS in reviewEntries[user][1]
                     assert reviewEntries[user][1][COMMENTS] == E
-                elif user in POWER_USERS:
+                else:
                     assert EXPERT in reviewEntries
                     assert FINAL in reviewEntries
 
@@ -247,11 +245,7 @@ def test_reviewEntries(clients):
 
 def test_reviewEntryFillFirstAll(clients):
     cIdFirst = cIds[0]
-    reId = {}
-    for user in {EXPERT, FINAL}:
-        (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
-        reviewEntries = findReviewEntries(text)
-        reId[user] = reviewEntries[user][0]
+    reId = getREIds(clients, cIdFirst)
 
     def assertIt(cl, exp):
         user = cl.user
@@ -320,7 +314,7 @@ def test_reviewEntryFill(clientsReviewer):
                     assert user in reviewEntries
                     assert COMMENTS in reviewEntries[user][1]
                     assert reviewEntries[user][1][COMMENTS] == E
-                elif user in POWER_USERS:
+                else:
                     assert EXPERT in reviewEntries
                     assert FINAL in reviewEntries
 
@@ -366,11 +360,7 @@ def test_reviewEntryFill(clientsReviewer):
 </summary>
 <pre><code class="python">def test_reviewEntryFillFirstAll(clients):
     cIdFirst = cIds[0]
-    reId = {}
-    for user in {EXPERT, FINAL}:
-        (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
-        reviewEntries = findReviewEntries(text)
-        reId[user] = reviewEntries[user][0]
+    reId = getREIds(clients, cIdFirst)
 
     def assertIt(cl, exp):
         user = cl.user
@@ -436,8 +426,8 @@ def test_reviewEntryFill(clientsReviewer):
     )</code></pre>
 </details>
 </dd>
-<dt id="test_50_review10.test_tryStartReview"><code class="name flex">
-<span>def <span class="ident">test_tryStartReview</span></span>(<span>clientsReviewer)</span>
+<dt id="test_50_review10.test_startReview"><code class="name flex">
+<span>def <span class="ident">test_startReview</span></span>(<span>clientsReviewer)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -445,18 +435,15 @@ def test_reviewEntryFill(clientsReviewer):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_tryStartReview(clientsReviewer):
+<pre><code class="python">def test_startReview(clientsReviewer):
     aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
     recordInfo.setdefault(REVIEW, {})
 
     def assertIt(cl, exp):
         rIds = assertStartTask(cl, START_REVIEW, aId, exp)
         user = cl.user
-        if exp:
-            assert len(rIds) == 1
-            recordInfo[REVIEW].setdefault(user, {})[&#34;eid&#34;] = rIds[0]
-        else:
-            assert len(rIds) == 0
+        assert len(rIds) == 1
+        recordInfo[REVIEW].setdefault(user, {})[&#34;eid&#34;] = rIds[0]
 
     expect = {user: True for user in {EXPERT, FINAL}}
     forall(clientsReviewer, expect, assertIt)</code></pre>
@@ -532,7 +519,7 @@ def test_reviewEntryFill(clientsReviewer):
 <li><code><a title="test_50_review10.test_reviewEntryFillFirstAll" href="#test_50_review10.test_reviewEntryFillFirstAll">test_reviewEntryFillFirstAll</a></code></li>
 <li><code><a title="test_50_review10.test_sidebar" href="#test_50_review10.test_sidebar">test_sidebar</a></code></li>
 <li><code><a title="test_50_review10.test_start" href="#test_50_review10.test_start">test_start</a></code></li>
-<li><code><a title="test_50_review10.test_tryStartReview" href="#test_50_review10.test_tryStartReview">test_tryStartReview</a></code></li>
+<li><code><a title="test_50_review10.test_startReview" href="#test_50_review10.test_startReview">test_startReview</a></code></li>
 <li><code><a title="test_50_review10.test_tryStartReviewAll" href="#test_50_review10.test_tryStartReviewAll">test_tryStartReviewAll</a></code></li>
 <li><code><a title="test_50_review10.test_viewAssessment" href="#test_50_review10.test_viewAssessment">test_viewAssessment</a></code></li>
 </ul>

@@ -172,7 +172,7 @@ def test_reviewEntries(clients):
                     assert user in reviewEntries
                     assert COMMENTS in reviewEntries[user][1]
                     assert reviewEntries[user][1][COMMENTS] == E
-                elif user in POWER_USERS:
+                else:
                     assert EXPERT in reviewEntries
                     assert FINAL in reviewEntries
 

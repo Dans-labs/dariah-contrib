@@ -37,7 +37,7 @@
 *   Authorization
 &#34;&#34;&#34;
 
-from flask import request, session
+from flask import request, session, abort
 from control.utils import (
     pick as G,
     utf8FromLatin1,
@@ -66,6 +66,9 @@ CW = C.web
 
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
+
+LIMITS = CW.limits
+LIMIT_JSON = G(LIMITS, N.json, default=1000000)
 
 Qc = H.icon(CW.unknown[N.country], asChar=True)
 Qu = H.icon(CW.unknown[N.user], asChar=True)
@@ -204,22 +207,26 @@ class Auth:
             )
         ]
         user.clear()
+        if len(userFound) != 1:
+            self.clearUser()
+            return False
+
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        if len(userFound) == 1:
-            user.update(userFound[0])
+        user.update(userFound[0])
         if not G(user, N.mayLogin, default=True):
             # this checks whether mayLogin is explicitly set to False
             self.clearUser()
+            return False
+
+        if N.group in user:
+            if N.groupRep not in user:
+                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
+                user[N.groupRep] = groupRep
         else:
-            if N.group in user:
-                if N.groupRep not in user:
-                    groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                    user[N.groupRep] = groupRep
-            else:
-                user[N.group] = authId
-                user[N.groupRep] = AUTH
+            user[N.group] = authId
+            user[N.groupRep] = AUTH
         return user[N.groupRep] != UNAUTH
 
     def wrapTestUsers(self):
@@ -272,6 +279,9 @@ class Auth:
         authUser = self.authUser
         unauthUser = self.unauthUser
 
+        contentLength = request.content_length
+        if contentLength is not None and contentLength &gt; LIMIT_JSON:
+            abort(400)
         env = request.environ
         self.clearUser()
         if isDevel:
@@ -807,22 +817,26 @@ attributes.</p>
             )
         ]
         user.clear()
+        if len(userFound) != 1:
+            self.clearUser()
+            return False
+
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        if len(userFound) == 1:
-            user.update(userFound[0])
+        user.update(userFound[0])
         if not G(user, N.mayLogin, default=True):
             # this checks whether mayLogin is explicitly set to False
             self.clearUser()
+            return False
+
+        if N.group in user:
+            if N.groupRep not in user:
+                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
+                user[N.groupRep] = groupRep
         else:
-            if N.group in user:
-                if N.groupRep not in user:
-                    groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                    user[N.groupRep] = groupRep
-            else:
-                user[N.group] = authId
-                user[N.groupRep] = AUTH
+            user[N.group] = authId
+            user[N.groupRep] = AUTH
         return user[N.groupRep] != UNAUTH
 
     def wrapTestUsers(self):
@@ -875,6 +889,9 @@ attributes.</p>
         authUser = self.authUser
         unauthUser = self.unauthUser
 
+        contentLength = request.content_length
+        if contentLength is not None and contentLength &gt; LIMIT_JSON:
+            abort(400)
         env = request.environ
         self.clearUser()
         if isDevel:
@@ -1431,6 +1448,9 @@ to a newly logged-in user.</p>
     authUser = self.authUser
     unauthUser = self.unauthUser
 
+    contentLength = request.content_length
+    if contentLength is not None and contentLength &gt; LIMIT_JSON:
+        abort(400)
     env = request.environ
     self.clearUser()
     if isDevel:
@@ -1835,22 +1855,26 @@ info that says that the current user is the public and nothing more.</dd>
         )
     ]
     user.clear()
+    if len(userFound) != 1:
+        self.clearUser()
+        return False
+
     user.update({N.eppn: eppn, N.authority: authority})
     if email:
         user[N.email] = email
-    if len(userFound) == 1:
-        user.update(userFound[0])
+    user.update(userFound[0])
     if not G(user, N.mayLogin, default=True):
         # this checks whether mayLogin is explicitly set to False
         self.clearUser()
+        return False
+
+    if N.group in user:
+        if N.groupRep not in user:
+            groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
+            user[N.groupRep] = groupRep
     else:
-        if N.group in user:
-            if N.groupRep not in user:
-                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                user[N.groupRep] = groupRep
-        else:
-            user[N.group] = authId
-            user[N.groupRep] = AUTH
+        user[N.group] = authId
+        user[N.groupRep] = AUTH
     return user[N.groupRep] != UNAUTH</code></pre>
 </details>
 </dd>

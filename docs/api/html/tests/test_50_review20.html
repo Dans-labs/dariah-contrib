@@ -42,9 +42,41 @@ succeed for all comments.
 Only when a review decision has been taken, the review comments become readable
 to the owner/editor of the contribution, the other reviewer, and the national
 coordinator.</dd>
-<dt><a title="test_50_review20.test_decideExpertAll" href="#test_50_review20.test_decideExpertAll"><code>test_decideExpertAll()</code></a></dt>
-<dd>All users try to make an expert decision. Only <strong>expert</strong> succeeds.
-He undoes his decision afterwards.</dd>
+<dt><a title="test_50_review20.test_decideOthers" href="#test_50_review20.test_decideOthers"><code>test_decideOthers()</code></a></dt>
+<dd>All users except the reviewers try to make all review decisions.
+None of them succeeds.</dd>
+<dt><a title="test_50_review20.test_reviewersDecide" href="#test_50_review20.test_reviewersDecide"><code>test_reviewersDecide()</code></a></dt>
+<dd><strong>expert</strong> tries to make all possible decisions and then revokes
+his last decision.
+After that, <strong>final</strong> tries the same, but fails, because
+<strong>final</strong> can only decide after <strong>expert</strong>.</dd>
+<dt><a title="test_50_review20.test_expertDecides" href="#test_50_review20.test_expertDecides"><code>test_expertDecides()</code></a></dt>
+<dd><strong>expert</strong> tries to revoke the decision, but fails because the decision
+is already revoked.
+Then he Accepts.
+Then he Accepts again, but fails, because it is the same as the existing
+decision.</dd>
+<dt><a title="test_50_review20.test_finalAccepts" href="#test_50_review20.test_finalAccepts"><code>test_finalAccepts()</code></a></dt>
+<dd><strong>final</strong> accepts.
+After that <strong>expert</strong> tries to take all review decisions, but fails,
+because the final decision has been taken.</dd>
+<dt><a title="test_50_review20.test_modify" href="#test_50_review20.test_modify"><code>test_modify()</code></a></dt>
+<dd>All users try to modify a field in the contribution, in the assessment, and in
+a review comment, but all fail, because everything is in a finished state.
+In particular, also a re-assignment of the reviewers to the assessment it attempted.</dd>
+<dt><a title="test_50_review20.test_finalRevokes" href="#test_50_review20.test_finalRevokes"><code>test_finalRevokes()</code></a></dt>
+<dd><strong>final</strong> revokes his decision.
+After that <strong>expert</strong> tries to take all review decisions, and succeeds,
+because there is no final decision.</dd>
+<dt><a title="test_50_review20.test_modify2" href="#test_50_review20.test_modify2"><code>test_modify2()</code></a></dt>
+<dd>
+<p>All users try to modify a field in the contribution, in the assessment, and in
+a review comment, and some succeed, because there is no finished state.</p>
+<p>The assesssment is still submitted, so the contribution and assessment are still
+locked: nobody can modify them.</p>
+<p>The reviewers can be reassigned by <strong>office</strong>.</p>
+<p>The reviews can be modified.</p>
+</dd>
 </dl>
 <details class="source">
 <summary>
@@ -75,31 +107,92 @@ Filling out reviews.
     to the owner/editor of the contribution, the other reviewer, and the national
     coordinator.
 
-`test_decideExpertAll`
-:   All users try to make an expert decision. Only **expert** succeeds.
-    He undoes his decision afterwards.
+`test_decideOthers`
+:   All users except the reviewers try to make all review decisions.
+    None of them succeeds.
+
+`test_reviewersDecide`
+:   **expert** tries to make all possible decisions and then revokes
+    his last decision.
+    After that, **final** tries the same, but fails, because
+    **final** can only decide after **expert**.
+
+`test_expertDecides`
+:   **expert** tries to revoke the decision, but fails because the decision
+    is already revoked.
+    Then he Accepts.
+    Then he Accepts again, but fails, because it is the same as the existing
+    decision.
+
+`test_finalAccepts`
+:   **final** accepts.
+    After that **expert** tries to take all review decisions, but fails,
+    because the final decision has been taken.
+
+`test_modify`
+:   All users try to modify a field in the contribution, in the assessment, and in
+    a review comment, but all fail, because everything is in a finished state.
+    In particular, also a re-assignment of the reviewers to the assessment it attempted.
+
+`test_finalRevokes`
+:   **final** revokes his decision.
+    After that **expert** tries to take all review decisions, and succeeds,
+    because there is no final decision.
+
+`test_modify2`
+:   All users try to modify a field in the contribution, in the assessment, and in
+    a review comment, and some succeed, because there is no finished state.
+
+    The assesssment is still submitted, so the contribution and assessment are still
+    locked: nobody can modify them.
+
+    The reviewers can be reassigned by **office**.
+
+    The reviews can be modified.
 &#34;&#34;&#34;
 
 import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, POWER_USERS
 from example import (
+    ACCEPT,
+    ASSESS,
     COMMENTS,
+    COMMENTS_E,
+    COMMENTS_F,
+    CONTRIB,
     CRITERIA_ENTRY,
+    EVIDENCE,
+    EVIDENCE1,
     EXPERT,
-    EXPERT_REVIEW_ACCEPT,
     FINAL,
+    OFFICE,
+    REJECT,
+    REMARKS,
+    REMARKS_E,
+    REMARKS_F,
     REVIEW,
+    REVIEW_DECISION,
     REVIEW_ENTRY,
+    REVIEWER_E,
+    REVISE,
+    REVOKE,
+    TITLE,
+    TITLE2,
+    TITLE_A2,
+    USER,
 )
 from helpers import (
     findReviewEntries,
     forall,
     getItem,
+    getREIds,
 )
 from starters import start
 from subtest import (
     assertFieldValue,
+    assertModifyField,
+    assertReviewDecisions,
     assertStatus,
 )
 
@@ -152,15 +245,165 @@ def test_reviewEntryView(clients):
     forall(clients, expect, assertIt)
 
 
-def test_decideExpertAll(clients):
-    rId = G(G(G(recordInfo, REVIEW), EXPERT), &#34;eid&#34;)
-    url = f&#34;/api/task/{EXPERT_REVIEW_ACCEPT}/{rId}&#34;
+def test_decideOthers(clients):
+    reviewInfo = G(recordInfo, REVIEW)
 
     def assertIt(cl, exp):
-        assertStatus(cl, url, exp)
+        user = cl.user
+        for kind in [EXPERT, FINAL]:
+            rId = G(G(reviewInfo, kind), &#34;eid&#34;)
+            expStatus = kind == user if exp else exp
+            for decision in [REJECT, REVISE, ACCEPT, REVOKE]:
+                decisionStr = G(G(REVIEW_DECISION, decision), kind)
+                url = f&#34;/api/task/{decisionStr}/{rId}&#34;
+                assertStatus(cl, url, expStatus)
+
+    expect = {user: False for user in USERS if user not in {EXPERT, FINAL}}
+    forall(clients, expect, assertIt)
+
+
+def test_reviewersDecide(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer,
+        recordInfo,
+        [EXPERT, FINAL],
+        [REJECT, REVISE, ACCEPT, REVOKE],
+        {EXPERT: True, FINAL: False},
+    )
+
+
+def test_expertDecides(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REVOKE], False,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], False,
+    )
+
+
+def test_finalAccepts(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [FINAL], [ACCEPT], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+    )
+
+
+def test_modify(clients):
+    users = G(valueTables, USER)
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    reviewInfo = G(recordInfo, REVIEW)
+    rEId = G(G(reviewInfo, EXPERT), &#34;eid&#34;)
+    rFId = G(G(reviewInfo, FINAL), &#34;eid&#34;)
+    cIdFirst = cIds[0]
+    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp)
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp)
+        reviewerFId = G(users, FINAL)
+        assertModifyField(cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp)
+        assertModifyField(
+            cl, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([EVIDENCE1], EVIDENCE1), exp
+        )
+        for (rId, remarks) in ((rEId, REMARKS_E), (rFId, REMARKS_F)):
+            assertModifyField(cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp)
+        for (u, reid) in reId.items():
+            comments = COMMENTS_E if u == EXPERT else COMMENTS_F
+            assertModifyField(
+                cl, REVIEW_ENTRY, reid, COMMENTS, ([comments], comments), exp
+            )
 
     expect = {user: False for user in USERS}
-    expect.update({user: True for user in {EXPERT}})
+    forall(clients, expect, assertIt)
+
+
+def test_finalRevokes(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [FINAL], [REVOKE], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
+    )
+
+
+def test_modify2(clients):
+    users = G(valueTables, USER)
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    reviewInfo = G(recordInfo, REVIEW)
+    rEId = G(G(reviewInfo, EXPERT), &#34;eid&#34;)
+    rFId = G(G(reviewInfo, FINAL), &#34;eid&#34;)
+    cIdFirst = cIds[0]
+    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
+        reviewerFId = G(users, FINAL)
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp[&#34;assign&#34;]
+        )
+        assertModifyField(
+            cl,
+            CRITERIA_ENTRY,
+            cIdFirst,
+            EVIDENCE,
+            ([EVIDENCE1], EVIDENCE1),
+            exp[CRITERIA_ENTRY],
+        )
+        for (rId, remarks, kind) in (
+            (rEId, REMARKS_E, EXPERT),
+            (rFId, REMARKS_F, FINAL),
+        ):
+            assertModifyField(
+                cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp[f&#34;{REVIEW}_{kind}&#34;]
+            )
+        for (kind, reid) in reId.items():
+            comments = COMMENTS_E if kind == EXPERT else COMMENTS_F
+            assertModifyField(
+                cl,
+                REVIEW_ENTRY,
+                reid,
+                COMMENTS,
+                ([comments], comments),
+                exp[f&#34;{REVIEW_ENTRY}_{kind}&#34;],
+            )
+
+    expectDefault = {user: False for user in USERS}
+    expectPerKind = {
+        CONTRIB: dict(expectDefault),
+        ASSESS: dict(expectDefault),
+        CRITERIA_ENTRY: dict(expectDefault),
+        &#34;assign&#34;: dict(expectDefault),
+        f&#34;{REVIEW}_{EXPERT}&#34;: dict(expectDefault),
+        f&#34;{REVIEW}_{FINAL}&#34;: dict(expectDefault),
+        f&#34;{REVIEW_ENTRY}_{EXPERT}&#34;: dict(expectDefault),
+        f&#34;{REVIEW_ENTRY}_{FINAL}&#34;: dict(expectDefault),
+    }
+    expectPerKind[&#34;assign&#34;].update({user: True for user in {OFFICE}})
+    expectPerKind[f&#34;{REVIEW}_{EXPERT}&#34;].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW}_{FINAL}&#34;].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW_ENTRY}_{EXPERT}&#34;].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW_ENTRY}_{FINAL}&#34;].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expect = {}
+    for (kind, expectKind) in expectPerKind.items():
+        for (user, exp) in expectKind.items():
+            expect.setdefault(user, {})[kind] = exp
+
     forall(clients, expect, assertIt)</code></pre>
 </details>
 </section>
@@ -171,8 +414,8 @@ def test_decideExpertAll(clients):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="test_50_review20.test_decideExpertAll"><code class="name flex">
-<span>def <span class="ident">test_decideExpertAll</span></span>(<span>clients)</span>
+<dt id="test_50_review20.test_decideOthers"><code class="name flex">
+<span>def <span class="ident">test_decideOthers</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -180,15 +423,200 @@ def test_decideExpertAll(clients):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_decideExpertAll(clients):
-    rId = G(G(G(recordInfo, REVIEW), EXPERT), &#34;eid&#34;)
-    url = f&#34;/api/task/{EXPERT_REVIEW_ACCEPT}/{rId}&#34;
+<pre><code class="python">def test_decideOthers(clients):
+    reviewInfo = G(recordInfo, REVIEW)
 
     def assertIt(cl, exp):
-        assertStatus(cl, url, exp)
+        user = cl.user
+        for kind in [EXPERT, FINAL]:
+            rId = G(G(reviewInfo, kind), &#34;eid&#34;)
+            expStatus = kind == user if exp else exp
+            for decision in [REJECT, REVISE, ACCEPT, REVOKE]:
+                decisionStr = G(G(REVIEW_DECISION, decision), kind)
+                url = f&#34;/api/task/{decisionStr}/{rId}&#34;
+                assertStatus(cl, url, expStatus)
+
+    expect = {user: False for user in USERS if user not in {EXPERT, FINAL}}
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_expertDecides"><code class="name flex">
+<span>def <span class="ident">test_expertDecides</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_expertDecides(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REVOKE], False,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], False,
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_finalAccepts"><code class="name flex">
+<span>def <span class="ident">test_finalAccepts</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_finalAccepts(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [FINAL], [ACCEPT], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_finalRevokes"><code class="name flex">
+<span>def <span class="ident">test_finalRevokes</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_finalRevokes(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [FINAL], [REVOKE], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_modify"><code class="name flex">
+<span>def <span class="ident">test_modify</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_modify(clients):
+    users = G(valueTables, USER)
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    reviewInfo = G(recordInfo, REVIEW)
+    rEId = G(G(reviewInfo, EXPERT), &#34;eid&#34;)
+    rFId = G(G(reviewInfo, FINAL), &#34;eid&#34;)
+    cIdFirst = cIds[0]
+    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp)
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp)
+        reviewerFId = G(users, FINAL)
+        assertModifyField(cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp)
+        assertModifyField(
+            cl, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([EVIDENCE1], EVIDENCE1), exp
+        )
+        for (rId, remarks) in ((rEId, REMARKS_E), (rFId, REMARKS_F)):
+            assertModifyField(cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp)
+        for (u, reid) in reId.items():
+            comments = COMMENTS_E if u == EXPERT else COMMENTS_F
+            assertModifyField(
+                cl, REVIEW_ENTRY, reid, COMMENTS, ([comments], comments), exp
+            )
 
     expect = {user: False for user in USERS}
-    expect.update({user: True for user in {EXPERT}})
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_modify2"><code class="name flex">
+<span>def <span class="ident">test_modify2</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_modify2(clients):
+    users = G(valueTables, USER)
+    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    reviewInfo = G(recordInfo, REVIEW)
+    rEId = G(G(reviewInfo, EXPERT), &#34;eid&#34;)
+    rFId = G(G(reviewInfo, FINAL), &#34;eid&#34;)
+    cIdFirst = cIds[0]
+    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
+        reviewerFId = G(users, FINAL)
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp[&#34;assign&#34;]
+        )
+        assertModifyField(
+            cl,
+            CRITERIA_ENTRY,
+            cIdFirst,
+            EVIDENCE,
+            ([EVIDENCE1], EVIDENCE1),
+            exp[CRITERIA_ENTRY],
+        )
+        for (rId, remarks, kind) in (
+            (rEId, REMARKS_E, EXPERT),
+            (rFId, REMARKS_F, FINAL),
+        ):
+            assertModifyField(
+                cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp[f&#34;{REVIEW}_{kind}&#34;]
+            )
+        for (kind, reid) in reId.items():
+            comments = COMMENTS_E if kind == EXPERT else COMMENTS_F
+            assertModifyField(
+                cl,
+                REVIEW_ENTRY,
+                reid,
+                COMMENTS,
+                ([comments], comments),
+                exp[f&#34;{REVIEW_ENTRY}_{kind}&#34;],
+            )
+
+    expectDefault = {user: False for user in USERS}
+    expectPerKind = {
+        CONTRIB: dict(expectDefault),
+        ASSESS: dict(expectDefault),
+        CRITERIA_ENTRY: dict(expectDefault),
+        &#34;assign&#34;: dict(expectDefault),
+        f&#34;{REVIEW}_{EXPERT}&#34;: dict(expectDefault),
+        f&#34;{REVIEW}_{FINAL}&#34;: dict(expectDefault),
+        f&#34;{REVIEW_ENTRY}_{EXPERT}&#34;: dict(expectDefault),
+        f&#34;{REVIEW_ENTRY}_{FINAL}&#34;: dict(expectDefault),
+    }
+    expectPerKind[&#34;assign&#34;].update({user: True for user in {OFFICE}})
+    expectPerKind[f&#34;{REVIEW}_{EXPERT}&#34;].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW}_{FINAL}&#34;].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW_ENTRY}_{EXPERT}&#34;].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f&#34;{REVIEW_ENTRY}_{FINAL}&#34;].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expect = {}
+    for (kind, expectKind) in expectPerKind.items():
+        for (user, exp) in expectKind.items():
+            expect.setdefault(user, {})[kind] = exp
+
     forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
@@ -225,6 +653,25 @@ def test_decideExpertAll(clients):
     expect = {user: None for user in USERS}
     expect.update({user: True for user in {EXPERT, FINAL} | POWER_USERS})
     forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_reviewersDecide"><code class="name flex">
+<span>def <span class="ident">test_reviewersDecide</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_reviewersDecide(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer,
+        recordInfo,
+        [EXPERT, FINAL],
+        [REJECT, REVISE, ACCEPT, REVOKE],
+        {EXPERT: True, FINAL: False},
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_50_review20.test_start"><code class="name flex">
@@ -269,8 +716,14 @@ def test_decideExpertAll(clients):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="test_50_review20.test_decideExpertAll" href="#test_50_review20.test_decideExpertAll">test_decideExpertAll</a></code></li>
+<li><code><a title="test_50_review20.test_decideOthers" href="#test_50_review20.test_decideOthers">test_decideOthers</a></code></li>
+<li><code><a title="test_50_review20.test_expertDecides" href="#test_50_review20.test_expertDecides">test_expertDecides</a></code></li>
+<li><code><a title="test_50_review20.test_finalAccepts" href="#test_50_review20.test_finalAccepts">test_finalAccepts</a></code></li>
+<li><code><a title="test_50_review20.test_finalRevokes" href="#test_50_review20.test_finalRevokes">test_finalRevokes</a></code></li>
+<li><code><a title="test_50_review20.test_modify" href="#test_50_review20.test_modify">test_modify</a></code></li>
+<li><code><a title="test_50_review20.test_modify2" href="#test_50_review20.test_modify2">test_modify2</a></code></li>
 <li><code><a title="test_50_review20.test_reviewEntryView" href="#test_50_review20.test_reviewEntryView">test_reviewEntryView</a></code></li>
+<li><code><a title="test_50_review20.test_reviewersDecide" href="#test_50_review20.test_reviewersDecide">test_reviewersDecide</a></code></li>
 <li><code><a title="test_50_review20.test_start" href="#test_50_review20.test_start">test_start</a></code></li>
 </ul>
 </li>

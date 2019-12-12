@@ -32,8 +32,11 @@
 <dl>
 <dt><a title="test_20_users10.test_users" href="#test_20_users10.test_users"><code>test_users()</code></a></dt>
 <dd><strong>office</strong> checks whether all users in the database have a corresponding
-client fixture.
-This client has logged in, except in case of <strong>public</strong>.</dd>
+client fixture.</dd>
+<dt><a title="test_20_users10.test_identity" href="#test_20_users10.test_identity"><code>test_identity()</code></a></dt>
+<dd>We check whether all users work as their own identity.
+This is a test on the web-app as well a test on the mechanics of the test
+framework.</dd>
 <dt><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail"><code>test_readEmail()</code></a></dt>
 <dd>All users try to read the email address of <strong>auth</strong>, but only some succeed</dd>
 </dl>
@@ -56,18 +59,23 @@ Getting to know all users.
 `test_users`
 :   **office** checks whether all users in the database have a corresponding
     client fixture.
-    This client has logged in, except in case of **public**.
+
+`test_identity`
+:   We check whether all users work as their own identity.
+    This is a test on the web-app as well a test on the mechanics of the test
+    framework.
 
 `test_readEmail`
 :   All users try to read the email address of **auth**, but only some succeed
 &#34;&#34;&#34;
 
 import magic  # noqa
-from conftest import USER_LIST, POWER_USERS
+from control.utils import E, serverprint
+from conftest import USER_LIST, NAMED_USERS, POWER_USERS
 from example import AUTH, AUTH_EMAIL, EMAIL, PUBLIC, USER
 from helpers import viewField
 from starters import start
-from subtest import assertFieldValue
+from subtest import assertFieldValue, assertStatus
 
 valueTables = {}
 
@@ -84,6 +92,25 @@ def test_users(clientOffice):
             assert user not in users
         else:
             assert user in users
+
+
+def test_identity(clients):
+    for (user, cl) in clients.items():
+        response = cl.get(&#34;/whoami&#34;)
+        actualUser = response.get_data(as_text=True)
+        serverprint(f&#34;{user} says: I am {actualUser}&#34;)
+        assert user == actualUser
+
+
+def test_login(clients, clientPublic):
+    for user in sorted(NAMED_USERS) + [E, PUBLIC, f&#34;xxxxxx&#34;]:
+        isNamed = user in NAMED_USERS
+        expect = 302 if isNamed else 303
+        serverprint(f&#34;LOGIN {user}&#34;)
+        assertStatus(clientPublic, f&#34;/login?eppn={user}&#34;, expect)
+        serverprint(f&#34;LOGOUT {user}&#34;)
+        if user in clients:
+            assertStatus(clients[user], f&#34;/logout&#34;, expect)
 
 
 def test_readEmail(clients):
@@ -103,6 +130,43 @@ def test_readEmail(clients):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="test_20_users10.test_identity"><code class="name flex">
+<span>def <span class="ident">test_identity</span></span>(<span>clients)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_identity(clients):
+    for (user, cl) in clients.items():
+        response = cl.get(&#34;/whoami&#34;)
+        actualUser = response.get_data(as_text=True)
+        serverprint(f&#34;{user} says: I am {actualUser}&#34;)
+        assert user == actualUser</code></pre>
+</details>
+</dd>
+<dt id="test_20_users10.test_login"><code class="name flex">
+<span>def <span class="ident">test_login</span></span>(<span>clients, clientPublic)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_login(clients, clientPublic):
+    for user in sorted(NAMED_USERS) + [E, PUBLIC, f&#34;xxxxxx&#34;]:
+        isNamed = user in NAMED_USERS
+        expect = 302 if isNamed else 303
+        serverprint(f&#34;LOGIN {user}&#34;)
+        assertStatus(clientPublic, f&#34;/login?eppn={user}&#34;, expect)
+        serverprint(f&#34;LOGOUT {user}&#34;)
+        if user in clients:
+            assertStatus(clients[user], f&#34;/logout&#34;, expect)</code></pre>
+</details>
+</dd>
 <dt id="test_20_users10.test_readEmail"><code class="name flex">
 <span>def <span class="ident">test_readEmail</span></span>(<span>clients)</span>
 </code></dt>
@@ -170,6 +234,8 @@ def test_readEmail(clients):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_20_users10.test_identity" href="#test_20_users10.test_identity">test_identity</a></code></li>
+<li><code><a title="test_20_users10.test_login" href="#test_20_users10.test_login">test_login</a></code></li>
 <li><code><a title="test_20_users10.test_readEmail" href="#test_20_users10.test_readEmail">test_readEmail</a></code></li>
 <li><code><a title="test_20_users10.test_start" href="#test_20_users10.test_start">test_start</a></code></li>
 <li><code><a title="test_20_users10.test_users" href="#test_20_users10.test_users">test_users</a></code></li>

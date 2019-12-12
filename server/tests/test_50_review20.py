@@ -292,7 +292,7 @@ def test_modify2(clients):
             )
 
     expectDefault = {user: False for user in USERS}
-    expect = {
+    expectPerKind = {
         CONTRIB: dict(expectDefault),
         ASSESS: dict(expectDefault),
         CRITERIA_ENTRY: dict(expectDefault),
@@ -302,8 +302,22 @@ def test_modify2(clients):
         f"{REVIEW_ENTRY}_{EXPERT}": dict(expectDefault),
         f"{REVIEW_ENTRY}_{FINAL}": dict(expectDefault),
     }
-    expect["assign"].update({user: True for user in {OFFICE}})
-    expect[f"{REVIEW}_{EXPERT}"].update({user: True for user in {EXPERT} | POWER_USERS})
-    expect[f"{REVIEW}_{FINAL}"].update({user: True for user in {FINAL} | POWER_USERS})
+    expectPerKind["assign"].update({user: True for user in {OFFICE}})
+    expectPerKind[f"{REVIEW}_{EXPERT}"].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f"{REVIEW}_{FINAL}"].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expectPerKind[f"{REVIEW_ENTRY}_{EXPERT}"].update(
+        {user: True for user in {EXPERT} | POWER_USERS}
+    )
+    expectPerKind[f"{REVIEW_ENTRY}_{FINAL}"].update(
+        {user: True for user in {FINAL} | POWER_USERS}
+    )
+    expect = {}
+    for (kind, expectKind) in expectPerKind.items():
+        for (user, exp) in expectKind.items():
+            expect.setdefault(user, {})[kind] = exp
 
     forall(clients, expect, assertIt)

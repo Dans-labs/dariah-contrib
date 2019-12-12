@@ -28,9 +28,19 @@
 <pre><code class="python">&#34;&#34;&#34;Various concrete values needed in the tests.&#34;&#34;&#34;
 
 from control.utils import EURO
-from conftest import USERS, AUTH_USERS, POWER_USERS
+from conftest import USERS, NAMED_USERS, POWER_USERS
 
+_ID = &#34;_id&#34;
 DB = &#34;dariah_test&#34;
+
+STATIC = &#34;/static&#34;
+FAV = &#34;/favicons&#34;
+COMMON_CSS = f&#34;{STATIC}/css/common.css&#34;
+COMMONX_CSS = f&#34;{STATIC}/css/commonx.css&#34;
+FAVICON = f&#34;{FAV}/favicon.ico&#34;
+FAVICONX = f&#34;{FAV}/faviconx.ico&#34;
+FAVICON_S = f&#34;{STATIC}{FAV}/favicon.ico&#34;
+FAVICON_SX = f&#34;{STATIC}{FAV}/faviconx.ico&#34;
 
 WELCOME = &#34;Welcome to the DARIAH contribution tool&#34;
 OVERVIEW = &#34;Country selection&#34;
@@ -48,10 +58,13 @@ COST_DESCRIPTION = &#34;costDescription&#34;
 COUNTRY = &#34;country&#34;
 DESCRIPTION = &#34;description&#34;
 DISCIPLINE = &#34;discipline&#34;
+EDITORS = &#34;editors&#34;
 EMAIL = &#34;email&#34;
 EVIDENCE = &#34;evidence&#34;
 KEYWORD = &#34;keyword&#34;
+LEVEL = &#34;level&#34;
 PACKAGE = &#34;package&#34;
+REMARKS = &#34;remarks&#34;
 REP = &#34;rep&#34;
 REVIEW = &#34;review&#34;
 REVIEW_ENTRY = &#34;reviewEntry&#34;
@@ -88,8 +101,30 @@ COMPLETE = &#34;complete&#34;
 COMPLETE_WITHDRAWN = &#34;completeWithdrawn&#34;
 SUBMITTED = &#34;submitted&#34;
 
-EXPERT_REVIEW_ACCEPT = &#34;expertReviewAccept&#34;
+ACCEPT = &#34;Accept&#34;
+REJECT = &#34;Reject&#34;
+REVISE = &#34;Revise&#34;
+REVOKE = &#34;Revoke&#34;
+
 RESUBMIT_ASSESSMENT = &#34;resubmitAssessment&#34;
+REVIEW_DECISION = {
+    ACCEPT: {
+        EXPERT: &#34;expertReviewAccept&#34;,
+        FINAL: &#34;finalReviewAccept&#34;,
+    },
+    REJECT: {
+        EXPERT: &#34;expertReviewReject&#34;,
+        FINAL: &#34;finalReviewReject&#34;,
+    },
+    REVISE: {
+        EXPERT: &#34;expertReviewRevise&#34;,
+        FINAL: &#34;finalReviewRevise&#34;,
+    },
+    REVOKE: {
+        EXPERT: &#34;expertReviewRevoke&#34;,
+        FINAL: &#34;finalReviewRevoke&#34;,
+    },
+}
 START_ASSESSMENT = &#34;startAssessment&#34;
 START_REVIEW = &#34;startReview&#34;
 SUBMIT_ASSESSMENT = &#34;submitAssessment&#34;
@@ -103,6 +138,13 @@ TITLE1 = &#34;No Title Yet&#34;
 TITLE2 = &#34;Contribution (Modified)&#34;
 TITLE_A = &#34;assessment of {cTitle}&#34;
 TITLE_A2 = &#34;My contribution assessed&#34;
+
+REMARKS_E = &#34;expert remarks&#34;
+REMARKS_F = &#34;final remarks&#34;
+
+EVIDENCE1 = &#34;modified evidence&#34;
+COMMENTS_E = &#34;modified expert comment&#34;
+COMMENTS_F = &#34;modified final comment&#34;
 
 CHECKS = {
     DESCRIPTION: (
@@ -131,9 +173,9 @@ CAPTIONS = (
     (&#34;Home&#34;, USERS, None, WELCOME, None),
     (&#34;Overview&#34;, USERS, None, OVERVIEW, None),
     (&#34;All contributions&#34;, USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
-    (&#34;My contributions&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
-    (&#34;{country} contributions&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
-    (&#34;Contributions I am assessing&#34;, AUTH_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;My contributions&#34;, NAMED_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;{country} contributions&#34;, NAMED_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
+    (&#34;Contributions I am assessing&#34;, NAMED_USERS, 0, &#34;contribution&#34;, &#34;contributions&#34;),
     (
         &#34;Contributions to be selected&#34;,
         {COORD, MYCOORD},
@@ -142,12 +184,12 @@ CAPTIONS = (
         &#34;contributions&#34;,
     ),
     (&#34;All assessments&#34;, POWER_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
-    (&#34;My assessments&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;My assessments&#34;, NAMED_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;Assessments needing reviewers&#34;, {OFFICE}, 0, &#34;assessment&#34;, &#34;assessments&#34;),
-    (&#34;Assessments in review by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
-    (&#34;Assessments reviewed by me&#34;, AUTH_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments in review by me&#34;, NAMED_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
+    (&#34;Assessments reviewed by me&#34;, NAMED_USERS, 0, &#34;assessment&#34;, &#34;assessments&#34;),
     (&#34;All reviews&#34;, POWER_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
-    (&#34;My reviews&#34;, AUTH_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
+    (&#34;My reviews&#34;, NAMED_USERS, 0, &#34;review&#34;, &#34;reviews&#34;),
     (&#34;countries&#34;, POWER_USERS, 51, COUNTRY, None),
     (&#34;criteria&#34;, POWER_USERS, 7, &#34;criteria&#34;, None),
     (&#34;disciplines&#34;, POWER_USERS, 3, None, None),

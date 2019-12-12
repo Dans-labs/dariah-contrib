@@ -29,6 +29,7 @@
 &#34;&#34;&#34;
 
 import os
+from itertools import chain
 
 from flask import (
     Flask,
@@ -41,7 +42,7 @@ from flask import (
 )
 
 from config import Config as C, Names as N
-from control.utils import pick as G, E
+from control.utils import pick as G, E, serverprint
 from control.db import Db
 from control.workflow.compute import Workflow
 from control.workflow.apply import execute
@@ -68,6 +69,8 @@ USER_TABLES_LIST = CT.userTables
 USER_TABLES = set(USER_TABLES_LIST)
 MASTERS = CT.masters
 DETAILS = CT.details
+
+LIMITS = CW.limits
 
 URLS = CW.urls
 &#34;&#34;&#34;A dictionary of fixed fall-back urls.&#34;&#34;&#34;
@@ -98,8 +101,75 @@ NO_ACTION = MESSAGES[N.noAction]
 
 
 def redirectResult(url, good):
+    &#34;&#34;&#34;Redirect.
+
+    Parameters
+    ----------
+    url: string
+        The url to redirect to
+    good:
+        Whether the redirection corresponds to a normal scenario or is the result of
+        an error
+
+    Returns
+    -------
+    response
+        A redirect response with either code 302 (good) or 303 (bad)
+    &#34;&#34;&#34;
+
     code = 302 if good else 303
     return redirect(url, code=code)
+
+
+def checkBounds(**kwargs):
+    &#34;&#34;&#34;Aggressive check on the arguments passed in an url and/or request.
+
+    First the total length of the request is counted.
+    If it is too much, the request will be aborted.
+
+    Each argument in request.args and `kwargs` must have a name that is allowed
+    and its value should have a length under an appropriate limit,
+    configured in `web.yaml`. There is always a fallback limit.
+
+    !!! caution &#34;Security&#34;
+        Before processing any request arg, whether from a form or from the url,
+        use this function to check whether the length is within limits.
+
+        If the length is exceeded, fail with a bad request,
+        without giving any useful feedback.
+        Because in this case we are dealing with a hacker.
+
+    Parameters
+    ----------
+    kwargs: dict
+        The key-values that need to be checked.
+
+    Raises
+    ------
+    HTTPException
+        If the length of any argument is out of bounds,
+        processing is aborted and a bad request response
+        is delivered
+    &#34;&#34;&#34;
+
+    default = G(LIMITS, N.default, default=50)
+    maxLen = G(LIMITS, N.request, default=default)
+
+    if request.content_length and request.content_length &gt; maxLen:
+        abort(400)
+
+    n = len(request.args)
+    boundN = G(LIMITS, N.keys, default=default)
+    if len(kwargs) &gt; boundN:
+        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {boundN} KEYS IN {kwargs}&#34;&#34;&#34;)
+        abort(400)
+    for (k, v) in chain.from_iterable((kwargs.items(), request.args.items())):
+        if k not in LIMITS:
+            abort(400)
+        valN = G(LIMITS, k, default=default)
+        if v is not None and len(v) &gt; valN:
+            serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({v})&#34;&#34;&#34;)
+            abort(400)
 
 
 def appFactory(regime, test, debug, **kwargs):
@@ -164,20 +234,39 @@ def appFactory(regime, test, debug, **kwargs):
         CT.showReferences()
         N.showNames()
 
+    @app.route(f&#34;&#34;&#34;/whoami&#34;&#34;&#34;)
+    def serveWhoami():
+        checkBounds()
+        if auth.authenticated():
+            return G(auth.user, N.eppn)
+        else:
+            return N.public
+
     @app.route(f&#34;&#34;&#34;/{N.static}/&lt;path:filepath&gt;&#34;&#34;&#34;)
     def serveStatic(filepath):
+        checkBounds(filepath=filepath)
+
         path = f&#34;&#34;&#34;{STATIC_ROOT}/{filepath}&#34;&#34;&#34;
-        return send_file(path)
+        if os.path.isfile(path):
+            return send_file(path)
+        flash(f&#34;file not found: {filepath}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;/{N.favicons}/&lt;path:filepath&gt;&#34;&#34;&#34;)
     def serveFavicons(filepath):
-        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons})/{filepath}&#34;&#34;&#34;
-        return send_file(path)
+        checkBounds(filepath=filepath)
+
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons}/{filepath}&#34;&#34;&#34;
+        if os.path.isfile(path):
+            return send_file(path)
+        flash(f&#34;icon not found: {filepath}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(START)
     @app.route(f&#34;&#34;&#34;/{N.index}&#34;&#34;&#34;)
     @app.route(f&#34;&#34;&#34;/{INDEX}&#34;&#34;&#34;)
     def serveIndex():
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -189,6 +278,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;{OVERVIEW}&#34;&#34;&#34;)
     def serveOverview():
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -199,6 +289,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;{OVERVIEW}.tsv&#34;&#34;&#34;)
     def serveOverviewTsv():
+        checkBounds()
         context = getContext()
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
@@ -207,12 +298,19 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;{SLOGOUT}&#34;&#34;&#34;)
     def serveSlogout():
-        auth.deauthenticate()
-        flash(&#34;logged out from DARIAH&#34;)
-        return redirectResult(SHIB_LOGOUT, True)
+        checkBounds()
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash(&#34;logged out from DARIAH&#34;)
+            return redirectResult(SHIB_LOGOUT, True)
+        flash(&#34;you were not logged in&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;{LOGIN}&#34;&#34;&#34;)
     def serveLogin():
+        checkBounds()
+        if auth.authenticated():
+            flash(&#34;you are already logged in&#34;)
         good = True
         if auth.authenticate(login=True):
             flash(&#34;log in successful&#34;)
@@ -223,14 +321,19 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;{LOGOUT}&#34;&#34;&#34;)
     def serveLogout():
-        auth.deauthenticate()
-        flash(&#34;logged out&#34;)
-        return redirectResult(START, True)
+        checkBounds()
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash(&#34;logged out&#34;)
+            return redirectResult(START, True)
+        flash(&#34;you were not logged in&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # SYSADMIN
 
     @app.route(f&#34;&#34;&#34;{WORKFLOW}&#34;&#34;&#34;)
     def serveWorkflow():
+        checkBounds()
         context = getContext()
         auth.authenticate()
         nWf = context.resetWorkflow()
@@ -244,6 +347,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/task/&lt;string:task&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveTask(task, eid):
+        checkBounds(task=task, eid=eid)
+
         context = getContext()
         auth.authenticate()
         (good, newPath) = execute(context, task, eid)
@@ -255,6 +360,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
+        checkBounds(table=table)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
         if table in ALL_TABLES and table not in MASTERS:
             context = getContext()
@@ -273,7 +380,10 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
+        checkBounds(table=table, eid=eid, dtable=dtable)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        dEid = None
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -281,13 +391,10 @@ def appFactory(regime, test, debug, **kwargs):
         ):
             context = getContext()
             auth.authenticate()
-            dEid = None
             if tablePerm(table):
                 dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
-                newPath = (
-                    f&#34;&#34;&#34;/{table}/{N.item}/{eid}/&#34;&#34;&#34; f&#34;&#34;&#34;{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
-                )
+                newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
         if dEid:
             flash(f&#34;{dtable} item added&#34;)
         else:
@@ -298,13 +405,18 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveTableListOpen(table, eid):
+        checkBounds(table=table, eid=eid)
+
         return serveTable(table, eid)
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}&#34;&#34;&#34;)
     def serveTableList(table):
+        checkBounds(table=table)
+
         return serveTable(table, None)
 
     def serveTable(table, eid):
+        checkBounds()
         action = G(request.args, N.action)
         actionRep = f&#34;?action={action}&#34; if action else E
         eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
@@ -335,6 +447,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -358,6 +472,8 @@ def appFactory(regime, test, debug, **kwargs):
         f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
+        checkBounds(table=table, masterId=masterId, dtable=dtable, eid=eid)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
         good = False
         if (
@@ -384,6 +500,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecord(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -397,6 +515,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
     def serveRecordTitle(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -415,6 +535,8 @@ def appFactory(regime, test, debug, **kwargs):
         f&#34;&#34;&#34;{N.open}/&lt;string:dtable&gt;/&lt;string:deid&gt;&#34;&#34;&#34;
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
+        checkBounds(table=table, eid=eid, dtable=dtable, deid=deid)
+
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
         if table in ALL_TABLES:
             context = getContext()
@@ -437,6 +559,8 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
+        checkBounds(table=table, eid=eid)
+
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
         if table in ALL_TABLES:
             context = getContext()
@@ -469,6 +593,8 @@ def appFactory(regime, test, debug, **kwargs):
         f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.field}/&lt;string:field&gt;&#34;&#34;&#34;, **GP
     )
     def serveField(table, eid, field):
+        checkBounds(table=table, eid=eid, field=field)
+
         action = G(request.args, N.action)
         if action in FIELD_ACTIONS:
             context = getContext()
@@ -488,11 +614,11 @@ def appFactory(regime, test, debug, **kwargs):
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
     def serveNotFound(anything=None):
-        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
-        return redirectResult(START, False)
+        checkBounds(anything=anything)
 
-    def noTask(table, task):
-        return abort(400)
+        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
+        abort(400)
+        return redirectResult(START, False)
 
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
@@ -628,20 +754,39 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         CT.showReferences()
         N.showNames()
 
+    @app.route(f&#34;&#34;&#34;/whoami&#34;&#34;&#34;)
+    def serveWhoami():
+        checkBounds()
+        if auth.authenticated():
+            return G(auth.user, N.eppn)
+        else:
+            return N.public
+
     @app.route(f&#34;&#34;&#34;/{N.static}/&lt;path:filepath&gt;&#34;&#34;&#34;)
     def serveStatic(filepath):
+        checkBounds(filepath=filepath)
+
         path = f&#34;&#34;&#34;{STATIC_ROOT}/{filepath}&#34;&#34;&#34;
-        return send_file(path)
+        if os.path.isfile(path):
+            return send_file(path)
+        flash(f&#34;file not found: {filepath}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;/{N.favicons}/&lt;path:filepath&gt;&#34;&#34;&#34;)
     def serveFavicons(filepath):
-        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons})/{filepath}&#34;&#34;&#34;
-        return send_file(path)
+        checkBounds(filepath=filepath)
+
+        path = f&#34;&#34;&#34;{STATIC_ROOT}/{N.favicons}/{filepath}&#34;&#34;&#34;
+        if os.path.isfile(path):
+            return send_file(path)
+        flash(f&#34;icon not found: {filepath}&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(START)
     @app.route(f&#34;&#34;&#34;/{N.index}&#34;&#34;&#34;)
     @app.route(f&#34;&#34;&#34;/{INDEX}&#34;&#34;&#34;)
     def serveIndex():
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -653,6 +798,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;{OVERVIEW}&#34;&#34;&#34;)
     def serveOverview():
+        checkBounds()
         path = START
         context = getContext()
         auth.authenticate()
@@ -663,6 +809,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;{OVERVIEW}.tsv&#34;&#34;&#34;)
     def serveOverviewTsv():
+        checkBounds()
         context = getContext()
         auth.authenticate()
         return Overview(context).wrap(asTsv=True)
@@ -671,12 +818,19 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;{SLOGOUT}&#34;&#34;&#34;)
     def serveSlogout():
-        auth.deauthenticate()
-        flash(&#34;logged out from DARIAH&#34;)
-        return redirectResult(SHIB_LOGOUT, True)
+        checkBounds()
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash(&#34;logged out from DARIAH&#34;)
+            return redirectResult(SHIB_LOGOUT, True)
+        flash(&#34;you were not logged in&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     @app.route(f&#34;&#34;&#34;{LOGIN}&#34;&#34;&#34;)
     def serveLogin():
+        checkBounds()
+        if auth.authenticated():
+            flash(&#34;you are already logged in&#34;)
         good = True
         if auth.authenticate(login=True):
             flash(&#34;log in successful&#34;)
@@ -687,14 +841,19 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;{LOGOUT}&#34;&#34;&#34;)
     def serveLogout():
-        auth.deauthenticate()
-        flash(&#34;logged out&#34;)
-        return redirectResult(START, True)
+        checkBounds()
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash(&#34;logged out&#34;)
+            return redirectResult(START, True)
+        flash(&#34;you were not logged in&#34;, &#34;error&#34;)
+        return redirectResult(START, False)
 
     # SYSADMIN
 
     @app.route(f&#34;&#34;&#34;{WORKFLOW}&#34;&#34;&#34;)
     def serveWorkflow():
+        checkBounds()
         context = getContext()
         auth.authenticate()
         nWf = context.resetWorkflow()
@@ -708,6 +867,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/task/&lt;string:task&gt;/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveTask(task, eid):
+        checkBounds(task=task, eid=eid)
+
         context = getContext()
         auth.authenticate()
         (good, newPath) = execute(context, task, eid)
@@ -719,6 +880,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsert(table):
+        checkBounds(table=table)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;
         if table in ALL_TABLES and table not in MASTERS:
             context = getContext()
@@ -737,7 +900,10 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/&lt;string:eid&gt;/&lt;string:dtable&gt;/{N.insert}&#34;&#34;&#34;)
     def serveTableInsertDetail(table, eid, dtable):
+        checkBounds(table=table, eid=eid, dtable=dtable)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
+        dEid = None
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -745,13 +911,10 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         ):
             context = getContext()
             auth.authenticate()
-            dEid = None
             if tablePerm(table):
                 dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
-                newPath = (
-                    f&#34;&#34;&#34;/{table}/{N.item}/{eid}/&#34;&#34;&#34; f&#34;&#34;&#34;{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
-                )
+                newPath = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{dEid}&#34;&#34;&#34;
         if dEid:
             flash(f&#34;{dtable} item added&#34;)
         else:
@@ -762,13 +925,18 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveTableListOpen(table, eid):
+        checkBounds(table=table, eid=eid)
+
         return serveTable(table, eid)
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.list}&#34;&#34;&#34;)
     def serveTableList(table):
+        checkBounds(table=table)
+
         return serveTable(table, None)
 
     def serveTable(table, eid):
+        checkBounds()
         action = G(request.args, N.action)
         actionRep = f&#34;?action={action}&#34; if action else E
         eidRep = f&#34;&#34;&#34;/{eid}&#34;&#34;&#34; if eid else E
@@ -799,6 +967,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordDelete(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -822,6 +992,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         f&#34;&#34;&#34;&lt;string:dtable&gt;/{N.delete}/&lt;string:eid&gt;&#34;&#34;&#34;
     )
     def serveRecordDeleteDetail(table, masterId, dtable, eid):
+        checkBounds(table=table, masterId=masterId, dtable=dtable, eid=eid)
+
         newPath = f&#34;&#34;&#34;/{table}/{N.item}/{masterId}&#34;&#34;&#34;
         good = False
         if (
@@ -848,6 +1020,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecord(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -861,6 +1035,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.title}&#34;&#34;&#34;)
     def serveRecordTitle(table, eid):
+        checkBounds(table=table, eid=eid)
+
         if table in ALL_TABLES:
             context = getContext()
             auth.authenticate()
@@ -879,6 +1055,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         f&#34;&#34;&#34;{N.open}/&lt;string:dtable&gt;/&lt;string:deid&gt;&#34;&#34;&#34;
     )
     def serveRecordPageDetail(table, eid, dtable, deid):
+        checkBounds(table=table, eid=eid, dtable=dtable, deid=deid)
+
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
         if table in ALL_TABLES:
             context = getContext()
@@ -901,6 +1079,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;&#34;&#34;&#34;)
     def serveRecordPageDet(table, eid):
+        checkBounds(table=table, eid=eid)
+
         path = f&#34;&#34;&#34;/{table}/{N.item}/{eid}&#34;&#34;&#34;
         if table in ALL_TABLES:
             context = getContext()
@@ -933,6 +1113,8 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
         f&#34;&#34;&#34;/api/&lt;string:table&gt;/{N.item}/&lt;string:eid&gt;/{N.field}/&lt;string:field&gt;&#34;&#34;&#34;, **GP
     )
     def serveField(table, eid, field):
+        checkBounds(table=table, eid=eid, field=field)
+
         action = G(request.args, N.action)
         if action in FIELD_ACTIONS:
             context = getContext()
@@ -952,11 +1134,11 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     @app.route(f&#34;&#34;&#34;/&lt;path:anything&gt;&#34;&#34;&#34;)
     def serveNotFound(anything=None):
-        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
-        return redirectResult(START, False)
+        checkBounds(anything=anything)
 
-    def noTask(table, task):
-        return abort(400)
+        flash(f&#34;Cannot find {anything}&#34;, &#34;error&#34;)
+        abort(400)
+        return redirectResult(START, False)
 
     def noTable(table):
         return f&#34;&#34;&#34;{NO_TABLE} {table}&#34;&#34;&#34;
@@ -973,16 +1155,130 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
     return app</code></pre>
 </details>
 </dd>
+<dt id="control.app.checkBounds"><code class="name flex">
+<span>def <span class="ident">checkBounds</span></span>(<span>**kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Aggressive check on the arguments passed in an url and/or request.</p>
+<p>First the total length of the request is counted.
+If it is too much, the request will be aborted.</p>
+<p>Each argument in request.args and <code>kwargs</code> must have a name that is allowed
+and its value should have a length under an appropriate limit,
+configured in <code>web.yaml</code>. There is always a fallback limit.</p>
+<div class="admonition caution">
+<p class="admonition-title">Security</p>
+<p>Before processing any request arg, whether from a form or from the url,
+use this function to check whether the length is within limits.</p>
+<p>If the length is exceeded, fail with a bad request,
+without giving any useful feedback.
+Because in this case we are dealing with a hacker.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The key-values that need to be checked.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>HTTPException</code></dt>
+<dd>If the length of any argument is out of bounds,
+processing is aborted and a bad request response
+is delivered</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def checkBounds(**kwargs):
+    &#34;&#34;&#34;Aggressive check on the arguments passed in an url and/or request.
+
+    First the total length of the request is counted.
+    If it is too much, the request will be aborted.
+
+    Each argument in request.args and `kwargs` must have a name that is allowed
+    and its value should have a length under an appropriate limit,
+    configured in `web.yaml`. There is always a fallback limit.
+
+    !!! caution &#34;Security&#34;
+        Before processing any request arg, whether from a form or from the url,
+        use this function to check whether the length is within limits.
+
+        If the length is exceeded, fail with a bad request,
+        without giving any useful feedback.
+        Because in this case we are dealing with a hacker.
+
+    Parameters
+    ----------
+    kwargs: dict
+        The key-values that need to be checked.
+
+    Raises
+    ------
+    HTTPException
+        If the length of any argument is out of bounds,
+        processing is aborted and a bad request response
+        is delivered
+    &#34;&#34;&#34;
+
+    default = G(LIMITS, N.default, default=50)
+    maxLen = G(LIMITS, N.request, default=default)
+
+    if request.content_length and request.content_length &gt; maxLen:
+        abort(400)
+
+    n = len(request.args)
+    boundN = G(LIMITS, N.keys, default=default)
+    if len(kwargs) &gt; boundN:
+        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {boundN} KEYS IN {kwargs}&#34;&#34;&#34;)
+        abort(400)
+    for (k, v) in chain.from_iterable((kwargs.items(), request.args.items())):
+        if k not in LIMITS:
+            abort(400)
+        valN = G(LIMITS, k, default=default)
+        if v is not None and len(v) &gt; valN:
+            serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({v})&#34;&#34;&#34;)
+            abort(400)</code></pre>
+</details>
+</dd>
 <dt id="control.app.redirectResult"><code class="name flex">
 <span>def <span class="ident">redirectResult</span></span>(<span>url, good)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Redirect.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>string</code></dt>
+<dd>The url to redirect to</dd>
+</dl>
+<p>good:
+Whether the redirection corresponds to a normal scenario or is the result of
+an error</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>response</code></dt>
+<dd>A redirect response with either code 302 (good) or 303 (bad)</dd>
+</dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def redirectResult(url, good):
+    &#34;&#34;&#34;Redirect.
+
+    Parameters
+    ----------
+    url: string
+        The url to redirect to
+    good:
+        Whether the redirection corresponds to a normal scenario or is the result of
+        an error
+
+    Returns
+    -------
+    response
+        A redirect response with either code 302 (good) or 303 (bad)
+    &#34;&#34;&#34;
+
     code = 302 if good else 303
     return redirect(url, code=code)</code></pre>
 </details>
@@ -1013,6 +1309,7 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="control.app.appFactory" href="#control.app.appFactory">appFactory</a></code></li>
+<li><code><a title="control.app.checkBounds" href="#control.app.checkBounds">checkBounds</a></code></li>
 <li><code><a title="control.app.redirectResult" href="#control.app.redirectResult">redirectResult</a></code></li>
 </ul>
 </li>
