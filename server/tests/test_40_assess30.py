@@ -110,10 +110,6 @@ Filling out an assessment.
 :   All users try to assign reviewers to this assessment.
     The office user succeeds because of a workflow condition:
     the assessment is submitted.
-
-`test_withdrawAssessment2`
-:   **owner** tries to withdraw the assessment, successfully.
-
 """
 
 import pytest
@@ -287,7 +283,7 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_withdrawAssessment(clientOwner):
@@ -331,7 +327,7 @@ def test_assignReviewers2(clients, field, user):
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_sidebar(clients):
@@ -384,7 +380,7 @@ def test_assignReviewers3(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
 
 
 def test_submitAssessmentRevised2(clientOwner):
@@ -408,10 +404,4 @@ def test_assignReviewers4(clients, field, user):
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
-
-
-def test_withdrawAssessment3(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
-    url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
-    assertStatus(clientOwner, url, True)
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)

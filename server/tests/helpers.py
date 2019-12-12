@@ -84,7 +84,6 @@ def checkCreator(table, eid, user):
     mongo = client.dariah_test
     userId = G(list(mongo.user.find(dict(eppn=user)))[0], _ID)
     records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
-    print("CHECKCREATOR", eid, user, userId, records)
     return len(records) > 0
 
 
@@ -326,7 +325,9 @@ def forall(cls, expect, assertFunc, *args):
             continue
         exp = expect[user]
         serverprint(f"USER {user} EXPECTS {exp}")
+        print(f"BEFORE {user} {assertFunc} {cls[user]}, {args}, {exp}")
         assertFunc(cls[user], *args, exp)
+        print(f"AFTER {user} {assertFunc}")
 
 
 def getEid(client, table, multiple=False):
@@ -445,9 +446,7 @@ def getREIds(clients, cId, direct=None):
     else:
         for user in {EXPERT, FINAL}:
             (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cId)
-            print(text)
             reviewEntries = findReviewEntries(text)
-            print(reviewEntries)
             reId[user] = reviewEntries[user][0]
     return reId
 

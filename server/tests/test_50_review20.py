@@ -33,21 +33,38 @@ Filling out reviews.
     After that, **final** tries the same, but fails, because
     **final** can only decide after **expert**.
 
-`testExpertDecides`
+`test_expertDecides`
 :   **expert** tries to revoke the decision, but fails because the decision
     is already revoked.
     Then he Accepts.
     Then he Accepts again, but fails, because it is the same as the existing
     decision.
 
-`testFinalAccepts`
+`test_finalAccepts`
 :   **final** accepts.
     After that **expert** tries to take all review decisions, but fails,
     because the final decision has been taken.
 
-`testModify`
+`test_modify`
 :   All users try to modify a field in the contribution, in the assessment, and in
     a review comment, but all fail, because everything is in a finished state.
+    In particular, also a re-assignment of the reviewers to the assessment it attempted.
+
+`test_finalRevokes`
+:   **final** revokes his decision.
+    After that **expert** tries to take all review decisions, and succeeds,
+    because there is no final decision.
+
+`test_modify2`
+:   All users try to modify a field in the contribution, in the assessment, and in
+    a review comment, and some succeed, because there is no finished state.
+
+    The assesssment is still submitted, so the contribution and assessment are still
+    locked: nobody can modify them.
+
+    The reviewers can be reassigned by **office**.
+
+    The reviews can be modified.
 """
 
 import magic  # noqa
@@ -57,24 +74,29 @@ from example import (
     ACCEPT,
     ASSESS,
     COMMENTS,
-    COMMENTS1,
+    COMMENTS_E,
+    COMMENTS_F,
     CONTRIB,
     CRITERIA_ENTRY,
     EVIDENCE,
     EVIDENCE1,
     EXPERT,
     FINAL,
+    OFFICE,
     REJECT,
     REMARKS,
-    REMARKS1,
+    REMARKS_E,
+    REMARKS_F,
     REVIEW,
     REVIEW_DECISION,
     REVIEW_ENTRY,
+    REVIEWER_E,
     REVISE,
     REVOKE,
     TITLE,
     TITLE2,
     TITLE_A2,
+    USER,
 )
 from helpers import (
     findReviewEntries,
@@ -187,7 +209,8 @@ def test_finalAccepts(clientsReviewer):
     )
 
 
-def testModify(clients):
+def test_modify(clients):
+    users = G(valueTables, USER)
     eid = G(G(recordInfo, CONTRIB), "eid")
     aId = G(G(recordInfo, ASSESS), "eid")
     reviewInfo = G(recordInfo, REVIEW)
@@ -199,15 +222,88 @@ def testModify(clients):
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp)
         assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp)
+        reviewerFId = G(users, FINAL)
+        assertModifyField(cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp)
         assertModifyField(
             cl, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([EVIDENCE1], EVIDENCE1), exp
         )
-        assertModifyField(cl, REVIEW, rEId, REMARKS, ([REMARKS1], REMARKS), exp)
+        for (rId, remarks) in ((rEId, REMARKS_E), (rFId, REMARKS_F)):
+            assertModifyField(cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp)
         for (u, reid) in reId.items():
+            comments = COMMENTS_E if u == EXPERT else COMMENTS_F
             assertModifyField(
-                cl, REVIEW_ENTRY, reid, COMMENTS, ([COMMENTS1], COMMENTS1), exp
+                cl, REVIEW_ENTRY, reid, COMMENTS, ([comments], comments), exp
             )
-        assertModifyField(cl, REVIEW, rFId, REMARKS, ([REMARKS1], REMARKS), exp)
 
     expect = {user: False for user in USERS}
+    forall(clients, expect, assertIt)
+
+
+def test_finalRevokes(clientsReviewer):
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [FINAL], [REVOKE], True,
+    )
+    assertReviewDecisions(
+        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
+    )
+
+
+def test_modify2(clients):
+    users = G(valueTables, USER)
+    eid = G(G(recordInfo, CONTRIB), "eid")
+    aId = G(G(recordInfo, ASSESS), "eid")
+    reviewInfo = G(recordInfo, REVIEW)
+    rEId = G(G(reviewInfo, EXPERT), "eid")
+    rFId = G(G(reviewInfo, FINAL), "eid")
+    cIdFirst = cIds[0]
+    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
+        assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
+        reviewerFId = G(users, FINAL)
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp["assign"]
+        )
+        assertModifyField(
+            cl,
+            CRITERIA_ENTRY,
+            cIdFirst,
+            EVIDENCE,
+            ([EVIDENCE1], EVIDENCE1),
+            exp[CRITERIA_ENTRY],
+        )
+        for (rId, remarks, kind) in (
+            (rEId, REMARKS_E, EXPERT),
+            (rFId, REMARKS_F, FINAL),
+        ):
+            assertModifyField(
+                cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp[f"{REVIEW}_{kind}"]
+            )
+        for (kind, reid) in reId.items():
+            comments = COMMENTS_E if kind == EXPERT else COMMENTS_F
+            assertModifyField(
+                cl,
+                REVIEW_ENTRY,
+                reid,
+                COMMENTS,
+                ([comments], comments),
+                exp[f"{REVIEW_ENTRY}_{kind}"],
+            )
+
+    expectDefault = {user: False for user in USERS}
+    expect = {
+        CONTRIB: dict(expectDefault),
+        ASSESS: dict(expectDefault),
+        CRITERIA_ENTRY: dict(expectDefault),
+        "assign": dict(expectDefault),
+        f"{REVIEW}_{EXPERT}": dict(expectDefault),
+        f"{REVIEW}_{FINAL}": dict(expectDefault),
+        f"{REVIEW_ENTRY}_{EXPERT}": dict(expectDefault),
+        f"{REVIEW_ENTRY}_{FINAL}": dict(expectDefault),
+    }
+    expect["assign"].update({user: True for user in {OFFICE}})
+    expect[f"{REVIEW}_{EXPERT}"].update({user: True for user in {EXPERT} | POWER_USERS})
+    expect[f"{REVIEW}_{FINAL}"].update({user: True for user in {FINAL} | POWER_USERS})
+
     forall(clients, expect, assertIt)

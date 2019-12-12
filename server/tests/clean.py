@@ -215,7 +215,7 @@ def importMongo():
     sys.stdout.write("DONE\n")
 
 
-def main():
+def clean():
     countryTable()
     groupTable()
     userTable()
@@ -227,4 +227,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    clean()

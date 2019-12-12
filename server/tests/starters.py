@@ -55,10 +55,10 @@ from example import (
 from helpers import (
     checkCreator,
     findDetails,
-    findReviewEntries,
     findValues,
     getItem,
     getItemEids,
+    getREIds,
     getRelatedValues,
     getScores,
 )
@@ -155,6 +155,9 @@ def findOrMakeItem(client, table, cId=None, aId=None):
     Returns
     -------
     tuple
+    isNew: boolean
+        Whether the record has been created rather than found
+    data: tuple
         The data of the contribution/assessment:
     text: string(html)
         the response text
@@ -169,20 +172,20 @@ def findOrMakeItem(client, table, cId=None, aId=None):
     eids = getItemEids(client, table)
     if eids:
         if table == CONTRIB:
-            return getItem(client, table, eids[0])
+            return (False, getItem(client, table, eids[0]))
         if table == ASSESS:
-            return [eids[0]]
+            return (False, [eids[0]])
         if table == REVIEW:
             for eid in eids:
                 if checkCreator(REVIEW, eid, client.user):
-                    return [eid]
+                    return (False, [eid])
 
     if table == CONTRIB:
-        return assertAddItem(client, table, True)
+        return (True, assertAddItem(client, table, True))
     if table == ASSESS:
-        return assertStartTask(client, START_ASSESSMENT, cId, True)
+        return (True, assertStartTask(client, START_ASSESSMENT, cId, True))
     if table == REVIEW:
-        return assertStartTask(client, START_REVIEW, aId, True)
+        return (True, assertStartTask(client, START_REVIEW, aId, True))
 
 
 def start(
@@ -294,107 +297,126 @@ def start(
 
     def doReview(aId):
         recordInfo.setdefault(REVIEW, {})
+        clr = {EXPERT: clientExpert, FINAL: clientFinal}
 
+        isNew = {}
         for cl in (clientExpert, clientFinal):
             user = cl.user
-            print("MAKE OR FIND REVIEW", user)
-            rIds = findOrMakeItem(cl, REVIEW, aId=aId)
+            (isNw, rIds) = findOrMakeItem(cl, REVIEW, aId=aId)
             assert len(rIds) == 1
             rId = rIds[0]
             user = cl.user
+            isNew[user] = isNew
             recordInfo[REVIEW].setdefault(user, {})["eid"] = rId
-            for (i, cId) in enumerate(cIds):
-                (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
-                reviewEntries = findReviewEntries(text)
-                rId = reviewEntries[user][0]
-                newValue = [f"{user}'s comment on criteria {i + 1}"]
-                newValueRep = ",".join(newValue)
-                assertModifyField(
-                    cl, REVIEW_ENTRY, rId, COMMENTS, (newValue, newValueRep), True
-                )
+        for cl in (clientExpert, clientFinal):
+            user = cl.user
+            rId = recordInfo[REVIEW][user]["eid"]
+            isNw = isNew[user]
+            if isNw:
+                for (i, cId) in enumerate(cIds):
+                    rEId = recordInfo[REVIEW][EXPERT]["eid"]
+                    rFId = recordInfo[REVIEW][FINAL]["eid"]
+                    reId = getREIds(clr, cId, direct=(rEId, rFId))
+                    reId = reId[user]
+                    newValue = [f"{user}'s comment on criteria {i + 1}"]
+                    newValueRep = ",".join(newValue)
+                    assertModifyField(
+                        cl, REVIEW_ENTRY, reId, COMMENTS, (newValue, newValueRep), True
+                    )
 
-    def startAssign(aId):
-        users = G(valueTables, USER)
-        for (field, user) in ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL)):
-            value = G(users, user)
-            assertModifyField(clientOffice, ASSESS, aId, field, (value, user), True)
+    def startAssign(aId, isNew):
+        if isNew:
+            users = G(valueTables, USER)
+            for (field, user) in ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL)):
+                value = G(users, user)
+                assertModifyField(clientOffice, ASSESS, aId, field, (value, user), True)
 
         if review:
             doReview(aId)
 
-    def startSubmit(aId, stage):
-        command = (
-            "submit"
-            if stage == COMPLETE
-            else "resubmit"
-            if stage == COMPLETE_WITHDRAWN
-            else E
-            if stage == SUBMITTED
-            else None
-        )
-        assert command is not None
-        if command:
-            url = f"/api/task/{command}Assessment/{aId}"
-            assertStatus(clientOwner, url, True)
+    def startSubmit(aId, stage, isNew):
+        if isNew:
+            command = (
+                "submit"
+                if stage == COMPLETE
+                else "resubmit"
+                if stage == COMPLETE_WITHDRAWN
+                else E
+                if stage == SUBMITTED
+                else None
+            )
+            assert command is not None
+            if command:
+                url = f"/api/task/{command}Assessment/{aId}"
+                assertStatus(clientOwner, url, True)
 
         if assign:
-            startAssign(aId)
+            startAssign(aId, isNew)
 
-    def startFillout(aId):
+    def startFillout(aId, isNew):
         (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
         criteriaEntries = findDetails(text, CRITERIA_ENTRY)
         nCId = len(criteriaEntries)
         assert nCId == CRITERIA_ENTRIES_N[TYPE1]
 
         for (i, (cId, material)) in enumerate(criteriaEntries):
-            assert ELLIPS_DIV in material
-            scores = getScores(cId)
-            (scoreValue, scoreId) = sorted(scores.items())[1]
-            assertModifyField(
-                clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True,
-            )
-            theEvidence = [f"evidence for {i + 1}", "see the internet"]
-            theEvidenceRep = ",".join(theEvidence)
-            assertModifyField(
-                clientOwner,
-                CRITERIA_ENTRY,
-                cId,
-                EVIDENCE,
-                (theEvidence, theEvidenceRep),
-                True,
-            )
             cIds.append(cId)
+            if isNew:
+                assert ELLIPS_DIV in material
+                scores = getScores(cId)
+                (scoreValue, scoreId) = sorted(scores.items())[1]
+                assertModifyField(
+                    clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True,
+                )
+                theEvidence = [f"evidence for {i + 1}", "see the internet"]
+                theEvidenceRep = ",".join(theEvidence)
+                assertModifyField(
+                    clientOwner,
+                    CRITERIA_ENTRY,
+                    cId,
+                    EVIDENCE,
+                    (theEvidence, theEvidenceRep),
+                    True,
+                )
+
         result = assertStage(
             clientOwner, ASSESS, aId, {COMPLETE, COMPLETE_WITHDRAWN, SUBMITTED}
         )
         stage = result[4]
 
         if submit:
-            startSubmit(aId, stage)
+            startSubmit(aId, stage, isNew)
 
-    def startAssessment(eid, cTitle):
-        assertModifyField(
-            clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True,
-        )
-        aIds = findOrMakeItem(clientOwner, ASSESS, cId=eid)
+    def startAssessment(eid, isNew):
+        contribInfo = recordInfo[CONTRIB]
+        cTitle = contribInfo[TITLE]
+        if isNew:
+            assertModifyField(
+                clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True,
+            )
+        (isNew, aIds) = findOrMakeItem(clientOwner, ASSESS, cId=eid)
         assert len(aIds) == 1
         aId = aIds[0]
         assessInfo = recordInfo.setdefault(ASSESS, {})
         assessInfo["eid"] = aId
-        assertEditor(clientOwner, ASSESS, aId, valueTables, True)
+        if isNew:
+            assertEditor(clientOwner, ASSESS, aId, valueTables, True)
         assessInfo[TITLE] = f"assessment of {cTitle}"
 
         if fillout:
-            startFillout(aId)
+            startFillout(aId, isNew)
 
     def startContrib():
-        (text, fields, msgs, eid) = findOrMakeItem(clientOwner, CONTRIB)
+        (isNew, (text, fields, msgs, eid)) = findOrMakeItem(clientOwner, CONTRIB)
         cTitle = G(fields, TITLE)
+        cType = G(fields, TYPE)
         contribInfo = recordInfo.setdefault(CONTRIB, {})
         contribInfo[TITLE] = cTitle
+        contribInfo[TYPE] = cType
         for (k, v) in zip(("text", "fields", "msgs", "eid"), (text, fields, msgs, eid)):
             contribInfo[k] = v
-        assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
+        if isNew:
+            assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
         if types:
             startTypes(eid)
@@ -403,7 +425,7 @@ def start(
             getValueTable(clientOffice, CONTRIB, eid, COUNTRY, valueTables, direct=True)
 
         if assessment:
-            startAssessment(eid, cTitle)
+            startAssessment(eid, isNew)
 
     if contrib:
         startContrib()

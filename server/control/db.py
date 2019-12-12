@@ -1136,7 +1136,7 @@ class Db:
 
         eid = G(record, N._id)
         if eid is None:
-            return True
+            return {}
 
         depSpecs = dict(
             reference=G(REFERENCE_SPECS, table, default={}),

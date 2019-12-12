@@ -175,22 +175,26 @@ class Auth:
             )
         ]
         user.clear()
+        if len(userFound) != 1:
+            self.clearUser()
+            return False
+
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        if len(userFound) == 1:
-            user.update(userFound[0])
+        user.update(userFound[0])
         if not G(user, N.mayLogin, default=True):
             # this checks whether mayLogin is explicitly set to False
             self.clearUser()
+            return False
+
+        if N.group in user:
+            if N.groupRep not in user:
+                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
+                user[N.groupRep] = groupRep
         else:
-            if N.group in user:
-                if N.groupRep not in user:
-                    groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                    user[N.groupRep] = groupRep
-            else:
-                user[N.group] = authId
-                user[N.groupRep] = AUTH
+            user[N.group] = authId
+            user[N.groupRep] = AUTH
         return user[N.groupRep] != UNAUTH
 
     def wrapTestUsers(self):
@@ -247,7 +251,6 @@ class Auth:
         if contentLength is not None and contentLength > LIMIT_JSON:
             abort(400)
         env = request.environ
-        print(env)
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)

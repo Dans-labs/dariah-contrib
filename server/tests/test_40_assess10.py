@@ -268,4 +268,4 @@ def test_assignReviewers(clients, field, user):
     assessInfo = G(recordInfo, ASSESS)
     aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, expect)
+    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)

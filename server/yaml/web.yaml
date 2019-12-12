@@ -5,17 +5,24 @@ limits:
   action: 20
   anything: 50
   assessed: 2
+  country: 5
   default: 50
   deid: 30
   dtable: 20
   eid: 30
+  email: 100
   env: 10000
+  eppn: 100
   field: 20
-  filename: 100
+  filepath: 100
+  groups: 200
   json: 1000000
   keys: 100
   masterId: 30
+  method: 50
+  reverse: 3
   reviewed: 2
+  sortcol: 100
   table: 20
   task: 40
 
@@ -236,7 +243,6 @@ names:
   - addClass
   - body
   - icon
-  - method
   - open
   - option
   - overview

@@ -15,6 +15,7 @@ from example import (
     ASSESS,
     CAPTIONS,
     EDITOR,
+    EDITORS,
     REVIEW,
     REVIEW_DECISION,
     START_ASSESSMENT,
@@ -140,7 +141,7 @@ def assertEditor(client, table, eid, valueTables, expect, clear=False):
         users = valueTables[USER]
         editorId = users[EDITOR]
         value = ([editorId], EDITOR)
-    assertModifyField(client, table, eid, "editors", value, expect)
+    assertModifyField(client, table, eid, EDITORS, value, expect)
 
 
 def assertFieldValue(source, field, expect):
@@ -170,6 +171,9 @@ def assertFieldValue(source, field, expect):
         assert field not in fields
     else:
         assert field in fields
+        value = fields[field]
+        if value != expect:
+            serverprint(f"FIELDVALUE {field}={value} (=/={expect})")
         assert expect == fields[field]
 
 
@@ -217,6 +221,36 @@ def assertModifyField(client, table, eid, field, newValue, expect):
 
 
 def assertReviewDecisions(clients, recordInfo, kinds, decisions, expect):
+    """Check whether the reviewers can take certain decisions.
+
+    You specify which reviewers take which decisions, and they will
+    all be carried out in that order.
+
+    You specifiy the expected outcomes in a dict or a boolean, telling
+    whether the taking of the decision is expected to succeed or not.
+
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures.
+    recordInfo: dict
+        Record info gathered by earlier tests, must contain review records
+        under key `review`
+    kinds: list of {expert, final}
+        At most one of each, the order is important.
+    decisions: list of {Reject, Revise, Accept, Revoke}
+        At most one of each, the order is important.
+    expect: bool | dict
+        Expected outcomes.
+        If it is a boolean, that is the expected outcome of all actions by all
+        reviewers.
+        Otherwise the dict is keyed by kind of reviewer.
+        The values are booleans or dicts.
+        A boolean indicates the expected outcome of all actions for that reviewer.
+        A dict specifies per action of that reviewer what the outcome is.
+    """
+
     reviewInfo = G(recordInfo, REVIEW)
     for kind in kinds:
         rId = G(G(reviewInfo, kind), "eid")
@@ -302,15 +336,108 @@ def assertStatus(client, url, expect):
     client: function
     url: string(url)
         The url to retrieve from the server
-    expect: boolean
-        Whether it is expected to be successful
+    expect: boolean | int | set of int
+        If boolean: Whether it is expected to be successful
+        If int: status code should be exactly this
+        If set of int: status code should be contained in this
     """
 
-    response = client.get(url)
-    if expect:
-        assert response.status_code in {200, 302}
+    try:
+        response = client.get(url)
+        code = response.status_code
+    except Exception as e:
+        serverprint(f"APPLICATION ERROR: {e}")
+        code = 4000
+
+    if type(expect) is set:
+        good = code in expect
+        if not good:
+            serverprint(f"STATUS {url} => {code} (not in {expect})")
+        assert good
+    elif type(expect) is int:
+        good = code == expect
+        if not good:
+            serverprint(f"STATUS {url} => {code} (=/= {expect})")
+        assert good
     else:
-        assert response.status_code in {400, 303}
+        codes = {200, 302} if expect else {400, 303}
+        good = code in codes
+        if not good:
+            serverprint(f"STATUS {url} => {code} (not in {codes})")
+        assert good
+
+
+def assignReviewers(clients, assessInfo, users, aId, field, user, keep, expect):
+    """Verify assigning reviewers to an assessment.
+
+    A reviewer will be assigned to an assessment and immediately be unassigned.
+    But the undo can be suppressed.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    assessInfo: dict
+        The assessment data as previously retrieved
+    users: dict
+        Mapping of users to ids
+    aId: string(ObjectId)
+        Assessment id
+    field: string
+        Reviewer field (`reviewerE` or `reviewerF`)
+    user: string
+        The reviewer user
+    keep: boolean
+        If True, the assignment will not be undone
+    expect: dict
+        For each user a boolean saying whether that user can assign the reviewer
+    """
+
+    aId = G(assessInfo, "eid")
+    value = G(users, user)
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, ASSESS, aId, field, (value, user), exp)
+        if exp and not keep:
+            assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
+
+    forall(clients, expect, assertIt)
+
+
+def illegalize(clients, url, **kwargs):
+    """Append illegal/long arguments to an url and trigger a 400 response.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    kwargs: dict
+        Additional parameters to illegalize.
+        The url will be expanded by formatting it with the `kwargs` values.
+    """
+
+    kwargsx = {k: v + "a" * 200 for (k, v) in kwargs.items()}
+    base = url.format(**kwargs)
+    basex = url.format(**kwargsx)
+
+    uxs = [
+        base,
+        basex,
+        f"{base}?action=xxx",
+        f"{base}?xxx=xxx",
+        f"{base}?action=" + "a" * 200,
+        f"{base}?" + "a" * 2000,
+    ]
+
+    passable = {200, 301, 302, 303}
+    for (i, ux) in enumerate(uxs):
+        expectx = {
+            user: 400 if i > 2 or i == 1 and len(kwargsx) else passable
+            for user in USERS
+            if user in clients
+        }
+        serverprint(f"LEGAL URL ? ({ux})")
+        forall(clients, expectx, assertStatus, ux)
 
 
 def inspectTitleAll(clients, table, eid, expect):
@@ -318,7 +445,8 @@ def inspectTitleAll(clients, table, eid, expect):
 
     Parameters
     ----------
-    clients: fixture
+    clients: dict
+        Mapping from users to client fixtures
     table: the table of the item
     eid: the id of the item
     expect: dict
@@ -331,37 +459,6 @@ def inspectTitleAll(clients, table, eid, expect):
     forall(clients, expect, assertIt)
 
 
-def assignReviewers(clients, assessInfo, users, aId, field, user, expect):
-    """Verify assigning reviewers to an assessment.
-
-    Parameters
-    ----------
-    clients: fixture
-    assessInfo: dict
-        The assessment data as previously retrieved
-    users: dict
-        Mapping of users to ids
-    aId: string(ObjectId)
-        Assessment id
-    field: string
-        Reviewer field (`reviewerE` or `reviewerF`)
-    user: string
-        The reviewer user
-    expect: dict
-        For each user a boolean saying whether that user can assign the reviewer
-    """
-
-    aId = G(assessInfo, "eid")
-    value = G(users, user)
-
-    def assertIt(cl, exp):
-        assertModifyField(cl, ASSESS, aId, field, (value, user), exp)
-        if exp:
-            assertModifyField(cl, ASSESS, aId, field, (None, UNDEF_VALUE), True)
-
-    forall(clients, expect, assertIt)
-
-
 def sidebar(clients, amounts):
     """Verify the sidebar.
 
@@ -370,7 +467,8 @@ def sidebar(clients, amounts):
 
     Parameters
     ----------
-    clients: fixture
+    clients: dict
+        Mapping from users to client fixtures
     amounts: dict
         Keyed by entry, it is a list of instructions to change the expected amount.
         Each instruction is a pair `(set of users, amount)`, leading

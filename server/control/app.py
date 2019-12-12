@@ -94,9 +94,10 @@ def redirectResult(url, good):
 
 
 def checkBounds(**kwargs):
-    """Aggressive check on the length of arguments passed in an url and/or request.
+    """Aggressive check on the arguments passed in an url and/or request.
 
-    Each argument in `kwargs` is compared for length to an appropriate limit,
+    Each argument in `kwargs` must have a name that is allowed and its value should
+    have a length under an appropriate limit,
     configured in `web.yaml`. There is always a fallback limit.
 
     !!! caution "Security"
@@ -128,6 +129,8 @@ def checkBounds(**kwargs):
         serverprint(f"""OUT-OF-BOUNDS: {n} > {boundN} KEYS IN {kwargs}""")
         abort(400)
     for (k, v) in kwargs.items():
+        if k not in LIMITS:
+            abort(400)
         valN = G(LIMITS, k, default=default)
         if v is not None and len(v) > valN:
             serverprint(f"""OUT-OF-BOUNDS: LENGTH ARG "{k}" > {valN} ({v})""")
@@ -196,6 +199,14 @@ def appFactory(regime, test, debug, **kwargs):
         CT.showReferences()
         N.showNames()
 
+    @app.route(f"""/whoami""")
+    def serveWhoami():
+        checkBounds(**request.args)
+        if auth.authenticated():
+            return G(auth.user, N.eppn)
+        else:
+            return N.public
+
     @app.route(f"""/{N.static}/<path:filepath>""")
     def serveStatic(filepath):
         checkBounds(filepath=filepath)
@@ -212,7 +223,7 @@ def appFactory(regime, test, debug, **kwargs):
         checkBounds(filepath=filepath)
         checkBounds(**request.args)
 
-        path = f"""{STATIC_ROOT}/{N.favicons})/{filepath}"""
+        path = f"""{STATIC_ROOT}/{N.favicons}/{filepath}"""
         if os.path.isfile(path):
             return send_file(path)
         flash(f"icon not found: {filepath}", "error")
@@ -222,6 +233,7 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/{N.index}""")
     @app.route(f"""/{INDEX}""")
     def serveIndex():
+        checkBounds(**request.args)
         path = START
         context = getContext()
         auth.authenticate()
@@ -254,13 +266,18 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""{SLOGOUT}""")
     def serveSlogout():
         checkBounds(**request.args)
-        auth.deauthenticate()
-        flash("logged out from DARIAH")
-        return redirectResult(SHIB_LOGOUT, True)
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash("logged out from DARIAH")
+            return redirectResult(SHIB_LOGOUT, True)
+        flash("you were not logged in", "error")
+        return redirectResult(START, False)
 
     @app.route(f"""{LOGIN}""")
     def serveLogin():
         checkBounds(**request.args)
+        if auth.authenticated():
+            flash("you are already logged in")
         good = True
         if auth.authenticate(login=True):
             flash("log in successful")
@@ -272,9 +289,12 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""{LOGOUT}""")
     def serveLogout():
         checkBounds(**request.args)
-        auth.deauthenticate()
-        flash("logged out")
-        return redirectResult(START, True)
+        if auth.authenticated():
+            auth.deauthenticate()
+            flash("logged out")
+            return redirectResult(START, True)
+        flash("you were not logged in", "error")
+        return redirectResult(START, False)
 
     # SYSADMIN
 
@@ -333,6 +353,7 @@ def appFactory(regime, test, debug, **kwargs):
         checkBounds(**request.args)
 
         newPath = f"""/{table}/{N.item}/{eid}"""
+        dEid = None
         if (
             table in USER_TABLES_LIST[0:2]
             and table in DETAILS
@@ -340,12 +361,11 @@ def appFactory(regime, test, debug, **kwargs):
         ):
             context = getContext()
             auth.authenticate()
-            dEid = None
             if tablePerm(table):
                 dEid = mkTable(context, dtable).insert(masterTable=table, masterId=eid)
             if dEid:
                 newPath = (
-                    f"""/{table}/{N.item}/{eid}/""" f"""{N.open}/{dtable}/{dEid}"""
+                    f"""/{table}/{N.item}/{eid}/{N.open}/{dtable}/{dEid}"""
                 )
         if dEid:
             flash(f"{dtable} item added")
@@ -577,10 +597,8 @@ def appFactory(regime, test, debug, **kwargs):
         checkBounds(**request.args)
 
         flash(f"Cannot find {anything}", "error")
-        return redirectResult(START, False)
-
-    def noTask(table, task):
         abort(400)
+        return redirectResult(START, False)
 
     def noTable(table):
         return f"""{NO_TABLE} {table}"""

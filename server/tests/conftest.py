@@ -108,6 +108,11 @@ in alphabetical order of the file names.
 `test_60_contrib10`
 :   Selecting contributions.
 
+### Tests: security
+
+`test_90_security10`
+:   Checking the response to forged requests.
+
 """
 
 import pytest
@@ -149,7 +154,7 @@ Finally, there is a fixture `clients` that contains fixtures for all the users.
 
 USERS = set(USER_LIST)
 
-AUTH_USERS = USERS - {"public"}
+NAMED_USERS = USERS - {"public"}
 """All authenticated users."""
 
 RIGHTFUL_USERS = set("""
@@ -195,6 +200,16 @@ def clients(app):
     """
 
     return {user: makeClient(app, user) for user in USERS}
+
+
+@pytest.fixture
+def clientsNamed(app):
+    """A dictionary of client fixtures for all authenticated users.
+
+    Keyed by user (eppn), the values are corresponding client fixtures.
+    """
+
+    return {user: makeClient(app, user) for user in NAMED_USERS}
 
 
 @pytest.fixture

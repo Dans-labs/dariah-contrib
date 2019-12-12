@@ -19,6 +19,7 @@ How the app is set up, difference between production and development
 import magic  # noqa
 from starters import start
 from subtest import assertStatus
+from example import PUBLIC
 
 
 def test_start():
@@ -31,4 +32,4 @@ def test_test(app):
 
 def test_login(clientPublic, clients):
     for user in clients:
-        assertStatus(clientPublic, f"/login?eppn={user}", True)
+        assertStatus(clientPublic, f"/login?eppn={user}", user != PUBLIC)

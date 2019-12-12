@@ -1,10 +1,19 @@
 """Various concrete values needed in the tests."""
 
 from control.utils import EURO
-from conftest import USERS, AUTH_USERS, POWER_USERS
+from conftest import USERS, NAMED_USERS, POWER_USERS
 
 _ID = "_id"
 DB = "dariah_test"
+
+STATIC = "/static"
+FAV = "/favicons"
+COMMON_CSS = f"{STATIC}/css/common.css"
+COMMONX_CSS = f"{STATIC}/css/commonx.css"
+FAVICON = f"{FAV}/favicon.ico"
+FAVICONX = f"{FAV}/faviconx.ico"
+FAVICON_S = f"{STATIC}{FAV}/favicon.ico"
+FAVICON_SX = f"{STATIC}{FAV}/faviconx.ico"
 
 WELCOME = "Welcome to the DARIAH contribution tool"
 OVERVIEW = "Country selection"
@@ -22,6 +31,7 @@ COST_DESCRIPTION = "costDescription"
 COUNTRY = "country"
 DESCRIPTION = "description"
 DISCIPLINE = "discipline"
+EDITORS = "editors"
 EMAIL = "email"
 EVIDENCE = "evidence"
 KEYWORD = "keyword"
@@ -102,10 +112,12 @@ TITLE2 = "Contribution (Modified)"
 TITLE_A = "assessment of {cTitle}"
 TITLE_A2 = "My contribution assessed"
 
-REMARKS1 = "remarks"
+REMARKS_E = "expert remarks"
+REMARKS_F = "final remarks"
 
 EVIDENCE1 = "modified evidence"
-COMMENTS1 = "modified comment"
+COMMENTS_E = "modified expert comment"
+COMMENTS_F = "modified final comment"
 
 CHECKS = {
     DESCRIPTION: (
@@ -134,9 +146,9 @@ CAPTIONS = (
     ("Home", USERS, None, WELCOME, None),
     ("Overview", USERS, None, OVERVIEW, None),
     ("All contributions", USERS, 0, "contribution", "contributions"),
-    ("My contributions", AUTH_USERS, 0, "contribution", "contributions"),
-    ("{country} contributions", AUTH_USERS, 0, "contribution", "contributions"),
-    ("Contributions I am assessing", AUTH_USERS, 0, "contribution", "contributions"),
+    ("My contributions", NAMED_USERS, 0, "contribution", "contributions"),
+    ("{country} contributions", NAMED_USERS, 0, "contribution", "contributions"),
+    ("Contributions I am assessing", NAMED_USERS, 0, "contribution", "contributions"),
     (
         "Contributions to be selected",
         {COORD, MYCOORD},
@@ -145,12 +157,12 @@ CAPTIONS = (
         "contributions",
     ),
     ("All assessments", POWER_USERS, 0, "assessment", "assessments"),
-    ("My assessments", AUTH_USERS, 0, "assessment", "assessments"),
+    ("My assessments", NAMED_USERS, 0, "assessment", "assessments"),
     ("Assessments needing reviewers", {OFFICE}, 0, "assessment", "assessments"),
-    ("Assessments in review by me", AUTH_USERS, 0, "assessment", "assessments"),
-    ("Assessments reviewed by me", AUTH_USERS, 0, "assessment", "assessments"),
+    ("Assessments in review by me", NAMED_USERS, 0, "assessment", "assessments"),
+    ("Assessments reviewed by me", NAMED_USERS, 0, "assessment", "assessments"),
     ("All reviews", POWER_USERS, 0, "review", "reviews"),
-    ("My reviews", AUTH_USERS, 0, "review", "reviews"),
+    ("My reviews", NAMED_USERS, 0, "review", "reviews"),
     ("countries", POWER_USERS, 51, COUNTRY, None),
     ("criteria", POWER_USERS, 7, "criteria", None),
     ("disciplines", POWER_USERS, 3, None, None),
