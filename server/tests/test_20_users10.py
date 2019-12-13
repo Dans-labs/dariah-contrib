@@ -23,6 +23,8 @@ Getting to know all users.
 :   All users try to read the email address of **auth**, but only some succeed
 """
 
+import pytest
+
 import magic  # noqa
 from control.utils import E, serverprint
 from conftest import USER_LIST, NAMED_USERS, POWER_USERS
@@ -31,15 +33,18 @@ from helpers import viewField
 from starters import start
 from subtest import assertFieldValue, assertStatus
 
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice):
-    start(clientOffice=clientOffice, users=True, valueTables=valueTables)
+    startInfo.update(start(clientOffice=clientOffice, users=True))
 
 
 def test_users(clientOffice):
     assert len(USER_LIST) == 11
+    valueTables = startInfo["valueTables"]
+
     users = valueTables[USER]
     for user in USER_LIST:
         if user == PUBLIC:
@@ -68,6 +73,8 @@ def test_login(clients, clientPublic):
 
 
 def test_readEmail(clients):
+    valueTables = startInfo["valueTables"]
+
     eid = valueTables[USER][AUTH]
     for (user, client) in clients.items():
         (text, fields) = viewField(client, USER, eid, EMAIL)

@@ -24,12 +24,11 @@ The starter functions may insert a few records in the database and fetch
 a few value tables for usage in test functions.
 """
 
-from control.utils import pick as G, E
+from control.utils import pick as G
 from example import (
     ASSESS,
     COMMENTS,
     COMPLETE,
-    COMPLETE_WITHDRAWN,
     CONTRIB,
     CRITERIA_ENTRY,
     CRITERIA_ENTRIES_N,
@@ -45,21 +44,17 @@ from example import (
     SCORE,
     START_ASSESSMENT,
     START_REVIEW,
-    SUBMITTED,
-    TITLE,
+    SUBMIT_ASSESSMENT,
     TYPE,
     TYPE1,
     TYPE2,
     USER,
 )
 from helpers import (
-    checkCreator,
     findDetails,
     findValues,
     getItem,
-    getItemEids,
-    getREIds,
-    getRelatedValues,
+    getReviewEntryId,
     getScores,
 )
 from subtest import (
@@ -72,31 +67,10 @@ from subtest import (
 )
 
 
-def getValueTable(client, table, eid, valueTable, dest, direct=False):
+def getValueTable(cl, table):
     """Get a mapping of values in a value table to their object ids.
 
-    We obtain the mapping by asking for an edit view of a field that
-    takes values in this value table.
-    Then we inspect the edit widget and read off the values and ids.
-
-    But we can also look directly in the list of items of a valueTable.
-    Sometimes we need to do that:
-
-    *   if the record does not have a field with values in this table
-    *   if the record has such a field, but it is not editable anymore
-        (because of workflow: example: `typeContribution` if the
-        assessment has been submitted.
-
-    In such cases, use the parameter `direct`.
-
-    !!! caution
-        We use the indirect mode as much as possible,
-        because then the code to present editable fields is exercised better.
-
-    !!! caution
-        When for `direct=False`, this function may only run if
-        there is a contribution record with an **editable** field of type
-        `table`..
+    We look directly in the list of items of a valueTable.
 
     The mapping is stored in the dict `dest` keyed by the
     name of the valueTable.
@@ -104,14 +78,7 @@ def getValueTable(client, table, eid, valueTable, dest, direct=False):
     Parameters
     ----------
     table: string
-        The name of table whose record we inspect
-    eid: dict
-        The id of the record
-    valueTable: string
-        The name of a value table which is also the name of the field in the record
-    direct: boolean, optional `False`
-        Whether to look up the values directly from a list view or indirectly
-        from an editable field.
+        The name of a value table
 
     Returns
     -------
@@ -119,30 +86,17 @@ def getValueTable(client, table, eid, valueTable, dest, direct=False):
         The stored value dict for this valueTable
     """
 
-    if direct:
-        response = client.get(f"/{valueTable}/list")
-        text = response.get_data(as_text=True)
-        dest[valueTable] = findValues(valueTable, text)
-    else:
-        valueDict = getRelatedValues(client, table, eid, valueTable)
-        dest[valueTable] = valueDict
-    return dest[valueTable]
+    response = cl.get(f"/{table}/list")
+    text = response.get_data(as_text=True)
+    return findValues(table, text)
 
 
-def findOrMakeItem(client, table, cId=None, aId=None):
-    """Finds or makes a contribution/assessment/review.
-
-    Either previous tests have made a contribution/assessment/review, and then we have
-    to find it.
-    Or there are no contributions/assessments/reviews yet, and then we have to make one.
-
-    In case of a review, we look for reviews made by the client, and if no such review
-    exists, we let the client make one.
-    We just check by means of an under-water query to the MongoDb.
+def makeItem(cl, table, cId=None, aId=None):
+    """Makes a contribution/assessment/review.
 
     Parameters
     ----------
-    client: fixture
+    cl: fixture
     table: string
         Either `contrib` or `assessment` or `review`
     cId: string(ObjectId), optional `None`
@@ -154,38 +108,16 @@ def findOrMakeItem(client, table, cId=None, aId=None):
 
     Returns
     -------
-    tuple
-    isNew: boolean
-        Whether the record has been created rather than found
-    data: tuple
-        The data of the contribution/assessment:
-    text: string(html)
-        the response text
-    fields: dict
-        the fieldnames and their values
-    msgs: list of string
-        error messages
     eid: string(ObjectId)
         the id of the contribution/assessment
     """
 
-    eids = getItemEids(client, table)
-    if eids:
-        if table == CONTRIB:
-            return (False, getItem(client, table, eids[0]))
-        if table == ASSESS:
-            return (False, [eids[0]])
-        if table == REVIEW:
-            for eid in eids:
-                if checkCreator(REVIEW, eid, client.user):
-                    return (False, [eid])
-
     if table == CONTRIB:
-        return (True, assertAddItem(client, table, True))
+        return assertAddItem(cl, table, True)
     if table == ASSESS:
-        return (True, assertStartTask(client, START_ASSESSMENT, cId, True))
+        return assertStartTask(cl, START_ASSESSMENT, cId, True)
     if table == REVIEW:
-        return (True, assertStartTask(client, START_REVIEW, aId, True))
+        return assertStartTask(cl, START_REVIEW, aId, True)
 
 
 def start(
@@ -202,42 +134,28 @@ def start(
     submit=False,
     assign=False,
     review=False,
-    valueTables=None,
-    recordInfo=None,
-    ids=None,
-    cIds=None,
 ):
     """The start sequence for a batch of tests.
 
-    It depends on the batch what we have to find or make.
+    The first step is to start with a clean slate inth database:
+    Only the value records, no user-contributed content.
+
+    It depends on the batch what we have to make on top of that..
 
     The result is always that certain records in the database are retrieved,
     of if they do not exist, created.
 
-    Records with user added content are stored in the dict `recordInfo`,
+    Records with user added content are stored in the dict `recordId`,
     under the name of the table as key.
 
     Records in value tables are stored in the dict `valueTables`,
     under the name of the table as key.
-
 
     !!! hint "Dependencies of parameters"
         Some things are dependent on others, for example, making an assessment
         presupposes that there is a contribution.
         The function will switch on all parameters that are implied before
         creating or finding stuff.
-
-    !!! note "Result parameters"
-        In the parameter list below, the following parameters are result parameters:
-
-        *   valueTables
-        *   recordInfo
-        *   ids
-        *   cIds
-
-        If they are not passed, they cannot be filled in, and the function will crash.
-        You only have to pass empty dicts or lists for them if you expect corresponding
-        results.
 
     Parameters
     ----------
@@ -260,21 +178,21 @@ def start(
         Whether to assign reviewers
     review: boolean, optional `False`
         Whether to start and fillout both reviews
+
+    Returns
+    -------
     valueTables: dict, optional `None`
         Where the retrieved data for the value tables end up
-    recordInfo: dict, optional `None`
-        Where the retrieved data for the other records end up
+    recordId: dict, optional `None`
+        Where the retrieved ids for the records end up
     ids: dict, optional `None`
         A resulting mapping between values in a value table and their corresponding ids
-    cIds: list, optional, `None
-        A resulting list of ids of criteria entries
     """
 
     if review:
         assign = True
     if assign:
         submit = True
-        users = True
     if submit:
         fillout = True
     if fillout:
@@ -282,150 +200,124 @@ def start(
     if assessment:
         contrib = True
         types = True
-    if countries:
-        contrib = True
+    if contrib:
+        users = True
 
-    if users:
-        getValueTable(clientOffice, None, None, USER, valueTables, direct=True)
+    valueTables = {}
+    recordId = {}
+    recordInfo = {}
+    ids = {}
 
-    def startTypes(eid):
-        typeValues = getValueTable(
-            clientOffice, CONTRIB, eid, TYPE, valueTables, direct=True
-        )
-        ids["TYPE1"] = typeValues[TYPE1]
-        ids["TYPE2"] = typeValues[TYPE2]
+    def startReviews():
+        aId = recordId[ASSESS]
+        cIds = recordId[CRITERIA_ENTRY]
 
-    def doReview(aId):
-        recordInfo.setdefault(REVIEW, {})
+        recordId.setdefault(REVIEW, {})
         clr = {EXPERT: clientExpert, FINAL: clientFinal}
 
-        isNew = {}
-        for cl in (clientExpert, clientFinal):
-            user = cl.user
-            (isNw, rIds) = findOrMakeItem(cl, REVIEW, aId=aId)
-            assert len(rIds) == 1
-            rId = rIds[0]
-            user = cl.user
-            isNew[user] = isNew
-            recordInfo[REVIEW].setdefault(user, {})["eid"] = rId
-        for cl in (clientExpert, clientFinal):
-            user = cl.user
-            rId = recordInfo[REVIEW][user]["eid"]
-            isNw = isNew[user]
-            if isNw:
-                for (i, cId) in enumerate(cIds):
-                    rEId = recordInfo[REVIEW][EXPERT]["eid"]
-                    rFId = recordInfo[REVIEW][FINAL]["eid"]
-                    reId = getREIds(clr, cId, direct=(rEId, rFId))
-                    reId = reId[user]
-                    newValue = [f"{user}'s comment on criteria {i + 1}"]
-                    newValueRep = ",".join(newValue)
-                    assertModifyField(
-                        cl, REVIEW_ENTRY, reId, COMMENTS, (newValue, newValueRep), True
-                    )
+        for (user, cl) in clr.items():
+            rId = makeItem(cl, REVIEW, aId=aId)
+            recordId[REVIEW][user] = rId
 
-    def startAssign(aId, isNew):
-        if isNew:
-            users = G(valueTables, USER)
-            for (field, user) in ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL)):
-                value = G(users, user)
-                assertModifyField(clientOffice, ASSESS, aId, field, (value, user), True)
+        for (user, cl) in clr.items():
+            rId = recordId[REVIEW][user]
+            for (i, cId) in enumerate(cIds):
+                rEId = recordId[REVIEW][EXPERT]
+                rFId = recordId[REVIEW][FINAL]
+                reId = getReviewEntryId(clr, cId, rEId, rFId)
+                reId = reId[user]
+                newValue = [f"{user}'s comment on criteria {i + 1}"]
+                newValueRep = ",".join(newValue)
+                assertModifyField(
+                    cl, REVIEW_ENTRY, reId, COMMENTS, (newValue, newValueRep), True
+                )
+
+    def startAssign():
+        aId = recordId[ASSESS]
+        users = G(valueTables, USER)
+        for (field, user) in ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL)):
+            value = G(users, user)
+            assertModifyField(clientOffice, ASSESS, aId, field, (value, user), True)
 
         if review:
-            doReview(aId)
+            startReviews()
 
-    def startSubmit(aId, stage, isNew):
-        if isNew:
-            command = (
-                "submit"
-                if stage == COMPLETE
-                else "resubmit"
-                if stage == COMPLETE_WITHDRAWN
-                else E
-                if stage == SUBMITTED
-                else None
-            )
-            assert command is not None
-            if command:
-                url = f"/api/task/{command}Assessment/{aId}"
-                assertStatus(clientOwner, url, True)
+    def startSubmit():
+        aId = recordId[ASSESS]
+        url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
+        assertStatus(clientOwner, url, True)
 
         if assign:
-            startAssign(aId, isNew)
+            startAssign()
 
-    def startFillout(aId, isNew):
-        (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
-        criteriaEntries = findDetails(text, CRITERIA_ENTRY)
+    def startFillout():
+        aId = recordId[ASSESS]
+        assessInfo = getItem(clientOwner, ASSESS, aId)
+        criteriaEntries = findDetails(assessInfo["text"], CRITERIA_ENTRY)
         nCId = len(criteriaEntries)
         assert nCId == CRITERIA_ENTRIES_N[TYPE1]
+        cIds = []
 
         for (i, (cId, material)) in enumerate(criteriaEntries):
             cIds.append(cId)
-            if isNew:
-                assert ELLIPS_DIV in material
-                scores = getScores(cId)
-                (scoreValue, scoreId) = sorted(scores.items())[1]
-                assertModifyField(
-                    clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True,
-                )
-                theEvidence = [f"evidence for {i + 1}", "see the internet"]
-                theEvidenceRep = ",".join(theEvidence)
-                assertModifyField(
-                    clientOwner,
-                    CRITERIA_ENTRY,
-                    cId,
-                    EVIDENCE,
-                    (theEvidence, theEvidenceRep),
-                    True,
-                )
+            assert ELLIPS_DIV in material
+            scores = getScores(cId)
+            (scoreValue, scoreId) = sorted(scores.items())[1]
+            assertModifyField(
+                clientOwner, CRITERIA_ENTRY, cId, SCORE, (scoreId, scoreValue), True,
+            )
+            theEvidence = [f"evidence for {i + 1}", "see the internet"]
+            theEvidenceRep = ",".join(theEvidence)
+            assertModifyField(
+                clientOwner,
+                CRITERIA_ENTRY,
+                cId,
+                EVIDENCE,
+                (theEvidence, theEvidenceRep),
+                True,
+            )
+        recordId[CRITERIA_ENTRY] = cIds
 
-        result = assertStage(
-            clientOwner, ASSESS, aId, {COMPLETE, COMPLETE_WITHDRAWN, SUBMITTED}
-        )
-        stage = result[4]
+        assertStage(clientOwner, ASSESS, aId, COMPLETE)
 
         if submit:
-            startSubmit(aId, stage, isNew)
+            startSubmit()
 
-    def startAssessment(eid, isNew):
-        contribInfo = recordInfo[CONTRIB]
-        cTitle = contribInfo[TITLE]
-        if isNew:
-            assertModifyField(
-                clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True,
-            )
-        (isNew, aIds) = findOrMakeItem(clientOwner, ASSESS, cId=eid)
-        assert len(aIds) == 1
-        aId = aIds[0]
-        assessInfo = recordInfo.setdefault(ASSESS, {})
-        assessInfo["eid"] = aId
-        if isNew:
-            assertEditor(clientOwner, ASSESS, aId, valueTables, True)
-        assessInfo[TITLE] = f"assessment of {cTitle}"
+    def startAssessment():
+        eid = recordId[CONTRIB]
+        assertModifyField(
+            clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True,
+        )
+        aId = makeItem(clientOwner, ASSESS, cId=eid)
+        recordId[ASSESS] = aId
+        assertEditor(clientOwner, ASSESS, aId, valueTables, True)
 
         if fillout:
-            startFillout(aId, isNew)
+            startFillout()
 
     def startContrib():
-        (isNew, (text, fields, msgs, eid)) = findOrMakeItem(clientOwner, CONTRIB)
-        cTitle = G(fields, TITLE)
-        cType = G(fields, TYPE)
-        contribInfo = recordInfo.setdefault(CONTRIB, {})
-        contribInfo[TITLE] = cTitle
-        contribInfo[TYPE] = cType
-        for (k, v) in zip(("text", "fields", "msgs", "eid"), (text, fields, msgs, eid)):
-            contribInfo[k] = v
-        if isNew:
-            assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
-
-        if types:
-            startTypes(eid)
-
-        if countries:
-            getValueTable(clientOffice, CONTRIB, eid, COUNTRY, valueTables, direct=True)
+        eid = makeItem(clientOwner, CONTRIB)
+        recordId[CONTRIB] = eid
+        assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
         if assessment:
-            startAssessment(eid, isNew)
+            startAssessment()
+
+    if users:
+        valueTables[USER] = getValueTable(clientOffice, USER)
+
+    if countries:
+        valueTables[COUNTRY] = getValueTable(clientOffice, COUNTRY)
+
+    if types:
+        typeValues = getValueTable(clientOffice, TYPE)
+        ids["TYPE1"] = typeValues[TYPE1]
+        ids["TYPE2"] = typeValues[TYPE2]
+        valueTables[TYPE] = typeValues
 
     if contrib:
         startContrib()
+
+    return dict(
+        valueTables=valueTables, recordId=recordId, recordInfo=recordInfo, ids=ids
+    )

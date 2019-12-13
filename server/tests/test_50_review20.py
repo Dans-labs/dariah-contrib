@@ -67,6 +67,8 @@ Filling out reviews.
     The reviews can be modified.
 """
 
+import pytest
+
 import magic  # noqa
 from control.utils import pick as G
 from conftest import USERS, POWER_USERS
@@ -102,7 +104,7 @@ from helpers import (
     findReviewEntries,
     forall,
     getItem,
-    getREIds,
+    getReviewEntryId,
 )
 from starters import start
 from subtest import (
@@ -112,14 +114,12 @@ from subtest import (
     assertStatus,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
-    start(
+    startInfo.update(start(
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         clientExpert=clientExpert,
@@ -128,18 +128,18 @@ def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
         assessment=True,
         countries=True,
         review=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
-        cIds=cIds,
-    )
+    ))
 
 
 def test_reviewEntryView(clients):
+    recordId = startInfo["recordId"]
+
+    cIds = recordId[CRITERIA_ENTRY]
     cIdFirst = cIds[0]
     reId = {}
     for user in {EXPERT, FINAL}:
-        (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
+        criteriaEntryInfo = getItem(clients[user], CRITERIA_ENTRY, cIdFirst)
+        text = criteriaEntryInfo["text"]
         reviewEntries = findReviewEntries(text)
         reId[user] = reviewEntries[user][0]
 
@@ -162,12 +162,14 @@ def test_reviewEntryView(clients):
 
 
 def test_decideOthers(clients):
-    reviewInfo = G(recordInfo, REVIEW)
+    recordId = startInfo["recordId"]
+
+    reviewId = G(recordId, REVIEW)
 
     def assertIt(cl, exp):
         user = cl.user
         for kind in [EXPERT, FINAL]:
-            rId = G(G(reviewInfo, kind), "eid")
+            rId = G(reviewId, kind)
             expStatus = kind == user if exp else exp
             for decision in [REJECT, REVISE, ACCEPT, REVOKE]:
                 decisionStr = G(G(REVIEW_DECISION, decision), kind)
@@ -179,9 +181,12 @@ def test_decideOthers(clients):
 
 
 def test_reviewersDecide(clientsReviewer):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
     assertReviewDecisions(
         clientsReviewer,
-        recordInfo,
+        reviewId,
         [EXPERT, FINAL],
         [REJECT, REVISE, ACCEPT, REVOKE],
         {EXPERT: True, FINAL: False},
@@ -189,35 +194,44 @@ def test_reviewersDecide(clientsReviewer):
 
 
 def test_expertDecides(clientsReviewer):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [EXPERT], [REVOKE], False,
+        clientsReviewer, reviewId, [EXPERT], [REVOKE], False,
     )
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], True,
+        clientsReviewer, reviewId, [EXPERT], [ACCEPT], True,
     )
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [EXPERT], [ACCEPT], False,
+        clientsReviewer, reviewId, [EXPERT], [ACCEPT], False,
     )
 
 
 def test_finalAccepts(clientsReviewer):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [FINAL], [ACCEPT], True,
+        clientsReviewer, reviewId, [FINAL], [ACCEPT], True,
     )
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
     )
 
 
 def test_modify(clients):
-    users = G(valueTables, USER)
-    eid = G(G(recordInfo, CONTRIB), "eid")
-    aId = G(G(recordInfo, ASSESS), "eid")
-    reviewInfo = G(recordInfo, REVIEW)
-    rEId = G(G(reviewInfo, EXPERT), "eid")
-    rFId = G(G(reviewInfo, FINAL), "eid")
-    cIdFirst = cIds[0]
-    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    users = valueTables[USER]
+    eid = recordId[CONTRIB]
+    aId = recordId[ASSESS]
+    reviewId = recordId[REVIEW]
+    rExpertId = reviewId[EXPERT]
+    rFinalId = reviewId[FINAL]
+    cIdFirst = recordId[CRITERIA_ENTRY][0]
+    renId = getReviewEntryId(clients, cIdFirst, rExpertId, rFinalId)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp)
@@ -227,9 +241,9 @@ def test_modify(clients):
         assertModifyField(
             cl, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([EVIDENCE1], EVIDENCE1), exp
         )
-        for (rId, remarks) in ((rEId, REMARKS_E), (rFId, REMARKS_F)):
+        for (rId, remarks) in ((rExpertId, REMARKS_E), (rFinalId, REMARKS_F)):
             assertModifyField(cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp)
-        for (u, reid) in reId.items():
+        for (u, reid) in renId.items():
             comments = COMMENTS_E if u == EXPERT else COMMENTS_F
             assertModifyField(
                 cl, REVIEW_ENTRY, reid, COMMENTS, ([comments], comments), exp
@@ -240,23 +254,29 @@ def test_modify(clients):
 
 
 def test_finalRevokes(clientsReviewer):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [FINAL], [REVOKE], True,
+        clientsReviewer, reviewId, [FINAL], [REVOKE], True,
     )
     assertReviewDecisions(
-        clientsReviewer, recordInfo, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
+        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
     )
 
 
 def test_modify2(clients):
-    users = G(valueTables, USER)
-    eid = G(G(recordInfo, CONTRIB), "eid")
-    aId = G(G(recordInfo, ASSESS), "eid")
-    reviewInfo = G(recordInfo, REVIEW)
-    rEId = G(G(reviewInfo, EXPERT), "eid")
-    rFId = G(G(reviewInfo, FINAL), "eid")
-    cIdFirst = cIds[0]
-    reId = getREIds(clients, cIdFirst, direct=(rEId, rFId))
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    users = valueTables[USER]
+    eid = recordId[CONTRIB]
+    aId = recordId[ASSESS]
+    reviewId = recordId[REVIEW]
+    rExpertId = reviewId[EXPERT]
+    rFinalId = reviewId[FINAL]
+    cIdFirst = recordId[CRITERIA_ENTRY][0]
+    renId = getReviewEntryId(clients, cIdFirst, rExpertId, rFinalId)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
@@ -274,13 +294,13 @@ def test_modify2(clients):
             exp[CRITERIA_ENTRY],
         )
         for (rId, remarks, kind) in (
-            (rEId, REMARKS_E, EXPERT),
-            (rFId, REMARKS_F, FINAL),
+            (rExpertId, REMARKS_E, EXPERT),
+            (rFinalId, REMARKS_F, FINAL),
         ):
             assertModifyField(
                 cl, REVIEW, rId, REMARKS, ([remarks], remarks), exp[f"{REVIEW}_{kind}"]
             )
-        for (kind, reid) in reId.items():
+        for (kind, reid) in renId.items():
             comments = COMMENTS_E if kind == EXPERT else COMMENTS_F
             assertModifyField(
                 cl,

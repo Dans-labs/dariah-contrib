@@ -42,24 +42,24 @@ from subtest import (
 )
 
 
-recordInfo = {}
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
+    startInfo.update(start(
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
         contrib=True,
         countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-    )
+    ))
 
 
 def test_modifyCost(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[COST_BARE]
     expect = EXAMPLE[COST_TOTAL]
     assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
@@ -75,7 +75,9 @@ def test_modifyCost(clientOwner, clientOffice):
     ("field",), ((COST_TOTAL,), (COST_DESCRIPTION,),),
 )
 def test_viewCost(clients, field):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[field]
     if field == COST_DESCRIPTION:
         value = value[0]

@@ -153,30 +153,28 @@ from subtest import (
     sidebar,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
+    startInfo.update(start(
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
         assessment=True,
         countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
-    )
+    ))
 
 
 def test_criteriaEntries(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
-        (text, fields, msgs, dummy) = getItem(cl, ASSESS, aId)
+        assessInfo = getItem(cl, ASSESS, aId)
+        text = assessInfo["text"]
         criteriaEntries = findDetails(text, CRITERIA_ENTRY)
         nEntries = len(criteriaEntries)
         if exp:
@@ -192,9 +190,12 @@ def test_criteriaEntries(clients):
 
 
 def test_fillEvidenceAll(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     clientOwner = clients[OWNER]
-    (text, fields, msgs, *dummy) = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
+    assessInfo = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
+    text = assessInfo["text"]
     criteriaEntries = findDetails(text, CRITERIA_ENTRY)
     cId = criteriaEntries[0][0]
 
@@ -211,12 +212,17 @@ def test_fillEvidenceAll(clients):
 
 
 def test_fillEvidenceOwner(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
 
-    (text, fields, msgs, *dummy) = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
+    aId = G(recordId, ASSESS)
+
+    assessInfo = assertStage(clientOwner, ASSESS, aId, INCOMPLETE)
+    text = assessInfo["text"]
 
     criteriaEntries = findDetails(text, CRITERIA_ENTRY)
     assert len(criteriaEntries) == CRITERIA_ENTRIES_N[TYPE1]
+
+    cIds = []
 
     for (i, (cId, material)) in enumerate(criteriaEntries):
         assert ELLIPS_DIV in material
@@ -232,9 +238,13 @@ def test_fillEvidenceOwner(clientOwner):
         )
         cIds.append(cId)
 
+    recordId[CRITERIA_ENTRY] = cIds
+
 
 def test_fillScore(clientOwner):
-    cId = cIds[0]
+    recordId = startInfo["recordId"]
+
+    cId = recordId[CRITERIA_ENTRY][0]
     scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cId, SCORE)
     (scoreValue, scoreId) = sorted(scores.items())[0]
     assertModifyField(
@@ -243,9 +253,11 @@ def test_fillScore(clientOwner):
 
 
 def test_fillScoreWrong(clientOwner):
+    recordId = startInfo["recordId"]
+
+    cIds = recordId[CRITERIA_ENTRY]
     cId = cIds[0]
     cIdx = cIds[1]
-    (text, fields, msgs, eid) = getItem(clientOwner, CRITERIA_ENTRY, cId)
     scores = getRelatedValues(clientOwner, CRITERIA_ENTRY, cIdx, SCORE)
     (scoreValue, scoreId) = sorted(scores.items())[0]
     assertModifyField(
@@ -254,13 +266,18 @@ def test_fillScoreWrong(clientOwner):
 
 
 def test_submitAssessment(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_complete(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
+    cIds = recordId[CRITERIA_ENTRY]
     nCId = len(cIds)
 
     for (i, cId) in enumerate(cIds):
@@ -279,41 +296,57 @@ def test_complete(clientOwner):
     ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers(clients, field, user):
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
+    assignReviewers(clients, users, aId, field, user, False, expect)
 
 
 def test_withdrawAssessment(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_inspectTitleAll2(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), TITLE)
+    recordId = startInfo["recordId"]
+    recordInfo = startInfo["recordInfo"]
+
+    aId = G(recordId, ASSESS)
+    assessInfo = getItem(clients[OWNER], ASSESS, aId)
+    fields = assessInfo["fields"]
+    recordInfo[ASSESS] = assessInfo
+    aTitle = G(fields, TITLE)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     inspectTitleAll(clients, ASSESS, aId, expect)
 
 
 def test_resubmitAssessment(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_submitAssessmentRevised(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/submitRevised/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_submitAssessment2(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
@@ -322,12 +355,14 @@ def test_submitAssessment2(clientOwner):
     ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers2(clients, field, user):
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
+    assignReviewers(clients, users, aId, field, user, False, expect)
 
 
 def test_sidebar(clients):
@@ -345,8 +380,13 @@ def test_sidebar(clients):
 
 
 def test_inspectTitleAll3(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), TITLE)
+    recordId = startInfo["recordId"]
+    recordInfo = startInfo["recordInfo"]
+
+    aId = G(recordId, ASSESS)
+    assessInfo = recordInfo[ASSESS]
+    fields = assessInfo["fields"]
+    aTitle = G(fields, TITLE)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
     expect.update({MYCOORD: aTitle})
@@ -354,7 +394,9 @@ def test_inspectTitleAll3(clients):
 
 
 def test_withdrawAssessment2(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
@@ -376,21 +418,27 @@ def test_sidebar2(clients):
     ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers3(clients, field, user):
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, False, expect)
+    assignReviewers(clients, users, aId, field, user, False, expect)
 
 
 def test_submitAssessmentRevised2(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/submitRevised/{aId}"
     assertStatus(clientOwner, url, False)
 
 
 def test_resubmitAssessment2(clientOwner):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     url = f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
 
@@ -399,9 +447,11 @@ def test_resubmitAssessment2(clientOwner):
     ("field", USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers4(clients, field, user):
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, "eid")
     expect = {user: False for user in USERS}
     expect[OFFICE] = True
-    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)
+    assignReviewers(clients, users, aId, field, user, True, expect)

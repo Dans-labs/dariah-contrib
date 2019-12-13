@@ -112,139 +112,130 @@ class MongoId(IdIndex):
         return self.getId(toHexMongo(table, self.cur[table]))
 
 
-mongo = MongoId()
-allData = collections.defaultdict(list)
-valueDict = collections.defaultdict(dict)
-countryMapping = {}
-userMapping = {}
-groupMapping = {}
-
-
-def countryTable():
-    table = &#34;country&#34;
-    for (iso, info) in sorted(COUNTRY.items()):
-        _id = mongo.newId(table)
-        countryMapping[iso] = _id
-        allData[table].append(
-            dict(
-                _id=_id,
-                iso=iso,
-                name=info[&#34;name&#34;],
-                isMember=info[&#34;isMember&#34;],
-                latitude=info[&#34;latitude&#34;],
-                longitude=info[&#34;longitude&#34;],
-            )
-        )
-
-
-def groupTable():
-    table = &#34;permissionGroup&#34;
-    for (name, description) in GROUP:
-        _id = mongo.newId(table)
-        groupMapping[name] = _id
-        allData[table].append(dict(_id=_id, rep=name, description=description))
-
-
-def userTable():
-    table = &#34;user&#34;
-    for user in USER:
-        _id = mongo.newId(table)
-        u = dict(x for x in user.items())
-        u[&#34;_id&#34;] = _id
-        userMapping[u[&#34;eppn&#34;]] = _id
-        u[&#34;group&#34;] = groupMapping[u[&#34;group&#34;]]
-        if &#34;country&#34; in u:
-            u[&#34;country&#34;] = countryMapping[u[&#34;country&#34;]]
-        allData[table].append(u)
-
-
-def relTables():
-    for (table, values) in VALUES.items():
-        for value in values:
-            _id = mongo.newId(table)
-            valueDict[table][value] = _id
-            v = dict(_id=_id, rep=value)
-            allData[table].append(v)
-
-
-def yearTable():
-    table = &#34;year&#34;
-    targetInterval = list(range(2010, 2030))
-    allData[table] = [dict(_id=mongo.newId(table), rep=year) for year in targetInterval]
-
-
-def decisionTable():
-    table = &#34;decision&#34;
-    allData[table] = [
-        dict(_id=mongo.newId(table), **DECISION[&#34;values&#34;][decision])
-        for decision in DECISION[&#34;order&#34;]
-    ]
-
-
-def backoffice():
-    relIndex = collections.defaultdict(dict)
-
-    for tableInfo in PROCEDURE:
-        table = tableInfo[&#34;name&#34;]
-        rows = tableInfo[&#34;rows&#34;]
-        keyField = KEY_FIELD[table]
-
-        for row in rows:  # deterministic order
-            _id = mongo.newId(table)
-            newRow = dict()
-            newRow[&#34;_id&#34;] = _id
-            relIndex[table][row[keyField]] = _id
-            for (field, value) in row.items():
-                if field in {&#34;startDate&#34;, &#34;endDate&#34;}:
-                    # newRow[field] = dt.fromisoformat(value)
-                    newRow[field] = value  # yaml has already converted the datetime
-                elif field == &#34;creator&#34;:
-                    newRow[field] = userMapping[value]
-                elif (
-                    table == N.package
-                    and field == N.typeContribution
-                    or table == N.criteria
-                    and field == N.typeContribution
-                ):
-                    newRow[field] = [relIndex[field][val] for val in value]
-                elif (
-                    table == N.criteria
-                    and field == N.package
-                    or table == N.score
-                    and field == N.criteria
-                ):
-                    newRow[field] = relIndex[field][value]
-                else:
-                    newRow[field] = value
-            allData[table].append(newRow)
-    for tableInfo in PROCEDURE:
-        table = tableInfo[&#34;name&#34;]
-        keyField = KEY_FIELD[table]
-
-        if keyField == &#34;key&#34;:
-            for row in allData[table]:
-                del row[&#34;key&#34;]
-
-
-def importMongo():
-    client = MongoClient()
-    sys.stdout.write(f&#34;RESET the DATABASE {DATABASE} ... &#34;)
-    client.drop_database(DATABASE)
-    mongo = client[DATABASE]
-    for (table, rows) in allData.items():
-        mongo[table].insert_many(list(rows))
-
-    justNow = now()
-    for table in VALUE_TABLES:
-        mongo.collect.update_one(
-            {&#34;table&#34;: table},
-            {&#34;$set&#34;: {&#34;dateCollected&#34;: justNow}},
-            upsert=True,
-        )
-    sys.stdout.write(&#34;DONE\n&#34;)
-
-
 def clean():
+    mongo = MongoId()
+    allData = collections.defaultdict(list)
+    valueDict = collections.defaultdict(dict)
+    countryMapping = {}
+    userMapping = {}
+    groupMapping = {}
+
+    def countryTable():
+        table = &#34;country&#34;
+        for (iso, info) in sorted(COUNTRY.items()):
+            _id = mongo.newId(table)
+            countryMapping[iso] = _id
+            allData[table].append(
+                dict(
+                    _id=_id,
+                    iso=iso,
+                    name=info[&#34;name&#34;],
+                    isMember=info[&#34;isMember&#34;],
+                    latitude=info[&#34;latitude&#34;],
+                    longitude=info[&#34;longitude&#34;],
+                )
+            )
+
+    def groupTable():
+        table = &#34;permissionGroup&#34;
+        for (name, description) in GROUP:
+            _id = mongo.newId(table)
+            groupMapping[name] = _id
+            allData[table].append(dict(_id=_id, rep=name, description=description))
+
+    def userTable():
+        table = &#34;user&#34;
+        for user in USER:
+            _id = mongo.newId(table)
+            u = dict(x for x in user.items())
+            u[&#34;_id&#34;] = _id
+            userMapping[u[&#34;eppn&#34;]] = _id
+            u[&#34;group&#34;] = groupMapping[u[&#34;group&#34;]]
+            if &#34;country&#34; in u:
+                u[&#34;country&#34;] = countryMapping[u[&#34;country&#34;]]
+            allData[table].append(u)
+
+    def relTables():
+        for (table, values) in VALUES.items():
+            for value in values:
+                _id = mongo.newId(table)
+                valueDict[table][value] = _id
+                v = dict(_id=_id, rep=value)
+                allData[table].append(v)
+
+    def yearTable():
+        table = &#34;year&#34;
+        targetInterval = list(range(2010, 2030))
+        allData[table] = [
+            dict(_id=mongo.newId(table), rep=year) for year in targetInterval
+        ]
+
+    def decisionTable():
+        table = &#34;decision&#34;
+        allData[table] = [
+            dict(_id=mongo.newId(table), **DECISION[&#34;values&#34;][decision])
+            for decision in DECISION[&#34;order&#34;]
+        ]
+
+    def backoffice():
+        relIndex = collections.defaultdict(dict)
+
+        for tableInfo in PROCEDURE:
+            table = tableInfo[&#34;name&#34;]
+            rows = tableInfo[&#34;rows&#34;]
+            keyField = KEY_FIELD[table]
+
+            for row in rows:  # deterministic order
+                _id = mongo.newId(table)
+                newRow = dict()
+                newRow[&#34;_id&#34;] = _id
+                relIndex[table][row[keyField]] = _id
+                for (field, value) in row.items():
+                    if field in {&#34;startDate&#34;, &#34;endDate&#34;}:
+                        # newRow[field] = dt.fromisoformat(value)
+                        newRow[field] = value  # yaml has already converted the datetime
+                    elif field == &#34;creator&#34;:
+                        newRow[field] = userMapping[value]
+                    elif (
+                        table == N.package
+                        and field == N.typeContribution
+                        or table == N.criteria
+                        and field == N.typeContribution
+                    ):
+                        newRow[field] = [relIndex[field][val] for val in value]
+                    elif (
+                        table == N.criteria
+                        and field == N.package
+                        or table == N.score
+                        and field == N.criteria
+                    ):
+                        newRow[field] = relIndex[field][value]
+                    else:
+                        newRow[field] = value
+                allData[table].append(newRow)
+        for tableInfo in PROCEDURE:
+            table = tableInfo[&#34;name&#34;]
+            keyField = KEY_FIELD[table]
+
+            if keyField == &#34;key&#34;:
+                for row in allData[table]:
+                    del row[&#34;key&#34;]
+
+    def importMongo():
+        client = MongoClient()
+        sys.stdout.write(f&#34;RESET the DATABASE {DATABASE} ... &#34;)
+        client.drop_database(DATABASE)
+        db = client[DATABASE]
+        for (table, rows) in allData.items():
+            db[table].insert_many(list(rows))
+
+        justNow = now()
+        for table in VALUE_TABLES:
+            db.collect.update_one(
+                {&#34;table&#34;: table}, {&#34;$set&#34;: {&#34;dateCollected&#34;: justNow}}, upsert=True,
+            )
+        sys.stdout.write(&#34;DONE\n&#34;)
+
     countryTable()
     groupTable()
     userTable()
@@ -266,60 +257,6 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="clean.backoffice"><code class="name flex">
-<span>def <span class="ident">backoffice</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def backoffice():
-    relIndex = collections.defaultdict(dict)
-
-    for tableInfo in PROCEDURE:
-        table = tableInfo[&#34;name&#34;]
-        rows = tableInfo[&#34;rows&#34;]
-        keyField = KEY_FIELD[table]
-
-        for row in rows:  # deterministic order
-            _id = mongo.newId(table)
-            newRow = dict()
-            newRow[&#34;_id&#34;] = _id
-            relIndex[table][row[keyField]] = _id
-            for (field, value) in row.items():
-                if field in {&#34;startDate&#34;, &#34;endDate&#34;}:
-                    # newRow[field] = dt.fromisoformat(value)
-                    newRow[field] = value  # yaml has already converted the datetime
-                elif field == &#34;creator&#34;:
-                    newRow[field] = userMapping[value]
-                elif (
-                    table == N.package
-                    and field == N.typeContribution
-                    or table == N.criteria
-                    and field == N.typeContribution
-                ):
-                    newRow[field] = [relIndex[field][val] for val in value]
-                elif (
-                    table == N.criteria
-                    and field == N.package
-                    or table == N.score
-                    and field == N.criteria
-                ):
-                    newRow[field] = relIndex[field][value]
-                else:
-                    newRow[field] = value
-            allData[table].append(newRow)
-    for tableInfo in PROCEDURE:
-        table = tableInfo[&#34;name&#34;]
-        keyField = KEY_FIELD[table]
-
-        if keyField == &#34;key&#34;:
-            for row in allData[table]:
-                del row[&#34;key&#34;]</code></pre>
-</details>
-</dd>
 <dt id="clean.clean"><code class="name flex">
 <span>def <span class="ident">clean</span></span>(<span>)</span>
 </code></dt>
@@ -330,6 +267,129 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def clean():
+    mongo = MongoId()
+    allData = collections.defaultdict(list)
+    valueDict = collections.defaultdict(dict)
+    countryMapping = {}
+    userMapping = {}
+    groupMapping = {}
+
+    def countryTable():
+        table = &#34;country&#34;
+        for (iso, info) in sorted(COUNTRY.items()):
+            _id = mongo.newId(table)
+            countryMapping[iso] = _id
+            allData[table].append(
+                dict(
+                    _id=_id,
+                    iso=iso,
+                    name=info[&#34;name&#34;],
+                    isMember=info[&#34;isMember&#34;],
+                    latitude=info[&#34;latitude&#34;],
+                    longitude=info[&#34;longitude&#34;],
+                )
+            )
+
+    def groupTable():
+        table = &#34;permissionGroup&#34;
+        for (name, description) in GROUP:
+            _id = mongo.newId(table)
+            groupMapping[name] = _id
+            allData[table].append(dict(_id=_id, rep=name, description=description))
+
+    def userTable():
+        table = &#34;user&#34;
+        for user in USER:
+            _id = mongo.newId(table)
+            u = dict(x for x in user.items())
+            u[&#34;_id&#34;] = _id
+            userMapping[u[&#34;eppn&#34;]] = _id
+            u[&#34;group&#34;] = groupMapping[u[&#34;group&#34;]]
+            if &#34;country&#34; in u:
+                u[&#34;country&#34;] = countryMapping[u[&#34;country&#34;]]
+            allData[table].append(u)
+
+    def relTables():
+        for (table, values) in VALUES.items():
+            for value in values:
+                _id = mongo.newId(table)
+                valueDict[table][value] = _id
+                v = dict(_id=_id, rep=value)
+                allData[table].append(v)
+
+    def yearTable():
+        table = &#34;year&#34;
+        targetInterval = list(range(2010, 2030))
+        allData[table] = [
+            dict(_id=mongo.newId(table), rep=year) for year in targetInterval
+        ]
+
+    def decisionTable():
+        table = &#34;decision&#34;
+        allData[table] = [
+            dict(_id=mongo.newId(table), **DECISION[&#34;values&#34;][decision])
+            for decision in DECISION[&#34;order&#34;]
+        ]
+
+    def backoffice():
+        relIndex = collections.defaultdict(dict)
+
+        for tableInfo in PROCEDURE:
+            table = tableInfo[&#34;name&#34;]
+            rows = tableInfo[&#34;rows&#34;]
+            keyField = KEY_FIELD[table]
+
+            for row in rows:  # deterministic order
+                _id = mongo.newId(table)
+                newRow = dict()
+                newRow[&#34;_id&#34;] = _id
+                relIndex[table][row[keyField]] = _id
+                for (field, value) in row.items():
+                    if field in {&#34;startDate&#34;, &#34;endDate&#34;}:
+                        # newRow[field] = dt.fromisoformat(value)
+                        newRow[field] = value  # yaml has already converted the datetime
+                    elif field == &#34;creator&#34;:
+                        newRow[field] = userMapping[value]
+                    elif (
+                        table == N.package
+                        and field == N.typeContribution
+                        or table == N.criteria
+                        and field == N.typeContribution
+                    ):
+                        newRow[field] = [relIndex[field][val] for val in value]
+                    elif (
+                        table == N.criteria
+                        and field == N.package
+                        or table == N.score
+                        and field == N.criteria
+                    ):
+                        newRow[field] = relIndex[field][value]
+                    else:
+                        newRow[field] = value
+                allData[table].append(newRow)
+        for tableInfo in PROCEDURE:
+            table = tableInfo[&#34;name&#34;]
+            keyField = KEY_FIELD[table]
+
+            if keyField == &#34;key&#34;:
+                for row in allData[table]:
+                    del row[&#34;key&#34;]
+
+    def importMongo():
+        client = MongoClient()
+        sys.stdout.write(f&#34;RESET the DATABASE {DATABASE} ... &#34;)
+        client.drop_database(DATABASE)
+        db = client[DATABASE]
+        for (table, rows) in allData.items():
+            db[table].insert_many(list(rows))
+
+        justNow = now()
+        for table in VALUE_TABLES:
+            db.collect.update_one(
+                {&#34;table&#34;: table}, {&#34;$set&#34;: {&#34;dateCollected&#34;: justNow}}, upsert=True,
+            )
+        sys.stdout.write(&#34;DONE\n&#34;)
+
     countryTable()
     groupTable()
     userTable()
@@ -338,93 +398,6 @@ if __name__ == &#34;__main__&#34;:
     decisionTable()
     backoffice()
     importMongo()</code></pre>
-</details>
-</dd>
-<dt id="clean.countryTable"><code class="name flex">
-<span>def <span class="ident">countryTable</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def countryTable():
-    table = &#34;country&#34;
-    for (iso, info) in sorted(COUNTRY.items()):
-        _id = mongo.newId(table)
-        countryMapping[iso] = _id
-        allData[table].append(
-            dict(
-                _id=_id,
-                iso=iso,
-                name=info[&#34;name&#34;],
-                isMember=info[&#34;isMember&#34;],
-                latitude=info[&#34;latitude&#34;],
-                longitude=info[&#34;longitude&#34;],
-            )
-        )</code></pre>
-</details>
-</dd>
-<dt id="clean.decisionTable"><code class="name flex">
-<span>def <span class="ident">decisionTable</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def decisionTable():
-    table = &#34;decision&#34;
-    allData[table] = [
-        dict(_id=mongo.newId(table), **DECISION[&#34;values&#34;][decision])
-        for decision in DECISION[&#34;order&#34;]
-    ]</code></pre>
-</details>
-</dd>
-<dt id="clean.groupTable"><code class="name flex">
-<span>def <span class="ident">groupTable</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def groupTable():
-    table = &#34;permissionGroup&#34;
-    for (name, description) in GROUP:
-        _id = mongo.newId(table)
-        groupMapping[name] = _id
-        allData[table].append(dict(_id=_id, rep=name, description=description))</code></pre>
-</details>
-</dd>
-<dt id="clean.importMongo"><code class="name flex">
-<span>def <span class="ident">importMongo</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def importMongo():
-    client = MongoClient()
-    sys.stdout.write(f&#34;RESET the DATABASE {DATABASE} ... &#34;)
-    client.drop_database(DATABASE)
-    mongo = client[DATABASE]
-    for (table, rows) in allData.items():
-        mongo[table].insert_many(list(rows))
-
-    justNow = now()
-    for table in VALUE_TABLES:
-        mongo.collect.update_one(
-            {&#34;table&#34;: table},
-            {&#34;$set&#34;: {&#34;dateCollected&#34;: justNow}},
-            upsert=True,
-        )
-    sys.stdout.write(&#34;DONE\n&#34;)</code></pre>
 </details>
 </dd>
 <dt id="clean.info"><code class="name flex">
@@ -438,24 +411,6 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def info(x):
     sys.stdout.write(&#34;{}\n&#34;.format(x))</code></pre>
-</details>
-</dd>
-<dt id="clean.relTables"><code class="name flex">
-<span>def <span class="ident">relTables</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def relTables():
-    for (table, values) in VALUES.items():
-        for value in values:
-            _id = mongo.newId(table)
-            valueDict[table][value] = _id
-            v = dict(_id=_id, rep=value)
-            allData[table].append(v)</code></pre>
 </details>
 </dd>
 <dt id="clean.toHexMongo"><code class="name flex">
@@ -497,28 +452,6 @@ if __name__ == &#34;__main__&#34;:
     return &#34;{:0&gt;6x}&#34;.format(number)</code></pre>
 </details>
 </dd>
-<dt id="clean.userTable"><code class="name flex">
-<span>def <span class="ident">userTable</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def userTable():
-    table = &#34;user&#34;
-    for user in USER:
-        _id = mongo.newId(table)
-        u = dict(x for x in user.items())
-        u[&#34;_id&#34;] = _id
-        userMapping[u[&#34;eppn&#34;]] = _id
-        u[&#34;group&#34;] = groupMapping[u[&#34;group&#34;]]
-        if &#34;country&#34; in u:
-            u[&#34;country&#34;] = countryMapping[u[&#34;country&#34;]]
-        allData[table].append(u)</code></pre>
-</details>
-</dd>
 <dt id="clean.warning"><code class="name flex">
 <span>def <span class="ident">warning</span></span>(<span>x)</span>
 </code></dt>
@@ -530,21 +463,6 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def warning(x):
     sys.stderr.write(&#34;{}\n&#34;.format(x))</code></pre>
-</details>
-</dd>
-<dt id="clean.yearTable"><code class="name flex">
-<span>def <span class="ident">yearTable</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def yearTable():
-    table = &#34;year&#34;
-    targetInterval = list(range(2010, 2030))
-    allData[table] = [dict(_id=mongo.newId(table), rep=year) for year in targetInterval]</code></pre>
 </details>
 </dd>
 </dl>
@@ -667,20 +585,12 @@ if __name__ == &#34;__main__&#34;:
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="clean.backoffice" href="#clean.backoffice">backoffice</a></code></li>
 <li><code><a title="clean.clean" href="#clean.clean">clean</a></code></li>
-<li><code><a title="clean.countryTable" href="#clean.countryTable">countryTable</a></code></li>
-<li><code><a title="clean.decisionTable" href="#clean.decisionTable">decisionTable</a></code></li>
-<li><code><a title="clean.groupTable" href="#clean.groupTable">groupTable</a></code></li>
-<li><code><a title="clean.importMongo" href="#clean.importMongo">importMongo</a></code></li>
 <li><code><a title="clean.info" href="#clean.info">info</a></code></li>
-<li><code><a title="clean.relTables" href="#clean.relTables">relTables</a></code></li>
 <li><code><a title="clean.toHexMongo" href="#clean.toHexMongo">toHexMongo</a></code></li>
 <li><code><a title="clean.toHexName" href="#clean.toHexName">toHexName</a></code></li>
 <li><code><a title="clean.toHexNumber" href="#clean.toHexNumber">toHexNumber</a></code></li>
-<li><code><a title="clean.userTable" href="#clean.userTable">userTable</a></code></li>
 <li><code><a title="clean.warning" href="#clean.warning">warning</a></code></li>
-<li><code><a title="clean.yearTable" href="#clean.yearTable">yearTable</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

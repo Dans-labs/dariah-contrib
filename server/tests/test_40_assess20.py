@@ -23,6 +23,8 @@ Starting a second assessment.
     assessment.
 """
 
+import pytest
+
 import magic  # noqa
 from control.utils import pick as G
 from example import (
@@ -36,59 +38,66 @@ from example import (
 )
 from helpers import (
     checkWarning,
+    getEid,
     getItem,
 )
-from starters import (
-    start,
-)
+from starters import start
 from subtest import (
     assertDelItem,
     assertModifyField,
     assertStartTask,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        assessment=True,
-        countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            assessment=True,
+            countries=True,
+        )
     )
 
 
 def test_addAssessment(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
-    assertStartTask(clientOwner, START_ASSESSMENT, eid, False)
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
+    aId = assertStartTask(clientOwner, START_ASSESSMENT, eid, False)
+    assert aId is None
 
 
 def test_addAssessment2(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
-    aId = G(G(recordInfo, ASSESS), "eid")
-    aTitle = G(G(recordInfo, ASSESS), TITLE)
-    assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (ids["TYPE2"], TYPE2), True
-    )
-    (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
+    recordId = startInfo["recordId"]
+    recordInfo = startInfo["recordInfo"]
+    ids = startInfo["ids"]
+
+    eid = G(recordId, CONTRIB)
+    aId = G(recordId, ASSESS)
+
+    assessInfo = getItem(clientOwner, ASSESS, aId)
+    recordInfo[ASSESS] = assessInfo
+    fields = assessInfo["fields"]
+
+    aTitle = G(fields, TITLE)
+    assertModifyField(clientOwner, CONTRIB, eid, TYPE, (ids["TYPE2"], TYPE2), True)
+    assessInfo = getItem(clientOwner, ASSESS, aId)
+    text = assessInfo["text"]
     assert checkWarning(text, aTitle)
 
-    aIds = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
+    assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
+    aIds = getEid(clientOwner, ASSESS, multiple=True)
     assert len(aIds) == 2
 
-    otherAid = [i for i in aIds if i != aId][0]
-    assertDelItem(clientOwner, ASSESS, otherAid, True)
+    newAId = [i for i in aIds if i != aId][0]
+    assertDelItem(clientOwner, ASSESS, newAId, True)
 
-    assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True
-    )
-    (text, fields, msgs, dummy) = getItem(clientOwner, ASSESS, aId)
+    assertModifyField(clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True)
+    assessInfo = getItem(clientOwner, ASSESS, aId)
+    text = assessInfo["text"]
     assert not checkWarning(text, aTitle)

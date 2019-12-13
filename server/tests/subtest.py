@@ -27,7 +27,6 @@ from example import (
 )
 from helpers import (
     accessUrl,
-    fieldRe,
     findCaptions,
     findMsg,
     findEid,
@@ -54,26 +53,19 @@ def assertAddItem(client, table, expect):
 
     Returns
     -------
-    text: string
-        The complete response text
-    fields: dict
-        All fields and their values
-    msgs: list
-        All entries that have been flashed (and arrived in the flash bar)
     eid: str(ObjectId)
         The id of the inserted item.
     """
 
     response = client.get(f"/api/{table}/insert", follow_redirects=True)
     text = response.get_data(as_text=True)
-    fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
     eid = findEid(text)
     if expect:
         assert "item added" in msgs
     else:
         assert "item added" not in msgs
-    return (text, fields, msgs, eid)
+    return eid
 
 
 def assertCaptions(client, expect):
@@ -163,7 +155,8 @@ def assertFieldValue(source, field, expect):
 
     if type(source) is tuple:
         (client, table, eid) = source
-        (text, fields, msgs, dummy) = getItem(client, table, eid)
+        info = getItem(client, table, eid)
+        fields = info["fields"]
     else:
         fields = source
 
@@ -198,7 +191,8 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     """
 
     if not expect:
-        fields = getItem(client, table, eid)[1]
+        info = getItem(client, table, eid)
+        fields = info["fields"]
         oldValue = fields[field] if field in fields else None
 
     if type(newValue) is tuple:
@@ -211,7 +205,8 @@ def assertModifyField(client, table, eid, field, newValue, expect):
     if not expect:
         assert field not in fields
 
-    (text, fields, msgs, eid) = getItem(client, table, eid)
+    info = getItem(client, table, eid)
+    fields = info["fields"]
 
     if expect:
         assertFieldValue(fields, field, newValueRep)
@@ -220,7 +215,7 @@ def assertModifyField(client, table, eid, field, newValue, expect):
             assertFieldValue(fields, field, oldValue)
 
 
-def assertReviewDecisions(clients, recordInfo, kinds, decisions, expect):
+def assertReviewDecisions(clients, reviewId, kinds, decisions, expect):
     """Check whether the reviewers can take certain decisions.
 
     You specify which reviewers take which decisions, and they will
@@ -234,9 +229,8 @@ def assertReviewDecisions(clients, recordInfo, kinds, decisions, expect):
     ----------
     clients: dict
         Mapping from users to client fixtures.
-    recordInfo: dict
-        Record info gathered by earlier tests, must contain review records
-        under key `review`
+    reviewId: dict
+        The review ids for the expert and final review
     kinds: list of {expert, final}
         At most one of each, the order is important.
     decisions: list of {Reject, Revise, Accept, Revoke}
@@ -251,9 +245,8 @@ def assertReviewDecisions(clients, recordInfo, kinds, decisions, expect):
         A dict specifies per action of that reviewer what the outcome is.
     """
 
-    reviewInfo = G(recordInfo, REVIEW)
     for kind in kinds:
-        rId = G(G(reviewInfo, kind), "eid")
+        rId = G(reviewId, kind)
         expectKind = (
             True if expect is True else False if expect is False else G(expect, kind)
         )
@@ -281,26 +274,34 @@ def assertStage(client, table, eid, expect):
     eid: ObjectId | string
     expect: string | set of string
         If a set, we expect one of the values in the set
+
+    Returns
+    -------
+    dict
+        The text, fields, msgs and stage of the record
     """
 
-    (text, fields, msgs, dummy) = getItem(client, table, eid)
+    info = getItem(client, table, eid)
+    text = info["text"]
     stageFound = findStages(text)[0]
+    info["stage"] = stageFound
     if type(expect) is set:
         assert stageFound in expect
     else:
         assert stageFound == expect
-    return (text, fields, msgs, eid, stageFound)
+    return info
 
 
 def assertStartTask(client, task, eid, expect):
     """Issues a start workflow command.
 
-    There are `startAssessment` and `startReview` tasks.
-    They take as argument the eid of a contribution or review, respectively.
-    They create an assessment or review, respectively.
+    There are `startAssessment` and `startReview` tasks that create a record,
+    and there are task that set a field in an existing recordd.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the new item will be read off.
+    Tasks take as arguments the eid of a record in a table.
+
+    The response texts will be analysed into messages and fields.
+    For start tasks, the new eid will be read off and returned, otherwise None is returned.
 
     Parameters
     ----------
@@ -311,9 +312,7 @@ def assertStartTask(client, task, eid, expect):
 
     Returns
     -------
-    eids: list of str(ObjectId)
-        The ids of all items in the mylist view of the user after the act.
-        The items are taken from the assessments or reviews, respectively.
+    eid: str(ObjectId) | `None`
     """
 
     table = (
@@ -321,11 +320,11 @@ def assertStartTask(client, task, eid, expect):
     )
     assert table is not None
     assertStatus(client, f"/api/task/{task}/{eid}", expect)
+    newEid = None
     if expect:
-        eids = getEid(client, table, multiple=True)
-    else:
-        eids = []
-    return eids
+        newEid = getEid(client, table)
+
+    return newEid if task in {START_ASSESSMENT, START_REVIEW} else None
 
 
 def assertStatus(client, url, expect):
@@ -367,7 +366,7 @@ def assertStatus(client, url, expect):
         assert good
 
 
-def assignReviewers(clients, assessInfo, users, aId, field, user, keep, expect):
+def assignReviewers(clients, users, aId, field, user, keep, expect):
     """Verify assigning reviewers to an assessment.
 
     A reviewer will be assigned to an assessment and immediately be unassigned.
@@ -377,8 +376,6 @@ def assignReviewers(clients, assessInfo, users, aId, field, user, keep, expect):
     ----------
     clients: dict
         Mapping from users to client fixtures
-    assessInfo: dict
-        The assessment data as previously retrieved
     users: dict
         Mapping of users to ids
     aId: string(ObjectId)
@@ -393,7 +390,6 @@ def assignReviewers(clients, assessInfo, users, aId, field, user, keep, expect):
         For each user a boolean saying whether that user can assign the reviewer
     """
 
-    aId = G(assessInfo, "eid")
     value = G(users, user)
 
     def assertIt(cl, exp):

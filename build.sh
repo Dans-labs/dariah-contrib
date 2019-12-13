@@ -220,7 +220,9 @@ function dbrootreset {
 function dbtestinit {
     cd $root/server/tests
     mongostart
-    python3 clean.py
+    if [[ "$1" != "noclean" ]]; then
+        python3 clean.py
+    fi
 }
 
 function dbworkflowinit {
@@ -449,7 +451,7 @@ function dbinitdev {
 }
 
 function dbinittest {
-    dbtestinit
+    dbtestinit "$@"
 }
 
 function dbwf {
@@ -534,13 +536,13 @@ function ship {
 
 function test {
     echo "RUNNING TESTS ..."
-    dbtestinit
+    dbtestinit "noclean"
     testrun plain "$@"
 }
 
 function testc {
     echo "RUNNING TESTS with COVERAGE ..."
-    dbtestinit
+    dbtestinit "noclean"
     testrun cov "$@"
 }
 

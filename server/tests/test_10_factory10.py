@@ -16,12 +16,15 @@ How the app is set up, difference between production and development
 
 """
 
+import pytest
+
 import magic  # noqa
 from starters import start
 from subtest import assertStatus
 from example import PUBLIC
 
 
+@pytest.mark.usefixtures("db")
 def test_start():
     start()
 

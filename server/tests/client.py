@@ -45,7 +45,7 @@ class Client:
     The log file handle is a class attribute, not an instance attribute.
     """
 
-    def __init__(self, user, client):
+    def __init__(self, user, cl):
         """Wrap the user in a client.
 
         Parameters
@@ -53,10 +53,10 @@ class Client:
         user: string
             The `eppn` of the user for which the client has been made.
             See `makeClient`.
-        client: fixture
+        cl: fixture
             A Flask object actiing as a client that fires requests at the server.
         """
-        self.cl = client
+        self.cl = cl
         self.user = user
 
     def get(self, *args, **kwargs):

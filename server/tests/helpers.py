@@ -70,23 +70,6 @@ def checkWarning(text, label):
     return not not reWarning(label).search(text)
 
 
-def checkCreator(table, eid, user):
-    """Checks whether a user is the creator of a record.
-
-    Parameters
-    ----------
-    table: string
-
-    Returns
-    -------
-    """
-    client = MongoClient()
-    mongo = client.dariah_test
-    userId = G(list(mongo.user.find(dict(eppn=user)))[0], _ID)
-    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
-    return len(records) > 0
-
-
 def findCaptions(text):
     """Get the captions from a response.
 
@@ -135,7 +118,7 @@ def findDetails(text, dtable):
 def findEid(text, multiple=False):
     """Get the entity id(s) from a response.
 
-    If the response shows a record, dig out its entity id.
+    If the response shows one or more records, dig out its entity id(s).
 
     Otherwise, return `None`
 
@@ -144,7 +127,7 @@ def findEid(text, multiple=False):
     text: string
         The response text.
     multiple: boolean
-        Whether we should return the list of all found ids or only the first one.
+        Whether we should return the list of all found ids or only the last one.
 
     Returns
     -------
@@ -152,7 +135,7 @@ def findEid(text, multiple=False):
     """
 
     results = eidRe.findall(text)
-    return results if multiple else results[0] if results else None
+    return results if multiple else results[-1] if results else None
 
 
 def findFields(text):
@@ -331,6 +314,8 @@ def getEid(client, table, multiple=False):
     Parameters
     ----------
     table: string
+    multiple: boolean
+        Whether we should return the list of all found ids or only the last one.
     """
 
     url = f"/{table}/list?action=my"
@@ -341,17 +326,13 @@ def getEid(client, table, multiple=False):
 def getItem(client, table, eid):
     """Looks up an item directly.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields
 
     Parameters
     ----------
     client: fixture
     table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
+    eid: string(ObjectId)
 
     Returns
     -------
@@ -361,8 +342,6 @@ def getItem(client, table, eid):
         All fields and their values
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the item.
     """
 
     url = f"/{table}/item/{eid}"
@@ -370,37 +349,13 @@ def getItem(client, table, eid):
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
-    eid = findEid(text)
-    return (text, fields, msgs, eid)
+    return dict(text=text, fields=fields, msgs=msgs)
 
 
-def getItemEids(client, table, action=None):
-    """Looks up item eids from a view on a table.
-
-    The response texts will be analysed into messages and fields, the eids
-    of the items will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
-
-    Returns
-    -------
-    eid: list of str(ObjectId)
-        The ids of the item that can be found.
-    """
-
-    actionStr = "" if action is None else f"?action={action}"
-    response = client.get(f"/{table}/list{actionStr}")
-    text = response.get_data(as_text=True)
-    return findEid(text, multiple=True)
-
-
-def getREIds(clients, cId, direct=None):
+def getReviewEntryId(clients, cId, rEId, rFId):
     """Get the review entries associated with a criteria entry.
+
+    We use a MongoDB query to get the corresponding review entries.
 
     Parameters
     ----------
@@ -408,11 +363,10 @@ def getREIds(clients, cId, direct=None):
         Keyed by user eppns, values by the corresponding client fixtures
     cId: string(ObjectId)
         The id of the criteria entry in question
-    direct: tuple of ObjectId, optional, `None`
-        If `None`, the review entries ids are peeled from a response text.
-        If present, it is a pair of review ids, the first of an expert review,
-        the second of a final review. These ids are used in a MongoDB query to get
-        the corresponding review entries.
+    rEId: string(ObjectId)
+        The id of the expert review
+    rFId: string(ObjectId)
+        The id of the final review
 
     Returns
     -------
@@ -421,25 +375,19 @@ def getREIds(clients, cId, direct=None):
         corresponding review entries.
     """
 
-    reId = {}
-    if direct:
-        client = MongoClient()
-        mongo = client.dariah_test
-        (rEId, rFId) = direct
-        reId = {u: G(
+    client = MongoClient()
+    mongo = client.dariah_test
+    return {
+        reviewer: G(
             list(
                 mongo[REVIEW_ENTRY].find(
-                    {REVIEW: ObjectId(reid), CRITERIA_ENTRY: ObjectId(cId)}
+                    {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
                 )
             )[0],
             _ID,
-        ) for (u, reid) in zip((EXPERT, FINAL), direct)}
-    else:
-        for user in {EXPERT, FINAL}:
-            (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cId)
-            reviewEntries = findReviewEntries(text)
-            reId[user] = reviewEntries[user][0]
-    return reId
+        )
+        for (reviewer, reviewId) in zip((EXPERT, FINAL), (rEId, rFId))
+    }
 
 
 def getRelatedValues(client, table, eid, field):

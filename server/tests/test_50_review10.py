@@ -43,6 +43,8 @@ Filling out reviews.
 :   **expert** and **final** fill out their review entries.
 """
 
+import pytest
+
 import magic  # noqa
 from control.utils import pick as G, E
 from conftest import USERS, POWER_USERS
@@ -65,7 +67,7 @@ from helpers import (
     findTasks,
     forall,
     getItem,
-    getREIds,
+    getReviewEntryId,
 )
 from starters import start
 from subtest import (
@@ -75,24 +77,20 @@ from subtest import (
     sidebar,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        assessment=True,
-        countries=True,
-        assign=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
-        cIds=cIds,
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            assessment=True,
+            countries=True,
+            assign=True,
+        )
     )
 
 
@@ -111,10 +109,13 @@ def test_sidebar(clients):
 
 
 def test_viewAssessment(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
-        (text, fields, msgs, dummy) = getItem(cl, ASSESS, aId)
+        assessInfo = getItem(cl, ASSESS, aId)
+        text = assessInfo["text"]
         tasks = findTasks(text)
         if exp:
             assert len(tasks) == 1
@@ -126,15 +127,17 @@ def test_viewAssessment(clients):
 
 
 def test_tryStartReviewAll(clients):
-    aId = G(G(recordInfo, ASSESS), "eid")
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
-        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        rId = assertStartTask(cl, START_REVIEW, aId, exp)
         if exp:
-            assert len(rIds) == 1
-            assertDelItem(cl, REVIEW, rIds[0], True)
+            assert rId is not None
+            assertDelItem(cl, REVIEW, rId, True)
         else:
-            assert len(rIds) == 0
+            assert rId is None
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {EXPERT, FINAL}})
@@ -142,30 +145,36 @@ def test_tryStartReviewAll(clients):
 
 
 def test_startReview(clientsReviewer):
-    aId = G(G(recordInfo, ASSESS), "eid")
-    recordInfo.setdefault(REVIEW, {})
+    recordId = startInfo["recordId"]
+
+    aId = G(recordId, ASSESS)
+    recordId.setdefault(REVIEW, {})
 
     def assertIt(cl, exp):
-        rIds = assertStartTask(cl, START_REVIEW, aId, exp)
+        rId = assertStartTask(cl, START_REVIEW, aId, exp)
+        assert rId is not None
         user = cl.user
-        assert len(rIds) == 1
-        recordInfo[REVIEW].setdefault(user, {})["eid"] = rIds[0]
+        recordId[REVIEW][user] = rId
 
     expect = {user: True for user in {EXPERT, FINAL}}
     forall(clientsReviewer, expect, assertIt)
 
 
 def test_reviewEntries(clients):
-    reviewInfo = G(recordInfo, REVIEW)
-    rEid = G(G(reviewInfo, EXPERT), "eid")
-    rFid = G(G(reviewInfo, FINAL), "eid")
+    recordId = startInfo["recordId"]
+
+    cIds = recordId[CRITERIA_ENTRY]
+    reviewId = G(recordId, REVIEW)
+    rEid = G(reviewId, EXPERT)
+    rFid = G(reviewId, FINAL)
     assert rEid is not None
     assert rFid is not None
 
     def assertIt(cl, exp):
         user = cl.user
         for crId in cIds:
-            (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, crId)
+            criteriaEntryInfo = getItem(cl, CRITERIA_ENTRY, crId)
+            text = criteriaEntryInfo["text"]
             reviewEntries = findReviewEntries(text)
             if exp:
                 if user in {EXPERT, FINAL}:
@@ -182,20 +191,26 @@ def test_reviewEntries(clients):
 
 
 def test_reviewEntryFillFirstAll(clients):
+    recordId = startInfo["recordId"]
+
+    cIds = recordId[CRITERIA_ENTRY]
     cIdFirst = cIds[0]
-    reId = getREIds(clients, cIdFirst)
+    reviewId = recordId[REVIEW]
+    reviewEntryId = getReviewEntryId(
+        clients, cIdFirst, reviewId[EXPERT], reviewId[FINAL]
+    )
 
     def assertIt(cl, exp):
         user = cl.user
-        for (kind, rId) in reId.items():
+        for (kind, renId) in reviewEntryId.items():
             thisExp = exp and (kind == user or user in POWER_USERS)
             newValue = [f"{user}'s comment"]
             newValueRep = ",".join(newValue)
             assertModifyField(
-                cl, REVIEW_ENTRY, rId, COMMENTS, (newValue, newValueRep), thisExp
+                cl, REVIEW_ENTRY, renId, COMMENTS, (newValue, newValueRep), thisExp
             )
             if thisExp:
-                assertModifyField(cl, REVIEW_ENTRY, rId, COMMENTS, ([], E), True)
+                assertModifyField(cl, REVIEW_ENTRY, renId, COMMENTS, ([], E), True)
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {EXPERT, FINAL} | POWER_USERS})
@@ -203,10 +218,15 @@ def test_reviewEntryFillFirstAll(clients):
 
 
 def test_reviewEntryFill(clientsReviewer):
+    recordId = startInfo["recordId"]
+
+    cIds = recordId[CRITERIA_ENTRY]
+
     def assertIt(cl, exp):
         user = cl.user
-        for (i, cId) in enumerate(cIds):
-            (text, fields, msgs, dummy) = getItem(cl, CRITERIA_ENTRY, cId)
+        for (i, crId) in enumerate(cIds):
+            criteriaEntryInfo = getItem(cl, CRITERIA_ENTRY, crId)
+            text = criteriaEntryInfo["text"]
             reviewEntries = findReviewEntries(text)
             rId = reviewEntries[user][0]
             newValue = [f"{user}'s comment on criteria {i + 1}"]

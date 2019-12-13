@@ -297,6 +297,7 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
+from clean import clean
 from client import makeClient
 
 
@@ -353,7 +354,12 @@ POWER_USERS = set(&#34;&#34;&#34;
 &#34;&#34;&#34;The power users.&#34;&#34;&#34;
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
+def db():
+    clean()
+
+
+@pytest.fixture(scope=&#34;session&#34;)
 def app():
     &#34;&#34;&#34;Normal app for testing: development mode, test mode.
 
@@ -367,7 +373,7 @@ def app():
     yield appFactory(&#34;development&#34;, True, DEBUG)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clients(app):
     &#34;&#34;&#34;A dictionary of client fixtures for each user.
 
@@ -380,7 +386,7 @@ def clients(app):
     return {user: makeClient(app, user) for user in USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientsNamed(app):
     &#34;&#34;&#34;A dictionary of client fixtures for all authenticated users.
 
@@ -390,7 +396,7 @@ def clientsNamed(app):
     return {user: makeClient(app, user) for user in NAMED_USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientsMy(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the owner/editor users.
 
@@ -400,7 +406,7 @@ def clientsMy(app):
     return {user: makeClient(app, user) for user in (&#34;owner&#34;, &#34;editor&#34;)}
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientsReviewer(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the reviewer users.
 
@@ -410,7 +416,7 @@ def clientsReviewer(app):
     return {user: makeClient(app, user) for user in (&#34;expert&#34;, &#34;final&#34;)}
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientsPower(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the power users.
 
@@ -420,57 +426,57 @@ def clientsPower(app):
     return {user: makeClient(app, user) for user in POWER_USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientPublic(app):
     return makeClient(app, &#34;public&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientAuth(app):
     return makeClient(app, &#34;auth&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientCoord(app):
     return makeClient(app, &#34;coord&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientExpert(app):
     return makeClient(app, &#34;expert&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientFinal(app):
     return makeClient(app, &#34;final&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientMycoord(app):
     return makeClient(app, &#34;mycoord&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientEditor(app):
     return makeClient(app, &#34;editor&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientOwner(app):
     return makeClient(app, &#34;owner&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientOffice(app):
     return makeClient(app, &#34;office&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientSystem(app):
     return makeClient(app, &#34;system&#34;)
 
 
-@pytest.fixture
+@pytest.fixture(scope=&#34;module&#34;)
 def clientRoot(app):
     return makeClient(app, &#34;root&#34;)</code></pre>
 </details>
@@ -520,7 +526,7 @@ So most tests are done in development mode, with the test users.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;session&#34;)
 def app():
     &#34;&#34;&#34;Normal app for testing: development mode, test mode.
 
@@ -543,7 +549,7 @@ def app():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientAuth(app):
     return makeClient(app, &#34;auth&#34;)</code></pre>
 </details>
@@ -557,7 +563,7 @@ def clientAuth(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientCoord(app):
     return makeClient(app, &#34;coord&#34;)</code></pre>
 </details>
@@ -571,7 +577,7 @@ def clientCoord(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientEditor(app):
     return makeClient(app, &#34;editor&#34;)</code></pre>
 </details>
@@ -585,7 +591,7 @@ def clientEditor(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientExpert(app):
     return makeClient(app, &#34;expert&#34;)</code></pre>
 </details>
@@ -599,7 +605,7 @@ def clientExpert(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientFinal(app):
     return makeClient(app, &#34;final&#34;)</code></pre>
 </details>
@@ -613,7 +619,7 @@ def clientFinal(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientMycoord(app):
     return makeClient(app, &#34;mycoord&#34;)</code></pre>
 </details>
@@ -627,7 +633,7 @@ def clientMycoord(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientOffice(app):
     return makeClient(app, &#34;office&#34;)</code></pre>
 </details>
@@ -641,7 +647,7 @@ def clientOffice(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientOwner(app):
     return makeClient(app, &#34;owner&#34;)</code></pre>
 </details>
@@ -655,7 +661,7 @@ def clientOwner(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientPublic(app):
     return makeClient(app, &#34;public&#34;)</code></pre>
 </details>
@@ -669,7 +675,7 @@ def clientPublic(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientRoot(app):
     return makeClient(app, &#34;root&#34;)</code></pre>
 </details>
@@ -683,7 +689,7 @@ def clientRoot(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientSystem(app):
     return makeClient(app, &#34;system&#34;)</code></pre>
 </details>
@@ -700,7 +706,7 @@ action on behalf of the different users.</p></section>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clients(app):
     &#34;&#34;&#34;A dictionary of client fixtures for each user.
 
@@ -723,7 +729,7 @@ def clients(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientsMy(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the owner/editor users.
 
@@ -743,7 +749,7 @@ def clientsMy(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientsNamed(app):
     &#34;&#34;&#34;A dictionary of client fixtures for all authenticated users.
 
@@ -763,7 +769,7 @@ def clientsNamed(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientsPower(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the power users.
 
@@ -783,7 +789,7 @@ def clientsPower(app):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@pytest.fixture
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
 def clientsReviewer(app):
     &#34;&#34;&#34;A dictionary of client fixtures for the reviewer users.
 
@@ -791,6 +797,20 @@ def clientsReviewer(app):
     &#34;&#34;&#34;
 
     return {user: makeClient(app, user) for user in (&#34;expert&#34;, &#34;final&#34;)}</code></pre>
+</details>
+</dd>
+<dt id="conftest.db"><code class="name flex">
+<span>def <span class="ident">db</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.fixture(scope=&#34;module&#34;)
+def db():
+    clean()</code></pre>
 </details>
 </dd>
 </dl>
@@ -843,6 +863,7 @@ def clientsReviewer(app):
 <li><code><a title="conftest.clientsNamed" href="#conftest.clientsNamed">clientsNamed</a></code></li>
 <li><code><a title="conftest.clientsPower" href="#conftest.clientsPower">clientsPower</a></code></li>
 <li><code><a title="conftest.clientsReviewer" href="#conftest.clientsReviewer">clientsReviewer</a></code></li>
+<li><code><a title="conftest.db" href="#conftest.db">db</a></code></li>
 </ul>
 </li>
 </ul>

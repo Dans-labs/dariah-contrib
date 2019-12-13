@@ -86,24 +86,24 @@ from subtest import (
 )
 
 
-recordInfo = {}
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner):
-    start(
+    startInfo.update(start(
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
         contrib=True,
         countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-    )
+    ))
 
 
 def test_modifyCost(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[COST_BARE]
     expect = EXAMPLE[COST_TOTAL]
     assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
@@ -119,7 +119,9 @@ def test_modifyCost(clientOwner, clientOffice):
     (&#34;field&#34;,), ((COST_TOTAL,), (COST_DESCRIPTION,),),
 )
 def test_viewCost(clients, field):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[field]
     if field == COST_DESCRIPTION:
         value = value[0]
@@ -151,7 +153,9 @@ def test_viewCost(clients, field):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyCost(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[COST_BARE]
     expect = EXAMPLE[COST_TOTAL]
     assertModifyField(clientOwner, CONTRIB, eid, COST_TOTAL, (value, expect), True)
@@ -172,16 +176,15 @@ def test_viewCost(clients, field):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOffice, clientOwner):
-    start(
+<pre><code class="python">@pytest.mark.usefixtures(&#34;db&#34;)
+def test_start(clientOffice, clientOwner):
+    startInfo.update(start(
         clientOffice=clientOffice,
         clientOwner=clientOwner,
         users=True,
         contrib=True,
         countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-    )</code></pre>
+    ))</code></pre>
 </details>
 </dd>
 <dt id="test_30_contrib40.test_viewCost"><code class="name flex">
@@ -197,7 +200,9 @@ def test_viewCost(clients, field):
     (&#34;field&#34;,), ((COST_TOTAL,), (COST_DESCRIPTION,),),
 )
 def test_viewCost(clients, field):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     value = EXAMPLE[field]
     if field == COST_DESCRIPTION:
         value = value[0]

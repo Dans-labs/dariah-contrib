@@ -63,11 +63,12 @@ test | url pattern
     during the previous tests.
 """
 
+import pytest
+
 import magic  # noqa
 from conftest import USERS
 from helpers import forall
 from starters import start
-from clean import clean
 from subtest import illegalize, assertStatus
 from example import (
     COMMON_CSS,
@@ -86,16 +87,12 @@ from example import (
     TITLE,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
-def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
-    start(
-        clientOffice=clientOffice, users=True, valueTables=valueTables, ids=ids,
-    )
+@pytest.mark.usefixtures("db")
+def test_start(clientOffice):
+    startInfo.update(start(clientOffice=clientOffice, users=True))
 
 
 def test_long(clients):
@@ -213,7 +210,3 @@ def test_field(clients):
         eid=DUMMY_ID,
         field=TITLE,
     )
-
-
-def test_clean():
-    clean()

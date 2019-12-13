@@ -119,6 +119,7 @@ import pytest
 
 import magic  # noqa
 from control.app import appFactory
+from clean import clean
 from client import makeClient
 
 
@@ -175,7 +176,12 @@ POWER_USERS = set("""
 """The power users."""
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
+def db():
+    clean()
+
+
+@pytest.fixture(scope="session")
 def app():
     """Normal app for testing: development mode, test mode.
 
@@ -189,7 +195,7 @@ def app():
     yield appFactory("development", True, DEBUG)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clients(app):
     """A dictionary of client fixtures for each user.
 
@@ -202,7 +208,7 @@ def clients(app):
     return {user: makeClient(app, user) for user in USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientsNamed(app):
     """A dictionary of client fixtures for all authenticated users.
 
@@ -212,7 +218,7 @@ def clientsNamed(app):
     return {user: makeClient(app, user) for user in NAMED_USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientsMy(app):
     """A dictionary of client fixtures for the owner/editor users.
 
@@ -222,7 +228,7 @@ def clientsMy(app):
     return {user: makeClient(app, user) for user in ("owner", "editor")}
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientsReviewer(app):
     """A dictionary of client fixtures for the reviewer users.
 
@@ -232,7 +238,7 @@ def clientsReviewer(app):
     return {user: makeClient(app, user) for user in ("expert", "final")}
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientsPower(app):
     """A dictionary of client fixtures for the power users.
 
@@ -242,56 +248,56 @@ def clientsPower(app):
     return {user: makeClient(app, user) for user in POWER_USERS}
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientPublic(app):
     return makeClient(app, "public")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientAuth(app):
     return makeClient(app, "auth")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientCoord(app):
     return makeClient(app, "coord")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientExpert(app):
     return makeClient(app, "expert")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientFinal(app):
     return makeClient(app, "final")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientMycoord(app):
     return makeClient(app, "mycoord")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientEditor(app):
     return makeClient(app, "editor")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientOwner(app):
     return makeClient(app, "owner")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientOffice(app):
     return makeClient(app, "office")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientSystem(app):
     return makeClient(app, "system")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def clientRoot(app):
     return makeClient(app, "root")

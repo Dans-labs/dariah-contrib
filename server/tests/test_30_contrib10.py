@@ -68,17 +68,17 @@ from example import (
     TITLE1,
     YEAR,
 )
-from helpers import forall
+from helpers import forall, getItem
 from starters import start
 from subtest import assertAddItem, assertDelItem, assertEditor, sidebar
 
 
-recordInfo = {}
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice):
-    start(clientOffice=clientOffice, users=True, valueTables=valueTables)
+    startInfo.update(start(clientOffice=clientOffice, users=True))
 
 
 def test_sidebar(clients):
@@ -88,7 +88,7 @@ def test_sidebar(clients):
 
 def test_addDelAll(clients):
     def assertIt(cl, exp):
-        (text, fields, msgs, eid) = assertAddItem(cl, CONTRIB, exp)
+        eid = assertAddItem(cl, CONTRIB, exp)
         if exp:
             assertDelItem(cl, CONTRIB, eid, True)
 
@@ -98,10 +98,12 @@ def test_addDelAll(clients):
 
 
 def test_addOwner(clientOwner):
-    (text, fields, msgs, eid) = assertAddItem(clientOwner, CONTRIB, True)
-    contribInfo = recordInfo.setdefault(CONTRIB, {})
-    for (k, v) in zip(("text", "fields", "msgs", "eid"), (text, fields, msgs, eid)):
-        contribInfo[k] = v
+    recordId = startInfo["recordId"]
+    recordInfo = startInfo["recordInfo"]
+
+    eid = assertAddItem(clientOwner, CONTRIB, True)
+    recordId[CONTRIB] = eid
+    recordInfo[CONTRIB] = getItem(clientOwner, CONTRIB, eid)
 
 
 def test_sidebar2(clients):
@@ -124,13 +126,19 @@ def test_sidebar2(clients):
         (CONTACT_PERSON_EMAIL, OWNER_EMAIL),
     ),
 )
-def test_fields(field, value):
-    fields = G(G(recordInfo, CONTRIB), "fields")
+def test_fields(clientOwner, field, value):
+    recordInfo = startInfo["recordInfo"]
+    contribInfo = recordInfo[CONTRIB]
+    fields = G(contribInfo, "fields")
+
     assert G(fields, field) == value
 
 
 def test_makeEditorAll(clients):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertEditor(cl, CONTRIB, eid, valueTables, exp)
@@ -143,7 +151,10 @@ def test_makeEditorAll(clients):
 
 
 def test_makeEditorOwner(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     assertEditor(clientOwner, CONTRIB, eid, valueTables, True)
 
 

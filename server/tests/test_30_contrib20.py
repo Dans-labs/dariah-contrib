@@ -73,23 +73,25 @@ from starters import start
 from subtest import assertFieldValue, assertModifyField
 
 
-recordInfo = {}
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        contrib=True,
-        countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            contrib=True,
+            countries=True,
+        )
     )
 
 
 def test_changeUserCountry(clientsPower):
+    valueTables = startInfo["valueTables"]
+
     users = valueTables[USER]
     countries = valueTables[COUNTRY]
 
@@ -112,7 +114,9 @@ def test_changeUserCountry(clientsPower):
 
 
 def test_modifyTitleAll(clients):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp)
@@ -132,7 +136,9 @@ def test_modifyTitleAll(clients):
     ),
 )
 def test_modifyDescription(clientsMy, field, value):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, value.strip()), exp)
@@ -146,7 +152,9 @@ def test_modifyDescription(clientsMy, field, value):
     ((DESCRIPTION, CHECKS[DESCRIPTION]), (COST_DESCRIPTION, CHECKS[COST_DESCRIPTION]),),
 )
 def test_descriptionMarkdown(clientsMy, field, checks):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         response = cl.get(f"/api/{CONTRIB}/item/{eid}/field/{field}?action=view")
@@ -169,7 +177,9 @@ def test_descriptionMarkdown(clientsMy, field, checks):
     ),
 )
 def test_modifyCost(clientsMy, value, expectVal):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, COST_TOTAL, (value, expectVal), exp)
@@ -189,7 +199,9 @@ def test_modifyCost(clientsMy, value, expectVal):
     ),
 )
 def test_modifyEmail(clientsMy, value, expectVal):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertModifyField(
@@ -233,7 +245,9 @@ def test_modifyEmail(clientsMy, value, expectVal):
     ),
 )
 def test_modifyUrl(clientsMy, field, value, expectVal):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):
         assertModifyField(cl, CONTRIB, eid, field, (value, expectVal), exp)

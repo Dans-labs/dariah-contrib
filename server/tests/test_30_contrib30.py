@@ -91,18 +91,15 @@ from starters import start, getValueTable
 from subtest import assertModifyField, assertDelItem
 
 
-recordInfo = {}
-valueTables = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        contrib=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
+    startInfo.update(
+        start(
+            clientOffice=clientOffice, clientOwner=clientOwner, users=True, contrib=True
+        )
     )
 
 
@@ -120,23 +117,31 @@ def test_start(clientOffice, clientOwner):
         (KEYWORD,),
     ),
 )
-def test_valueEdit(clientOwner, field):
-    eid = G(G(recordInfo, CONTRIB), "eid")
-    values = getValueTable(clientOwner, CONTRIB, eid, field, valueTables)
+def test_valueEdit(clientOffice, clientOwner, field):
+    valueTables = startInfo["valueTables"]
+
+    values = getValueTable(clientOffice, field)
+    valueTables[field] = values
 
     for exampleValue in EXAMPLE[field]:
         assert exampleValue in values
 
 
 def test_modifyVcc(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     vccs = valueTables[VCC]
     vcc12 = [vccs[VCC1], vccs[VCC2]]
     assertModifyField(clientOwner, CONTRIB, eid, VCC, (vcc12, VCC12), True)
 
 
 def test_modifyVccWrong(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     vccs = valueTables[VCC]
     wrongValue = list(valueTables[TADIRAH_OBJECT].values())[0]
     vccVal = [wrongValue, vccs["vcc2"]]
@@ -144,41 +149,59 @@ def test_modifyVccWrong(clientOwner):
 
 
 def test_modifyVccError(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     vccs = valueTables[VCC]
     vccVal = ["monkey", vccs[VCC2]]
     assertModifyField(clientOwner, CONTRIB, eid, VCC, (vccVal, None), False)
 
 
 def test_modifyTypeEx1(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(
         clientOwner, CONTRIB, eid, TYPE, (valueTables[TYPE][TYPE2], TYPE2), True
     )
 
 
 def test_modifyTypeMult(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     types = valueTables[TYPE]
     newValue = (types[TYPE2], types[TYPE1])
     assertModifyField(clientOwner, CONTRIB, eid, TYPE, (newValue, None), False)
 
 
 def test_modifyTypeEx2(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(
         clientOwner, CONTRIB, eid, TYPE, (valueTables[TYPE][TYPE2], TYPE2), True
     )
 
 
 def test_modifyTypeWrong(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     wrongValue = list(valueTables[TADIRAH_OBJECT].values())[0]
     assertModifyField(clientOwner, CONTRIB, eid, TYPE, wrongValue, False)
 
 
 def test_modifyTypeTypo(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     types = valueTables[TYPE]
     fieldx = "xxxContribution"
     (text, fields) = modifyField(clientOwner, CONTRIB, eid, fieldx, types[TYPE2])
@@ -196,7 +219,10 @@ def test_modifyTypeTypo(clientOwner):
     ),
 )
 def test_modifyMeta(clientOwner, field):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    valueTables = startInfo["valueTables"]
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     meta = valueTables[field]
     checkValues = EXAMPLE[field][0:3]
     updateValues = tuple(meta[ex] for ex in checkValues)
@@ -211,7 +237,9 @@ def test_modifyMeta(clientOwner, field):
     ((VCC,), (TYPE,), (TADIRAH_OBJECT,), (TADIRAH_ACTIVITY,), (TADIRAH_TECHNIQUE,),),
 )
 def test_addMetaWrong(clientOwner, field):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     updateValues = [["xxx"]]
 
     assertModifyField(clientOwner, CONTRIB, eid, field, updateValues, False)
@@ -221,7 +249,9 @@ def test_addMetaWrong(clientOwner, field):
     ("field", "value"), ((DISCIPLINE, "ddd"), (KEYWORD, "kkk"),),
 )
 def test_addMetaRight(clientOwner, clientOffice, field, value):
-    eid = G(G(recordInfo, CONTRIB), "eid")
+    recordId = startInfo["recordId"]
+
+    eid = G(recordId, CONTRIB)
     updateValues = ((value,),)
     assertModifyField(clientOwner, CONTRIB, eid, field, (updateValues, value), True)
     assertModifyField(clientOwner, CONTRIB, eid, field, (None, ""), True)
