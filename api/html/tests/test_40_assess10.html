@@ -191,7 +191,7 @@ from example import (
     UNDEF_VALUE,
     USER,
 )
-from helpers import forall
+from helpers import forall, getItem
 from starters import start
 from subtest import (
     assertDelItem,
@@ -205,28 +205,27 @@ from subtest import (
     sidebar,
 )
 
-recordInfo = {}
-valueTables = {}
-cIds = []
-ids = {}
+startInfo = {}
 
 
+@pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        contrib=True,
-        types=True,
-        countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            contrib=True,
+            types=True,
+            countries=True,
+        )
     )
 
 
 def test_resetType(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(clientOwner, CONTRIB, eid, TYPE, (None, UNDEF_VALUE), True)
 
 
@@ -240,7 +239,9 @@ def test_resetType(clientOwner, clientOffice):
     ),
 )
 def test_tryStartAll(clients, url):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     theUrl = url.format(eid=eid)
 
     def assertIt(cl, exp):
@@ -251,16 +252,19 @@ def test_tryStartAll(clients, url):
 
 
 def test_tryStartAgainAll(clients):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+    ids = startInfo[&#34;ids&#34;]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(clients[OWNER], CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True)
 
     def assertIt(cl, exp):
-        aIds = assertStartTask(cl, START_ASSESSMENT, eid, exp)
+        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
         if exp:
-            assert len(aIds) == 1
-            assertDelItem(cl, ASSESS, aIds[0], True)
+            assert aId is not None
+            assertDelItem(cl, ASSESS, aId, True)
         else:
-            assert len(aIds) == 0
+            assert aId is None
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {OWNER, EDITOR}})
@@ -268,11 +272,12 @@ def test_tryStartAgainAll(clients):
 
 
 def test_tryStartAgainOwner(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    aIds = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
-    assert len(aIds) == 1
-    assessInfo = recordInfo.setdefault(ASSESS, {})
-    assessInfo[&#34;eid&#34;] = aIds[0]
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
+    aId = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
+    assert aId is not None
+    recordId[ASSESS] = aId
 
 
 def test_sidebar(clients):
@@ -289,7 +294,10 @@ def test_sidebar(clients):
 
 
 def test_editor(clientOwner):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    valueTables = startInfo[&#34;valueTables&#34;]
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
     assertEditor(clientOwner, ASSESS, aId, valueTables, True)
 
 
@@ -307,8 +315,17 @@ def test_sidebar2(clients):
 
 
 def test_inspectTitleAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    recordId = startInfo[&#34;recordId&#34;]
+    recordInfo = startInfo[&#34;recordInfo&#34;]
+
+    eid = G(recordId, CONTRIB)
+    aId = G(recordId, ASSESS)
+
+    contribInfo = getItem(clients[OWNER], CONTRIB, eid)
+    recordInfo[CONTRIB] = contribInfo
+    fields = contribInfo[&#34;fields&#34;]
+
+    cTitle = G(fields, TITLE)
     aTitle = TITLE_A.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
@@ -316,7 +333,9 @@ def test_inspectTitleAll(clients):
 
 
 def test_inspectTypeAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, aId), TYPEA, exp)
@@ -327,7 +346,10 @@ def test_inspectTypeAll(clients):
 
 
 def test_modifyTypeAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+    ids = startInfo[&#34;ids&#34;]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, TYPEA, (ids[&#34;TYPE2&#34;], None), exp)
@@ -337,8 +359,14 @@ def test_modifyTypeAll(clients):
 
 
 def test_modifyTitleAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    recordId = startInfo[&#34;recordId&#34;]
+    recordInfo = startInfo[&#34;recordInfo&#34;]
+
+    aId = G(recordId, ASSESS)
+    contribInfo = recordInfo[CONTRIB]
+    fields = contribInfo[&#34;fields&#34;]
+
+    cTitle = G(fields, TITLE)
     aTitle = TITLE_A.format(cTitle=cTitle)
 
     def assertIt(cl, exp):
@@ -355,11 +383,13 @@ def test_modifyTitleAll(clients):
     (&#34;field&#34;, USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers(clients, field, user):
+    valueTables = startInfo[&#34;valueTables&#34;]
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
+    assignReviewers(clients, users, aId, field, user, True, expect)</code></pre>
 </details>
 </section>
 <section>
@@ -382,11 +412,13 @@ def test_assignReviewers(clients, field, user):
     (&#34;field&#34;, USER), ((REVIEWER_E, EXPERT), (REVIEWER_F, FINAL),),
 )
 def test_assignReviewers(clients, field, user):
+    valueTables = startInfo[&#34;valueTables&#34;]
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
     users = G(valueTables, USER)
-    assessInfo = G(recordInfo, ASSESS)
-    aId = G(assessInfo, &#34;eid&#34;)
     expect = {user: False for user in USERS}
-    assignReviewers(clients, assessInfo, users, aId, field, user, True, expect)</code></pre>
+    assignReviewers(clients, users, aId, field, user, True, expect)</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess10.test_editor"><code class="name flex">
@@ -399,7 +431,10 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_editor(clientOwner):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    valueTables = startInfo[&#34;valueTables&#34;]
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
     assertEditor(clientOwner, ASSESS, aId, valueTables, True)</code></pre>
 </details>
 </dd>
@@ -413,8 +448,17 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_inspectTitleAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    recordId = startInfo[&#34;recordId&#34;]
+    recordInfo = startInfo[&#34;recordInfo&#34;]
+
+    eid = G(recordId, CONTRIB)
+    aId = G(recordId, ASSESS)
+
+    contribInfo = getItem(clients[OWNER], CONTRIB, eid)
+    recordInfo[CONTRIB] = contribInfo
+    fields = contribInfo[&#34;fields&#34;]
+
+    cTitle = G(fields, TITLE)
     aTitle = TITLE_A.format(cTitle=cTitle)
     expect = {user: None for user in USERS}
     expect.update({user: aTitle for user in RIGHTFUL_USERS})
@@ -431,7 +475,9 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_inspectTypeAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
         assertFieldValue((cl, ASSESS, aId), TYPEA, exp)
@@ -451,8 +497,14 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTitleAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
-    cTitle = G(G(recordInfo, CONTRIB), TITLE)
+    recordId = startInfo[&#34;recordId&#34;]
+    recordInfo = startInfo[&#34;recordInfo&#34;]
+
+    aId = G(recordId, ASSESS)
+    contribInfo = recordInfo[CONTRIB]
+    fields = contribInfo[&#34;fields&#34;]
+
+    cTitle = G(fields, TITLE)
     aTitle = TITLE_A.format(cTitle=cTitle)
 
     def assertIt(cl, exp):
@@ -475,7 +527,10 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_modifyTypeAll(clients):
-    aId = G(G(recordInfo, ASSESS), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+    ids = startInfo[&#34;ids&#34;]
+
+    aId = G(recordId, ASSESS)
 
     def assertIt(cl, exp):
         assertModifyField(cl, ASSESS, aId, TYPEA, (ids[&#34;TYPE2&#34;], None), exp)
@@ -494,7 +549,9 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_resetType(clientOwner, clientOffice):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(clientOwner, CONTRIB, eid, TYPE, (None, UNDEF_VALUE), True)</code></pre>
 </details>
 </dd>
@@ -551,17 +608,17 @@ def test_assignReviewers(clients, field, user):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start(clientOffice, clientOwner):
-    start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        contrib=True,
-        types=True,
-        countries=True,
-        valueTables=valueTables,
-        recordInfo=recordInfo,
-        ids=ids,
+<pre><code class="python">@pytest.mark.usefixtures(&#34;db&#34;)
+def test_start(clientOffice, clientOwner):
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            contrib=True,
+            types=True,
+            countries=True,
+        )
     )</code></pre>
 </details>
 </dd>
@@ -575,16 +632,19 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_tryStartAgainAll(clients):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+    ids = startInfo[&#34;ids&#34;]
+
+    eid = G(recordId, CONTRIB)
     assertModifyField(clients[OWNER], CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True)
 
     def assertIt(cl, exp):
-        aIds = assertStartTask(cl, START_ASSESSMENT, eid, exp)
+        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
         if exp:
-            assert len(aIds) == 1
-            assertDelItem(cl, ASSESS, aIds[0], True)
+            assert aId is not None
+            assertDelItem(cl, ASSESS, aId, True)
         else:
-            assert len(aIds) == 0
+            assert aId is None
 
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {OWNER, EDITOR}})
@@ -601,11 +661,12 @@ def test_assignReviewers(clients, field, user):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_tryStartAgainOwner(clientOwner):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
-    aIds = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
-    assert len(aIds) == 1
-    assessInfo = recordInfo.setdefault(ASSESS, {})
-    assessInfo[&#34;eid&#34;] = aIds[0]</code></pre>
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
+    aId = assertStartTask(clientOwner, START_ASSESSMENT, eid, True)
+    assert aId is not None
+    recordId[ASSESS] = aId</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess10.test_tryStartAll"><code class="name flex">
@@ -627,7 +688,9 @@ def test_assignReviewers(clients, field, user):
     ),
 )
 def test_tryStartAll(clients, url):
-    eid = G(G(recordInfo, CONTRIB), &#34;eid&#34;)
+    recordId = startInfo[&#34;recordId&#34;]
+
+    eid = G(recordId, CONTRIB)
     theUrl = url.format(eid=eid)
 
     def assertIt(cl, exp):

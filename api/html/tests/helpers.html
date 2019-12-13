@@ -103,6 +103,9 @@ def checkCreator(table, eid, user):
     Parameters
     ----------
     table: string
+    eid: string(ObjectId)
+    user: string
+        Eppn of a user
 
     Returns
     -------
@@ -162,7 +165,7 @@ def findDetails(text, dtable):
 def findEid(text, multiple=False):
     &#34;&#34;&#34;Get the entity id(s) from a response.
 
-    If the response shows a record, dig out its entity id.
+    If the response shows one or more records, dig out its entity id(s).
 
     Otherwise, return `None`
 
@@ -171,7 +174,7 @@ def findEid(text, multiple=False):
     text: string
         The response text.
     multiple: boolean
-        Whether we should return the list of all found ids or only the first one.
+        Whether we should return the list of all found ids or only the last one.
 
     Returns
     -------
@@ -179,7 +182,7 @@ def findEid(text, multiple=False):
     &#34;&#34;&#34;
 
     results = eidRe.findall(text)
-    return results if multiple else results[0] if results else None
+    return results if multiple else results[-1] if results else None
 
 
 def findFields(text):
@@ -358,6 +361,8 @@ def getEid(client, table, multiple=False):
     Parameters
     ----------
     table: string
+    multiple: boolean
+        Whether we should return the list of all found ids or only the last one.
     &#34;&#34;&#34;
 
     url = f&#34;/{table}/list?action=my&#34;
@@ -368,17 +373,13 @@ def getEid(client, table, multiple=False):
 def getItem(client, table, eid):
     &#34;&#34;&#34;Looks up an item directly.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields
 
     Parameters
     ----------
     client: fixture
     table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
+    eid: string(ObjectId)
 
     Returns
     -------
@@ -388,8 +389,6 @@ def getItem(client, table, eid):
         All fields and their values
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the item.
     &#34;&#34;&#34;
 
     url = f&#34;/{table}/item/{eid}&#34;
@@ -397,8 +396,7 @@ def getItem(client, table, eid):
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
-    eid = findEid(text)
-    return (text, fields, msgs, eid)
+    return dict(text=text, fields=fields, msgs=msgs)
 
 
 def getItemEids(client, table, action=None):
@@ -426,8 +424,10 @@ def getItemEids(client, table, action=None):
     return findEid(text, multiple=True)
 
 
-def getREIds(clients, cId, direct=None):
+def getReviewEntryId(clients, cId, rEId, rFId):
     &#34;&#34;&#34;Get the review entries associated with a criteria entry.
+
+    We use a MongoDB query to get the corresponding review entries.
 
     Parameters
     ----------
@@ -435,11 +435,10 @@ def getREIds(clients, cId, direct=None):
         Keyed by user eppns, values by the corresponding client fixtures
     cId: string(ObjectId)
         The id of the criteria entry in question
-    direct: tuple of ObjectId, optional, `None`
-        If `None`, the review entries ids are peeled from a response text.
-        If present, it is a pair of review ids, the first of an expert review,
-        the second of a final review. These ids are used in a MongoDB query to get
-        the corresponding review entries.
+    rEId: string(ObjectId)
+        The id of the expert review
+    rFId: string(ObjectId)
+        The id of the final review
 
     Returns
     -------
@@ -448,25 +447,19 @@ def getREIds(clients, cId, direct=None):
         corresponding review entries.
     &#34;&#34;&#34;
 
-    reId = {}
-    if direct:
-        client = MongoClient()
-        mongo = client.dariah_test
-        (rEId, rFId) = direct
-        reId = {u: G(
+    client = MongoClient()
+    mongo = client.dariah_test
+    return {
+        reviewer: G(
             list(
                 mongo[REVIEW_ENTRY].find(
-                    {REVIEW: ObjectId(reid), CRITERIA_ENTRY: ObjectId(cId)}
+                    {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
                 )
             )[0],
             _ID,
-        ) for (u, reid) in zip((EXPERT, FINAL), direct)}
-    else:
-        for user in {EXPERT, FINAL}:
-            (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cId)
-            reviewEntries = findReviewEntries(text)
-            reId[user] = reviewEntries[user][0]
-    return reId
+        )
+        for (reviewer, reviewId) in zip((EXPERT, FINAL), (rEId, rFId))
+    }
 
 
 def getRelatedValues(client, table, eid, field):
@@ -666,6 +659,10 @@ def viewField(client, table, eid, field):
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>string</code></dt>
+<dd>Eppn of a user</dd>
 </dl>
 <h2 id="returns">Returns</h2></section>
 <details class="source">
@@ -678,6 +675,9 @@ def viewField(client, table, eid, field):
     Parameters
     ----------
     table: string
+    eid: string(ObjectId)
+    user: string
+        Eppn of a user
 
     Returns
     -------
@@ -809,14 +809,14 @@ Each chunk consists of the following parts:</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Get the entity id(s) from a response.</p>
-<p>If the response shows a record, dig out its entity id.</p>
+<p>If the response shows one or more records, dig out its entity id(s).</p>
 <p>Otherwise, return <code>None</code></p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
 <dd>The response text.</dd>
 <dt><strong><code>multiple</code></strong> :&ensp;<code>boolean</code></dt>
-<dd>Whether we should return the list of all found ids or only the first one.</dd>
+<dd>Whether we should return the list of all found ids or only the last one.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>list of string(ObjectId) | string(ObjectId) | <code>None</code></p></section>
@@ -827,7 +827,7 @@ Each chunk consists of the following parts:</p>
 <pre><code class="python">def findEid(text, multiple=False):
     &#34;&#34;&#34;Get the entity id(s) from a response.
 
-    If the response shows a record, dig out its entity id.
+    If the response shows one or more records, dig out its entity id(s).
 
     Otherwise, return `None`
 
@@ -836,7 +836,7 @@ Each chunk consists of the following parts:</p>
     text: string
         The response text.
     multiple: boolean
-        Whether we should return the list of all found ids or only the first one.
+        Whether we should return the list of all found ids or only the last one.
 
     Returns
     -------
@@ -844,7 +844,7 @@ Each chunk consists of the following parts:</p>
     &#34;&#34;&#34;
 
     results = eidRe.findall(text)
-    return results if multiple else results[0] if results else None</code></pre>
+    return results if multiple else results[-1] if results else None</code></pre>
 </details>
 </dd>
 <dt id="helpers.findFields"><code class="name flex">
@@ -1201,6 +1201,8 @@ and reviews.</p>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
+<dt><strong><code>multiple</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>Whether we should return the list of all found ids or only the last one.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -1216,6 +1218,8 @@ and reviews.</p>
     Parameters
     ----------
     table: string
+    multiple: boolean
+        Whether we should return the list of all found ids or only the last one.
     &#34;&#34;&#34;
 
     url = f&#34;/{table}/list?action=my&#34;
@@ -1228,17 +1232,15 @@ and reviews.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Looks up an item directly.</p>
-<p>The response texts will be analysed into messages and fields, the eid
-of the item will be read off.</p>
-<p>We assume that there is still only one item in the view.</p>
+<p>The response texts will be analysed into messages and fields</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
-<dd>The view on the table, such as <code>my</code>, <code>our</code>.</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1248,8 +1250,6 @@ of the item will be read off.</p>
 <dd>All fields and their values</dd>
 <dt><strong><code>msgs</code></strong> :&ensp;<code>list</code></dt>
 <dd>All entries that have been flashed (and arrived in the flash bar)</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The id of the item.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -1258,17 +1258,13 @@ of the item will be read off.</p>
 <pre><code class="python">def getItem(client, table, eid):
     &#34;&#34;&#34;Looks up an item directly.
 
-    The response texts will be analysed into messages and fields, the eid
-    of the item will be read off.
-
-    We assume that there is still only one item in the view.
+    The response texts will be analysed into messages and fields
 
     Parameters
     ----------
     client: fixture
     table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
+    eid: string(ObjectId)
 
     Returns
     -------
@@ -1278,8 +1274,6 @@ of the item will be read off.</p>
         All fields and their values
     msgs: list
         All entries that have been flashed (and arrived in the flash bar)
-    eid: str(ObjectId)
-        The id of the item.
     &#34;&#34;&#34;
 
     url = f&#34;/{table}/item/{eid}&#34;
@@ -1287,8 +1281,7 @@ of the item will be read off.</p>
     text = response.get_data(as_text=True)
     fields = {field: value for (field, value) in fieldRe.findall(text)}
     msgs = findMsg(text)
-    eid = findEid(text)
-    return (text, fields, msgs, eid)</code></pre>
+    return dict(text=text, fields=fields, msgs=msgs)</code></pre>
 </details>
 </dd>
 <dt id="helpers.getItemEids"><code class="name flex">
@@ -1341,76 +1334,6 @@ of the items will be read off.</p>
     return findEid(text, multiple=True)</code></pre>
 </details>
 </dd>
-<dt id="helpers.getREIds"><code class="name flex">
-<span>def <span class="ident">getREIds</span></span>(<span>clients, cId, direct=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get the review entries associated with a criteria entry.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
-<dd>Keyed by user eppns, values by the corresponding client fixtures</dd>
-<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>The id of the criteria entry in question</dd>
-<dt><strong><code>direct</code></strong> :&ensp;<code>tuple</code> of <code>ObjectId</code>, optional, <code>None</code></dt>
-<dd>If <code>None</code>, the review entries ids are peeled from a response text.
-If present, it is a pair of review ids, the first of an expert review,
-the second of a final review. These ids are used in a MongoDB query to get
-the corresponding review entries.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>dict</code></dt>
-<dd>Keyed by reviewer (<code>expert</code> or <code>final</code>), the values are the ids of the
-corresponding review entries.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getREIds(clients, cId, direct=None):
-    &#34;&#34;&#34;Get the review entries associated with a criteria entry.
-
-    Parameters
-    ----------
-    clients: dict
-        Keyed by user eppns, values by the corresponding client fixtures
-    cId: string(ObjectId)
-        The id of the criteria entry in question
-    direct: tuple of ObjectId, optional, `None`
-        If `None`, the review entries ids are peeled from a response text.
-        If present, it is a pair of review ids, the first of an expert review,
-        the second of a final review. These ids are used in a MongoDB query to get
-        the corresponding review entries.
-
-    Returns
-    -------
-    dict
-        Keyed by reviewer (`expert` or `final`), the values are the ids of the
-        corresponding review entries.
-    &#34;&#34;&#34;
-
-    reId = {}
-    if direct:
-        client = MongoClient()
-        mongo = client.dariah_test
-        (rEId, rFId) = direct
-        reId = {u: G(
-            list(
-                mongo[REVIEW_ENTRY].find(
-                    {REVIEW: ObjectId(reid), CRITERIA_ENTRY: ObjectId(cId)}
-                )
-            )[0],
-            _ID,
-        ) for (u, reid) in zip((EXPERT, FINAL), direct)}
-    else:
-        for user in {EXPERT, FINAL}:
-            (text, fields, msgs, dummy) = getItem(clients[user], CRITERIA_ENTRY, cId)
-            reviewEntries = findReviewEntries(text)
-            reId[user] = reviewEntries[user][0]
-    return reId</code></pre>
-</details>
-</dd>
 <dt id="helpers.getRelatedValues"><code class="name flex">
 <span>def <span class="ident">getRelatedValues</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
@@ -1434,6 +1357,71 @@ corresponding review entries.</dd>
     values = valueRe.findall(valueStr[0])
     valueDict = {value: eid for (eid, value) in values}
     return valueDict</code></pre>
+</details>
+</dd>
+<dt id="helpers.getReviewEntryId"><code class="name flex">
+<span>def <span class="ident">getReviewEntryId</span></span>(<span>clients, cId, rEId, rFId)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get the review entries associated with a criteria entry.</p>
+<p>We use a MongoDB query to get the corresponding review entries.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Keyed by user eppns, values by the corresponding client fixtures</dd>
+<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the criteria entry in question</dd>
+<dt><strong><code>rEId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the expert review</dd>
+<dt><strong><code>rFId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the final review</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Keyed by reviewer (<code>expert</code> or <code>final</code>), the values are the ids of the
+corresponding review entries.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getReviewEntryId(clients, cId, rEId, rFId):
+    &#34;&#34;&#34;Get the review entries associated with a criteria entry.
+
+    We use a MongoDB query to get the corresponding review entries.
+
+    Parameters
+    ----------
+    clients: dict
+        Keyed by user eppns, values by the corresponding client fixtures
+    cId: string(ObjectId)
+        The id of the criteria entry in question
+    rEId: string(ObjectId)
+        The id of the expert review
+    rFId: string(ObjectId)
+        The id of the final review
+
+    Returns
+    -------
+    dict
+        Keyed by reviewer (`expert` or `final`), the values are the ids of the
+        corresponding review entries.
+    &#34;&#34;&#34;
+
+    client = MongoClient()
+    mongo = client.dariah_test
+    return {
+        reviewer: G(
+            list(
+                mongo[REVIEW_ENTRY].find(
+                    {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
+                )
+            )[0],
+            _ID,
+        )
+        for (reviewer, reviewId) in zip((EXPERT, FINAL), (rEId, rFId))
+    }</code></pre>
 </details>
 </dd>
 <dt id="helpers.getScores"><code class="name flex">
@@ -1736,8 +1724,8 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.getEid" href="#helpers.getEid">getEid</a></code></li>
 <li><code><a title="helpers.getItem" href="#helpers.getItem">getItem</a></code></li>
 <li><code><a title="helpers.getItemEids" href="#helpers.getItemEids">getItemEids</a></code></li>
-<li><code><a title="helpers.getREIds" href="#helpers.getREIds">getREIds</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
+<li><code><a title="helpers.getReviewEntryId" href="#helpers.getReviewEntryId">getReviewEntryId</a></code></li>
 <li><code><a title="helpers.getScores" href="#helpers.getScores">getScores</a></code></li>
 <li><code><a title="helpers.modifyField" href="#helpers.modifyField">modifyField</a></code></li>
 <li><code><a title="helpers.postJson" href="#helpers.postJson">postJson</a></code></li>

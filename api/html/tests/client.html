@@ -107,6 +107,12 @@ class Client:
         user = self.user
         cl = self.cl
 
+        response = cl.get(&#34;/whoami&#34;)
+        actualUser = response.get_data(as_text=True)
+        assert user == actualUser
+        if user == actualUser:
+            return
+
         url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
         cl.get(url)
         response = cl.get(&#34;/whoami&#34;)
@@ -254,6 +260,12 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
         user = self.user
         cl = self.cl
 
+        response = cl.get(&#34;/whoami&#34;)
+        actualUser = response.get_data(as_text=True)
+        assert user == actualUser
+        if user == actualUser:
+            return
+
         url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
         cl.get(url)
         response = cl.get(&#34;/whoami&#34;)
@@ -304,6 +316,12 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
 <pre><code class="python">def identify(self):
     user = self.user
     cl = self.cl
+
+    response = cl.get(&#34;/whoami&#34;)
+    actualUser = response.get_data(as_text=True)
+    assert user == actualUser
+    if user == actualUser:
+        return
 
     url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
     cl.get(url)

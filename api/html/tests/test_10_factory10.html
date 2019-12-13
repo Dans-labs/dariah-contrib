@@ -55,12 +55,15 @@ How the app is set up, difference between production and development
 
 &#34;&#34;&#34;
 
+import pytest
+
 import magic  # noqa
 from starters import start
 from subtest import assertStatus
 from example import PUBLIC
 
 
+@pytest.mark.usefixtures(&#34;db&#34;)
 def test_start():
     start()
 
@@ -104,7 +107,8 @@ def test_login(clientPublic, clients):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_start():
+<pre><code class="python">@pytest.mark.usefixtures(&#34;db&#34;)
+def test_start():
     start()</code></pre>
 </details>
 </dd>
