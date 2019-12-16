@@ -593,8 +593,8 @@
 <p id="t257" class="stm run hide_run">    <span class="nam">assertModifyField</span><span class="op">(</span><span class="nam">clientOwner</span><span class="op">,</span> <span class="nam">CONTRIB</span><span class="op">,</span> <span class="nam">eid</span><span class="op">,</span> <span class="nam">field</span><span class="op">,</span> <span class="op">(</span><span class="key">None</span><span class="op">,</span> <span class="str">""</span><span class="op">)</span><span class="op">,</span> <span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t258" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t259" class="stm run hide_run">    <span class="nam">client</span> <span class="op">=</span> <span class="nam">MongoClient</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t260" class="stm run hide_run">    <span class="nam">mongo</span> <span class="op">=</span> <span class="nam">client</span><span class="op">[</span><span class="nam">DB</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
-<p id="t261" class="stm run hide_run">    <span class="nam">mid</span> <span class="op">=</span> <span class="nam">list</span><span class="op">(</span><span class="nam">mongo</span><span class="op">[</span><span class="nam">field</span><span class="op">]</span><span class="op">.</span><span class="nam">find</span><span class="op">(</span><span class="op">{</span><span class="nam">REP</span><span class="op">:</span> <span class="nam">value</span><span class="op">}</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">[</span><span class="nam">_ID</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t260" class="stm run hide_run">    <span class="nam">db</span> <span class="op">=</span> <span class="nam">client</span><span class="op">[</span><span class="nam">DB</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t261" class="stm run hide_run">    <span class="nam">mid</span> <span class="op">=</span> <span class="nam">list</span><span class="op">(</span><span class="nam">db</span><span class="op">[</span><span class="nam">field</span><span class="op">]</span><span class="op">.</span><span class="nam">find</span><span class="op">(</span><span class="op">{</span><span class="nam">REP</span><span class="op">:</span> <span class="nam">value</span><span class="op">}</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">[</span><span class="nam">_ID</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
 <p id="t262" class="stm run hide_run">    <span class="nam">assertDelItem</span><span class="op">(</span><span class="nam">clientOffice</span><span class="op">,</span> <span class="nam">field</span><span class="op">,</span> <span class="nam">mid</span><span class="op">,</span> <span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 
             </td>
@@ -606,7 +606,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-13 13:39
+            created at 2019-12-16 16:52
         </p>
     </div>
 </div>

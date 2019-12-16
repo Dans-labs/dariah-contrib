@@ -71,7 +71,7 @@ class Client:
     The log file handle is a class attribute, not an instance attribute.
     &#34;&#34;&#34;
 
-    def __init__(self, user, client):
+    def __init__(self, user, cl):
         &#34;&#34;&#34;Wrap the user in a client.
 
         Parameters
@@ -79,10 +79,10 @@ class Client:
         user: string
             The `eppn` of the user for which the client has been made.
             See `makeClient`.
-        client: fixture
+        cl: fixture
             A Flask object actiing as a client that fires requests at the server.
         &#34;&#34;&#34;
-        self.cl = client
+        self.cl = cl
         self.user = user
 
     def get(self, *args, **kwargs):
@@ -106,12 +106,6 @@ class Client:
     def identify(self):
         user = self.user
         cl = self.cl
-
-        response = cl.get(&#34;/whoami&#34;)
-        actualUser = response.get_data(as_text=True)
-        assert user == actualUser
-        if user == actualUser:
-            return
 
         url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
         cl.get(url)
@@ -177,7 +171,7 @@ After testing is will be analysed by <a title="analysis" href="analysis.html"><c
 <dl>
 <dt id="client.Client"><code class="flex name class">
 <span>class <span class="ident">Client</span></span>
-<span>(</span><span>user, client)</span>
+<span>(</span><span>user, cl)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Wraps the Flask test client.</p>
@@ -196,7 +190,7 @@ created</li>
 <dt><strong><code>user</code></strong> :&ensp;<code>string</code></dt>
 <dd>The <code>eppn</code> of the user for which the client has been made.
 See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</code></a>.</dd>
-<dt><strong><a title="client" href="#client"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>cl</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>A Flask object actiing as a client that fires requests at the server.</dd>
 </dl></section>
 <details class="source">
@@ -224,7 +218,7 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
     The log file handle is a class attribute, not an instance attribute.
     &#34;&#34;&#34;
 
-    def __init__(self, user, client):
+    def __init__(self, user, cl):
         &#34;&#34;&#34;Wrap the user in a client.
 
         Parameters
@@ -232,10 +226,10 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
         user: string
             The `eppn` of the user for which the client has been made.
             See `makeClient`.
-        client: fixture
+        cl: fixture
             A Flask object actiing as a client that fires requests at the server.
         &#34;&#34;&#34;
-        self.cl = client
+        self.cl = cl
         self.user = user
 
     def get(self, *args, **kwargs):
@@ -259,12 +253,6 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
     def identify(self):
         user = self.user
         cl = self.cl
-
-        response = cl.get(&#34;/whoami&#34;)
-        actualUser = response.get_data(as_text=True)
-        assert user == actualUser
-        if user == actualUser:
-            return
 
         url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
         cl.get(url)
@@ -316,12 +304,6 @@ See <a title="client.makeClient" href="#client.makeClient"><code>makeClient()</c
 <pre><code class="python">def identify(self):
     user = self.user
     cl = self.cl
-
-    response = cl.get(&#34;/whoami&#34;)
-    actualUser = response.get_data(as_text=True)
-    assert user == actualUser
-    if user == actualUser:
-        return
 
     url = &#34;/logout&#34; if user == &#34;public&#34; else f&#34;/login?eppn={user}&#34;
     cl.get(url)

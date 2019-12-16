@@ -110,7 +110,7 @@ from subtest import (
 )
 
 
-def getValueTable(client, table):
+def getValueTable(cl, table):
     &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
 
     We look directly in the list of items of a valueTable.
@@ -129,17 +129,17 @@ def getValueTable(client, table):
         The stored value dict for this valueTable
     &#34;&#34;&#34;
 
-    response = client.get(f&#34;/{table}/list&#34;)
+    response = cl.get(f&#34;/{table}/list&#34;)
     text = response.get_data(as_text=True)
     return findValues(table, text)
 
 
-def makeItem(client, table, cId=None, aId=None):
+def makeItem(cl, table, cId=None, aId=None):
     &#34;&#34;&#34;Makes a contribution/assessment/review.
 
     Parameters
     ----------
-    client: fixture
+    cl: fixture
     table: string
         Either `contrib` or `assessment` or `review`
     cId: string(ObjectId), optional `None`
@@ -156,11 +156,11 @@ def makeItem(client, table, cId=None, aId=None):
     &#34;&#34;&#34;
 
     if table == CONTRIB:
-        return assertAddItem(client, table, True)
+        return assertAddItem(cl, table, True)
     if table == ASSESS:
-        return assertStartTask(client, START_ASSESSMENT, cId, True)
+        return assertStartTask(cl, START_ASSESSMENT, cId, True)
     if table == REVIEW:
-        return assertStartTask(client, START_REVIEW, aId, True)
+        return assertStartTask(cl, START_REVIEW, aId, True)
 
 
 def start(
@@ -236,7 +236,6 @@ def start(
         assign = True
     if assign:
         submit = True
-        users = True
     if submit:
         fillout = True
     if fillout:
@@ -244,6 +243,8 @@ def start(
     if assessment:
         contrib = True
         types = True
+    if contrib:
+        users = True
 
     valueTables = {}
     recordId = {}
@@ -373,7 +374,7 @@ def start(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="starters.getValueTable"><code class="name flex">
-<span>def <span class="ident">getValueTable</span></span>(<span>client, table)</span>
+<span>def <span class="ident">getValueTable</span></span>(<span>cl, table)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Get a mapping of values in a value table to their object ids.</p>
@@ -394,7 +395,7 @@ name of the valueTable.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getValueTable(client, table):
+<pre><code class="python">def getValueTable(cl, table):
     &#34;&#34;&#34;Get a mapping of values in a value table to their object ids.
 
     We look directly in the list of items of a valueTable.
@@ -413,19 +414,19 @@ name of the valueTable.</p>
         The stored value dict for this valueTable
     &#34;&#34;&#34;
 
-    response = client.get(f&#34;/{table}/list&#34;)
+    response = cl.get(f&#34;/{table}/list&#34;)
     text = response.get_data(as_text=True)
     return findValues(table, text)</code></pre>
 </details>
 </dd>
 <dt id="starters.makeItem"><code class="name flex">
-<span>def <span class="ident">makeItem</span></span>(<span>client, table, cId=None, aId=None)</span>
+<span>def <span class="ident">makeItem</span></span>(<span>cl, table, cId=None, aId=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Makes a contribution/assessment/review.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>cl</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>Either <code>contrib</code> or <code>assessment</code> or <code>review</code></dd>
@@ -445,12 +446,12 @@ review</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def makeItem(client, table, cId=None, aId=None):
+<pre><code class="python">def makeItem(cl, table, cId=None, aId=None):
     &#34;&#34;&#34;Makes a contribution/assessment/review.
 
     Parameters
     ----------
-    client: fixture
+    cl: fixture
     table: string
         Either `contrib` or `assessment` or `review`
     cId: string(ObjectId), optional `None`
@@ -467,11 +468,11 @@ review</dd>
     &#34;&#34;&#34;
 
     if table == CONTRIB:
-        return assertAddItem(client, table, True)
+        return assertAddItem(cl, table, True)
     if table == ASSESS:
-        return assertStartTask(client, START_ASSESSMENT, cId, True)
+        return assertStartTask(cl, START_ASSESSMENT, cId, True)
     if table == REVIEW:
-        return assertStartTask(client, START_REVIEW, aId, True)</code></pre>
+        return assertStartTask(cl, START_REVIEW, aId, True)</code></pre>
 </details>
 </dd>
 <dt id="starters.start"><code class="name flex">
@@ -604,7 +605,6 @@ creating or finding stuff.</p>
         assign = True
     if assign:
         submit = True
-        users = True
     if submit:
         fillout = True
     if fillout:
@@ -612,6 +612,8 @@ creating or finding stuff.</p>
     if assessment:
         contrib = True
         types = True
+    if contrib:
+        users = True
 
     valueTables = {}
     recordId = {}

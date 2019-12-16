@@ -41,6 +41,7 @@ from flask import request, session, abort
 from control.utils import (
     pick as G,
     utf8FromLatin1,
+    serverprint,
     shiftRegional,
     E,
     AT,
@@ -63,6 +64,7 @@ from control.perm import (
 CB = C.base
 CW = C.web
 
+DEBUG_LOGIN = True
 
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
@@ -297,14 +299,23 @@ class Auth:
                 return False
             return self.getUser(eppn)
         else:
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
             authenticated = SHIB_KEY in env and env[SHIB_KEY]
             if authenticated:
                 eppn = utf8FromLatin1(env[N.eppn])
                 email = utf8FromLatin1(env[N.mail])
                 isUser = self.getUser(eppn, email=email)
+                if DEBUG_LOGIN:
+                    serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
                 if not isUser:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
+                    if DEBUG_LOGIN:
+                        serverprint(f&#34;LOGIN: authentication failed&#34;)
                     return False
 
                 if N.group not in user:
@@ -330,7 +341,16 @@ class Auth:
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
+                if DEBUG_LOGIN:
+                    serverprint(f&#34;LOGIN: authentication successful&#34;)
                 return True
+
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
+                serverprint(f&#34;ENV = {env}&#34;)
+                for (k, v) in env.items():
+                    serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
+                serverprint(f&#34;LOGIN: authentication failed&#34;)
 
             user.update(unauthUser)
             return False
@@ -907,14 +927,23 @@ attributes.</p>
                 return False
             return self.getUser(eppn)
         else:
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
             authenticated = SHIB_KEY in env and env[SHIB_KEY]
             if authenticated:
                 eppn = utf8FromLatin1(env[N.eppn])
                 email = utf8FromLatin1(env[N.mail])
                 isUser = self.getUser(eppn, email=email)
+                if DEBUG_LOGIN:
+                    serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
+                    serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
                 if not isUser:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
+                    if DEBUG_LOGIN:
+                        serverprint(f&#34;LOGIN: authentication failed&#34;)
                     return False
 
                 if N.group not in user:
@@ -940,7 +969,16 @@ attributes.</p>
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
+                if DEBUG_LOGIN:
+                    serverprint(f&#34;LOGIN: authentication successful&#34;)
                 return True
+
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
+                serverprint(f&#34;ENV = {env}&#34;)
+                for (k, v) in env.items():
+                    serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
+                serverprint(f&#34;LOGIN: authentication failed&#34;)
 
             user.update(unauthUser)
             return False
@@ -1466,14 +1504,23 @@ to a newly logged-in user.</p>
             return False
         return self.getUser(eppn)
     else:
+        if DEBUG_LOGIN:
+            serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
         authenticated = SHIB_KEY in env and env[SHIB_KEY]
         if authenticated:
             eppn = utf8FromLatin1(env[N.eppn])
             email = utf8FromLatin1(env[N.mail])
             isUser = self.getUser(eppn, email=email)
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+                serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
+                serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
+                serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
             if not isUser:
                 # the user is refused because the database says (s)he may not login
                 self.clearUser()
+                if DEBUG_LOGIN:
+                    serverprint(f&#34;LOGIN: authentication failed&#34;)
                 return False
 
             if N.group not in user:
@@ -1499,7 +1546,16 @@ to a newly logged-in user.</p>
             else:
                 _id = db.insertUser(user)
                 user[N._id] = _id
+            if DEBUG_LOGIN:
+                serverprint(f&#34;LOGIN: authentication successful&#34;)
             return True
+
+        if DEBUG_LOGIN:
+            serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
+            serverprint(f&#34;ENV = {env}&#34;)
+            for (k, v) in env.items():
+                serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
+            serverprint(f&#34;LOGIN: authentication failed&#34;)
 
         user.update(unauthUser)
         return False</code></pre>

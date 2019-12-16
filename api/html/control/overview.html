@@ -584,7 +584,7 @@ class Overview:
             classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
         if asTsv:
             columns = &#34;\t&#34;.join(
-                self.disclose(values, col, recCountry) for col in groupOrder
+                self.disclose(values, col, recCountry) or E for col in groupOrder
             )
         else:
             columns = [
@@ -1259,7 +1259,7 @@ class Overview:
             classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
         if asTsv:
             columns = &#34;\t&#34;.join(
-                self.disclose(values, col, recCountry) for col in groupOrder
+                self.disclose(values, col, recCountry) or E for col in groupOrder
             )
         else:
             columns = [
@@ -1742,7 +1742,7 @@ def wrapStatus(contrib, compact=True):
         classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
     if asTsv:
         columns = &#34;\t&#34;.join(
-            self.disclose(values, col, recCountry) for col in groupOrder
+            self.disclose(values, col, recCountry) or E for col in groupOrder
         )
     else:
         columns = [

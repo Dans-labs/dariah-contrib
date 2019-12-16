@@ -54,6 +54,8 @@ from example import (
     START_ASSESSMENT,
     START_REVIEW,
     TITLE,
+    TITLE1,
+    TITLE2,
     UNDEF_VALUE,
     USER,
     USER_COUNTRY,
@@ -69,6 +71,7 @@ from helpers import (
     getEid,
     getItem,
     modifyField,
+    shiftDate,
 )
 
 
@@ -297,6 +300,15 @@ def assertReviewDecisions(clients, reviewId, kinds, decisions, expect):
             assertStatus(G(clients, kind), url, exp)
 
 
+def assertShiftDate(clientSys, table, eid, field, amount):
+    &#34;&#34;&#34;Shifts the date in a field annd recomputes workflow.
+
+    See `helpers.shiftDate`.
+    &#34;&#34;&#34;
+    shiftDate(table, eid, field, amount)
+    assertStatus(clientSys, &#34;/workflow&#34;, True)
+
+
 def assertStage(client, table, eid, expect):
     &#34;&#34;&#34;Check whether a record has a certain workflow stage.
 
@@ -488,6 +500,27 @@ def inspectTitleAll(clients, table, eid, expect):
     forall(clients, expect, assertIt)
 
 
+def modifyTitleAll(clients, table, eid, expect):
+    &#34;&#34;&#34;Modify the title of an item, performed by each user.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    &#34;&#34;&#34;
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, table, eid, TITLE, TITLE2, exp)
+        if exp:
+            assertModifyField(cl, table, eid, TITLE, TITLE1, exp)
+
+    forall(clients, expect, assertIt)
+
+
 def sidebar(clients, amounts):
     &#34;&#34;&#34;Verify the sidebar.
 
@@ -530,7 +563,33 @@ def sidebar(clients, amounts):
             expectedCaptions.setdefault(user, {})[thisCaption] = (n, expectedItem)
 
     expect = {user: G(expectedCaptions, user) for user in USERS}
-    forall(clients, expect, assertCaptions)</code></pre>
+    forall(clients, expect, assertCaptions)
+
+
+def startAssessment(clients, eid, expect):
+    &#34;&#34;&#34;Starts an assessment and deletes it immediately afterwards.
+
+    All users in `clients` for which there is an entry in `expect` do this.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    eid: string(ObjectId)
+        The id of the contribution for an assessment is started
+    expect: dict
+        Per user whether the starting of an assessment succeeds or not
+    &#34;&#34;&#34;
+
+    def assertIt(cl, exp):
+        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
+        if exp:
+            assert aId is not None
+            assertDelItem(cl, ASSESS, aId, True)
+        else:
+            assert aId is None
+
+    forall(clients, expect, assertIt)</code></pre>
 </details>
 </section>
 <section>
@@ -931,6 +990,25 @@ A dict specifies per action of that reviewer what the outcome is.</dd>
             assertStatus(G(clients, kind), url, exp)</code></pre>
 </details>
 </dd>
+<dt id="subtest.assertShiftDate"><code class="name flex">
+<span>def <span class="ident">assertShiftDate</span></span>(<span>clientSys, table, eid, field, amount)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Shifts the date in a field annd recomputes workflow.</p>
+<p>See <a title="helpers.shiftDate" href="helpers.html#helpers.shiftDate"><code>shiftDate()</code></a>.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def assertShiftDate(clientSys, table, eid, field, amount):
+    &#34;&#34;&#34;Shifts the date in a field annd recomputes workflow.
+
+    See `helpers.shiftDate`.
+    &#34;&#34;&#34;
+    shiftDate(table, eid, field, amount)
+    assertStatus(clientSys, &#34;/workflow&#34;, True)</code></pre>
+</details>
+</dd>
 <dt id="subtest.assertStage"><code class="name flex">
 <span>def <span class="ident">assertStage</span></span>(<span>client, table, eid, expect)</span>
 </code></dt>
@@ -989,7 +1067,7 @@ A dict specifies per action of that reviewer what the outcome is.</dd>
 </code></dt>
 <dd>
 <section class="desc"><p>Issues a start workflow command.</p>
-<p>There are <code>startAssessment</code> and <code>startReview</code> tasks that create a record,
+<p>There are <a title="subtest.startAssessment" href="#subtest.startAssessment"><code>startAssessment()</code></a> and <code>startReview</code> tasks that create a record,
 and there are task that set a field in an existing recordd.</p>
 <p>Tasks take as arguments the eid of a record in a table.</p>
 <p>The response texts will be analysed into messages and fields.
@@ -1260,6 +1338,47 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
     forall(clients, expect, assertIt)</code></pre>
 </details>
 </dd>
+<dt id="subtest.modifyTitleAll"><code class="name flex">
+<span>def <span class="ident">modifyTitleAll</span></span>(<span>clients, table, eid, expect)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Modify the title of an item, performed by each user.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mapping from users to client fixtures</dd>
+<dt><strong><code>table</code></strong> :&ensp;<code>the</code> <code>table</code> of <code>the</code> <code>item</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>the</code> <code>id</code> of <code>the</code> <code>item</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The expected values, keyed per user</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def modifyTitleAll(clients, table, eid, expect):
+    &#34;&#34;&#34;Modify the title of an item, performed by each user.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    &#34;&#34;&#34;
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, table, eid, TITLE, TITLE2, exp)
+        if exp:
+            assertModifyField(cl, table, eid, TITLE, TITLE1, exp)
+
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
 <dt id="subtest.sidebar"><code class="name flex">
 <span>def <span class="ident">sidebar</span></span>(<span>clients, amounts)</span>
 </code></dt>
@@ -1326,6 +1445,51 @@ The set of users can be left out, then all users are implied.</dd>
     forall(clients, expect, assertCaptions)</code></pre>
 </details>
 </dd>
+<dt id="subtest.startAssessment"><code class="name flex">
+<span>def <span class="ident">startAssessment</span></span>(<span>clients, eid, expect)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Starts an assessment and deletes it immediately afterwards.</p>
+<p>All users in <code>clients</code> for which there is an entry in <code>expect</code> do this.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mapping from users to client fixtures</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dd>The id of the contribution for an assessment is started</dd>
+<dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Per user whether the starting of an assessment succeeds or not</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def startAssessment(clients, eid, expect):
+    &#34;&#34;&#34;Starts an assessment and deletes it immediately afterwards.
+
+    All users in `clients` for which there is an entry in `expect` do this.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    eid: string(ObjectId)
+        The id of the contribution for an assessment is started
+    expect: dict
+        Per user whether the starting of an assessment succeeds or not
+    &#34;&#34;&#34;
+
+    def assertIt(cl, exp):
+        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
+        if exp:
+            assert aId is not None
+            assertDelItem(cl, ASSESS, aId, True)
+        else:
+            assert aId is None
+
+    forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -1346,13 +1510,16 @@ The set of users can be left out, then all users are implied.</dd>
 <li><code><a title="subtest.assertFieldValue" href="#subtest.assertFieldValue">assertFieldValue</a></code></li>
 <li><code><a title="subtest.assertModifyField" href="#subtest.assertModifyField">assertModifyField</a></code></li>
 <li><code><a title="subtest.assertReviewDecisions" href="#subtest.assertReviewDecisions">assertReviewDecisions</a></code></li>
+<li><code><a title="subtest.assertShiftDate" href="#subtest.assertShiftDate">assertShiftDate</a></code></li>
 <li><code><a title="subtest.assertStage" href="#subtest.assertStage">assertStage</a></code></li>
 <li><code><a title="subtest.assertStartTask" href="#subtest.assertStartTask">assertStartTask</a></code></li>
 <li><code><a title="subtest.assertStatus" href="#subtest.assertStatus">assertStatus</a></code></li>
 <li><code><a title="subtest.assignReviewers" href="#subtest.assignReviewers">assignReviewers</a></code></li>
 <li><code><a title="subtest.illegalize" href="#subtest.illegalize">illegalize</a></code></li>
 <li><code><a title="subtest.inspectTitleAll" href="#subtest.inspectTitleAll">inspectTitleAll</a></code></li>
+<li><code><a title="subtest.modifyTitleAll" href="#subtest.modifyTitleAll">modifyTitleAll</a></code></li>
 <li><code><a title="subtest.sidebar" href="#subtest.sidebar">sidebar</a></code></li>
+<li><code><a title="subtest.startAssessment" href="#subtest.startAssessment">startAssessment</a></code></li>
 </ul>
 </li>
 </ul>
