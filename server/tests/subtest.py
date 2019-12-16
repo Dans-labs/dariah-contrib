@@ -38,6 +38,7 @@ from helpers import (
     getEid,
     getItem,
     modifyField,
+    shiftDate,
 )
 
 
@@ -264,6 +265,15 @@ def assertReviewDecisions(clients, reviewId, kinds, decisions, expect):
             )
             serverprint(f"REVIEW DECISION {decision} by {kind} expects {exp}")
             assertStatus(G(clients, kind), url, exp)
+
+
+def assertShiftDate(clientSys, table, eid, field, amount):
+    """Shifts the date in a field annd recomputes workflow.
+
+    See `helpers.shiftDate`.
+    """
+    shiftDate(table, eid, field, amount)
+    assertStatus(clientSys, "/workflow", True)
 
 
 def assertStage(client, table, eid, expect):

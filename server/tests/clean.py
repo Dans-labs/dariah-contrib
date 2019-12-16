@@ -84,7 +84,7 @@ class MongoId(IdIndex):
 
 
 def clean():
-    mongo = MongoId()
+    db = MongoId()
     allData = collections.defaultdict(list)
     valueDict = collections.defaultdict(dict)
     countryMapping = {}
@@ -94,7 +94,7 @@ def clean():
     def countryTable():
         table = "country"
         for (iso, info) in sorted(COUNTRY.items()):
-            _id = mongo.newId(table)
+            _id = db.newId(table)
             countryMapping[iso] = _id
             allData[table].append(
                 dict(
@@ -110,14 +110,14 @@ def clean():
     def groupTable():
         table = "permissionGroup"
         for (name, description) in GROUP:
-            _id = mongo.newId(table)
+            _id = db.newId(table)
             groupMapping[name] = _id
             allData[table].append(dict(_id=_id, rep=name, description=description))
 
     def userTable():
         table = "user"
         for user in USER:
-            _id = mongo.newId(table)
+            _id = db.newId(table)
             u = dict(x for x in user.items())
             u["_id"] = _id
             userMapping[u["eppn"]] = _id
@@ -129,7 +129,7 @@ def clean():
     def relTables():
         for (table, values) in VALUES.items():
             for value in values:
-                _id = mongo.newId(table)
+                _id = db.newId(table)
                 valueDict[table][value] = _id
                 v = dict(_id=_id, rep=value)
                 allData[table].append(v)
@@ -138,13 +138,13 @@ def clean():
         table = "year"
         targetInterval = list(range(2010, 2030))
         allData[table] = [
-            dict(_id=mongo.newId(table), rep=year) for year in targetInterval
+            dict(_id=db.newId(table), rep=year) for year in targetInterval
         ]
 
     def decisionTable():
         table = "decision"
         allData[table] = [
-            dict(_id=mongo.newId(table), **DECISION["values"][decision])
+            dict(_id=db.newId(table), **DECISION["values"][decision])
             for decision in DECISION["order"]
         ]
 
@@ -157,7 +157,7 @@ def clean():
             keyField = KEY_FIELD[table]
 
             for row in rows:  # deterministic order
-                _id = mongo.newId(table)
+                _id = db.newId(table)
                 newRow = dict()
                 newRow["_id"] = _id
                 relIndex[table][row[keyField]] = _id

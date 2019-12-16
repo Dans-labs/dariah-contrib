@@ -83,6 +83,9 @@ in alphabetical order of the file names.
 `test_30_contrib40`
 :   Checking the visibility of sensitive fields.
 
+`test_30_contrib50`
+:   Selecting contributions.
+
 ### Tests: assessments
 
 `test_40_assess10`
@@ -105,14 +108,8 @@ in alphabetical order of the file names.
 `test_50_review20`
 :   Checking visibility of reviews and making review decisions.
 
-`test_50_assess30`
-:   Revising and resubmitting assessments.
-
-### Tests: contributions: selection.
-
-`test_60_contrib10`
-:   Selecting contributions.
-
+    *To be done:*
+    *Revising, resubmitting assessments and take a new review decision*
 """
 
 import pytest

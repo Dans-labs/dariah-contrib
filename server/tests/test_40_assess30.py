@@ -69,6 +69,17 @@ Filling out an assessment.
 `test_submitAssessment2`
 :   **owner** tries to submit the assessment, successfully.
 
+`test_revokeDelay`
+    There is a delay time during which the submission can be revoked.
+    We'll test what happens when the delay time is past.
+    We do this by updating the `dateSubmitted` field under water, directly
+    in Mongo.
+    We shift the time back 0.5 hours
+    **owner** withdraws and succeeds and then submits again.
+    We shift the time back 1.5 hours.
+    **owner** withdraws and fails.
+    We shift the time forward 1.5 hours again.
+
 `test_assignReviewers2`
 :   All users try to assign reviewers to this assessment.
     The office user succeeds because of a workflow condition:
@@ -123,6 +134,7 @@ from example import (
     COMPLETE,
     CRITERIA_ENTRY,
     CRITERIA_ENTRIES_N,
+    DATE_SUBMITTED,
     EDITOR,
     ELLIPS_DIV,
     EVIDENCE,
@@ -146,6 +158,7 @@ from helpers import findDetails, forall, getItem, getRelatedValues
 from starters import start
 from subtest import (
     assertModifyField,
+    assertShiftDate,
     assertStage,
     assertStatus,
     inspectTitleAll,
@@ -158,13 +171,15 @@ startInfo = {}
 
 @pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        assessment=True,
-        countries=True,
-    ))
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            assessment=True,
+            countries=True,
+        )
+    )
 
 
 def test_criteriaEntries(clients):
@@ -349,6 +364,24 @@ def test_submitAssessment2(clientOwner):
     aId = G(recordId, ASSESS)
     url = f"/api/task/{SUBMIT_ASSESSMENT}/{aId}"
     assertStatus(clientOwner, url, True)
+
+
+def test_revokeDelay(clientOwner, clientSystem):
+    recordId = startInfo["recordId"]
+    aId = G(recordId, ASSESS)
+
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -0.5)
+    for url in (
+        f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}",
+        f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}",
+    ):
+        assertStatus(clientOwner, url, True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -1.5)
+    for url in (
+        f"/api/task/{WITHDRAW_ASSESSMENT}/{aId}",
+    ):
+        assertStatus(clientOwner, url, False)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, 1.5)
 
 
 @pytest.mark.parametrize(

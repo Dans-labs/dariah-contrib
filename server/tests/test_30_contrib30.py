@@ -257,6 +257,6 @@ def test_addMetaRight(clientOwner, clientOffice, field, value):
     assertModifyField(clientOwner, CONTRIB, eid, field, (None, ""), True)
 
     client = MongoClient()
-    mongo = client[DB]
-    mid = list(mongo[field].find({REP: value}))[0][_ID]
+    db = client[DB]
+    mid = list(db[field].find({REP: value}))[0][_ID]
     assertDelItem(clientOffice, field, mid, True)

@@ -29,11 +29,12 @@
 &#34;&#34;&#34;
 
 import re
+from datetime import timedelta
 
 from flask import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from control.utils import pick as G, serverprint
+from control.utils import pick as G, serverprint, now
 from conftest import USER_LIST
 from example import (
     _ID,
@@ -95,26 +96,6 @@ def checkWarning(text, label):
     &#34;&#34;&#34;
 
     return not not reWarning(label).search(text)
-
-
-def checkCreator(table, eid, user):
-    &#34;&#34;&#34;Checks whether a user is the creator of a record.
-
-    Parameters
-    ----------
-    table: string
-    eid: string(ObjectId)
-    user: string
-        Eppn of a user
-
-    Returns
-    -------
-    &#34;&#34;&#34;
-    client = MongoClient()
-    mongo = client.dariah_test
-    userId = G(list(mongo.user.find(dict(eppn=user)))[0], _ID)
-    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
-    return len(records) &gt; 0
 
 
 def findCaptions(text):
@@ -399,31 +380,6 @@ def getItem(client, table, eid):
     return dict(text=text, fields=fields, msgs=msgs)
 
 
-def getItemEids(client, table, action=None):
-    &#34;&#34;&#34;Looks up item eids from a view on a table.
-
-    The response texts will be analysed into messages and fields, the eids
-    of the items will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
-
-    Returns
-    -------
-    eid: list of str(ObjectId)
-        The ids of the item that can be found.
-    &#34;&#34;&#34;
-
-    actionStr = &#34;&#34; if action is None else f&#34;?action={action}&#34;
-    response = client.get(f&#34;/{table}/list{actionStr}&#34;)
-    text = response.get_data(as_text=True)
-    return findEid(text, multiple=True)
-
-
 def getReviewEntryId(clients, cId, rEId, rFId):
     &#34;&#34;&#34;Get the review entries associated with a criteria entry.
 
@@ -448,11 +404,11 @@ def getReviewEntryId(clients, cId, rEId, rFId):
     &#34;&#34;&#34;
 
     client = MongoClient()
-    mongo = client.dariah_test
+    db = client.dariah_test
     return {
         reviewer: G(
             list(
-                mongo[REVIEW_ENTRY].find(
+                db[REVIEW_ENTRY].find(
                     {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
                 )
             )[0],
@@ -492,9 +448,9 @@ def getScores(cId):
         Keyed by the title of the score, values are their ids.
     &#34;&#34;&#34;
     client = MongoClient()
-    mongo = client.dariah_test
-    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
-    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    db = client.dariah_test
+    crId = G(list(db.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
+    scores = db.score.find(dict(criteria=ObjectId(crId)))
     result = {}
     for record in scores:
         score = G(record, SCORE)
@@ -614,6 +570,41 @@ def reWarning(label):
     )
 
 
+def shiftDate(table, eid, field, amount):
+    &#34;&#34;&#34;Shifts the date in a field with a certain amount.
+
+    If the field in question is currently blank, it is assumed to
+    represent `now`.
+
+    !!! caution &#34;Recompute the workflow table&#34;
+        We have changed a field in the database on which the workflow status depends.
+        Tests that need to see updated workflow data should perform a recomputation
+        of the workflow data.
+
+    Parameters
+    ----------
+    table: string
+        The table that contains the date field
+    eid: string(objectId)
+        The id of the record that contains the ddate field
+    field: string
+        The name of the date field
+    amount: timedelta
+        The amount of hours to shift the date field. Can be negative or positive.
+    &#34;&#34;&#34;
+
+    client = MongoClient()
+    db = client.dariah_test
+    eid = ObjectId(eid)
+    justNow = now()
+    currentDate = G(db[table].find_one({_ID: eid}), field)
+    if currentDate is None:
+        currentDate = justNow
+
+    shiftedDate = currentDate + timedelta(hours=amount)
+    db[table].update_one({_ID: eid}, {&#34;$set&#34;: {field: shiftedDate}})
+
+
 def viewField(client, table, eid, field):
     &#34;&#34;&#34;Get the response for showing a field.&#34;&#34;&#34;
 
@@ -648,45 +639,6 @@ def viewField(client, table, eid, field):
     status = response.status_code
     msgs = findMsg(text)
     return (text, status, msgs)</code></pre>
-</details>
-</dd>
-<dt id="helpers.checkCreator"><code class="name flex">
-<span>def <span class="ident">checkCreator</span></span>(<span>table, eid, user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Checks whether a user is the creator of a record.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>user</code></strong> :&ensp;<code>string</code></dt>
-<dd>Eppn of a user</dd>
-</dl>
-<h2 id="returns">Returns</h2></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def checkCreator(table, eid, user):
-    &#34;&#34;&#34;Checks whether a user is the creator of a record.
-
-    Parameters
-    ----------
-    table: string
-    eid: string(ObjectId)
-    user: string
-        Eppn of a user
-
-    Returns
-    -------
-    &#34;&#34;&#34;
-    client = MongoClient()
-    mongo = client.dariah_test
-    userId = G(list(mongo.user.find(dict(eppn=user)))[0], _ID)
-    records = list(mongo[table].find(dict(_id=ObjectId(eid), creator=userId)))
-    return len(records) &gt; 0</code></pre>
 </details>
 </dd>
 <dt id="helpers.checkWarning"><code class="name flex">
@@ -1284,56 +1236,6 @@ and reviews.</p>
     return dict(text=text, fields=fields, msgs=msgs)</code></pre>
 </details>
 </dd>
-<dt id="helpers.getItemEids"><code class="name flex">
-<span>def <span class="ident">getItemEids</span></span>(<span>client, table, action=None)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Looks up item eids from a view on a table.</p>
-<p>The response texts will be analysed into messages and fields, the eids
-of the items will be read off.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
-<dd>The view on the table, such as <code>my</code>, <code>our</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><strong><code>eid</code></strong> :&ensp;<code>list</code> of <code>str</code>(<code>ObjectId</code>)</dt>
-<dd>The ids of the item that can be found.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def getItemEids(client, table, action=None):
-    &#34;&#34;&#34;Looks up item eids from a view on a table.
-
-    The response texts will be analysed into messages and fields, the eids
-    of the items will be read off.
-
-    Parameters
-    ----------
-    client: fixture
-    table: string
-    action: string, optional `None`
-        The view on the table, such as `my`, `our`.
-
-    Returns
-    -------
-    eid: list of str(ObjectId)
-        The ids of the item that can be found.
-    &#34;&#34;&#34;
-
-    actionStr = &#34;&#34; if action is None else f&#34;?action={action}&#34;
-    response = client.get(f&#34;/{table}/list{actionStr}&#34;)
-    text = response.get_data(as_text=True)
-    return findEid(text, multiple=True)</code></pre>
-</details>
-</dd>
 <dt id="helpers.getRelatedValues"><code class="name flex">
 <span>def <span class="ident">getRelatedValues</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
@@ -1410,11 +1312,11 @@ corresponding review entries.</dd>
     &#34;&#34;&#34;
 
     client = MongoClient()
-    mongo = client.dariah_test
+    db = client.dariah_test
     return {
         reviewer: G(
             list(
-                mongo[REVIEW_ENTRY].find(
+                db[REVIEW_ENTRY].find(
                     {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
                 )
             )[0],
@@ -1459,9 +1361,9 @@ want to retrieve.</dd>
         Keyed by the title of the score, values are their ids.
     &#34;&#34;&#34;
     client = MongoClient()
-    mongo = client.dariah_test
-    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
-    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    db = client.dariah_test
+    crId = G(list(db.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
+    scores = db.score.find(dict(criteria=ObjectId(crId)))
     result = {}
     for record in scores:
         score = G(record, SCORE)
@@ -1675,6 +1577,69 @@ Will be wrapped into JSON with a proper header.</dd>
     )</code></pre>
 </details>
 </dd>
+<dt id="helpers.shiftDate"><code class="name flex">
+<span>def <span class="ident">shiftDate</span></span>(<span>table, eid, field, amount)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Shifts the date in a field with a certain amount.</p>
+<p>If the field in question is currently blank, it is assumed to
+represent <code>now</code>.</p>
+<div class="admonition caution">
+<p class="admonition-title">Recompute the workflow table</p>
+<p>We have changed a field in the database on which the workflow status depends.
+Tests that need to see updated workflow data should perform a recomputation
+of the workflow data.</p>
+</div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
+<dd>The table that contains the date field</dd>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>objectId</code>)</dt>
+<dd>The id of the record that contains the ddate field</dd>
+<dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of the date field</dd>
+<dt><strong><code>amount</code></strong> :&ensp;<code>timedelta</code></dt>
+<dd>The amount of hours to shift the date field. Can be negative or positive.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def shiftDate(table, eid, field, amount):
+    &#34;&#34;&#34;Shifts the date in a field with a certain amount.
+
+    If the field in question is currently blank, it is assumed to
+    represent `now`.
+
+    !!! caution &#34;Recompute the workflow table&#34;
+        We have changed a field in the database on which the workflow status depends.
+        Tests that need to see updated workflow data should perform a recomputation
+        of the workflow data.
+
+    Parameters
+    ----------
+    table: string
+        The table that contains the date field
+    eid: string(objectId)
+        The id of the record that contains the ddate field
+    field: string
+        The name of the date field
+    amount: timedelta
+        The amount of hours to shift the date field. Can be negative or positive.
+    &#34;&#34;&#34;
+
+    client = MongoClient()
+    db = client.dariah_test
+    eid = ObjectId(eid)
+    justNow = now()
+    currentDate = G(db[table].find_one({_ID: eid}), field)
+    if currentDate is None:
+        currentDate = justNow
+
+    shiftedDate = currentDate + timedelta(hours=amount)
+    db[table].update_one({_ID: eid}, {&#34;$set&#34;: {field: shiftedDate}})</code></pre>
+</details>
+</dd>
 <dt id="helpers.viewField"><code class="name flex">
 <span>def <span class="ident">viewField</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
@@ -1708,7 +1673,6 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
 <li><code><a title="helpers.accessUrl" href="#helpers.accessUrl">accessUrl</a></code></li>
-<li><code><a title="helpers.checkCreator" href="#helpers.checkCreator">checkCreator</a></code></li>
 <li><code><a title="helpers.checkWarning" href="#helpers.checkWarning">checkWarning</a></code></li>
 <li><code><a title="helpers.findCaptions" href="#helpers.findCaptions">findCaptions</a></code></li>
 <li><code><a title="helpers.findDetails" href="#helpers.findDetails">findDetails</a></code></li>
@@ -1723,7 +1687,6 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.forall" href="#helpers.forall">forall</a></code></li>
 <li><code><a title="helpers.getEid" href="#helpers.getEid">getEid</a></code></li>
 <li><code><a title="helpers.getItem" href="#helpers.getItem">getItem</a></code></li>
-<li><code><a title="helpers.getItemEids" href="#helpers.getItemEids">getItemEids</a></code></li>
 <li><code><a title="helpers.getRelatedValues" href="#helpers.getRelatedValues">getRelatedValues</a></code></li>
 <li><code><a title="helpers.getReviewEntryId" href="#helpers.getReviewEntryId">getReviewEntryId</a></code></li>
 <li><code><a title="helpers.getScores" href="#helpers.getScores">getScores</a></code></li>
@@ -1733,6 +1696,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <li><code><a title="helpers.reEditField" href="#helpers.reEditField">reEditField</a></code></li>
 <li><code><a title="helpers.reValueList" href="#helpers.reValueList">reValueList</a></code></li>
 <li><code><a title="helpers.reWarning" href="#helpers.reWarning">reWarning</a></code></li>
+<li><code><a title="helpers.shiftDate" href="#helpers.shiftDate">shiftDate</a></code></li>
 <li><code><a title="helpers.viewField" href="#helpers.viewField">viewField</a></code></li>
 </ul>
 </li>

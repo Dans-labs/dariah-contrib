@@ -47,6 +47,13 @@
         only the rightful users succeed.
     *   All users try to start a self-assessment,
         only *owner** and **editor** succeed.
+
+`test_revoke`
+:   **mycoord** takes a decision.
+    There is a delay time during which this decision can be revoked.
+    We'll test what happens when the delay time is past.
+    We do this by updating the `dateDecided` field under water, directly
+    in Mongo.
 """
 
 import pytest
@@ -57,6 +64,7 @@ from conftest import USERS, RIGHTFUL_USERS
 
 from example import (
     CONTRIB,
+    DATE_DECIDED,
     EDITOR,
     MYCOORD,
     OWNER,
@@ -69,7 +77,13 @@ from example import (
 
 from helpers import forall
 from starters import start
-from subtest import assertModifyField, assertStatus, modifyTitleAll, startAssessment
+from subtest import (
+    assertModifyField,
+    assertShiftDate,
+    assertStatus,
+    modifyTitleAll,
+    startAssessment,
+)
 
 
 startInfo = {}
@@ -154,3 +168,33 @@ def test_modify3(clients, clientMycoord):
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {OWNER, EDITOR}})
     startAssessment(clients, eid, expect)
+
+
+def test_revoke(clientMycoord, clientSystem):
+    recordId = startInfo["recordId"]
+    eid = recordId[CONTRIB]
+    tests = (
+        (SELECT_ACCEPT, 47, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 49, SELECT_REJECT, False),
+        (SELECT_REJECT, 47, SELECT_ACCEPT, True),
+        (SELECT_REJECT, 49, SELECT_ACCEPT, False),
+        (SELECT_REVOKE, 47, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 49, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 47, SELECT_REJECT, True),
+        (SELECT_REVOKE, 49, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 47, SELECT_REVOKE, True),
+        (SELECT_ACCEPT, 49, SELECT_REVOKE, False),
+        (SELECT_REJECT, 47, SELECT_REVOKE, True),
+        (SELECT_REJECT, 49, SELECT_REVOKE, False),
+    )
+    for (decisionBefore, shiftBack, decisionAfter, exp) in tests:
+        url = f"/api/task/{decisionBefore}/{eid}"
+        assertStatus(clientMycoord, url, True)
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+        url = f"/api/task/{decisionAfter}/{eid}"
+        serverprint(
+            f"REVOCATION: {decisionBefore} SHIFTBACK {shiftBack} {decisionAfter}: {exp}"
+        )
+        url = f"/api/task/{decisionAfter}/{eid}"
+        assertStatus(clientMycoord, url, exp)
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)

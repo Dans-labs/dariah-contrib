@@ -2,11 +2,12 @@
 """
 
 import re
+from datetime import timedelta
 
 from flask import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from control.utils import pick as G, serverprint
+from control.utils import pick as G, serverprint, now
 from conftest import USER_LIST
 from example import (
     _ID,
@@ -376,11 +377,11 @@ def getReviewEntryId(clients, cId, rEId, rFId):
     """
 
     client = MongoClient()
-    mongo = client.dariah_test
+    db = client.dariah_test
     return {
         reviewer: G(
             list(
-                mongo[REVIEW_ENTRY].find(
+                db[REVIEW_ENTRY].find(
                     {REVIEW: ObjectId(reviewId), CRITERIA_ENTRY: ObjectId(cId)}
                 )
             )[0],
@@ -420,9 +421,9 @@ def getScores(cId):
         Keyed by the title of the score, values are their ids.
     """
     client = MongoClient()
-    mongo = client.dariah_test
-    crId = G(list(mongo.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
-    scores = mongo.score.find(dict(criteria=ObjectId(crId)))
+    db = client.dariah_test
+    crId = G(list(db.criteriaEntry.find(dict(_id=ObjectId(cId))))[0], CRITERIA)
+    scores = db.score.find(dict(criteria=ObjectId(crId)))
     result = {}
     for record in scores:
         score = G(record, SCORE)
@@ -540,6 +541,41 @@ def reWarning(label):
         ),
         re.S,
     )
+
+
+def shiftDate(table, eid, field, amount):
+    """Shifts the date in a field with a certain amount.
+
+    If the field in question is currently blank, it is assumed to
+    represent `now`.
+
+    !!! caution "Recompute the workflow table"
+        We have changed a field in the database on which the workflow status depends.
+        Tests that need to see updated workflow data should perform a recomputation
+        of the workflow data.
+
+    Parameters
+    ----------
+    table: string
+        The table that contains the date field
+    eid: string(objectId)
+        The id of the record that contains the ddate field
+    field: string
+        The name of the date field
+    amount: timedelta
+        The amount of hours to shift the date field. Can be negative or positive.
+    """
+
+    client = MongoClient()
+    db = client.dariah_test
+    eid = ObjectId(eid)
+    justNow = now()
+    currentDate = G(db[table].find_one({_ID: eid}), field)
+    if currentDate is None:
+        currentDate = justNow
+
+    shiftedDate = currentDate + timedelta(hours=amount)
+    db[table].update_one({_ID: eid}, {"$set": {field: shiftedDate}})
 
 
 def viewField(client, table, eid, field):

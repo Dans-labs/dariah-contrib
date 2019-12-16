@@ -50,6 +50,17 @@ Filling out reviews.
     a review comment, but all fail, because everything is in a finished state.
     In particular, also a re-assignment of the reviewers to the assessment it attempted.
 
+`test_revokeDelay`
+    There is a delay time during which the final decision can be revoked.
+    We'll test what happens when the delay time is past.
+    We do this by updating the `dateDecided` field under water, directly
+    in Mongo.
+    We shift the time back 23 hours
+    **final** revokes and succeeds and then accepts again.
+    We shift the time back 25 hours.
+    **final** revokes and fails.
+    We shift the time forward 25 hours again.
+
 `test_finalRevokes`
 :   **final** revokes his decision.
     After that **expert** tries to take all review decisions, and succeeds,
@@ -65,6 +76,10 @@ Filling out reviews.
     The reviewers can be reassigned by **office**.
 
     The reviews can be modified.
+
+`test_revise`
+    *To be done:*
+    *Revising, resubmitting assessments and take a new review decision*
 """
 
 import pytest
@@ -80,6 +95,7 @@ from example import (
     COMMENTS_F,
     CONTRIB,
     CRITERIA_ENTRY,
+    DATE_DECIDED,
     EVIDENCE,
     EVIDENCE1,
     EXPERT,
@@ -111,6 +127,7 @@ from subtest import (
     assertFieldValue,
     assertModifyField,
     assertReviewDecisions,
+    assertShiftDate,
     assertStatus,
 )
 
@@ -251,6 +268,23 @@ def test_modify(clients):
 
     expect = {user: False for user in USERS}
     forall(clients, expect, assertIt)
+
+
+def test_revokeDelay(clientFinal, clientSystem):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
+    cFinal = {FINAL: clientFinal}
+    rFinal = G(reviewId, FINAL)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -23)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE, ACCEPT], True,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE], False,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, 25)
 
 
 def test_finalRevokes(clientsReviewer):

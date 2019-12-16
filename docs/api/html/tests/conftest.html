@@ -146,6 +146,8 @@ in alphabetical order of the file names.</p>
 <dd>Modifying contribution fields that have values in value tables.</dd>
 <dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
 <dd>Checking the visibility of sensitive fields.</dd>
+<dt><a title="test_30_contrib50" href="test_30_contrib50.html"><code>test_30_contrib50</code></a></dt>
+<dd>Selecting contributions.</dd>
 </dl>
 <h3 id="tests-assessments">Tests: assessments</h3>
 <dl>
@@ -163,14 +165,8 @@ in alphabetical order of the file names.</p>
 <dt><a title="test_50_review10" href="test_50_review10.html"><code>test_50_review10</code></a></dt>
 <dd>Starting reviews and filling them out.</dd>
 <dt><a title="test_50_review20" href="test_50_review20.html"><code>test_50_review20</code></a></dt>
-<dd>Checking visibility of reviews and making review decisions.</dd>
-<dt><code>test_50_assess30</code></dt>
-<dd>Revising and resubmitting assessments.</dd>
-</dl>
-<h3 id="tests-contributions-selection">Tests: contributions: selection.</h3>
-<dl>
-<dt><code>test_60_contrib10</code></dt>
-<dd>Selecting contributions.</dd>
+<dd>Checking visibility of reviews and making review decisions.
+Revising and resubmitting assessments.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -261,6 +257,9 @@ in alphabetical order of the file names.
 `test_30_contrib40`
 :   Checking the visibility of sensitive fields.
 
+`test_30_contrib50`
+:   Selecting contributions.
+
 ### Tests: assessments
 
 `test_40_assess10`
@@ -282,15 +281,7 @@ in alphabetical order of the file names.
 
 `test_50_review20`
 :   Checking visibility of reviews and making review decisions.
-
-`test_50_assess30`
-:   Revising and resubmitting assessments.
-
-### Tests: contributions: selection.
-
-`test_60_contrib10`
-:   Selecting contributions.
-
+    Revising and resubmitting assessments.
 &#34;&#34;&#34;
 
 import pytest
@@ -830,7 +821,6 @@ def db():
 <li><a href="#tests-contributions">Tests: Contributions</a></li>
 <li><a href="#tests-assessments">Tests: assessments</a></li>
 <li><a href="#tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</a></li>
-<li><a href="#tests-contributions-selection">Tests: contributions: selection.</a></li>
 </ul>
 </li>
 </ul>
