@@ -316,6 +316,8 @@ class Auth:
             if DEBUG_LOGIN:
                 serverprint(f"LOGIN: No shibboleth session found:")
                 serverprint(f"ENV = {env}")
+                for (k, v) in env:
+                    serverprint(f"LOGIN: ENV[{k}] = {v}")
                 serverprint(f"LOGIN: authentication failed")
 
             user.update(unauthUser)
