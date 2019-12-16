@@ -9,6 +9,7 @@ from flask import request, session, abort
 from control.utils import (
     pick as G,
     utf8FromLatin1,
+    serverprint,
     shiftRegional,
     E,
     AT,
@@ -31,6 +32,7 @@ from control.perm import (
 CB = C.base
 CW = C.web
 
+DEBUG_LOGIN = True
 
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
@@ -265,14 +267,23 @@ class Auth:
                 return False
             return self.getUser(eppn)
         else:
+            if DEBUG_LOGIN:
+                serverprint(f"LOGIN: start authentication with shibboleth")
             authenticated = SHIB_KEY in env and env[SHIB_KEY]
             if authenticated:
                 eppn = utf8FromLatin1(env[N.eppn])
                 email = utf8FromLatin1(env[N.mail])
                 isUser = self.getUser(eppn, email=email)
+                if DEBUG_LOGIN:
+                    serverprint(f"LOGIN: shibboleth seesion found:")
+                    serverprint(f"""LOGIN: eppn   = "{eppn}" """)
+                    serverprint(f"""LOGIN: email  = "{email}" """)
+                    serverprint(f"""LOGIN: isUser = "{isUser}" """)
                 if not isUser:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
+                    if DEBUG_LOGIN:
+                        serverprint(f"LOGIN: authentication failed")
                     return False
 
                 if N.group not in user:
@@ -298,7 +309,14 @@ class Auth:
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
+                if DEBUG_LOGIN:
+                    serverprint(f"LOGIN: authentication successful")
                 return True
+
+            if DEBUG_LOGIN:
+                serverprint(f"LOGIN: No shibboleth session found:")
+                serverprint(f"ENV = {env}")
+                serverprint(f"LOGIN: authentication failed")
 
             user.update(unauthUser)
             return False

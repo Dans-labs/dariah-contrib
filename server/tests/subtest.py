@@ -21,6 +21,8 @@ from example import (
     START_ASSESSMENT,
     START_REVIEW,
     TITLE,
+    TITLE1,
+    TITLE2,
     UNDEF_VALUE,
     USER,
     USER_COUNTRY,
@@ -455,6 +457,27 @@ def inspectTitleAll(clients, table, eid, expect):
     forall(clients, expect, assertIt)
 
 
+def modifyTitleAll(clients, table, eid, expect):
+    """Modify the title of an item, performed by each user.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    table: the table of the item
+    eid: the id of the item
+    expect: dict
+        The expected values, keyed per user
+    """
+
+    def assertIt(cl, exp):
+        assertModifyField(cl, table, eid, TITLE, TITLE2, exp)
+        if exp:
+            assertModifyField(cl, table, eid, TITLE, TITLE1, exp)
+
+    forall(clients, expect, assertIt)
+
+
 def sidebar(clients, amounts):
     """Verify the sidebar.
 
@@ -498,3 +521,29 @@ def sidebar(clients, amounts):
 
     expect = {user: G(expectedCaptions, user) for user in USERS}
     forall(clients, expect, assertCaptions)
+
+
+def startAssessment(clients, eid, expect):
+    """Starts an assessment and deletes it immediately afterwards.
+
+    All users in `clients` for which there is an entry in `expect` do this.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    eid: string(ObjectId)
+        The id of the contribution for an assessment is started
+    expect: dict
+        Per user whether the starting of an assessment succeeds or not
+    """
+
+    def assertIt(cl, exp):
+        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
+        if exp:
+            assert aId is not None
+            assertDelItem(cl, ASSESS, aId, True)
+        else:
+            assert aId is None
+
+    forall(clients, expect, assertIt)

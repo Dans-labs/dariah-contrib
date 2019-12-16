@@ -552,7 +552,7 @@ class Overview:
             classes["assessed"] += f" {assessedClass}"
         if asTsv:
             columns = "\t".join(
-                self.disclose(values, col, recCountry) for col in groupOrder
+                self.disclose(values, col, recCountry) or E for col in groupOrder
             )
         else:
             columns = [

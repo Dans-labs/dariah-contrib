@@ -115,7 +115,6 @@ def test_changeUserCountry(clientsPower):
 
 def test_modifyTitleAll(clients):
     recordId = startInfo["recordId"]
-
     eid = G(recordId, CONTRIB)
 
     def assertIt(cl, exp):

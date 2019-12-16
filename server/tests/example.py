@@ -79,6 +79,13 @@ REJECT = "Reject"
 REVISE = "Revise"
 REVOKE = "Revoke"
 
+SELECT_ACCEPT = "selectContrib"
+SELECT_REJECT = "deselectContrib"
+SELECT_REVOKE = "unselectContrib"
+START_ASSESSMENT = "startAssessment"
+START_REVIEW = "startReview"
+SUBMIT_ASSESSMENT = "submitAssessment"
+WITHDRAW_ASSESSMENT = "withdrawAssessment"
 RESUBMIT_ASSESSMENT = "resubmitAssessment"
 REVIEW_DECISION = {
     ACCEPT: {
@@ -98,10 +105,6 @@ REVIEW_DECISION = {
         FINAL: "finalReviewRevoke",
     },
 }
-START_ASSESSMENT = "startAssessment"
-START_REVIEW = "startReview"
-SUBMIT_ASSESSMENT = "submitAssessment"
-WITHDRAW_ASSESSMENT = "withdrawAssessment"
 
 DUMMY_ID = "00000000ffa4bbd9fe000f15"
 

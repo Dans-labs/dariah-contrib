@@ -103,7 +103,6 @@ from example import (
 from helpers import forall, getItem
 from starters import start
 from subtest import (
-    assertDelItem,
     assertEditor,
     assertFieldValue,
     assertModifyField,
@@ -112,6 +111,7 @@ from subtest import (
     inspectTitleAll,
     assignReviewers,
     sidebar,
+    startAssessment,
 )
 
 startInfo = {}
@@ -167,17 +167,9 @@ def test_tryStartAgainAll(clients):
     eid = G(recordId, CONTRIB)
     assertModifyField(clients[OWNER], CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True)
 
-    def assertIt(cl, exp):
-        aId = assertStartTask(cl, START_ASSESSMENT, eid, exp)
-        if exp:
-            assert aId is not None
-            assertDelItem(cl, ASSESS, aId, True)
-        else:
-            assert aId is None
-
     expect = {user: False for user in USERS}
     expect.update({user: True for user in {OWNER, EDITOR}})
-    forall(clients, expect, assertIt)
+    startAssessment(clients, eid, expect)
 
 
 def test_tryStartAgainOwner(clientOwner):
