@@ -149,6 +149,7 @@ from example import (
     REVIEWER_F,
     SCORE,
     SUBMIT_ASSESSMENT,
+    SUBMIT_REVISED,
     TITLE,
     TYPE1,
     USER,
@@ -354,7 +355,7 @@ def test_submitAssessmentRevised(clientOwner):
     recordId = startInfo["recordId"]
 
     aId = G(recordId, ASSESS)
-    url = f"/api/task/submitRevised/{aId}"
+    url = f"/api/task/{SUBMIT_REVISED}/{aId}"
     assertStatus(clientOwner, url, False)
 
 
@@ -464,7 +465,7 @@ def test_submitAssessmentRevised2(clientOwner):
     recordId = startInfo["recordId"]
 
     aId = G(recordId, ASSESS)
-    url = f"/api/task/submitRevised/{aId}"
+    url = f"/api/task/{SUBMIT_REVISED}/{aId}"
     assertStatus(clientOwner, url, False)
 
 

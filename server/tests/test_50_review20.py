@@ -77,15 +77,47 @@ Filling out reviews.
 
     The reviews can be modified.
 
+`test_finalRevise`
+:   We test revision and resubmission. The chain of events is:
+
+    *   **expert** has to give an advisory decision first. We let hem accept
+        the assessment;
+    *   we shift the submission date back 27 hours,
+        so that the system does not consider the assessment resubmitted
+        when we have shifted the review decisions back in time;
+    *   we shift the decisionDate back 26 hours,
+        so that **expert** cannot revoke his decision right now;
+    *   **final** decides that revision is needed;
+    *   we shift the decisionData back 25 hours,
+        so that **final** cannot revoke his decision under the current
+        conditions;
+    *   **expert** tries to take all review decisions, but fails,
+        because the assessment has not yet been resubmitted.
+
 `test_revise`
-    *To be done:*
-    *Revising, resubmitting assessments and take a new review decision*
+:   Here we test the **owner**'s part in the revision:
+
+    *   he checks the current stage of the assessment: "complete revised"
+    *   he sets the evidence of the first entry to an empty value
+    *   he checks the current stage of the assessment: "incomplete revised"
+    *   he sets the evidence of the first entry to a new empty value
+    *   he checks the current stage of the assessment: "complete revised"
+    *   he submits the assessment but fails
+    *   he resubmits the assessment but fails
+    *   he submits the assessment as revision and succeeds
+
+`test_newRound`
+:   Here we test the making of new review decisions.
+
+    * **final** tries to decide anything, but fails.
+    * **expert** acceepts and succeeds.
+    * **final** acceepts and succeeds.
 """
 
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G
+from control.utils import pick as G, E
 from conftest import USERS, POWER_USERS
 from example import (
     ACCEPT,
@@ -93,24 +125,30 @@ from example import (
     COMMENTS,
     COMMENTS_E,
     COMMENTS_F,
+    COMPLETE_REVISED,
     CONTRIB,
     CRITERIA_ENTRY,
     DATE_DECIDED,
+    DATE_SUBMITTED,
     EVIDENCE,
     EVIDENCE1,
     EXPERT,
     FINAL,
+    INCOMPLETE_REVISED,
     OFFICE,
     REJECT,
     REMARKS,
     REMARKS_E,
     REMARKS_F,
+    RESUBMIT_ASSESSMENT,
     REVIEW,
     REVIEW_DECISION,
     REVIEW_ENTRY,
     REVIEWER_E,
     REVISE,
     REVOKE,
+    SUBMIT_ASSESSMENT,
+    SUBMIT_REVISED,
     TITLE,
     TITLE2,
     TITLE_A2,
@@ -128,6 +166,7 @@ from subtest import (
     assertModifyField,
     assertReviewDecisions,
     assertShiftDate,
+    assertStage,
     assertStatus,
 )
 
@@ -136,16 +175,18 @@ startInfo = {}
 
 @pytest.mark.usefixtures("db")
 def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        clientExpert=clientExpert,
-        clientFinal=clientFinal,
-        users=True,
-        assessment=True,
-        countries=True,
-        review=True,
-    ))
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            clientExpert=clientExpert,
+            clientFinal=clientFinal,
+            users=True,
+            assessment=True,
+            countries=True,
+            review=True,
+        )
+    )
 
 
 def test_reviewEntryView(clients):
@@ -316,8 +357,12 @@ def test_modify2(clients):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
         assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
         reviewerFId = G(users, FINAL)
+        reviewerEId = G(users, EXPERT)
         assertModifyField(
             cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp["assign"]
+        )
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerEId, EXPERT), exp["assign"]
         )
         assertModifyField(
             cl,
@@ -375,3 +420,58 @@ def test_modify2(clients):
             expect.setdefault(user, {})[kind] = exp
 
     forall(clients, expect, assertIt)
+
+
+def test_finalRevise(clientsReviewer, clientSystem):
+    recordId = startInfo["recordId"]
+    aId = G(recordId, ASSESS)
+    reviewId = G(recordId, REVIEW)
+    rExpert = G(reviewId, EXPERT)
+    rFinal = G(reviewId, FINAL)
+
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -27)
+    assertShiftDate(clientSystem, REVIEW, rExpert, DATE_DECIDED, -26)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [REVISE], True)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+    )
+
+
+def test_Revise(clientOwner):
+    recordId = startInfo["recordId"]
+    aId = G(recordId, ASSESS)
+    cIds = recordId[CRITERIA_ENTRY]
+    cIdFirst = cIds[0]
+
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertModifyField(
+        clientOwner, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([], E), True,
+    )
+    assertStage(clientOwner, ASSESS, aId, INCOMPLETE_REVISED)
+    theEvidence = [f"revised evidence for 1", "see the internet"]
+    theEvidenceRep = ",".join(theEvidence)
+    assertModifyField(
+        clientOwner,
+        CRITERIA_ENTRY,
+        cIdFirst,
+        EVIDENCE,
+        (theEvidence, theEvidenceRep),
+        True,
+    )
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertStatus(clientOwner, f"/api/task/{SUBMIT_ASSESSMENT}/{aId}", False)
+    assertStatus(clientOwner, f"/api/task/{RESUBMIT_ASSESSMENT}/{aId}", False)
+    assertStatus(clientOwner, f"/api/task/{SUBMIT_REVISED}/{aId}", True)
+
+
+def test_newRound(clientsReviewer):
+    recordId = startInfo["recordId"]
+    reviewId = G(recordId, REVIEW)
+
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [FINAL], [REJECT, ACCEPT, REVISE, REVOKE], False
+    )
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [ACCEPT], True)

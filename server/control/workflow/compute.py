@@ -214,7 +214,9 @@ class Workflow:
         good = True
         for (wfId, records) in wfIds.items():
             if len(records) > 1:
-                serverprint(f"WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:")
+                serverprint(
+                    f"WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:"
+                )
                 serverprint(records[0])
                 good = False
         if good:
@@ -374,20 +376,12 @@ class Workflow:
             It is set to `True` when an assessment is currently under review.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            Reviews have both `locked` and `done`. `done` indcates whether the final
-            reviewer has decided. `locked` is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known. It also inforces that the expert reviewer cannot revoke
-            his/her decision.
         done: boolean
             Workflow attribute that derives from the reviews.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            It is set to `True` when the reviewer has decided.
-            It is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known.
-            When the final reviewer is `done`, also the assessment and the contribution
+            It is set to `True` when the final reviewer has decided other than `Revise`.
+            If `done`, also the assessment and the contribution
             count as `done`.
 
         Returns
@@ -475,11 +469,13 @@ class Workflow:
 
         locked = stage in {N.submitted, N.submittedRevised}
 
-        done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+        done = not not finalReviewStage and finalReviewStage != N.reviewRevise
 
         if done:
             if expertReviewWf:
                 expertReviewWf[N.done] = True
+            if finalReviewWf:
+                finalReviewWf[N.done] = True
 
         mayAdd = {
             kind: not frozen and not done and not G(reviewsWf, kind)
@@ -554,7 +550,6 @@ class Workflow:
                 else None
             )
         )
-        done = not not stage
 
         return {
             N._id: G(record, N._id),
@@ -564,7 +559,6 @@ class Workflow:
             N.kind: kind,
             N.stage: stage,
             N.stageDate: G(record, N.dateDecided),
-            N.done: done,
             N.frozen: frozen,
         }
 

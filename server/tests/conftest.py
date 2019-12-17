@@ -107,9 +107,7 @@ in alphabetical order of the file names.
 
 `test_50_review20`
 :   Checking visibility of reviews and making review decisions.
-
-    *To be done:*
-    *Revising, resubmitting assessments and take a new review decision*
+    Revising, resubmitting assessments and take a new review decision.
 """
 
 import pytest

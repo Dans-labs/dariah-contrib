@@ -424,7 +424,7 @@ class WorkflowItem:
         perm = recordObj.perm
         uid = self.uid
 
-        (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+        (stage,) = self.info(table, N.stage, kind=kind)
 
         if table in {N.assessment, N.criteriaEntry}:
             (rStage,) = self.info(N.review, N.stage, kind=N.final)
@@ -612,8 +612,6 @@ class WorkflowItem:
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            if value == taskValue:
-                return False
 
         (contribId,) = self.info(N.contrib, N._id)
 
@@ -642,6 +640,9 @@ class WorkflowItem:
             if task == N.startAssessment:
                 return isOwn and mayAdd and not frozen and not done
 
+            if value == taskValue:
+                return False
+
             if not isCoord:
                 return False
 
@@ -658,12 +659,15 @@ class WorkflowItem:
 
             return False
 
-        if (frozen or done) and not remaining:
-            return False
-
         if table == N.assessment:
+            if (frozen or done) and not remaining:
+                return False
+
             if task == N.startReview:
                 return G(mayAdd, myKind)
+
+            if value == taskValue:
+                return False
 
             if uid not in creators:
                 return False
@@ -691,6 +695,9 @@ class WorkflowItem:
             return False
 
         if table == N.review:
+            if (frozen or done) and not remaining:
+                return False
+
             taskKind = G(taskInfo, N.kind)
             if not kind or kind != taskKind or kind != myKind:
                 return False
@@ -699,10 +706,24 @@ class WorkflowItem:
             if not answer:
                 return False
 
+            (aStage, aStageDate) = self.info(N.assessment, N.stage, N.stageDate)
             (finalStage,) = self.info(table, N.stage, kind=N.final)
-            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            (expertStage, expertStageDate) = self.info(
+                table, N.stage, N.stageDate, kind=N.expert
+            )
             xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
             xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+            revision = finalStage == N.reviewRevise
+            zFinalStage = finalStage and not revision
+            submitted = aStage == N.submitted
+            submittedRevised = aStage == N.submittedRevised
+            mayDecideExpert = (
+                submitted and not finalStage or submittedRevised and revision
+            )
+
+            if value == taskValue:
+                if not revision:
+                    return False
 
             if task in {
                 N.expertReviewRevise,
@@ -710,7 +731,9 @@ class WorkflowItem:
                 N.expertReviewReject,
                 N.expertReviewRevoke,
             } - {xExpertStage}:
-                return kind == N.expert and not finalStage and answer
+                return (
+                    kind == N.expert and not zFinalStage and mayDecideExpert and answer
+                )
 
             if task in {
                 N.finalReviewRevise,
@@ -719,7 +742,17 @@ class WorkflowItem:
                 N.finalReviewRevoke,
             } - {xFinalStage}:
                 return (
-                    kind == N.final and not not (expertStage or finalStage) and answer
+                    kind == N.final
+                    and not not expertStage
+                    and (not aStageDate or expertStageDate > aStageDate)
+                    and (
+                        (
+                            (not finalStage and submitted)
+                            or (revision and submittedRevised)
+                        )
+                        or remaining
+                    )
+                    and answer
                 )
 
             return False
@@ -860,7 +893,7 @@ class WorkflowItem:
 
         urlExtra = E
 
-        done = False
+        executed = False
         if self.permission(task, kind=kind):
             operator = G(taskInfo, N.operator)
             if operator == N.add:
@@ -869,20 +902,20 @@ class WorkflowItem:
                 deid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
                 if deid:
                     urlExtra = f"""/{N.open}/{dtable}/{deid}"""
-                    done = True
+                    executed = True
             elif operator == N.set:
                 field = G(taskInfo, N.field)
                 value = G(taskInfo, N.value)
                 if recordObj.field(field, mayEdit=True).save(value):
-                    done = True
-            if done:
-                flash(f"""<{acro}> done""", "message")
+                    executed = True
+            if executed:
+                flash(f"""<{acro}> executed""", "message")
             else:
                 flash(f"""<{acro}> failed""", "error")
         else:
             flash(f"""<{acro}> not permitted""", "error")
 
-        return f"""/{N.contrib}/{N.item}/{contribId}{urlExtra}""" if done else None
+        return f"""/{N.contrib}/{N.item}/{contribId}{urlExtra}""" if executed else None
 
     def statusOverview(self, table, kind=None):
         """Present the current status of a record on the interface.

@@ -73,7 +73,9 @@ ROOT = "root"
 SYSTEM = "system"
 
 INCOMPLETE = "incomplete"
+INCOMPLETE_REVISED = "incompleteRevised"
 COMPLETE = "complete"
+COMPLETE_REVISED = "completeRevised"
 COMPLETE_WITHDRAWN = "completeWithdrawn"
 SUBMITTED = "submitted"
 
@@ -88,6 +90,7 @@ SELECT_REVOKE = "unselectContrib"
 START_ASSESSMENT = "startAssessment"
 START_REVIEW = "startReview"
 SUBMIT_ASSESSMENT = "submitAssessment"
+SUBMIT_REVISED = "submitRevised"
 WITHDRAW_ASSESSMENT = "withdrawAssessment"
 RESUBMIT_ASSESSMENT = "resubmitAssessment"
 REVIEW_DECISION = {
