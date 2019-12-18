@@ -585,54 +585,58 @@ const openGidH = gid => {
   }
 }
 
+const setGid = (me, on, inv, method) => {
+  const gid = me.attr('gid')
+  const gKey = `group${gid}`
+  const isDone = me.css('display') == 'none'
+  if (!isDone) {
+    const other = $(`a[gid="${gid}"].dc.i-${inv}`)
+    me.hide()
+    xTouched[gid] = on
+    method(gid)
+    other.show()
+  }
+    localStorage.setItem(gKey, on ? 'open' : '')
+}
+
 const initExpandControls = () => {
-  $('.dc.cdown').click(e => {
+  $('.hide').hide()
+  $('.dc.i-cdown').click(e => {
     e.preventDefault()
-    const gid = $(this).attr('gid')
-    const other = $(`a[gid="${gid}"].dc.cup`)
-    $(this).hide()
-    xTouched[gid] = true
-    openGidH(gid)
-    other.show()
+    const me = $(e.target)
+    setGid(me, true, 'cup', openGidH)
   })
-  $('.dc.cup').click(e => {
+  $('.dc.i-cup').click(e => {
     e.preventDefault()
-    const gid = $(this).attr('gid')
-    const other = $(`a[gid="${gid}"].dc.cdown`)
-    $(this).hide()
-    xTouched[gid] = false
-    closeGidH(gid)
-    other.show()
+    const me = $(e.target)
+    setGid(me, false, 'cdown', closeGidH)
   })
-  $('.dca.addown').click(e => {
+  $('.dca.i-addown').click(e => {
     e.preventDefault()
-    const gn = $(this).attr('gn')
-    $(`.c-${gn} a.dc.cdown`).each(() => {
-      const isOpen = $(this).css('display') == 'none'
-      const gid = $(this).attr('gid')
-      if (!isOpen) {
-        const other = $(`a[gid="${gid}"].dc.cup`)
-        $(this).hide()
-        xTouched[gid] = true
-        openGidH(gid)
-        other.show()
-      }
+    const me = $(e.target)
+    const gn = me.attr('gn')
+    $(`.c-${gn} a.dc.i-cdown`).each((i, elem) => {
+      const el = $(elem)
+      setGid(el, true, 'cup', openGidH)
     })
   })
-  $('.dca.adup').click(e => {
+  $('.dca.i-adup').click(e => {
     e.preventDefault()
-    const gn = $(this).attr('gn')
-    $(`.c-${gn} a.dc.cup`).each(() => {
-      const isClosed = $(this).css('display') == 'none'
-      const gid = $(this).attr('gid')
-      if (!isClosed) {
-        const other = $(`a[gid="${gid}"].dc.cdown`)
-        $(this).hide()
-        xTouched[gid] = false
-        closeGidH(gid)
-        other.show()
-      }
+    const me = $(e.target)
+    const gn = me.attr('gn')
+    $(`.c-${gn} a.dc.i-cup`).each((i, elem) => {
+      const el = $(elem)
+      setGid(el, false, 'cdown', closeGidH)
     })
+  })
+  $('.dc.i-cdown').each((i, elem) => {
+    const el = $(elem)
+    const gid = el.attr('gid')
+    const gKey = `group${gid}`
+    const prevOpen = localStorage.getItem(gKey)
+    if (prevOpen) {
+      setGid(el, true, 'cup', openGidH)
+    }
   })
 }
 

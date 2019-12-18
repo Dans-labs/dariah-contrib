@@ -396,7 +396,11 @@ class HtmlElements:
         """iconx.
 
         Pseudo element for a clickable icon.
-        It will be wrapped in an `<a href="...">...</a>` element.
+        It will be wrapped in an `<a href="...">...</a>` element or a <span...>
+        if `href` is `None`.
+
+        If `href` is the empty string, the element will still be wrapped in
+        an `<a ...>` element, but without a `href` attribute.
 
         !!! warning
             The `icon` names must be listed in the web.yaml config file
@@ -408,6 +412,7 @@ class HtmlElements:
             Name of the icon.
         href: url, optional, `None`
             Destination of the icon when clicked.
+            Will be left out when equal to the empty string.
 
         Returns
         -------
@@ -416,10 +421,11 @@ class HtmlElements:
 
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         addClass = f"{N.icon} i-{icon} "
-        return (
-            HtmlElement(N.a).wrap(iconChar, addClass=addClass, href=href, **atts)
-            if href
-            else HtmlElement(N.span).wrap(iconChar, addClass=addClass, **atts)
+        if href:
+            atts["href"] = href
+
+        return HtmlElement(N.span if href is None else N.a).wrap(
+            iconChar, addClass=addClass, **atts
         )
 
     @staticmethod

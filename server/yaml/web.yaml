@@ -241,8 +241,14 @@ listActions:
   - select
 
 names:
+  - _cn
   - addClass
+  - all
+  - asc
+  - arank
+  - astage
   - body
+  - desc
   - icon
   - open
   - option
@@ -250,5 +256,6 @@ names:
   - showEid
   - showTable
   - symbol
+  - undisclosed
   - wrapHelp
   - you

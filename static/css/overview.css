@@ -52,8 +52,8 @@ table.cc th {
   padding: 0.2em 0.3em;
   font-size: small;
 }
-table.cc td.c-vcc,
-table.cc th.c-vcc {
+table.cc td.c-country,
+table.cc th.c-country {
   text-align: left;
 }
 table.cc td.c-year,
@@ -72,12 +72,6 @@ table.cc td.c-assessed,
 table.cc th.c-assessed {
   text-align: left;
 }
-table.cc,
-table.cc {
-  text-align: center;
-  min-width: 6em;
-  max-width: 6em;
-}
 table.cc td.c-selected,
 table.cc th.c-selected {
   text-align: left;
@@ -85,11 +79,9 @@ table.cc th.c-selected {
 table.cc td.c-title,
 table.cc th.c-title {
   text-align: left;
+  min-width: 10rem;
 }
 
-td.c-vcc {
-  color: #666666;
-}
 td.c-type {
   color: #222222;
 }
@@ -187,18 +179,18 @@ a[select] {
 tr.dd {
   display: table-row;
 }
-tr.dd.hide {
+/*tr.dd.hide {
   display: none;
-}
-a.dc.cup {
+}*/
+a.dc.i-cup {
   display: inline;
 }
-a.dc.hide.cup {
+/*a.dc.hide.i-cup {
   display: none;
-}
-a.dc.cdown {
+}*/
+a.dc.i-cdown {
   display: inline;
 }
-a.dc.hide.cdown {
+/*a.dc.hide.i-cdown {
   display: none;
-}
+}*/

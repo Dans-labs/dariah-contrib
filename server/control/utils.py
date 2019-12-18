@@ -43,7 +43,9 @@ Q = "?"
 S = "s"
 
 NL = "\n"
+TAB = "\t"
 
+PLUS = "+"
 MIN = "-"
 HYPHEN = "-"
 WHYPHEN = " - "

@@ -36,7 +36,7 @@ class Bool(TypeBase):
         noneValue = False if len(values) == 2 else None
 
         valueBare = G(values, val, default=G(values, noneValue))
-        return H.icon(valueBare, cls="medium") if markup else valueBare
+        return H.icon(valueBare, cls="medium", asChar=not markup)
 
     def toEdit(self, val):
         return val

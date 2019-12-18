@@ -9,7 +9,7 @@ import json
 from flask import request, make_response
 
 from config import Config as C, Names as N
-from control.utils import pick as G, E, NBSP
+from control.utils import pick as G, E, NBSP, COMMA, PLUS, MIN, ONE, MINONE, S, NL, TAB
 from control.html import HtmlElements as H
 
 
@@ -18,24 +18,22 @@ CW = C.web
 
 URLS = CW.urls
 PAGE = URLS[N.info][N.url]
-PAGEX = f"{PAGE}.tsv"
+PAGEX = f"""{PAGE}.tsv"""
 
-COL_PLURAL = dict(country="countries",)
+COL_PLURAL = dict(country=N.countries,)
 
 COLSPECS = (
-    ("country", str),
-    ("vcc", str, "VCC"),
-    ("year", int),
-    ("type", str),
-    ("cost", int, "cost (€)"),
-    ("assessed", tuple),
-    ("selected", bool),
-    ("title", str),
+    (N.country, str),
+    (N.year, int),
+    (N.type, str),
+    (N.cost, int, """cost (€)"""),
+    (N.assessed, tuple),
+    (N.selected, bool),
+    (N.title, str),
 )
 
 GROUP_COLS = """
       country
-      vcc
       year
       type
       assessed
@@ -54,7 +52,7 @@ ASSESSED_STATUS = {
     N.incomplete: ("started", "a-started"),
     N.incompleteRevised: ("revision", "a-started"),
     N.incompleteWithdrawn: ("withdrawn", "a-none"),
-    N.complete: ("submitted", "a-self"),
+    N.complete: ("filled-in", "a-self"),
     N.completeRevised: ("revised", "a-self"),
     N.completeWithdrawn: ("withdrawn", "a-none"),
     N.submitted: ("in review", "a-inreview"),
@@ -67,6 +65,8 @@ ASSESSED_CLASS = {stage: info[1] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
 
+ALL = """All countries"""
+
 
 class Overview:
     def __init__(self, context):
@@ -75,7 +75,6 @@ class Overview:
         types = context.types
         self.bool3Obj = types.bool3
         self.countryType = types.country
-        self.vccType = types.vcc
         self.yearType = types.year
         self.typeType = types.typeContribution
 
@@ -111,47 +110,49 @@ class Overview:
         db = context.db
         chosenCountryId = self.chosenCountryId
         countryType = self.countryType
-        vccType = self.vccType
         yearType = self.yearType
         typeType = self.typeType
 
         contribs = {}
         for record in db.bulkContribWorkflow(chosenCountryId):
+            title = G(record, N.title)
             contribId = G(record, N._id)
 
             selected = G(record, N.selected)
             aStage = G(record, N.aStage)
+            rStage = G(record, N.rStage)
+            if rStage in {N.reviewAccept, N.reviewReject}:
+                aStage = rStage
             score = G(record, N.score)
             assessed = ASSESSED_STATUS[aStage][0]
-            if assessed != N.reviewAccept:
+            aRank = (G(ASSESSED_RANK, aStage, default=0), score)
+            if aStage != N.reviewAccept:
                 score = None
 
             countryRep = countryType.titleStr(G(db.country, G(record, N.country)))
             yearRep = yearType.titleStr(G(db.year, G(record, N.year)))
-            typeRep = typeType.titleStr(
-                G(db.typeContribution, G(record, N.typeContribution))
-            )
-            vccRep = " + ".join(
-                vccType.titleStr(G(db.vcc, v)) for v in G(record, N.vcc, default=[])
-            )
+            typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)))
+            cost = G(record, N.cost)
 
             contribs[contribId] = {
-                "_id": contribId,
-                "_cn": countryRep,
-                "country": countryRep,
-                "vcc": vccRep,
-                "year": yearRep,
-                "type": typeRep,
-                "title": G(record, N.title),
-                "cost": G(record, N.costTotal),
-                "assessed": (assessed, score),
-                "selected": selected,
+                N._id: contribId,
+                N._cn: countryRep,
+                N.country: countryRep,
+                N.year: yearRep,
+                N.type: typeRep,
+                N.title: title,
+                N.cost: cost,
+                N.assessed: assessed,
+                N.arank: aRank,
+                N.astage: aStage,
+                N.score: score,
+                N.selected: selected,
             }
 
         self.contribs = contribs
 
     def roTri(self, tri):
-        return self.bool3Obj.toDisplay(tri)
+        return self.bool3Obj.toDisplay(tri, markup=False)
 
     def wrap(self, asTsv=False):
         context = self.context
@@ -164,10 +165,10 @@ class Overview:
 
         accessRep = auth.credentials()[1]
 
-        rawSortCol = request.args.get("sortcol", "")
-        rawReverse = request.args.get("reverse", "")
-        country = request.args.get("country", "")
-        groups = request.args.get("groups", "")
+        rawSortCol = request.args.get(N.sortcol, E)
+        rawReverse = request.args.get(N.reverse, E)
+        country = request.args.get(N.country, E)
+        groups = request.args.get(N.groups, E)
 
         self.getCountry(country)
         self.getContribs()
@@ -181,7 +182,7 @@ class Overview:
 
         if chosenCountryId is not None:
             colSpecs = COLSPECS[1:]
-            groups = self.rmGroup(groups.split(","), "country")
+            groups = self.rmGroup(groups.split(COMMA), N.country)
             groupCols = GROUP_COLS[1:]
 
         cols = [c[0] for c in colSpecs]
@@ -192,12 +193,12 @@ class Overview:
         sortDefault = cols[-1]
 
         allGroupSet = set(groupCols)
-        groupsChosen = [] if not groups else groups.split(",")
+        groupsChosen = [] if not groups else groups.split(COMMA)
         groupSet = set(groupsChosen)
-        groupStr = ("-by-" if groupSet else "") + "-".join(sorted(groupSet))
+        groupStr = ("""-by-""" if groupSet else E) + MIN.join(sorted(groupSet))
 
         sortCol = sortDefault if rawSortCol not in colSet else rawSortCol
-        reverse = False if rawReverse not in {"-1", "1"} else rawReverse == "-1"
+        reverse = False if rawReverse not in {MINONE, ONE} else rawReverse == MINONE
 
         self.cols = cols
         self.labels = labels
@@ -209,7 +210,18 @@ class Overview:
         if not asTsv:
             material.append(H.h(3, """Country selection"""))
 
-            countryItems = []
+            countryItems = [
+                H.a(
+                    ALL,
+                    (
+                        f"""{PAGE}?country=&sortcol={rawSortCol}&"""
+                        f"""reverse={rawReverse}&groups={groups}"""
+                    ),
+                    cls="c-control",
+                )
+                if chosenCountryId
+                else H.span(ALL, cls="c-focus")
+            ]
             for (cid, countryInfo) in db.country.items():
                 if not G(countryInfo, N.isMember):
                     continue
@@ -222,60 +234,68 @@ class Overview:
                     else H.a(
                         name,
                         (
-                            f"{PAGE}?country={iso}&sortcol={rawSortCol}&"
-                            f"reverse={rawReverse}&groups={groups}"
+                            f"""{PAGE}?country={iso}&sortcol={rawSortCol}&"""
+                            f"""reverse={rawReverse}&groups={groups}"""
                         ),
                         cls="c-control",
                     )
                 )
-            material.append(H.p(countryItems, cls="countries"))
+            material.append(H.p(countryItems, cls=N.countries))
 
         groupsAvailable = sorted(allGroupSet - set(groupsChosen))
         groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
 
         if not asTsv:
             urlArgs = (
-                f"?country={chosenCountryIso}&"
-                f"sortcol={rawSortCol}&reverse={rawReverse}&"
+                f"""?country={chosenCountryIso}&"""
+                f"""sortcol={rawSortCol}&reverse={rawReverse}&"""
             )
-            urlStart1 = f"{PAGE}{urlArgs}"
-            urlStart = f"{urlStart1}" f"&groups="
+            urlStart1 = f"""{PAGE}{urlArgs}"""
+            urlStart = f"""{urlStart1}""" f"&groups="
             availableReps = E.join(
                 H.a(
-                    f"+{g}",
-                    (f"{urlStart}{self.addGroup(groupsChosen, g)}"),
+                    f"""+{g}""",
+                    (f"""{urlStart}{self.addGroup(groupsChosen, g)}"""),
                     cls="g-add",
                 )
                 for g in groupsAvailable
             )
             chosenReps = E.join(
                 H.a(
-                    f"-{g}", (f"{urlStart}{self.rmGroup(groupsChosen, g)}"), cls="g-rm",
+                    f"""-{g}""",
+                    f"""{urlStart}{self.rmGroup(groupsChosen, g)}""",
+                    cls="g-rm",
                 )
                 for g in groupsChosen
             )
             clearGroups = (
-                ""
+                E
                 if len(chosenReps) == 0
                 else H.iconx(
-                    N.clear, (f"{urlStart1}"), cls="g-x", title="clear all groups"
+                    N.clear, urlStart1, cls="g-x", title="""clear all groups"""
                 )
             )
-            rArgs = f"{urlArgs}groups={groups}"
+            rArgs = f"""{urlArgs}groups={groups}"""
 
         headerLine = self.ourCountryHeaders(
             country, groups, asTsv, groupOrder=groupOrder,
         )
 
+        contribs = self.contribs
+        nContribs = len(contribs)
+        plural = E if nContribs == 1 else S
+        things = f"""{len(contribs)} contribution{plural}"""
+        origin = chosenCountry or ALL.lower()
+
         if not asTsv:
-            material.append(H.h(3, "Grouping"))
+            material.append(H.h(3, """Grouping"""))
             material.append(
                 H.table(
                     [],
                     [
                         (
                             [
-                                ("available groups", dict(cls="mtl")),
+                                ("""available groups""", dict(cls="mtl")),
                                 (availableReps, dict(cls="mtd")),
                                 (NBSP, {}),
                             ],
@@ -283,7 +303,7 @@ class Overview:
                         ),
                         (
                             [
-                                ("chosen groups", dict(cls="mtl")),
+                                ("""chosen groups""", dict(cls="mtl")),
                                 (chosenReps, dict(cls="mtd")),
                                 (clearGroups, {}),
                             ],
@@ -297,10 +317,10 @@ class Overview:
                 H.h(
                     3,
                     [
-                        f"Contributions from {chosenCountry}",
+                        f"""{things} from {origin}""",
                         H.a(
-                            "Download as Excel",
-                            f"{PAGEX}{rArgs}",
+                            """Download as Excel""",
+                            f"""{PAGEX}{rArgs}""",
                             target="_blank",
                             cls="button large",
                         ),
@@ -319,7 +339,9 @@ class Overview:
             material.append(groupRel)
 
         if asTsv:
-            fileName = f'dariah-{country or "all-countries"}{groupStr}-for-{accessRep}'
+            fileName = (
+                f"""dariah-{country or "all-countries"}{groupStr}-for-{accessRep}"""
+            )
             headers = {
                 "Expires": "0",
                 "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -327,10 +349,11 @@ class Overview:
                 "Content-Disposition": f'attachment; filename="{fileName}"',
                 "Content-Encoding": "identity",
             }
-            tsv = f"\ufeff{headerLine}\n{E.join(material)}".encode("utf_16_le")
+            tsv = f"""\ufeff{headerLine}\n{E.join(material)}""".encode("""utf_16_le""")
             data = make_response(tsv, headers)
         else:
             data = E.join(material)
+
         return data
 
     def groupList(
@@ -348,11 +371,11 @@ class Overview:
             )
             if asTsv:
                 return (
-                    "\n".join(
+                    NL.join(
                         self.formatContrib(contrib, None, chosenCountry, asTsv,)
                         for contrib in groupedList
                     ),
-                    "",
+                    E,
                 )
             else:
                 return (
@@ -360,7 +383,7 @@ class Overview:
                         self.formatContrib(contrib, None, chosenCountry, asTsv,)
                         for contrib in groupedList
                     ],
-                    "",
+                    E,
                 )
 
         preGroups = groups[0:-1]
@@ -375,8 +398,8 @@ class Overview:
         for c in contribs.values():
             dest = groupedList
             for g in preGroups:
-                dest = dest.setdefault(c.get(g, None), {})
-            dest = dest.setdefault(c.get(lastGroup, None), [])
+                dest = dest.setdefault(G(c, g), {})
+            dest = dest.setdefault(G(c, lastGroup), [])
             dest.append(c)
 
         material = []
@@ -389,10 +412,11 @@ class Overview:
             nonlocal maxGroupId
             maxGroupId += 1
             thisGroupId = maxGroupId
+            thisGroupId = COMMA.join(f"""{k}:{v}""" for (k, v) in groupValues.items())
             groupRel.setdefault(str(parentGroupId), []).append(str(thisGroupId))
 
             headIndex = len(material)
-            material.append("-" if asTsv else ([("-", {})], {}))
+            material.append(MIN if asTsv else ([(MIN, {})], {}))
             nRecords = 0
             nGroups = 0
             cost = 0
@@ -407,7 +431,7 @@ class Overview:
                 ):
                     nRecords += 1
                     nGroups += 1
-                    cost += rec.get("cost", 0) or 0
+                    cost += G(rec, N.cost) or 0
                     material.append(
                         self.formatContrib(
                             rec,
@@ -439,14 +463,16 @@ class Overview:
                 thisGroup = groups[depth - 1]
                 groupValuesT[thisGroup] = groupValues[thisGroup]
             # groupValuesT.update(groupValues)
-            groupValuesT["cost"] = cost
-            groupValuesT["title"] = self.colRep("contribution", nRecords)
-            groupValuesT["_cn"] = groupValues.get("country", None)
+            groupValuesT[N.cost] = cost
+            groupValuesT[N.title] = self.colRep(N.contribution, nRecords)
+            groupValuesT[N._cn] = G(groupValues, N.country)
             if depth == 0:
-                for g in groupCols + ["title"]:
-                    label = selectedCountry if g == "country" else "all"
-                    controls = self.expandAcontrols(g) if g in groups or g == "title" else ""
-                    groupValuesT[g] = label if asTsv else f"{label} {controls}"
+                for g in groupCols + [N.title]:
+                    label = selectedCountry if g == N.country else N.all
+                    controls = (
+                        self.expandAcontrols(g) if g in groups or g == N.title else E
+                    )
+                    groupValuesT[g] = label if asTsv else f"""{label} {controls}"""
             material[headIndex] = self.formatContrib(
                 groupValuesT,
                 parentGroupId,
@@ -466,7 +492,7 @@ class Overview:
         groupMaterial(groupedList, 0, {}, 1)
         return (
             E.join(material) if asTsv else material,
-            H.script(f"var groupRel = {json.dumps(groupRel)}"),
+            H.script(f"""var groupRel = {json.dumps(groupRel)}"""),
         )
 
     def formatContrib(
@@ -489,69 +515,64 @@ class Overview:
 
         if groupOrder is None:
             groupOrder = cols
-        contribId = contrib.get("_id", None)
+        contribId = G(contrib, N._id)
+        (assessedLabel, assessedClass) = self.wrapStatus(contrib)
         if allHead:
-            selected = contrib.get("selected", "")
+            selected = G(contrib, N.selected) or E
             if asTsv:
                 selected = self.valTri(selected)
-            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
-            assessedClass = ""
+            assessedClass = E
         else:
-            selected = contrib.get("selected", None)
+            selected = G(contrib, N.selected)
             selected = (
                 (self.valTri(selected) if asTsv else self.roTri(selected))
-                if "selected" in contrib
-                else ""
+                if N.selected in contrib
+                else E
             )
-
-            (assessedLabel, assessedClass) = self.wrapStatus(contrib)
-        rawTitle = contrib.get("title", "")
+        rawTitle = G(contrib, N.title) or E
         title = (
             rawTitle
             if asTsv
             else rawTitle
             if subHead
             else H.a(
-                f"{rawTitle or '? missing title ?'}",
-                f"/{N.contrib}/{N.item}/{contribId}",
+                f"""{rawTitle or "? missing title ?"}""",
+                f"""/{N.contrib}/{N.item}/{contribId}""",
             )
-            if "title" in contrib
-            else ""
+            if N.title in contrib
+            else E
         )
 
         values = {
-            "country": (contrib["country"] or "??") if "country" in contrib else "",
-            "vcc": (contrib["vcc"] or "??") if "vcc" in contrib else "",
-            "year": (contrib["year"] or "??") if "year" in contrib else "",
-            "type": (contrib["type"] or "??") if "type" in contrib else "",
-            "cost": self.euro(contrib.get("cost", None), subHead)
-            if "cost" in contrib
-            else "",
-            "assessed": assessedLabel,
-            "selected": selected,
-            "title": title,
+            N.country: G(contrib, N.country) or E,
+            N.year: G(contrib, N.year) or E,
+            N.type: G(contrib, N.type) or E,
+            N.cost: self.euro(G(contrib, N.cost)),
+            N.assessed: assessedLabel,
+            N.selected: selected,
+            N.title: title,
         }
-        recCountry = contrib.get("_cn", None) or values.get("country", None)
+        recCountry = G(contrib, N._cn) or G(values, N.country)
         if depth is not None:
-            xGroup = groupOrder[depth] if depth == 0 or depth < groupLen else "title"
-            xName = "contribution" if xGroup == "title" else xGroup
+            xGroup = groupOrder[depth] if depth == 0 or depth < groupLen else N.title
+            xName = N.contribution if xGroup == N.title else xGroup
             xRep = self.colRep(xName, nGroups)
             values[xGroup] = (
                 xRep
                 if asTsv
                 else (
-                    f"{self.expandControls(thisGroupId, True)} {xRep}"
-                    if xGroup == "title"
-                    else f"{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"
+                    f"""{self.expandControls(thisGroupId, True)} {xRep}"""
+                    if xGroup == N.title
+                    else f"""{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"""
                     if depth > 0
-                    else f"{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"
+                    else f"""{values[xGroup]} ({xRep}) {self.expandControls(thisGroupId)}"""
                 )
             )
         if not asTsv:
             classes = {col: f"c-{col}" for col in groupOrder}
             classes["assessed"] += f" {assessedClass}"
         if asTsv:
-            columns = "\t".join(
+            columns = TAB.join(
                 self.disclose(values, col, recCountry) or E for col in groupOrder
             )
         else:
@@ -560,15 +581,15 @@ class Overview:
                     self.disclose(values, col, recCountry),
                     dict(
                         cls=(
-                            "{classes[col]} "
-                            "{self.subHeadClass(col, groupSet, subHead, allHead)}"
+                            f"{classes[col]} "
+                            + self.subHeadClass(col, groupSet, subHead, allHead)
                         )
                     ),
                 )
                 for col in groupOrder
             ]
         if not asTsv:
-            hideRep = " hide" if hide else ""
+            hideRep = " hide" if hide else E
             displayAtts = (
                 {} if groupId is None else dict(cls=f"dd{hideRep}", gid=groupId)
             )
@@ -580,12 +601,11 @@ class Overview:
         colType = types[col]
 
         def makeKey(contrib):
-            if col == "assessed":
-                (stage, score) = contrib.get(col, (None, None))
-                return (ASSESSED_RANK.get(N.stage, 0), score)
-            value = contrib.get(col, None)
+            if col == N.assessed:
+                return G(contrib, N.arank)
+            value = G(contrib, col)
             if value is None:
-                return "" if colType is str else 0
+                return E if colType is str else 0
             if colType is str:
                 return value.lower()
             if colType is bool:
@@ -593,10 +613,10 @@ class Overview:
             return value
 
         def makeKeyInd(value):
-            if col == "assessed":
+            if col == N.assessed:
                 return value
             if value is None:
-                return "" if colType is str else 0
+                return E if colType is str else 0
             if colType is str:
                 return value.lower()
             if colType is bool:
@@ -615,19 +635,19 @@ class Overview:
             groupOrder = cols
 
         if asTsv:
-            headers = ""
-            sep = ""
+            headers = E
+            sep = E
             for col in groupOrder:
                 label = labels[col]
                 colControl = label
-                headers += f"{sep}{colControl}"
-                sep = "\t"
+                headers += f"""{sep}{colControl}"""
+                sep = TAB
 
         else:
             headers = []
-            dirClass = "desc" if reverse else "asc"
-            dirIcon = "adown" if reverse else "aup"
-            urlStart = f"{PAGE}?country={country}&groups={groups}&"
+            dirClass = N.desc if reverse else N.asc
+            dirIcon = N.adown if reverse else N.aup
+            urlStart = f"""{PAGE}?country={country}&groups={groups}&"""
             for col in groupOrder:
                 isSorted = col == sortCol
                 thisClass = f"c-{col}"
@@ -642,7 +662,8 @@ class Overview:
                 label = labels[col]
                 sep = NBSP if icon else E
                 colControl = H.a(
-                    f"{label}{icon}", f"{urlStart}sortcol={col}&reverse={reverseRep}"
+                    f"""{label}{icon}""",
+                    f"""{urlStart}sortcol={col}&reverse={reverseRep}""",
                 )
                 headers.append((colControl, dict(cls=f"och {thisClass}")))
             headers = (headers, {})
@@ -655,43 +676,41 @@ class Overview:
         isSuperUser = self.isSuperUser
         isCoord = auth.coordinator(countryId=recCountry)
 
-        disclosed = colName != "cost" or isSuperUser or isCoord
-        value = values[colName] if disclosed else "undisclosed"
+        disclosed = colName != N.cost or isSuperUser or isCoord
+        value = values[colName] if disclosed else N.undisclosed
         return value
 
     @staticmethod
-    def wrapStatus(contrib, compact=True):
-        aStage = G(contrib, N.aStage)
+    def wrapStatus(contrib):
+        aStage = G(contrib, N.astage)
         score = G(contrib, N.score)
-        baseLabel = ASSESSED_LABELS.get(aStage, "??")
-        aClass = ASSESSED_CLASS.get(aStage, ASSESSED_ACCEPTED_CLASS)
-        if compact:
-            aLabel = baseLabel if score is None else f"score {score}%"
-        else:
-            aLabel = f"{score}% - {baseLabel}"
+        scoreRep = E if score is None else f"""{score}% - """
+        baseLabel = G(ASSESSED_LABELS, aStage, default="??")
+        aClass = G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
+        aLabel = f"""{scoreRep}{baseLabel}"""
         return (aLabel, aClass)
 
     @staticmethod
     def colRep(col, n):
-        itemRep = col if n == 1 else COL_PLURAL.get(col, f"{col}s")
-        return f"{n} {itemRep}"
+        itemRep = col if n == 1 else G(COL_PLURAL, col, default=f"""{col}s""")
+        return f"""{n} {itemRep}"""
 
     @staticmethod
     def addGroup(groups, g):
-        return ",".join(groups + [g])
+        return COMMA.join(groups + [g])
 
     @staticmethod
     def rmGroup(groups, g):
-        return ",".join(h for h in groups if h != g)
+        return COMMA.join(h for h in groups if h != g)
 
     @staticmethod
     def expandControls(gid, hide=False):
-        hideRep = " hide" if hide else ""
-        showRep = "" if hide else " hide"
+        hideRep = " hide" if hide else E
+        showRep = E if hide else " hide"
         return E.join(
             (
-                H.iconx(N.cdown, cls=f"dc{showRep}", gid=gid),
-                H.iconx(N.cup, cls=f"dc{hideRep}", gid=gid),
+                H.iconx(N.cdown, href=E, cls=f"""dc{showRep}""", gid=gid),
+                H.iconx(N.cup, href=E, cls=f"""dc{hideRep}""", gid=gid),
             )
         )
 
@@ -699,26 +718,26 @@ class Overview:
     def expandAcontrols(group):
         return E.join(
             (
-                H.iconx(N.addown, cls=f"dca", gn=group),
-                H.iconx(N.adup, cls=f"dca", ggn=group),
+                H.iconx(N.addown, href=E, cls=f"dca", gn=group),
+                H.iconx(N.adup, href=E, cls=f"dca", gn=group),
             )
         )
 
     @staticmethod
-    def euro(amount, subHead):
-        return "??" if amount is None else f"{int(round(amount)):,}"
+    def euro(amount):
+        return E if amount is None else f"""{int(round(amount)):,}"""
 
     @staticmethod
     def valTri(tri):
-        return "" if tri is None else "+" if tri else "-"
+        return E if tri is None else PLUS if tri else MIN
 
     @staticmethod
     def subHeadClass(col, groupSet, subHead, allHead):
         theClass = (
             "allhead"
-            if allHead and col == "selected"
+            if allHead and col == N.selected
             else "subhead"
             if allHead or (subHead and (col in groupSet or col in SUBHEAD_X_COLS))
-            else ""
+            else E
         )
-        return f" {theClass}" if theClass else ""
+        return f" {theClass}" if theClass else E
