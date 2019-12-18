@@ -62,6 +62,7 @@ ASSESSED_STATUS = {
 }
 ASSESSED_LABELS = {stage: info[0] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_CLASS = {stage: info[1] for (stage, info) in ASSESSED_STATUS.items()}
+ASSESSED_CLASS1 = {info[0]: info[1] for info in ASSESSED_STATUS.values()}
 ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
 
@@ -516,7 +517,7 @@ class Overview:
         if groupOrder is None:
             groupOrder = cols
         contribId = G(contrib, N._id)
-        (assessedLabel, assessedClass) = self.wrapStatus(contrib)
+        (assessedLabel, assessedClass) = self.wrapStatus(contrib, subHead=subHead)
         if allHead:
             selected = G(contrib, N.selected) or E
             if asTsv:
@@ -681,13 +682,20 @@ class Overview:
         return value
 
     @staticmethod
-    def wrapStatus(contrib):
+    def wrapStatus(contrib, subHead=False):
+        if subHead:
+            print(contrib)
         aStage = G(contrib, N.astage)
+        assessed = G(contrib, N.assessed) or E
         score = G(contrib, N.score)
         scoreRep = E if score is None else f"""{score}% - """
-        baseLabel = G(ASSESSED_LABELS, aStage, default="??")
-        aClass = G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
-        aLabel = f"""{scoreRep}{baseLabel}"""
+        baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
+        aClass = (
+            G(ASSESSED_CLASS1, assessed, default=ASSESSED_ACCEPTED_CLASS)
+            if subHead
+            else G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
+        )
+        aLabel = baseLabel if subHead else f"""{scoreRep}{baseLabel}"""
         return (aLabel, aClass)
 
     @staticmethod

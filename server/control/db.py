@@ -489,7 +489,6 @@ class Db:
                 {M_PROJ: project},
             ],
         )
-        print(project)
         return records
 
     def makeCrit(self, mainTable, conditions):

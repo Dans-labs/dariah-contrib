@@ -179,45 +179,45 @@ td
 	font-size: 1rem;
 }
 
-.a-none
+.a-none,.subhead.a-none
 {
     color: #444444;
     background-color: #dddddd;
 }
-.a-started
+.a-started,.subhead.a-started
 {
     color: #ffffff;
     background-color: #ff8800;
 }
-.a-self
+.a-self,.subhead.a-self
 {
     color: #ffffff;
     background-color: #eebb00;
 }
-.a-inreview
+.a-inreview,.subhead.a-inreview
 {
     color: #444444;
     background-color: #eeee00;
 }
-.a-rejected
+.a-rejected,.subhead.a-rejected
 {
     color: #ffffff;
     background-color: #ff0000;
 }
-.a-accepted
+.a-accepted,.subhead.a-accepted
 {
     color: #000000;
     background-color: #88ff88;
 }
-.c-undecided
+.c-undecided,.subhead.c-undecided
 {
 }
-.c-rejected
+.c-rejected,.subhead.c-rejected
 {
     color: #000000;
     background-color: #ff8888;
 }
-.c-selected
+.c-selected,.subhead.c-selected
 {
     color: #000000;
     background-color: #00ffff;
