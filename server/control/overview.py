@@ -350,7 +350,7 @@ class Overview:
                 "Content-Disposition": f'attachment; filename="{fileName}"',
                 "Content-Encoding": "identity",
             }
-            tsv = f"""\ufeff{headerLine}\n{E.join(material)}""".encode("""utf_16_le""")
+            tsv = f"""\ufeff{headerLine}\n{NL.join(material)}""".encode("""utf_16_le""")
             data = make_response(tsv, headers)
         else:
             data = E.join(material)
@@ -492,7 +492,7 @@ class Overview:
 
         groupMaterial(groupedList, 0, {}, 1)
         return (
-            E.join(material) if asTsv else material,
+            NL.join(material) if asTsv else material,
             H.script(f"""var groupRel = {json.dumps(groupRel)}"""),
         )
 
