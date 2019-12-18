@@ -67,17 +67,17 @@ unknown:
 
 icons:
   add: ✚
-  addown: ⇟
-  adown: ▾
-  adup: ⇞
-  aup: ▴
+  addown: ⤵️
+  adown: ↓
+  adup: ⤴️
+  aup: ↑
   calc: ⌨︎
-  cdown: ↓
+  cdown: ⤵️
   chain: ⚭
   check: ✔︎
   clear: ✖︎
   cross: ✘
-  cup: ↑
+  cup: ⤴️
   delete: ✖︎
   detached: ⚮
   devel: ⚒︎
