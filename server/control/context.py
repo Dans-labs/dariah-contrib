@@ -8,7 +8,7 @@
 
 from config import Config as C, Names as N
 from control.typ.types import Types
-from control.utils import serverprint
+from control.utils import pick as G, serverprint
 from control.workflow.apply import WorkflowItem
 
 
@@ -16,6 +16,7 @@ CB = C.base
 CT = C.tables
 
 DEBUG = CB.debug
+DEBUG_CACHE = G(DEBUG, N.cache)
 
 VALUE_TABLES = set(CT.valueTables)
 
@@ -264,7 +265,8 @@ class Context:
         method: function
             The raw `control.db.Db` method.
         methodName: string
-            The name of the raw Db method. Only used to display if DEBUG is True.
+            The name of the raw Db method. Only used to display if cache
+            debugging is on.
         methodNameArgs: iterable
             The arguments to pass to the Db method.
         table: string
@@ -287,7 +289,7 @@ class Context:
         if not requireFresh:
             if table in cache:
                 if key in cache[table]:
-                    if DEBUG:
+                    if DEBUG_CACHE:
                         serverprint(f"""CACHE HIT {methodName}({key})""")
                     return cache[table][key]
 

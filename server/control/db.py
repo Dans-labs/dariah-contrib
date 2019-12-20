@@ -32,6 +32,7 @@ CW = C.web
 
 DATABASE = CB.database
 DEBUG = CB.debug
+DEBUG_MONGO = G(DEBUG, N.mongo)
 CREATOR = CB.creator
 
 M_SET = CM.set
@@ -187,7 +188,7 @@ class Db:
         """Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
-        It will spit out debug information if DEBUG is True.
+        It will spit out debug information if mongo debugging is True.
 
         Parameters
         ----------
@@ -214,7 +215,7 @@ class Db:
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = """!UNDEFINED""" if method is None else E
-        if DEBUG:
+        if DEBUG_MONGO:
             argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
             kwargRep = COMMA.join(f"{k}={v}" for (k, v) in kwargs.items())
             serverprint(

@@ -13,7 +13,10 @@ root:
   dariah_dev: dirk
   dariah_test: root
 
-debug: false
+debug:
+  cache: false
+  mongo: false
+  auth: true
 
 attributes:
   o: org
