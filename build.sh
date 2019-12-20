@@ -36,6 +36,9 @@ function givehelp {
     echo "gunilog a   : see the access log of the gunicorn service"
     echo "gunilog e   : see the error log of the gunicorn service"
     echo "gunilog E   : see the error journal of the gunicorn service"
+    echo "gunilog s   : see the shibboleth log"
+    echo "gunilog sw  : see the shibboleth warning log"
+    echo "gunilog st  : see the shibboleth transaction log"
     echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
@@ -327,15 +330,28 @@ function gunirun {
 }
 
 function gunishow {
-    logdir=/var/log/dariah-contrib
+    dlogdir=/var/log/dariah-contrib
+    slogdir=/var/log/shibboleth
     if [[ "$1" == "a" ]]; then
         logfile="access.log"
+        logdir="$dlogdir"
     elif [[ "$1" == "e" ]]; then
         logfile="error.log"
+        logdir="$dlogdir"
+    elif [[ "$1" == "s" ]]; then
+        logfile="shibd.log"
+        logdir="$slogdir"
+    elif [[ "$1" == "sw" ]]; then
+        logfile="shibd_warn.log"
+        logdir="$slogdir"
+    elif [[ "$1" == "st" ]]; then
+        logfile="transaction.log"
+        logdir="$slogdir"
     elif [[ "$1" == "E" ]]; then
         journalctl -xe
     else
         logfile="$1"
+        logdir="$dlogdir"
     fi
     less "$logdir/$logfile"
 }
