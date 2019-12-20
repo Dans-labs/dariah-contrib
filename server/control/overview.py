@@ -683,8 +683,6 @@ class Overview:
 
     @staticmethod
     def wrapStatus(contrib, subHead=False):
-        if subHead:
-            print(contrib)
         aStage = G(contrib, N.astage)
         assessed = G(contrib, N.assessed) or E
         score = G(contrib, N.score)
