@@ -1,6 +1,8 @@
 staticRoot: ../static/
 secretFile: /opt/web-apps/dariah_jwt.secret
 shibKey: Shib-Session-ID
+usesAjp: true
+
 creator: HaSProject
 
 database:

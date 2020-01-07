@@ -34,7 +34,7 @@ CW = C.web
 
 DEBUG = CB.debug
 DEBUG_AUTH = G(DEBUG, N.auth)
-
+USES_AJP = CB.usesAjp
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
@@ -254,6 +254,7 @@ class Auth:
         if contentLength is not None and contentLength > LIMIT_JSON:
             abort(400)
         env = request.environ
+        authEnv = {k[4:]: v for (k, v) in env.items()} if USES_AJP else env
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
@@ -270,10 +271,10 @@ class Auth:
         else:
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: start authentication with shibboleth")
-            authenticated = SHIB_KEY in env and env[SHIB_KEY]
+            authenticated = SHIB_KEY in authEnv and authEnv[SHIB_KEY]
             if authenticated:
-                eppn = utf8FromLatin1(env[N.eppn])
-                email = utf8FromLatin1(env[N.mail])
+                eppn = utf8FromLatin1(authEnv[N.eppn])
+                email = utf8FromLatin1(authEnv[N.mail])
                 isUser = self.getUser(eppn, email=email)
                 if DEBUG_AUTH:
                     serverprint(f"LOGIN: shibboleth seesion found:")
@@ -294,9 +295,9 @@ class Auth:
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
                 attributes = {
-                    toolKey: utf8FromLatin1(G(env, envKey, default=E))
+                    toolKey: utf8FromLatin1(G(authEnv, envKey, default=E))
                     for (envKey, toolKey) in ATTRIBUTES.items()
-                    if envKey in env
+                    if envKey in authEnv
                 }
                 dirty = False
                 for (att, val) in attributes.items():
@@ -316,7 +317,7 @@ class Auth:
 
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: No shibboleth session found:")
-                for (k, v) in env.items():
+                for (k, v) in authEnv.items():
                     serverprint(f"LOGIN: ENV[{k}] = {v}")
                 serverprint(f"LOGIN: authentication failed")
 
