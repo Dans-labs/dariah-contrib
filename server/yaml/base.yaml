@@ -1,7 +1,9 @@
 staticRoot: ../static/
 secretFile: /opt/web-apps/dariah_jwt.secret
 shibKey: Shib-Session-ID
-usesAjp: true
+
+# the next parameter may have values ajp, http, null
+transportAttributes: http
 
 creator: HaSProject
 
@@ -38,3 +40,4 @@ objects:
 names:
   - DARIAH
   - mail
+  - ajp

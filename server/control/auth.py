@@ -34,7 +34,7 @@ CW = C.web
 
 DEBUG = CB.debug
 DEBUG_AUTH = G(DEBUG, N.auth)
-USES_AJP = CB.usesAjp
+TRANSPORT_ATTRIBUTES = CB.transportAttributes
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
@@ -253,8 +253,21 @@ class Auth:
         contentLength = request.content_length
         if contentLength is not None and contentLength > LIMIT_JSON:
             abort(400)
-        env = request.environ
-        authEnv = {k[4:]: v for (k, v) in env.items()} if USES_AJP else env
+        authEnv = (
+            {
+                k[4:]: v
+                for (k, v) in request.environ.items()
+                if k.startswith(f"""AJP_""")
+            }
+            if TRANSPORT_ATTRIBUTES == N.ajp
+            else {
+                k[5:]: v
+                for (k, v) in request.headers.items()
+                if k.startswith(f"""HTTP_""")
+            }
+            if TRANSPORT_ATTRIBUTES == N.http
+            else request.environ
+        )
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
