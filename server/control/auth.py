@@ -261,6 +261,7 @@ class Auth:
         isDevel = self.isDevel
         authUser = self.authUser
         unauthUser = self.unauthUser
+        headerKeys = list(ATTRIBUTES.keys()) + [SHIB_KEY, N.mail]
 
         contentLength = request.content_length
         if contentLength is not None and contentLength > LIMIT_JSON:
@@ -273,13 +274,13 @@ class Auth:
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
-                k[5:]: v
-                for (k, v) in request.headers.items()
-                if k.startswith(f"""HTTP_""")
+                k: request.headers[f"HTTP_{authKey(k)}"]
+                for k in headerKeys
             }
             if TRANSPORT_ATTRIBUTES == N.http
             else request.environ
         )
+        serverprint(request.headers)
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
@@ -302,7 +303,7 @@ class Auth:
                 email = authGet(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email)
                 if DEBUG_AUTH:
-                    serverprint(f"LOGIN: shibboleth seesion found:")
+                    serverprint(f"LOGIN: shibboleth session found:")
                     serverprint(f"""LOGIN: eppn   = "{eppn}" """)
                     serverprint(f"""LOGIN: email  = "{email}" """)
                     serverprint(f"""LOGIN: isUser = "{isUser}" """)
