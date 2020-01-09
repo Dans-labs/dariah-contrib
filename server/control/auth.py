@@ -265,7 +265,7 @@ class Auth:
         unauthUser = self.unauthUser
         headerKeys = [
             authKey(k)
-            for k in chain.from_iterable(ATTRIBUTES.keys(), [SHIB_KEY, N.mail])
+            for k in chain.from_iterable((ATTRIBUTES.keys(), [SHIB_KEY, N.mail]))
         ]
 
         contentLength = request.content_length
