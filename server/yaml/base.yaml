@@ -2,7 +2,7 @@ staticRoot: ../static/
 secretFile: /opt/web-apps/dariah_jwt.secret
 shibKey: Shib-Session-ID
 
-# the next parameter may have values ajp, http, null
+# the next parameter may have values ajp, http, default
 transportAttributes: http
 
 creator: HaSProject
@@ -29,6 +29,7 @@ attributes:
   sn: lastName
   isMemberOf: membership
   affiliation: rel
+  # schacCountryOfCitizenship: countryIdp
 
 objects:
   - context

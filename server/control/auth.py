@@ -46,6 +46,18 @@ Qu = H.icon(CW.unknown[N.user], asChar=True)
 Qg = H.icon(CW.unknown[N.group], asChar=True)
 
 
+def authKey(akey):
+    return akey.replace('-', '_').upper() if TRANSPORT_ATTRIBUTES == N.http else akey
+
+
+def authValue(avalue):
+    return utf8FromLatin1(avalue)
+
+
+def authGet(authEnv, akey):
+    return authValue(G(authEnv, authKey(akey), default=E))
+
+
 class Auth:
     """Deal with user Authentication.
 
@@ -284,10 +296,10 @@ class Auth:
         else:
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: start authentication with shibboleth")
-            authenticated = SHIB_KEY in authEnv and authEnv[SHIB_KEY]
+            authenticated = authGet(authEnv, SHIB_KEY)
             if authenticated:
-                eppn = utf8FromLatin1(authEnv[N.eppn])
-                email = utf8FromLatin1(authEnv[N.mail])
+                eppn = authGet(authEnv, N.eppn)
+                email = authGet(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email)
                 if DEBUG_AUTH:
                     serverprint(f"LOGIN: shibboleth seesion found:")

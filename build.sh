@@ -42,6 +42,7 @@ function givehelp {
     echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
+    echo "restart     : restart the webservice"
     echo "update      : fetch new code and deploy it on the server"
     echo "activate36  : activate python36 in a spawned shell"
     echo ""
@@ -356,6 +357,11 @@ function gunishow {
     less "$logdir/$logfile"
 }
 
+function restartprocess {
+    systemctl stop dariah-contrib.service
+    systemctl start dariah-contrib.service
+}
+
 function serverun {
     cd $root/server
     mongostart
@@ -531,6 +537,10 @@ function install {
     guniasservice
 }
 
+function restart {
+    restartprocess
+}
+
 function serve {
     echo "serve" $@
     serverun "" "$@"
@@ -579,7 +589,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    activate36|gunilog|gunistatus|gunistop|install|update)
+    activate36|gunilog|gunistatus|gunistop|install|restart|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
