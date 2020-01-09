@@ -5,6 +5,8 @@
 *   Authorization
 """
 
+from itertools import chain
+
 from flask import request, session, abort
 from control.utils import (
     pick as G,
@@ -47,7 +49,7 @@ Qg = H.icon(CW.unknown[N.group], asChar=True)
 
 
 def authKey(akey):
-    return akey.replace('-', '_').upper() if TRANSPORT_ATTRIBUTES == N.http else akey
+    return akey.replace("-", "_").upper() if TRANSPORT_ATTRIBUTES == N.http else akey
 
 
 def authValue(avalue):
@@ -261,7 +263,10 @@ class Auth:
         isDevel = self.isDevel
         authUser = self.authUser
         unauthUser = self.unauthUser
-        headerKeys = list(ATTRIBUTES.keys()) + [SHIB_KEY, N.mail]
+        headerKeys = [
+            authKey(k)
+            for k in chain.from_iterable(ATTRIBUTES.keys(), [SHIB_KEY, N.mail])
+        ]
 
         contentLength = request.content_length
         if contentLength is not None and contentLength > LIMIT_JSON:
@@ -274,12 +279,17 @@ class Auth:
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
-                k: request.headers[authKey(k)]
+                k: request.headers[k]
                 for k in headerKeys
+                if k in request.headers
             }
             if TRANSPORT_ATTRIBUTES == N.http
             else request.environ
         )
+        if DEBUG_AUTH:
+            serverprint(f"LOGIN: auth environment/headers")
+            for (k, v) in authEnv.items():
+                serverprint(f"LOGIN: {k} = {v}")
         serverprint(request.headers)
         self.clearUser()
         if isDevel:
@@ -343,8 +353,6 @@ class Auth:
 
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: No shibboleth session found:")
-                for (k, v) in authEnv.items():
-                    serverprint(f"LOGIN: ENV[{k}] = {v}")
                 serverprint(f"LOGIN: authentication failed")
 
             user.update(unauthUser)
