@@ -274,7 +274,7 @@ class Auth:
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
-                k: request.headers[f"HTTP_{authKey(k)}"]
+                k: request.headers[authKey(k)]
                 for k in headerKeys
             }
             if TRANSPORT_ATTRIBUTES == N.http
