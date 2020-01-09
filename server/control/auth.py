@@ -5,8 +5,6 @@
 *   Authorization
 """
 
-from itertools import chain
-
 from flask import request, session, abort
 from control.utils import (
     pick as G,
@@ -263,10 +261,6 @@ class Auth:
         isDevel = self.isDevel
         authUser = self.authUser
         unauthUser = self.unauthUser
-        headerKeys = [
-            authKey(k)
-            for k in chain.from_iterable((ATTRIBUTES.keys(), [SHIB_KEY, N.mail]))
-        ]
 
         contentLength = request.content_length
         if contentLength is not None and contentLength > LIMIT_JSON:
@@ -280,8 +274,7 @@ class Auth:
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
                 k: request.headers[k]
-                for k in headerKeys
-                if k in request.headers
+                for k in request.headers
             }
             if TRANSPORT_ATTRIBUTES == N.http
             else request.environ
