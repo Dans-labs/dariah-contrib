@@ -46,10 +46,6 @@ Qu = H.icon(CW.unknown[N.user], asChar=True)
 Qg = H.icon(CW.unknown[N.group], asChar=True)
 
 
-def authGet(authEnv, akey):
-    return utf8FromLatin1(G(authEnv, akey, default=E))
-
-
 class Auth:
     """Deal with user Authentication.
 
@@ -259,7 +255,7 @@ class Auth:
             abort(400)
         authEnv = (
             {
-                k[4:]: v
+                k[4:]: utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
                 if k.startswith(f"""AJP_""")
             }
@@ -269,13 +265,15 @@ class Auth:
                 for k in request.headers
             }
             if TRANSPORT_ATTRIBUTES == N.http
-            else request.environ
+            else {
+                k: utf8FromLatin1(v)
+                for (k, v) in request.environ.items()
+            }
         )
         if DEBUG_AUTH:
             serverprint(f"LOGIN: auth environment/headers")
             for (k, v) in authEnv.items():
-                serverprint(f"LOGIN: {k} = {v}")
-        serverprint(request.headers)
+                serverprint(f"LOGIN: ATTRIBUTE {k} = {v}")
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
@@ -292,10 +290,10 @@ class Auth:
         else:
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: start authentication with shibboleth")
-            authenticated = authGet(authEnv, SHIB_KEY)
+            authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
-                eppn = authGet(authEnv, N.eppn)
-                email = authGet(authEnv, N.mail)
+                eppn = G(authEnv, N.eppn)
+                email = G(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email)
                 if DEBUG_AUTH:
                     serverprint(f"LOGIN: shibboleth session found:")
@@ -316,7 +314,7 @@ class Auth:
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
                 attributes = {
-                    toolKey: utf8FromLatin1(G(authEnv, envKey, default=E))
+                    toolKey: G(authEnv, envKey, default=E)
                     for (envKey, toolKey) in ATTRIBUTES.items()
                     if envKey in authEnv
                 }

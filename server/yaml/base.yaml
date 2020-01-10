@@ -1,6 +1,6 @@
 staticRoot: ../static/
 secretFile: /opt/web-apps/dariah_jwt.secret
-shibKey: Shib-Session-ID
+shibKey: shib-session-id
 
 # the next parameter may have values ajp, http, default
 transportAttributes: http
@@ -25,9 +25,9 @@ debug:
 attributes:
   o: org
   cn: name
-  givenName: firstName
+  givenname: firstName
   sn: lastName
-  isMemberOf: membership
+  ismemberof: membership
   affiliation: rel
   # schacCountryOfCitizenship: countryIdp
 
