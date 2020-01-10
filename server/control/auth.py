@@ -255,18 +255,18 @@ class Auth:
             abort(400)
         authEnv = (
             {
-                k[4:]: utf8FromLatin1(v)
+                k[4:].lower(): utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
                 if k.startswith(f"""AJP_""")
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
-                k: request.headers.get(k)
-                for k in request.headers
+                k.lower(): v
+                for (k, v) in request.headers
             }
             if TRANSPORT_ATTRIBUTES == N.http
             else {
-                k: utf8FromLatin1(v)
+                k.lower(): utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
             }
         )
