@@ -78,6 +78,18 @@ because it has not been submitted.</dd>
 <dd><strong>owner</strong> tries to submit the assessment as revision, unsuccessfully.</dd>
 <dt><a title="test_40_assess30.test_submitAssessment2" href="#test_40_assess30.test_submitAssessment2"><code>test_submitAssessment2()</code></a></dt>
 <dd><strong>owner</strong> tries to submit the assessment, successfully.</dd>
+</dl>
+<p><a title="test_40_assess30.test_revokeDelay" href="#test_40_assess30.test_revokeDelay"><code>test_revokeDelay()</code></a>
+There is a delay time during which the submission can be revoked.
+We'll test what happens when the delay time is past.
+We do this by updating the <code>dateSubmitted</code> field under water, directly
+in Mongo.
+We shift the time back 0.5 hours
+<strong>owner</strong> withdraws and succeeds and then submits again.
+We shift the time back 1.5 hours.
+<strong>owner</strong> withdraws and fails.
+We shift the time forward 1.5 hours again.</p>
+<dl>
 <dt><a title="test_40_assess30.test_assignReviewers2" href="#test_40_assess30.test_assignReviewers2"><code>test_assignReviewers2()</code></a></dt>
 <dd>All users try to assign reviewers to this assessment.
 The office user succeeds because of a workflow condition:
@@ -190,6 +202,17 @@ Filling out an assessment.
 `test_submitAssessment2`
 :   **owner** tries to submit the assessment, successfully.
 
+`test_revokeDelay`
+    There is a delay time during which the submission can be revoked.
+    We&#39;ll test what happens when the delay time is past.
+    We do this by updating the `dateSubmitted` field under water, directly
+    in Mongo.
+    We shift the time back 0.5 hours
+    **owner** withdraws and succeeds and then submits again.
+    We shift the time back 1.5 hours.
+    **owner** withdraws and fails.
+    We shift the time forward 1.5 hours again.
+
 `test_assignReviewers2`
 :   All users try to assign reviewers to this assessment.
     The office user succeeds because of a workflow condition:
@@ -244,6 +267,7 @@ from example import (
     COMPLETE,
     CRITERIA_ENTRY,
     CRITERIA_ENTRIES_N,
+    DATE_SUBMITTED,
     EDITOR,
     ELLIPS_DIV,
     EVIDENCE,
@@ -258,6 +282,7 @@ from example import (
     REVIEWER_F,
     SCORE,
     SUBMIT_ASSESSMENT,
+    SUBMIT_REVISED,
     TITLE,
     TYPE1,
     USER,
@@ -267,6 +292,7 @@ from helpers import findDetails, forall, getItem, getRelatedValues
 from starters import start
 from subtest import (
     assertModifyField,
+    assertShiftDate,
     assertStage,
     assertStatus,
     inspectTitleAll,
@@ -279,13 +305,15 @@ startInfo = {}
 
 @pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        assessment=True,
-        countries=True,
-    ))
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            assessment=True,
+            countries=True,
+        )
+    )
 
 
 def test_criteriaEntries(clients):
@@ -460,7 +488,7 @@ def test_submitAssessmentRevised(clientOwner):
     recordId = startInfo[&#34;recordId&#34;]
 
     aId = G(recordId, ASSESS)
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
+    url = f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;
     assertStatus(clientOwner, url, False)
 
 
@@ -470,6 +498,24 @@ def test_submitAssessment2(clientOwner):
     aId = G(recordId, ASSESS)
     url = f&#34;/api/task/{SUBMIT_ASSESSMENT}/{aId}&#34;
     assertStatus(clientOwner, url, True)
+
+
+def test_revokeDelay(clientOwner, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -0.5)
+    for url in (
+        f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;,
+        f&#34;/api/task/{RESUBMIT_ASSESSMENT}/{aId}&#34;,
+    ):
+        assertStatus(clientOwner, url, True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -1.5)
+    for url in (
+        f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;,
+    ):
+        assertStatus(clientOwner, url, False)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, 1.5)
 
 
 @pytest.mark.parametrize(
@@ -552,7 +598,7 @@ def test_submitAssessmentRevised2(clientOwner):
     recordId = startInfo[&#34;recordId&#34;]
 
     aId = G(recordId, ASSESS)
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
+    url = f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;
     assertStatus(clientOwner, url, False)
 
 
@@ -926,6 +972,33 @@ def test_assignReviewers4(clients, field, user):
     assertStatus(clientOwner, url, True)</code></pre>
 </details>
 </dd>
+<dt id="test_40_assess30.test_revokeDelay"><code class="name flex">
+<span>def <span class="ident">test_revokeDelay</span></span>(<span>clientOwner, clientSystem)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_revokeDelay(clientOwner, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -0.5)
+    for url in (
+        f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;,
+        f&#34;/api/task/{RESUBMIT_ASSESSMENT}/{aId}&#34;,
+    ):
+        assertStatus(clientOwner, url, True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -1.5)
+    for url in (
+        f&#34;/api/task/{WITHDRAW_ASSESSMENT}/{aId}&#34;,
+    ):
+        assertStatus(clientOwner, url, False)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, 1.5)</code></pre>
+</details>
+</dd>
 <dt id="test_40_assess30.test_sidebar"><code class="name flex">
 <span>def <span class="ident">test_sidebar</span></span>(<span>clients)</span>
 </code></dt>
@@ -982,13 +1055,15 @@ def test_assignReviewers4(clients, field, user):
 </summary>
 <pre><code class="python">@pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        users=True,
-        assessment=True,
-        countries=True,
-    ))</code></pre>
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            users=True,
+            assessment=True,
+            countries=True,
+        )
+    )</code></pre>
 </details>
 </dd>
 <dt id="test_40_assess30.test_submitAssessment"><code class="name flex">
@@ -1038,7 +1113,7 @@ def test_start(clientOffice, clientOwner):
     recordId = startInfo[&#34;recordId&#34;]
 
     aId = G(recordId, ASSESS)
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
+    url = f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;
     assertStatus(clientOwner, url, False)</code></pre>
 </details>
 </dd>
@@ -1055,7 +1130,7 @@ def test_start(clientOffice, clientOwner):
     recordId = startInfo[&#34;recordId&#34;]
 
     aId = G(recordId, ASSESS)
-    url = f&#34;/api/task/submitRevised/{aId}&#34;
+    url = f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;
     assertStatus(clientOwner, url, False)</code></pre>
 </details>
 </dd>
@@ -1123,6 +1198,7 @@ def test_start(clientOffice, clientOwner):
 <li><code><a title="test_40_assess30.test_inspectTitleAll3" href="#test_40_assess30.test_inspectTitleAll3">test_inspectTitleAll3</a></code></li>
 <li><code><a title="test_40_assess30.test_resubmitAssessment" href="#test_40_assess30.test_resubmitAssessment">test_resubmitAssessment</a></code></li>
 <li><code><a title="test_40_assess30.test_resubmitAssessment2" href="#test_40_assess30.test_resubmitAssessment2">test_resubmitAssessment2</a></code></li>
+<li><code><a title="test_40_assess30.test_revokeDelay" href="#test_40_assess30.test_revokeDelay">test_revokeDelay</a></code></li>
 <li><code><a title="test_40_assess30.test_sidebar" href="#test_40_assess30.test_sidebar">test_sidebar</a></code></li>
 <li><code><a title="test_40_assess30.test_sidebar2" href="#test_40_assess30.test_sidebar2">test_sidebar2</a></code></li>
 <li><code><a title="test_40_assess30.test_start" href="#test_40_assess30.test_start">test_start</a></code></li>

@@ -64,8 +64,9 @@ from control.perm import (
 CB = C.base
 CW = C.web
 
-DEBUG_LOGIN = True
-
+DEBUG = CB.debug
+DEBUG_AUTH = G(DEBUG, N.auth)
+TRANSPORT_ATTRIBUTES = CB.transportAttributes
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
@@ -284,7 +285,27 @@ class Auth:
         contentLength = request.content_length
         if contentLength is not None and contentLength &gt; LIMIT_JSON:
             abort(400)
-        env = request.environ
+        authEnv = (
+            {
+                k[4:].lower(): utf8FromLatin1(v)
+                for (k, v) in request.environ.items()
+                if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+            }
+            if TRANSPORT_ATTRIBUTES == N.ajp
+            else {
+                k.lower(): v
+                for (k, v) in request.headers
+            }
+            if TRANSPORT_ATTRIBUTES == N.http
+            else {
+                k.lower(): utf8FromLatin1(v)
+                for (k, v) in request.environ.items()
+            }
+        )
+        if DEBUG_AUTH:
+            serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+            for (k, v) in authEnv.items():
+                serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
@@ -299,22 +320,22 @@ class Auth:
                 return False
             return self.getUser(eppn)
         else:
-            if DEBUG_LOGIN:
+            if DEBUG_AUTH:
                 serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
-            authenticated = SHIB_KEY in env and env[SHIB_KEY]
+            authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
-                eppn = utf8FromLatin1(env[N.eppn])
-                email = utf8FromLatin1(env[N.mail])
+                eppn = G(authEnv, N.eppn)
+                email = G(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email)
-                if DEBUG_LOGIN:
-                    serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
                 if not isUser:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
-                    if DEBUG_LOGIN:
+                    if DEBUG_AUTH:
                         serverprint(f&#34;LOGIN: authentication failed&#34;)
                     return False
 
@@ -325,9 +346,9 @@ class Auth:
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
                 attributes = {
-                    toolKey: utf8FromLatin1(G(env, envKey, default=E))
+                    toolKey: G(authEnv, envKey, default=E)
                     for (envKey, toolKey) in ATTRIBUTES.items()
-                    if envKey in env
+                    if envKey in authEnv
                 }
                 dirty = False
                 for (att, val) in attributes.items():
@@ -341,15 +362,12 @@ class Auth:
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
-                if DEBUG_LOGIN:
+                if DEBUG_AUTH:
                     serverprint(f&#34;LOGIN: authentication successful&#34;)
                 return True
 
-            if DEBUG_LOGIN:
+            if DEBUG_AUTH:
                 serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-                serverprint(f&#34;ENV = {env}&#34;)
-                for (k, v) in env.items():
-                    serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
                 serverprint(f&#34;LOGIN: authentication failed&#34;)
 
             user.update(unauthUser)
@@ -912,7 +930,27 @@ attributes.</p>
         contentLength = request.content_length
         if contentLength is not None and contentLength &gt; LIMIT_JSON:
             abort(400)
-        env = request.environ
+        authEnv = (
+            {
+                k[4:].lower(): utf8FromLatin1(v)
+                for (k, v) in request.environ.items()
+                if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+            }
+            if TRANSPORT_ATTRIBUTES == N.ajp
+            else {
+                k.lower(): v
+                for (k, v) in request.headers
+            }
+            if TRANSPORT_ATTRIBUTES == N.http
+            else {
+                k.lower(): utf8FromLatin1(v)
+                for (k, v) in request.environ.items()
+            }
+        )
+        if DEBUG_AUTH:
+            serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+            for (k, v) in authEnv.items():
+                serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
         self.clearUser()
         if isDevel:
             eppn = G(request.args, N.eppn)
@@ -927,22 +965,22 @@ attributes.</p>
                 return False
             return self.getUser(eppn)
         else:
-            if DEBUG_LOGIN:
+            if DEBUG_AUTH:
                 serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
-            authenticated = SHIB_KEY in env and env[SHIB_KEY]
+            authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
-                eppn = utf8FromLatin1(env[N.eppn])
-                email = utf8FromLatin1(env[N.mail])
+                eppn = G(authEnv, N.eppn)
+                email = G(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email)
-                if DEBUG_LOGIN:
-                    serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
                 if not isUser:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
-                    if DEBUG_LOGIN:
+                    if DEBUG_AUTH:
                         serverprint(f&#34;LOGIN: authentication failed&#34;)
                     return False
 
@@ -953,9 +991,9 @@ attributes.</p>
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
                 attributes = {
-                    toolKey: utf8FromLatin1(G(env, envKey, default=E))
+                    toolKey: G(authEnv, envKey, default=E)
                     for (envKey, toolKey) in ATTRIBUTES.items()
-                    if envKey in env
+                    if envKey in authEnv
                 }
                 dirty = False
                 for (att, val) in attributes.items():
@@ -969,15 +1007,12 @@ attributes.</p>
                 else:
                     _id = db.insertUser(user)
                     user[N._id] = _id
-                if DEBUG_LOGIN:
+                if DEBUG_AUTH:
                     serverprint(f&#34;LOGIN: authentication successful&#34;)
                 return True
 
-            if DEBUG_LOGIN:
+            if DEBUG_AUTH:
                 serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-                serverprint(f&#34;ENV = {env}&#34;)
-                for (k, v) in env.items():
-                    serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
                 serverprint(f&#34;LOGIN: authentication failed&#34;)
 
             user.update(unauthUser)
@@ -1489,7 +1524,27 @@ to a newly logged-in user.</p>
     contentLength = request.content_length
     if contentLength is not None and contentLength &gt; LIMIT_JSON:
         abort(400)
-    env = request.environ
+    authEnv = (
+        {
+            k[4:].lower(): utf8FromLatin1(v)
+            for (k, v) in request.environ.items()
+            if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+        }
+        if TRANSPORT_ATTRIBUTES == N.ajp
+        else {
+            k.lower(): v
+            for (k, v) in request.headers
+        }
+        if TRANSPORT_ATTRIBUTES == N.http
+        else {
+            k.lower(): utf8FromLatin1(v)
+            for (k, v) in request.environ.items()
+        }
+    )
+    if DEBUG_AUTH:
+        serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+        for (k, v) in authEnv.items():
+            serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
     self.clearUser()
     if isDevel:
         eppn = G(request.args, N.eppn)
@@ -1504,22 +1559,22 @@ to a newly logged-in user.</p>
             return False
         return self.getUser(eppn)
     else:
-        if DEBUG_LOGIN:
+        if DEBUG_AUTH:
             serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
-        authenticated = SHIB_KEY in env and env[SHIB_KEY]
+        authenticated = G(authEnv, SHIB_KEY)
         if authenticated:
-            eppn = utf8FromLatin1(env[N.eppn])
-            email = utf8FromLatin1(env[N.mail])
+            eppn = G(authEnv, N.eppn)
+            email = G(authEnv, N.mail)
             isUser = self.getUser(eppn, email=email)
-            if DEBUG_LOGIN:
-                serverprint(f&#34;LOGIN: shibboleth seesion found:&#34;)
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
             if not isUser:
                 # the user is refused because the database says (s)he may not login
                 self.clearUser()
-                if DEBUG_LOGIN:
+                if DEBUG_AUTH:
                     serverprint(f&#34;LOGIN: authentication failed&#34;)
                 return False
 
@@ -1530,9 +1585,9 @@ to a newly logged-in user.</p>
             # process the attributes provided by the identity server
             # they may have been changed after the last login
             attributes = {
-                toolKey: utf8FromLatin1(G(env, envKey, default=E))
+                toolKey: G(authEnv, envKey, default=E)
                 for (envKey, toolKey) in ATTRIBUTES.items()
-                if envKey in env
+                if envKey in authEnv
             }
             dirty = False
             for (att, val) in attributes.items():
@@ -1546,15 +1601,12 @@ to a newly logged-in user.</p>
             else:
                 _id = db.insertUser(user)
                 user[N._id] = _id
-            if DEBUG_LOGIN:
+            if DEBUG_AUTH:
                 serverprint(f&#34;LOGIN: authentication successful&#34;)
             return True
 
-        if DEBUG_LOGIN:
+        if DEBUG_AUTH:
             serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-            serverprint(f&#34;ENV = {env}&#34;)
-            for (k, v) in env.items():
-                serverprint(f&#34;LOGIN: ENV[{k}] = {v}&#34;)
             serverprint(f&#34;LOGIN: authentication failed&#34;)
 
         user.update(unauthUser)

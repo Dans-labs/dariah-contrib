@@ -41,7 +41,7 @@
 
 from config import Config as C, Names as N
 from control.typ.types import Types
-from control.utils import serverprint
+from control.utils import pick as G, serverprint
 from control.workflow.apply import WorkflowItem
 
 
@@ -49,6 +49,7 @@ CB = C.base
 CT = C.tables
 
 DEBUG = CB.debug
+DEBUG_CACHE = G(DEBUG, N.cache)
 
 VALUE_TABLES = set(CT.valueTables)
 
@@ -297,7 +298,8 @@ class Context:
         method: function
             The raw `control.db.Db` method.
         methodName: string
-            The name of the raw Db method. Only used to display if DEBUG is True.
+            The name of the raw Db method. Only used to display if cache
+            debugging is on.
         methodNameArgs: iterable
             The arguments to pass to the Db method.
         table: string
@@ -320,7 +322,7 @@ class Context:
         if not requireFresh:
             if table in cache:
                 if key in cache[table]:
-                    if DEBUG:
+                    if DEBUG_CACHE:
                         serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
                     return cache[table][key]
 
@@ -704,7 +706,8 @@ to which it adds caching.</p>
         method: function
             The raw `control.db.Db` method.
         methodName: string
-            The name of the raw Db method. Only used to display if DEBUG is True.
+            The name of the raw Db method. Only used to display if cache
+            debugging is on.
         methodNameArgs: iterable
             The arguments to pass to the Db method.
         table: string
@@ -727,7 +730,7 @@ to which it adds caching.</p>
         if not requireFresh:
             if table in cache:
                 if key in cache[table]:
-                    if DEBUG:
+                    if DEBUG_CACHE:
                         serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
                     return cache[table][key]
 
@@ -817,7 +820,8 @@ info from the database and store user info there.</p></section>
 <dt><strong><code>method</code></strong> :&ensp;<code>function</code></dt>
 <dd>The raw <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> method.</dd>
 <dt><strong><code>methodName</code></strong> :&ensp;<code>string</code></dt>
-<dd>The name of the raw Db method. Only used to display if DEBUG is True.</dd>
+<dd>The name of the raw Db method. Only used to display if cache
+debugging is on.</dd>
 <dt><strong><code>methodNameArgs</code></strong> :&ensp;<code>iterable</code></dt>
 <dd>The arguments to pass to the Db method.</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -847,7 +851,8 @@ fetched value in the cache.</dd>
     method: function
         The raw `control.db.Db` method.
     methodName: string
-        The name of the raw Db method. Only used to display if DEBUG is True.
+        The name of the raw Db method. Only used to display if cache
+        debugging is on.
     methodNameArgs: iterable
         The arguments to pass to the Db method.
     table: string
@@ -870,7 +875,7 @@ fetched value in the cache.</dd>
     if not requireFresh:
         if table in cache:
             if key in cache[table]:
-                if DEBUG:
+                if DEBUG_CACHE:
                     serverprint(f&#34;&#34;&#34;CACHE HIT {methodName}({key})&#34;&#34;&#34;)
                 return cache[table][key]
 

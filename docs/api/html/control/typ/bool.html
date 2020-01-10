@@ -63,7 +63,7 @@ class Bool(TypeBase):
         noneValue = False if len(values) == 2 else None
 
         valueBare = G(values, val, default=G(values, noneValue))
-        return H.icon(valueBare, cls=&#34;medium&#34;) if markup else valueBare
+        return H.icon(valueBare, cls=&#34;medium&#34;, asChar=not markup)
 
     def toEdit(self, val):
         return val
@@ -148,7 +148,7 @@ class Bool3(Bool):
         noneValue = False if len(values) == 2 else None
 
         valueBare = G(values, val, default=G(values, noneValue))
-        return H.icon(valueBare, cls=&#34;medium&#34;) if markup else valueBare
+        return H.icon(valueBare, cls=&#34;medium&#34;, asChar=not markup)
 
     def toEdit(self, val):
         return val

@@ -512,7 +512,7 @@ class WorkflowItem:
         perm = recordObj.perm
         uid = self.uid
 
-        (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+        (stage,) = self.info(table, N.stage, kind=kind)
 
         if table in {N.assessment, N.criteriaEntry}:
             (rStage,) = self.info(N.review, N.stage, kind=N.final)
@@ -700,8 +700,6 @@ class WorkflowItem:
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            if value == taskValue:
-                return False
 
         (contribId,) = self.info(N.contrib, N._id)
 
@@ -730,6 +728,9 @@ class WorkflowItem:
             if task == N.startAssessment:
                 return isOwn and mayAdd and not frozen and not done
 
+            if value == taskValue:
+                return False
+
             if not isCoord:
                 return False
 
@@ -746,12 +747,15 @@ class WorkflowItem:
 
             return False
 
-        if (frozen or done) and not remaining:
-            return False
-
         if table == N.assessment:
+            if (frozen or done) and not remaining:
+                return False
+
             if task == N.startReview:
                 return G(mayAdd, myKind)
+
+            if value == taskValue:
+                return False
 
             if uid not in creators:
                 return False
@@ -779,6 +783,9 @@ class WorkflowItem:
             return False
 
         if table == N.review:
+            if (frozen or done) and not remaining:
+                return False
+
             taskKind = G(taskInfo, N.kind)
             if not kind or kind != taskKind or kind != myKind:
                 return False
@@ -787,10 +794,24 @@ class WorkflowItem:
             if not answer:
                 return False
 
+            (aStage, aStageDate) = self.info(N.assessment, N.stage, N.stageDate)
             (finalStage,) = self.info(table, N.stage, kind=N.final)
-            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            (expertStage, expertStageDate) = self.info(
+                table, N.stage, N.stageDate, kind=N.expert
+            )
             xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
             xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+            revision = finalStage == N.reviewRevise
+            zFinalStage = finalStage and not revision
+            submitted = aStage == N.submitted
+            submittedRevised = aStage == N.submittedRevised
+            mayDecideExpert = (
+                submitted and not finalStage or submittedRevised and revision
+            )
+
+            if value == taskValue:
+                if not revision:
+                    return False
 
             if task in {
                 N.expertReviewRevise,
@@ -798,7 +819,9 @@ class WorkflowItem:
                 N.expertReviewReject,
                 N.expertReviewRevoke,
             } - {xExpertStage}:
-                return kind == N.expert and not finalStage and answer
+                return (
+                    kind == N.expert and not zFinalStage and mayDecideExpert and answer
+                )
 
             if task in {
                 N.finalReviewRevise,
@@ -807,7 +830,17 @@ class WorkflowItem:
                 N.finalReviewRevoke,
             } - {xFinalStage}:
                 return (
-                    kind == N.final and not not (expertStage or finalStage) and answer
+                    kind == N.final
+                    and not not expertStage
+                    and (not aStageDate or expertStageDate &gt; aStageDate)
+                    and (
+                        (
+                            (not finalStage and submitted)
+                            or (revision and submittedRevised)
+                        )
+                        or remaining
+                    )
+                    and answer
                 )
 
             return False
@@ -948,7 +981,7 @@ class WorkflowItem:
 
         urlExtra = E
 
-        done = False
+        executed = False
         if self.permission(task, kind=kind):
             operator = G(taskInfo, N.operator)
             if operator == N.add:
@@ -957,20 +990,20 @@ class WorkflowItem:
                 deid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
                 if deid:
                     urlExtra = f&#34;&#34;&#34;/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
-                    done = True
+                    executed = True
             elif operator == N.set:
                 field = G(taskInfo, N.field)
                 value = G(taskInfo, N.value)
                 if recordObj.field(field, mayEdit=True).save(value):
-                    done = True
-            if done:
-                flash(f&#34;&#34;&#34;&lt;{acro}&gt; done&#34;&#34;&#34;, &#34;message&#34;)
+                    executed = True
+            if executed:
+                flash(f&#34;&#34;&#34;&lt;{acro}&gt; executed&#34;&#34;&#34;, &#34;message&#34;)
             else:
                 flash(f&#34;&#34;&#34;&lt;{acro}&gt; failed&#34;&#34;&#34;, &#34;error&#34;)
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if executed else None
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -1558,7 +1591,7 @@ details of the current user can be read off.</dd>
         perm = recordObj.perm
         uid = self.uid
 
-        (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+        (stage,) = self.info(table, N.stage, kind=kind)
 
         if table in {N.assessment, N.criteriaEntry}:
             (rStage,) = self.info(N.review, N.stage, kind=N.final)
@@ -1746,8 +1779,6 @@ details of the current user can be read off.</dd>
         if operator == N.set:
             if taskField == N.decision:
                 value = G(db.decisionInv, value)
-            if value == taskValue:
-                return False
 
         (contribId,) = self.info(N.contrib, N._id)
 
@@ -1776,6 +1807,9 @@ details of the current user can be read off.</dd>
             if task == N.startAssessment:
                 return isOwn and mayAdd and not frozen and not done
 
+            if value == taskValue:
+                return False
+
             if not isCoord:
                 return False
 
@@ -1792,12 +1826,15 @@ details of the current user can be read off.</dd>
 
             return False
 
-        if (frozen or done) and not remaining:
-            return False
-
         if table == N.assessment:
+            if (frozen or done) and not remaining:
+                return False
+
             if task == N.startReview:
                 return G(mayAdd, myKind)
+
+            if value == taskValue:
+                return False
 
             if uid not in creators:
                 return False
@@ -1825,6 +1862,9 @@ details of the current user can be read off.</dd>
             return False
 
         if table == N.review:
+            if (frozen or done) and not remaining:
+                return False
+
             taskKind = G(taskInfo, N.kind)
             if not kind or kind != taskKind or kind != myKind:
                 return False
@@ -1833,10 +1873,24 @@ details of the current user can be read off.</dd>
             if not answer:
                 return False
 
+            (aStage, aStageDate) = self.info(N.assessment, N.stage, N.stageDate)
             (finalStage,) = self.info(table, N.stage, kind=N.final)
-            (expertStage,) = self.info(table, N.stage, kind=N.expert)
+            (expertStage, expertStageDate) = self.info(
+                table, N.stage, N.stageDate, kind=N.expert
+            )
             xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
             xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+            revision = finalStage == N.reviewRevise
+            zFinalStage = finalStage and not revision
+            submitted = aStage == N.submitted
+            submittedRevised = aStage == N.submittedRevised
+            mayDecideExpert = (
+                submitted and not finalStage or submittedRevised and revision
+            )
+
+            if value == taskValue:
+                if not revision:
+                    return False
 
             if task in {
                 N.expertReviewRevise,
@@ -1844,7 +1898,9 @@ details of the current user can be read off.</dd>
                 N.expertReviewReject,
                 N.expertReviewRevoke,
             } - {xExpertStage}:
-                return kind == N.expert and not finalStage and answer
+                return (
+                    kind == N.expert and not zFinalStage and mayDecideExpert and answer
+                )
 
             if task in {
                 N.finalReviewRevise,
@@ -1853,7 +1909,17 @@ details of the current user can be read off.</dd>
                 N.finalReviewRevoke,
             } - {xFinalStage}:
                 return (
-                    kind == N.final and not not (expertStage or finalStage) and answer
+                    kind == N.final
+                    and not not expertStage
+                    and (not aStageDate or expertStageDate &gt; aStageDate)
+                    and (
+                        (
+                            (not finalStage and submitted)
+                            or (revision and submittedRevised)
+                        )
+                        or remaining
+                    )
+                    and answer
                 )
 
             return False
@@ -1994,7 +2060,7 @@ details of the current user can be read off.</dd>
 
         urlExtra = E
 
-        done = False
+        executed = False
         if self.permission(task, kind=kind):
             operator = G(taskInfo, N.operator)
             if operator == N.add:
@@ -2003,20 +2069,20 @@ details of the current user can be read off.</dd>
                 deid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
                 if deid:
                     urlExtra = f&#34;&#34;&#34;/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
-                    done = True
+                    executed = True
             elif operator == N.set:
                 field = G(taskInfo, N.field)
                 value = G(taskInfo, N.value)
                 if recordObj.field(field, mayEdit=True).save(value):
-                    done = True
-            if done:
-                flash(f&#34;&#34;&#34;&lt;{acro}&gt; done&#34;&#34;&#34;, &#34;message&#34;)
+                    executed = True
+            if executed:
+                flash(f&#34;&#34;&#34;&lt;{acro}&gt; executed&#34;&#34;&#34;, &#34;message&#34;)
             else:
                 flash(f&#34;&#34;&#34;&lt;{acro}&gt; failed&#34;&#34;&#34;, &#34;error&#34;)
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None
+        return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if executed else None
 
     def statusOverview(self, table, kind=None):
         &#34;&#34;&#34;Present the current status of a record on the interface.
@@ -2570,7 +2636,7 @@ Otherwise, we check for the readability of this field in the record.</dd>
     perm = recordObj.perm
     uid = self.uid
 
-    (done, stage) = self.info(table, N.done, N.stage, kind=kind)
+    (stage,) = self.info(table, N.stage, kind=kind)
 
     if table in {N.assessment, N.criteriaEntry}:
         (rStage,) = self.info(N.review, N.stage, kind=N.final)
@@ -2702,7 +2768,7 @@ If the action has not been performed, <code>None</code> is returned.</p></sectio
 
     urlExtra = E
 
-    done = False
+    executed = False
     if self.permission(task, kind=kind):
         operator = G(taskInfo, N.operator)
         if operator == N.add:
@@ -2711,20 +2777,20 @@ If the action has not been performed, <code>None</code> is returned.</p></sectio
             deid = tableObj.insert(masterTable=table, masterId=eid, force=True) or E
             if deid:
                 urlExtra = f&#34;&#34;&#34;/{N.open}/{dtable}/{deid}&#34;&#34;&#34;
-                done = True
+                executed = True
         elif operator == N.set:
             field = G(taskInfo, N.field)
             value = G(taskInfo, N.value)
             if recordObj.field(field, mayEdit=True).save(value):
-                done = True
-        if done:
-            flash(f&#34;&#34;&#34;&lt;{acro}&gt; done&#34;&#34;&#34;, &#34;message&#34;)
+                executed = True
+        if executed:
+            flash(f&#34;&#34;&#34;&lt;{acro}&gt; executed&#34;&#34;&#34;, &#34;message&#34;)
         else:
             flash(f&#34;&#34;&#34;&lt;{acro}&gt; failed&#34;&#34;&#34;, &#34;error&#34;)
     else:
         flash(f&#34;&#34;&#34;&lt;{acro}&gt; not permitted&#34;&#34;&#34;, &#34;error&#34;)
 
-    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if done else None</code></pre>
+    return f&#34;&#34;&#34;/{N.contrib}/{N.item}/{contribId}{urlExtra}&#34;&#34;&#34; if executed else None</code></pre>
 </details>
 </dd>
 <dt id="control.workflow.apply.WorkflowItem.getKind"><code class="name flex">
@@ -3176,8 +3242,6 @@ the task acts on: contrib, assessment, or review.</dd>
     if operator == N.set:
         if taskField == N.decision:
             value = G(db.decisionInv, value)
-        if value == taskValue:
-            return False
 
     (contribId,) = self.info(N.contrib, N._id)
 
@@ -3206,6 +3270,9 @@ the task acts on: contrib, assessment, or review.</dd>
         if task == N.startAssessment:
             return isOwn and mayAdd and not frozen and not done
 
+        if value == taskValue:
+            return False
+
         if not isCoord:
             return False
 
@@ -3222,12 +3289,15 @@ the task acts on: contrib, assessment, or review.</dd>
 
         return False
 
-    if (frozen or done) and not remaining:
-        return False
-
     if table == N.assessment:
+        if (frozen or done) and not remaining:
+            return False
+
         if task == N.startReview:
             return G(mayAdd, myKind)
+
+        if value == taskValue:
+            return False
 
         if uid not in creators:
             return False
@@ -3255,6 +3325,9 @@ the task acts on: contrib, assessment, or review.</dd>
         return False
 
     if table == N.review:
+        if (frozen or done) and not remaining:
+            return False
+
         taskKind = G(taskInfo, N.kind)
         if not kind or kind != taskKind or kind != myKind:
             return False
@@ -3263,10 +3336,24 @@ the task acts on: contrib, assessment, or review.</dd>
         if not answer:
             return False
 
+        (aStage, aStageDate) = self.info(N.assessment, N.stage, N.stageDate)
         (finalStage,) = self.info(table, N.stage, kind=N.final)
-        (expertStage,) = self.info(table, N.stage, kind=N.expert)
+        (expertStage, expertStageDate) = self.info(
+            table, N.stage, N.stageDate, kind=N.expert
+        )
         xExpertStage = N.expertReviewRevoke if expertStage is None else expertStage
         xFinalStage = N.finalReviewRevoke if finalStage is None else finalStage
+        revision = finalStage == N.reviewRevise
+        zFinalStage = finalStage and not revision
+        submitted = aStage == N.submitted
+        submittedRevised = aStage == N.submittedRevised
+        mayDecideExpert = (
+            submitted and not finalStage or submittedRevised and revision
+        )
+
+        if value == taskValue:
+            if not revision:
+                return False
 
         if task in {
             N.expertReviewRevise,
@@ -3274,7 +3361,9 @@ the task acts on: contrib, assessment, or review.</dd>
             N.expertReviewReject,
             N.expertReviewRevoke,
         } - {xExpertStage}:
-            return kind == N.expert and not finalStage and answer
+            return (
+                kind == N.expert and not zFinalStage and mayDecideExpert and answer
+            )
 
         if task in {
             N.finalReviewRevise,
@@ -3283,7 +3372,17 @@ the task acts on: contrib, assessment, or review.</dd>
             N.finalReviewRevoke,
         } - {xFinalStage}:
             return (
-                kind == N.final and not not (expertStage or finalStage) and answer
+                kind == N.final
+                and not not expertStage
+                and (not aStageDate or expertStageDate &gt; aStageDate)
+                and (
+                    (
+                        (not finalStage and submitted)
+                        or (revision and submittedRevised)
+                    )
+                    or remaining
+                )
+                and answer
             )
 
         return False

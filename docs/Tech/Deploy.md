@@ -42,6 +42,7 @@ gunicorn server | yes | yes
 run tests | yes | yes
 ship everything | yes | no
 update production | no | yes
+view logs | no | yes
 
 ## Python
 
@@ -204,8 +205,61 @@ development web server.
 ## User authentication
 
 We make use of the DARIAH infrastructure for _user authentication_ [AAI]({{dariahIDP}})
-(see in particular
+, see in particular
 [Integrating Shibboleth Authentication into your Application]({{dariahShib}}) .
+
+Shibboleth's SP runs under an Apache webserver which acts as a reverse-proxy to
+gunicorn which runs the dariah-contrib webapp.
+
+This raises one particular difficulty: after authentication, Shibboleth stores
+the authentication *attributes*, such as the `eppn` of the authenticated user, in server
+variables.
+Now if the dariah-contrib web app runs directly under the same Apache, it can
+just read those variables.
+And if the dariah-contrib web app runs in another Apache, the reverse-proxy can transport
+the variables to the inner Apache by means of AJP.
+
+Unfortunately, our set-up is different from both of these.
+
+However, there is another way: transport the attributes as HTTP headers. 
+
+??? caution "Header spoofing"
+    Transporting information in HTTP headers is flagged as potentially insecure
+    because any client can send any header.
+    See [Shibboleth SP]({{shibboleth}}).
+
+    Yet, Shibboleth's SP software has a protection in place: it will scrub all headers that
+    correspond to any header the SP would set itself.
+    If a client is caught in sending such a header, the client will get a SAML error back and 
+    the request is not further processed.
+    We have tested the protection against header spoofing by sending a request
+    with a header `eppn`  and later `epPn` with a value of a superuser.
+    Without protection against spoofing, this could be the basis of logging in as an
+    all powerful user without providing credentials.
+
+    However, we got a neat and forbidding SAML error page back.
+    When looking in the gunicorn logs, there were absolutely no entries, so the request
+    did not even make it to the web-app.
+
+    The offending request can be seen in the httpd access log:
+
+    ```
+    1xx.xxx.xxx.xxx - - [10/Jan/2020:11:54:04 +0100] "GET / HTTP/1.1" 500 920 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:72.0) Gecko/20100101 Firefox/72.0"
+    1xx.xxx.xxx.xxx - - [10/Jan/2020:11:54:04 +0100] "GET /shibboleth-sp/main.css HTTP/1.1" 500 942 "https://dariah-beta.dans.knaw.nl/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:72.0) Gecko/20100101 Firefox/72.0"
+    ```
+
+    and in the httpd error log we find these entries:
+    ```
+    [Fri Jan 10 11:54:04.793239 2020] [mod_shib:error] [pid 64712] [client 1xx.xxx.xxx.xxx:yyy] Attempt to spoof header (eppn) was detected.
+    [Fri Jan 10 11:54:04.859058 2020] [mod_shib:error] [pid 116268] [client 1xx.xxx.xxx.xxx:yyy] Attempt to spoof header (eppn) was detected., referer: https://dariah-beta.dans.knaw.nl/
+    [Fri Jan 10 11:54:04.889303 2020] [mod_shib:error] [pid 116267] [client 1xx.xxx.xxx.xxx:yyy] Attempt to spoof header (eppn) was detected.
+    ```
+
+This is then indeed the method by which we transmit the attributes from the
+reverse proxy through gunicorn to the web app.
+
+Thanks to Martin Haase (DAASI, Tübingen) en Thijs Kinkhorst (SURFconext) for
+pointing this out.
 
 ## Documentation
 
