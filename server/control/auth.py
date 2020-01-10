@@ -46,16 +46,8 @@ Qu = H.icon(CW.unknown[N.user], asChar=True)
 Qg = H.icon(CW.unknown[N.group], asChar=True)
 
 
-def authKey(akey):
-    return akey.replace("-", "_").upper() if TRANSPORT_ATTRIBUTES == N.http else akey
-
-
-def authValue(avalue):
-    return utf8FromLatin1(avalue)
-
-
 def authGet(authEnv, akey):
-    return authValue(G(authEnv, authKey(akey), default=E))
+    return utf8FromLatin1(G(authEnv, akey, default=E))
 
 
 class Auth:
@@ -273,7 +265,7 @@ class Auth:
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {
-                k: request.headers[k]
+                k: request.headers.get(k)
                 for k in request.headers
             }
             if TRANSPORT_ATTRIBUTES == N.http
