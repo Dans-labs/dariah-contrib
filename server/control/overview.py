@@ -215,7 +215,7 @@ class Overview:
                 H.a(
                     ALL,
                     (
-                        f"""{PAGE}?country=&sortcol={rawSortCol}&"""
+                        f"""{PAGE}?country=x&sortcol={rawSortCol}&"""
                         f"""reverse={rawReverse}&groups={groups}"""
                     ),
                     cls="c-control",
