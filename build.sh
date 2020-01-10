@@ -33,12 +33,14 @@ function givehelp {
     echo "    Production only:"
     echo "      prod db = dariah"
     echo "<task>:"
-    echo "gunilog a   : see the access log of the gunicorn service"
-    echo "gunilog e   : see the error log of the gunicorn service"
-    echo "gunilog E   : see the error journal of the gunicorn service"
-    echo "gunilog s   : see the shibboleth log"
-    echo "gunilog sw  : see the shibboleth warning log"
-    echo "gunilog st  : see the shibboleth transaction log"
+    echo "log ha      : see the access log of the httpd service"
+    echo "log he      : see the error log of the httpd service"
+    echo "log ga      : see the access log of the gunicorn service"
+    echo "log ge      : see the error log of the gunicorn service"
+    echo "log gE      : see the error journal of the gunicorn service"
+    echo "log s       : see the shibboleth log"
+    echo "log sw      : see the shibboleth warning log"
+    echo "log st      : see the shibboleth transaction log"
     echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
@@ -330,15 +332,22 @@ function gunirun {
     
 }
 
-function gunishow {
-    dlogdir=/var/log/dariah-contrib
+function logshow {
+    hlogdir=/var/log/httpd
+    glogdir=/var/log/dariah-contrib
     slogdir=/var/log/shibboleth
-    if [[ "$1" == "a" ]]; then
+    if [[ "$1" == "ha" ]]; then
+        logfile="dariah-contrib_ssl_access.log"
+        logdir="$hlogdir"
+    elif [[ "$1" == "he" ]]; then
+        logfile="dariah-contrib_ssl_error.log"
+        logdir="$hlogdir"
+    elif [[ "$1" == "ga" ]]; then
         logfile="access.log"
-        logdir="$dlogdir"
-    elif [[ "$1" == "e" ]]; then
+        logdir="$glogdir"
+    elif [[ "$1" == "ge" ]]; then
         logfile="error.log"
-        logdir="$dlogdir"
+        logdir="$glogdir"
     elif [[ "$1" == "s" ]]; then
         logfile="shibd.log"
         logdir="$slogdir"
@@ -352,7 +361,7 @@ function gunishow {
         journalctl -xe
     else
         logfile="$1"
-        logdir="$dlogdir"
+        logdir="$glogdir"
     fi
     less "$logdir/$logfile"
 }
@@ -517,10 +526,6 @@ function guni {
     gunirun "" "$@"
 }
 
-function gunilog {
-    gunishow "$@"
-}
-
 function gunistatus {
     gunirun "status"
 }
@@ -535,6 +540,10 @@ function gunitest {
 
 function install {
     guniasservice
+}
+
+function log {
+    logshow "$@"
 }
 
 function restart {
@@ -589,7 +598,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    activate36|gunilog|gunistatus|gunistop|install|restart|update)
+    activate36|log|gunistatus|gunistop|install|restart|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
