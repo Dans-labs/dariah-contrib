@@ -245,7 +245,9 @@ class Workflow:
         good = True
         for (wfId, records) in wfIds.items():
             if len(records) &gt; 1:
-                serverprint(f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;)
+                serverprint(
+                    f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;
+                )
                 serverprint(records[0])
                 good = False
         if good:
@@ -405,20 +407,12 @@ class Workflow:
             It is set to `True` when an assessment is currently under review.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            Reviews have both `locked` and `done`. `done` indcates whether the final
-            reviewer has decided. `locked` is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known. It also inforces that the expert reviewer cannot revoke
-            his/her decision.
         done: boolean
             Workflow attribute that derives from the reviews.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            It is set to `True` when the reviewer has decided.
-            It is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known.
-            When the final reviewer is `done`, also the assessment and the contribution
+            It is set to `True` when the final reviewer has decided other than `Revise`.
+            If `done`, also the assessment and the contribution
             count as `done`.
 
         Returns
@@ -506,11 +500,13 @@ class Workflow:
 
         locked = stage in {N.submitted, N.submittedRevised}
 
-        done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+        done = not not finalReviewStage and finalReviewStage != N.reviewRevise
 
         if done:
             if expertReviewWf:
                 expertReviewWf[N.done] = True
+            if finalReviewWf:
+                finalReviewWf[N.done] = True
 
         mayAdd = {
             kind: not frozen and not done and not G(reviewsWf, kind)
@@ -585,7 +581,6 @@ class Workflow:
                 else None
             )
         )
-        done = not not stage
 
         return {
             N._id: G(record, N._id),
@@ -595,7 +590,6 @@ class Workflow:
             N.kind: kind,
             N.stage: stage,
             N.stageDate: G(record, N.dateDecided),
-            N.done: done,
             N.frozen: frozen,
         }
 
@@ -982,7 +976,9 @@ are fetched and stored as attributes.</p>
         good = True
         for (wfId, records) in wfIds.items():
             if len(records) &gt; 1:
-                serverprint(f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;)
+                serverprint(
+                    f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;
+                )
                 serverprint(records[0])
                 good = False
         if good:
@@ -1142,20 +1138,12 @@ are fetched and stored as attributes.</p>
             It is set to `True` when an assessment is currently under review.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            Reviews have both `locked` and `done`. `done` indcates whether the final
-            reviewer has decided. `locked` is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known. It also inforces that the expert reviewer cannot revoke
-            his/her decision.
         done: boolean
             Workflow attribute that derives from the reviews.
             It is also important for the contribution, hence it will
             be passed upwards to it.
-            It is set to `True` when the reviewer has decided.
-            It is used to enforce that the final reviewer
-            takes his/her decision only when the decision of the expert
-            reviewer is known.
-            When the final reviewer is `done`, also the assessment and the contribution
+            It is set to `True` when the final reviewer has decided other than `Revise`.
+            If `done`, also the assessment and the contribution
             count as `done`.
 
         Returns
@@ -1243,11 +1231,13 @@ are fetched and stored as attributes.</p>
 
         locked = stage in {N.submitted, N.submittedRevised}
 
-        done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+        done = not not finalReviewStage and finalReviewStage != N.reviewRevise
 
         if done:
             if expertReviewWf:
                 expertReviewWf[N.done] = True
+            if finalReviewWf:
+                finalReviewWf[N.done] = True
 
         mayAdd = {
             kind: not frozen and not done and not G(reviewsWf, kind)
@@ -1322,7 +1312,6 @@ are fetched and stored as attributes.</p>
                 else None
             )
         )
-        done = not not stage
 
         return {
             N._id: G(record, N._id),
@@ -1332,7 +1321,6 @@ are fetched and stored as attributes.</p>
             N.kind: kind,
             N.stage: stage,
             N.stageDate: G(record, N.dateDecided),
-            N.done: done,
             N.frozen: frozen,
         }
 
@@ -1770,21 +1758,13 @@ Hence it is passed down.</dd>
 <dd>Workflow attribute that derives from the assessment.
 It is set to <code>True</code> when an assessment is currently under review.
 It is also important for the contribution, hence it will
-be passed upwards to it.
-Reviews have both <code>locked</code> and <code>done</code>. <code>done</code> indcates whether the final
-reviewer has decided. <code>locked</code> is used to enforce that the final reviewer
-takes his/her decision only when the decision of the expert
-reviewer is known. It also inforces that the expert reviewer cannot revoke
-his/her decision.</dd>
+be passed upwards to it.</dd>
 <dt><strong><code>done</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Workflow attribute that derives from the reviews.
 It is also important for the contribution, hence it will
 be passed upwards to it.
-It is set to <code>True</code> when the reviewer has decided.
-It is used to enforce that the final reviewer
-takes his/her decision only when the decision of the expert
-reviewer is known.
-When the final reviewer is <code>done</code>, also the assessment and the contribution
+It is set to <code>True</code> when the final reviewer has decided other than <code>Revise</code>.
+If <code>done</code>, also the assessment and the contribution
 count as <code>done</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -1822,20 +1802,12 @@ count as <code>done</code>.</dd>
         It is set to `True` when an assessment is currently under review.
         It is also important for the contribution, hence it will
         be passed upwards to it.
-        Reviews have both `locked` and `done`. `done` indcates whether the final
-        reviewer has decided. `locked` is used to enforce that the final reviewer
-        takes his/her decision only when the decision of the expert
-        reviewer is known. It also inforces that the expert reviewer cannot revoke
-        his/her decision.
     done: boolean
         Workflow attribute that derives from the reviews.
         It is also important for the contribution, hence it will
         be passed upwards to it.
-        It is set to `True` when the reviewer has decided.
-        It is used to enforce that the final reviewer
-        takes his/her decision only when the decision of the expert
-        reviewer is known.
-        When the final reviewer is `done`, also the assessment and the contribution
+        It is set to `True` when the final reviewer has decided other than `Revise`.
+        If `done`, also the assessment and the contribution
         count as `done`.
 
     Returns
@@ -1923,11 +1895,13 @@ count as <code>done</code>.</dd>
 
     locked = stage in {N.submitted, N.submittedRevised}
 
-    done = not not finalReviewStage and not finalReviewStage == N.reviewRevise
+    done = not not finalReviewStage and finalReviewStage != N.reviewRevise
 
     if done:
         if expertReviewWf:
             expertReviewWf[N.done] = True
+        if finalReviewWf:
+            finalReviewWf[N.done] = True
 
     mayAdd = {
         kind: not frozen and not done and not G(reviewsWf, kind)
@@ -2033,7 +2007,6 @@ Hence it is passed from there to here.</dd>
             else None
         )
     )
-    done = not not stage
 
     return {
         N._id: G(record, N._id),
@@ -2043,7 +2016,6 @@ Hence it is passed from there to here.</dd>
         N.kind: kind,
         N.stage: stage,
         N.stageDate: G(record, N.dateDecided),
-        N.done: done,
         N.frozen: frozen,
     }</code></pre>
 </details>
@@ -2240,7 +2212,9 @@ Otherwise, the table will merely be cleared.</dd>
     good = True
     for (wfId, records) in wfIds.items():
         if len(records) &gt; 1:
-            serverprint(f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;)
+            serverprint(
+                f&#34;WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:&#34;
+            )
             serverprint(records[0])
             good = False
     if good:

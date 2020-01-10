@@ -428,7 +428,11 @@ class HtmlElements:
         &#34;&#34;&#34;iconx.
 
         Pseudo element for a clickable icon.
-        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element or a &lt;span...&gt;
+        if `href` is `None`.
+
+        If `href` is the empty string, the element will still be wrapped in
+        an `&lt;a ...&gt;` element, but without a `href` attribute.
 
         !!! warning
             The `icon` names must be listed in the web.yaml config file
@@ -440,6 +444,7 @@ class HtmlElements:
             Name of the icon.
         href: url, optional, `None`
             Destination of the icon when clicked.
+            Will be left out when equal to the empty string.
 
         Returns
         -------
@@ -448,10 +453,11 @@ class HtmlElements:
 
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         addClass = f&#34;{N.icon} i-{icon} &#34;
-        return (
-            HtmlElement(N.a).wrap(iconChar, addClass=addClass, href=href, **atts)
-            if href
-            else HtmlElement(N.span).wrap(iconChar, addClass=addClass, **atts)
+        if href:
+            atts[&#34;href&#34;] = href
+
+        return HtmlElement(N.span if href is None else N.a).wrap(
+            iconChar, addClass=addClass, **atts
         )
 
     @staticmethod
@@ -1295,7 +1301,11 @@ in the <code>**atts</code> parameter, which will not further be documented.</p>
         &#34;&#34;&#34;iconx.
 
         Pseudo element for a clickable icon.
-        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+        It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element or a &lt;span...&gt;
+        if `href` is `None`.
+
+        If `href` is the empty string, the element will still be wrapped in
+        an `&lt;a ...&gt;` element, but without a `href` attribute.
 
         !!! warning
             The `icon` names must be listed in the web.yaml config file
@@ -1307,6 +1317,7 @@ in the <code>**atts</code> parameter, which will not further be documented.</p>
             Name of the icon.
         href: url, optional, `None`
             Destination of the icon when clicked.
+            Will be left out when equal to the empty string.
 
         Returns
         -------
@@ -1315,10 +1326,11 @@ in the <code>**atts</code> parameter, which will not further be documented.</p>
 
         iconChar = G(ICONS, icon, default=ICONS[N.noicon])
         addClass = f&#34;{N.icon} i-{icon} &#34;
-        return (
-            HtmlElement(N.a).wrap(iconChar, addClass=addClass, href=href, **atts)
-            if href
-            else HtmlElement(N.span).wrap(iconChar, addClass=addClass, **atts)
+        if href:
+            atts[&#34;href&#34;] = href
+
+        return HtmlElement(N.span if href is None else N.a).wrap(
+            iconChar, addClass=addClass, **atts
         )
 
     @staticmethod
@@ -2209,7 +2221,10 @@ def iconr(itemKey, tag, msg=None):
 <dd>
 <section class="desc"><p>iconx.</p>
 <p>Pseudo element for a clickable icon.
-It will be wrapped in an <code>&lt;a href="..."&gt;...&lt;/a&gt;</code> element.</p>
+It will be wrapped in an <code>&lt;a href="..."&gt;...&lt;/a&gt;</code> element or a <span...>
+if <code>href</code> is <code>None</code>.</p>
+<p>If <code>href</code> is the empty string, the element will still be wrapped in
+an <code>&lt;a ...&gt;</code> element, but without a <code>href</code> attribute.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The <code>icon</code> names must be listed in the web.yaml config file
@@ -2220,7 +2235,8 @@ under the key <code>icons</code>. The icon itself is a Unicode character.</p>
 <dt><strong><code>icon</code></strong> :&ensp;<code>string</code></dt>
 <dd>Name of the icon.</dd>
 <dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional, <code>None</code></dt>
-<dd>Destination of the icon when clicked.</dd>
+<dd>Destination of the icon when clicked.
+Will be left out when equal to the empty string.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -2236,7 +2252,11 @@ def iconx(icon, href=None, **atts):
     &#34;&#34;&#34;iconx.
 
     Pseudo element for a clickable icon.
-    It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element.
+    It will be wrapped in an `&lt;a href=&#34;...&#34;&gt;...&lt;/a&gt;` element or a &lt;span...&gt;
+    if `href` is `None`.
+
+    If `href` is the empty string, the element will still be wrapped in
+    an `&lt;a ...&gt;` element, but without a `href` attribute.
 
     !!! warning
         The `icon` names must be listed in the web.yaml config file
@@ -2248,6 +2268,7 @@ def iconx(icon, href=None, **atts):
         Name of the icon.
     href: url, optional, `None`
         Destination of the icon when clicked.
+        Will be left out when equal to the empty string.
 
     Returns
     -------
@@ -2256,10 +2277,11 @@ def iconx(icon, href=None, **atts):
 
     iconChar = G(ICONS, icon, default=ICONS[N.noicon])
     addClass = f&#34;{N.icon} i-{icon} &#34;
-    return (
-        HtmlElement(N.a).wrap(iconChar, addClass=addClass, href=href, **atts)
-        if href
-        else HtmlElement(N.span).wrap(iconChar, addClass=addClass, **atts)
+    if href:
+        atts[&#34;href&#34;] = href
+
+    return HtmlElement(N.span if href is None else N.a).wrap(
+        iconChar, addClass=addClass, **atts
     )</code></pre>
 </details>
 </dd>

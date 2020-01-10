@@ -64,6 +64,18 @@ because the final decision has been taken.</dd>
 <dd>All users try to modify a field in the contribution, in the assessment, and in
 a review comment, but all fail, because everything is in a finished state.
 In particular, also a re-assignment of the reviewers to the assessment it attempted.</dd>
+</dl>
+<p><a title="test_50_review20.test_revokeDelay" href="#test_50_review20.test_revokeDelay"><code>test_revokeDelay()</code></a>
+There is a delay time during which the final decision can be revoked.
+We'll test what happens when the delay time is past.
+We do this by updating the <code>dateDecided</code> field under water, directly
+in Mongo.
+We shift the time back 23 hours
+<strong>final</strong> revokes and succeeds and then accepts again.
+We shift the time back 25 hours.
+<strong>final</strong> revokes and fails.
+We shift the time forward 25 hours again.</p>
+<dl>
 <dt><a title="test_50_review20.test_finalRevokes" href="#test_50_review20.test_finalRevokes"><code>test_finalRevokes()</code></a></dt>
 <dd><strong>final</strong> revokes his decision.
 After that <strong>expert</strong> tries to take all review decisions, and succeeds,
@@ -76,6 +88,48 @@ a review comment, and some succeed, because there is no finished state.</p>
 locked: nobody can modify them.</p>
 <p>The reviewers can be reassigned by <strong>office</strong>.</p>
 <p>The reviews can be modified.</p>
+</dd>
+<dt><a title="test_50_review20.test_finalRevise" href="#test_50_review20.test_finalRevise"><code>test_finalRevise()</code></a></dt>
+<dd>
+<p>We test revision and resubmission. The chain of events is:</p>
+<ul>
+<li><strong>expert</strong> has to give an advisory decision first. We let hem accept
+the assessment;</li>
+<li>we shift the submission date back 27 hours,
+so that the system does not consider the assessment resubmitted
+when we have shifted the review decisions back in time;</li>
+<li>we shift the decisionDate back 26 hours,
+so that <strong>expert</strong> cannot revoke his decision right now;</li>
+<li><strong>final</strong> decides that revision is needed;</li>
+<li>we shift the decisionData back 25 hours,
+so that <strong>final</strong> cannot revoke his decision under the current
+conditions;</li>
+<li><strong>expert</strong> tries to take all review decisions, but fails,
+because the assessment has not yet been resubmitted.</li>
+</ul>
+</dd>
+<dt><code>test_revise</code></dt>
+<dd>
+<p>Here we test the <strong>owner</strong>'s part in the revision:</p>
+<ul>
+<li>he checks the current stage of the assessment: "complete revised"</li>
+<li>he sets the evidence of the first entry to an empty value</li>
+<li>he checks the current stage of the assessment: "incomplete revised"</li>
+<li>he sets the evidence of the first entry to a new empty value</li>
+<li>he checks the current stage of the assessment: "complete revised"</li>
+<li>he submits the assessment but fails</li>
+<li>he resubmits the assessment but fails</li>
+<li>he submits the assessment as revision and succeeds</li>
+</ul>
+</dd>
+<dt><a title="test_50_review20.test_newRound" href="#test_50_review20.test_newRound"><code>test_newRound()</code></a></dt>
+<dd>
+<p>Here we test the making of new review decisions.</p>
+<ul>
+<li><strong>final</strong> tries to decide anything, but fails.</li>
+<li><strong>expert</strong> acceepts and succeeds.</li>
+<li><strong>final</strong> acceepts and succeeds.</li>
+</ul>
 </dd>
 </dl>
 <details class="source">
@@ -134,6 +188,17 @@ Filling out reviews.
     a review comment, but all fail, because everything is in a finished state.
     In particular, also a re-assignment of the reviewers to the assessment it attempted.
 
+`test_revokeDelay`
+    There is a delay time during which the final decision can be revoked.
+    We&#39;ll test what happens when the delay time is past.
+    We do this by updating the `dateDecided` field under water, directly
+    in Mongo.
+    We shift the time back 23 hours
+    **final** revokes and succeeds and then accepts again.
+    We shift the time back 25 hours.
+    **final** revokes and fails.
+    We shift the time forward 25 hours again.
+
 `test_finalRevokes`
 :   **final** revokes his decision.
     After that **expert** tries to take all review decisions, and succeeds,
@@ -149,12 +214,48 @@ Filling out reviews.
     The reviewers can be reassigned by **office**.
 
     The reviews can be modified.
+
+`test_finalRevise`
+:   We test revision and resubmission. The chain of events is:
+
+    *   **expert** has to give an advisory decision first. We let hem accept
+        the assessment;
+    *   we shift the submission date back 27 hours,
+        so that the system does not consider the assessment resubmitted
+        when we have shifted the review decisions back in time;
+    *   we shift the decisionDate back 26 hours,
+        so that **expert** cannot revoke his decision right now;
+    *   **final** decides that revision is needed;
+    *   we shift the decisionData back 25 hours,
+        so that **final** cannot revoke his decision under the current
+        conditions;
+    *   **expert** tries to take all review decisions, but fails,
+        because the assessment has not yet been resubmitted.
+
+`test_revise`
+:   Here we test the **owner**&#39;s part in the revision:
+
+    *   he checks the current stage of the assessment: &#34;complete revised&#34;
+    *   he sets the evidence of the first entry to an empty value
+    *   he checks the current stage of the assessment: &#34;incomplete revised&#34;
+    *   he sets the evidence of the first entry to a new empty value
+    *   he checks the current stage of the assessment: &#34;complete revised&#34;
+    *   he submits the assessment but fails
+    *   he resubmits the assessment but fails
+    *   he submits the assessment as revision and succeeds
+
+`test_newRound`
+:   Here we test the making of new review decisions.
+
+    * **final** tries to decide anything, but fails.
+    * **expert** acceepts and succeeds.
+    * **final** acceepts and succeeds.
 &#34;&#34;&#34;
 
 import pytest
 
 import magic  # noqa
-from control.utils import pick as G
+from control.utils import pick as G, E
 from conftest import USERS, POWER_USERS
 from example import (
     ACCEPT,
@@ -162,23 +263,30 @@ from example import (
     COMMENTS,
     COMMENTS_E,
     COMMENTS_F,
+    COMPLETE_REVISED,
     CONTRIB,
     CRITERIA_ENTRY,
+    DATE_DECIDED,
+    DATE_SUBMITTED,
     EVIDENCE,
     EVIDENCE1,
     EXPERT,
     FINAL,
+    INCOMPLETE_REVISED,
     OFFICE,
     REJECT,
     REMARKS,
     REMARKS_E,
     REMARKS_F,
+    RESUBMIT_ASSESSMENT,
     REVIEW,
     REVIEW_DECISION,
     REVIEW_ENTRY,
     REVIEWER_E,
     REVISE,
     REVOKE,
+    SUBMIT_ASSESSMENT,
+    SUBMIT_REVISED,
     TITLE,
     TITLE2,
     TITLE_A2,
@@ -195,6 +303,8 @@ from subtest import (
     assertFieldValue,
     assertModifyField,
     assertReviewDecisions,
+    assertShiftDate,
+    assertStage,
     assertStatus,
 )
 
@@ -203,16 +313,18 @@ startInfo = {}
 
 @pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        clientExpert=clientExpert,
-        clientFinal=clientFinal,
-        users=True,
-        assessment=True,
-        countries=True,
-        review=True,
-    ))
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            clientExpert=clientExpert,
+            clientFinal=clientFinal,
+            users=True,
+            assessment=True,
+            countries=True,
+            review=True,
+        )
+    )
 
 
 def test_reviewEntryView(clients):
@@ -337,6 +449,23 @@ def test_modify(clients):
     forall(clients, expect, assertIt)
 
 
+def test_revokeDelay(clientFinal, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    reviewId = G(recordId, REVIEW)
+
+    cFinal = {FINAL: clientFinal}
+    rFinal = G(reviewId, FINAL)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -23)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE, ACCEPT], True,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE], False,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, 25)
+
+
 def test_finalRevokes(clientsReviewer):
     recordId = startInfo[&#34;recordId&#34;]
     reviewId = G(recordId, REVIEW)
@@ -366,8 +495,12 @@ def test_modify2(clients):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
         assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
         reviewerFId = G(users, FINAL)
+        reviewerEId = G(users, EXPERT)
         assertModifyField(
             cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp[&#34;assign&#34;]
+        )
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerEId, EXPERT), exp[&#34;assign&#34;]
         )
         assertModifyField(
             cl,
@@ -424,7 +557,62 @@ def test_modify2(clients):
         for (user, exp) in expectKind.items():
             expect.setdefault(user, {})[kind] = exp
 
-    forall(clients, expect, assertIt)</code></pre>
+    forall(clients, expect, assertIt)
+
+
+def test_finalRevise(clientsReviewer, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+    reviewId = G(recordId, REVIEW)
+    rExpert = G(reviewId, EXPERT)
+    rFinal = G(reviewId, FINAL)
+
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -27)
+    assertShiftDate(clientSystem, REVIEW, rExpert, DATE_DECIDED, -26)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [REVISE], True)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+    )
+
+
+def test_Revise(clientOwner):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+    cIds = recordId[CRITERIA_ENTRY]
+    cIdFirst = cIds[0]
+
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertModifyField(
+        clientOwner, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([], E), True,
+    )
+    assertStage(clientOwner, ASSESS, aId, INCOMPLETE_REVISED)
+    theEvidence = [f&#34;revised evidence for 1&#34;, &#34;see the internet&#34;]
+    theEvidenceRep = &#34;,&#34;.join(theEvidence)
+    assertModifyField(
+        clientOwner,
+        CRITERIA_ENTRY,
+        cIdFirst,
+        EVIDENCE,
+        (theEvidence, theEvidenceRep),
+        True,
+    )
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertStatus(clientOwner, f&#34;/api/task/{SUBMIT_ASSESSMENT}/{aId}&#34;, False)
+    assertStatus(clientOwner, f&#34;/api/task/{RESUBMIT_ASSESSMENT}/{aId}&#34;, False)
+    assertStatus(clientOwner, f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;, True)
+
+
+def test_newRound(clientsReviewer):
+    recordId = startInfo[&#34;recordId&#34;]
+    reviewId = G(recordId, REVIEW)
+
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [FINAL], [REJECT, ACCEPT, REVISE, REVOKE], False
+    )
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [ACCEPT], True)</code></pre>
 </details>
 </section>
 <section>
@@ -434,6 +622,42 @@ def test_modify2(clients):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="test_50_review20.test_Revise"><code class="name flex">
+<span>def <span class="ident">test_Revise</span></span>(<span>clientOwner)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_Revise(clientOwner):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+    cIds = recordId[CRITERIA_ENTRY]
+    cIdFirst = cIds[0]
+
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertModifyField(
+        clientOwner, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([], E), True,
+    )
+    assertStage(clientOwner, ASSESS, aId, INCOMPLETE_REVISED)
+    theEvidence = [f&#34;revised evidence for 1&#34;, &#34;see the internet&#34;]
+    theEvidenceRep = &#34;,&#34;.join(theEvidence)
+    assertModifyField(
+        clientOwner,
+        CRITERIA_ENTRY,
+        cIdFirst,
+        EVIDENCE,
+        (theEvidence, theEvidenceRep),
+        True,
+    )
+    assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
+    assertStatus(clientOwner, f&#34;/api/task/{SUBMIT_ASSESSMENT}/{aId}&#34;, False)
+    assertStatus(clientOwner, f&#34;/api/task/{RESUBMIT_ASSESSMENT}/{aId}&#34;, False)
+    assertStatus(clientOwner, f&#34;/api/task/{SUBMIT_REVISED}/{aId}&#34;, True)</code></pre>
+</details>
+</dd>
 <dt id="test_50_review20.test_decideOthers"><code class="name flex">
 <span>def <span class="ident">test_decideOthers</span></span>(<span>clients)</span>
 </code></dt>
@@ -502,6 +726,32 @@ def test_modify2(clients):
     assertReviewDecisions(
         clientsReviewer, reviewId, [FINAL], [ACCEPT], True,
     )
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+    )</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_finalRevise"><code class="name flex">
+<span>def <span class="ident">test_finalRevise</span></span>(<span>clientsReviewer, clientSystem)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_finalRevise(clientsReviewer, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    aId = G(recordId, ASSESS)
+    reviewId = G(recordId, REVIEW)
+    rExpert = G(reviewId, EXPERT)
+    rFinal = G(reviewId, FINAL)
+
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertShiftDate(clientSystem, ASSESS, aId, DATE_SUBMITTED, -27)
+    assertShiftDate(clientSystem, REVIEW, rExpert, DATE_DECIDED, -26)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [REVISE], True)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
     assertReviewDecisions(
         clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
     )</code></pre>
@@ -596,8 +846,12 @@ def test_modify2(clients):
         assertModifyField(cl, CONTRIB, eid, TITLE, TITLE2, exp[CONTRIB])
         assertModifyField(cl, ASSESS, aId, TITLE, TITLE_A2, exp[ASSESS])
         reviewerFId = G(users, FINAL)
+        reviewerEId = G(users, EXPERT)
         assertModifyField(
             cl, ASSESS, aId, REVIEWER_E, (reviewerFId, FINAL), exp[&#34;assign&#34;]
+        )
+        assertModifyField(
+            cl, ASSESS, aId, REVIEWER_E, (reviewerEId, EXPERT), exp[&#34;assign&#34;]
         )
         assertModifyField(
             cl,
@@ -655,6 +909,26 @@ def test_modify2(clients):
             expect.setdefault(user, {})[kind] = exp
 
     forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="test_50_review20.test_newRound"><code class="name flex">
+<span>def <span class="ident">test_newRound</span></span>(<span>clientsReviewer)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_newRound(clientsReviewer):
+    recordId = startInfo[&#34;recordId&#34;]
+    reviewId = G(recordId, REVIEW)
+
+    assertReviewDecisions(
+        clientsReviewer, reviewId, [FINAL], [REJECT, ACCEPT, REVISE, REVOKE], False
+    )
+    assertReviewDecisions(clientsReviewer, reviewId, [EXPERT], [ACCEPT], True)
+    assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [ACCEPT], True)</code></pre>
 </details>
 </dd>
 <dt id="test_50_review20.test_reviewEntryView"><code class="name flex">
@@ -718,6 +992,32 @@ def test_modify2(clients):
     )</code></pre>
 </details>
 </dd>
+<dt id="test_50_review20.test_revokeDelay"><code class="name flex">
+<span>def <span class="ident">test_revokeDelay</span></span>(<span>clientFinal, clientSystem)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_revokeDelay(clientFinal, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    reviewId = G(recordId, REVIEW)
+
+    cFinal = {FINAL: clientFinal}
+    rFinal = G(reviewId, FINAL)
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -23)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE, ACCEPT], True,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
+    assertReviewDecisions(
+        cFinal, reviewId, [FINAL], [REVOKE], False,
+    )
+    assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, 25)</code></pre>
+</details>
+</dd>
 <dt id="test_50_review20.test_start"><code class="name flex">
 <span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner, clientExpert, clientFinal)</span>
 </code></dt>
@@ -729,16 +1029,18 @@ def test_modify2(clients):
 </summary>
 <pre><code class="python">@pytest.mark.usefixtures(&#34;db&#34;)
 def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
-    startInfo.update(start(
-        clientOffice=clientOffice,
-        clientOwner=clientOwner,
-        clientExpert=clientExpert,
-        clientFinal=clientFinal,
-        users=True,
-        assessment=True,
-        countries=True,
-        review=True,
-    ))</code></pre>
+    startInfo.update(
+        start(
+            clientOffice=clientOffice,
+            clientOwner=clientOwner,
+            clientExpert=clientExpert,
+            clientFinal=clientFinal,
+            users=True,
+            assessment=True,
+            countries=True,
+            review=True,
+        )
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -757,14 +1059,18 @@ def test_start(clientOffice, clientOwner, clientExpert, clientFinal):
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="test_50_review20.test_Revise" href="#test_50_review20.test_Revise">test_Revise</a></code></li>
 <li><code><a title="test_50_review20.test_decideOthers" href="#test_50_review20.test_decideOthers">test_decideOthers</a></code></li>
 <li><code><a title="test_50_review20.test_expertDecides" href="#test_50_review20.test_expertDecides">test_expertDecides</a></code></li>
 <li><code><a title="test_50_review20.test_finalAccepts" href="#test_50_review20.test_finalAccepts">test_finalAccepts</a></code></li>
+<li><code><a title="test_50_review20.test_finalRevise" href="#test_50_review20.test_finalRevise">test_finalRevise</a></code></li>
 <li><code><a title="test_50_review20.test_finalRevokes" href="#test_50_review20.test_finalRevokes">test_finalRevokes</a></code></li>
 <li><code><a title="test_50_review20.test_modify" href="#test_50_review20.test_modify">test_modify</a></code></li>
 <li><code><a title="test_50_review20.test_modify2" href="#test_50_review20.test_modify2">test_modify2</a></code></li>
+<li><code><a title="test_50_review20.test_newRound" href="#test_50_review20.test_newRound">test_newRound</a></code></li>
 <li><code><a title="test_50_review20.test_reviewEntryView" href="#test_50_review20.test_reviewEntryView">test_reviewEntryView</a></code></li>
 <li><code><a title="test_50_review20.test_reviewersDecide" href="#test_50_review20.test_reviewersDecide">test_reviewersDecide</a></code></li>
+<li><code><a title="test_50_review20.test_revokeDelay" href="#test_50_review20.test_revokeDelay">test_revokeDelay</a></code></li>
 <li><code><a title="test_50_review20.test_start" href="#test_50_review20.test_start">test_start</a></code></li>
 </ul>
 </li>

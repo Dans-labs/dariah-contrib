@@ -64,6 +64,7 @@ CW = C.web
 
 DATABASE = CB.database
 DEBUG = CB.debug
+DEBUG_MONGO = G(DEBUG, N.mongo)
 CREATOR = CB.creator
 
 M_SET = CM.set
@@ -219,7 +220,7 @@ class Db:
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
-        It will spit out debug information if DEBUG is True.
+        It will spit out debug information if mongo debugging is True.
 
         Parameters
         ----------
@@ -246,7 +247,7 @@ class Db:
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-        if DEBUG:
+        if DEBUG_MONGO:
             argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
             kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
             serverprint(
@@ -1502,7 +1503,7 @@ as recommended in
         &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
         All commands fired at the NongoDb go through this wrapper.
-        It will spit out debug information if DEBUG is True.
+        It will spit out debug information if mongo debugging is True.
 
         Parameters
         ----------
@@ -1529,7 +1530,7 @@ as recommended in
 
         method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
         warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-        if DEBUG:
+        if DEBUG_MONGO:
             argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
             kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
             serverprint(
@@ -4277,7 +4278,7 @@ all MongoDb connections should be closed.</p></section>
 <dd>
 <section class="desc"><p>Wrapper around calls to MongoDb.</p>
 <p>All commands fired at the NongoDb go through this wrapper.
-It will spit out debug information if DEBUG is True.</p>
+It will spit out debug information if mongo debugging is True.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
@@ -4305,7 +4306,7 @@ The command must be listed in the mongo.yaml config file.</dd>
     &#34;&#34;&#34;Wrapper around calls to MongoDb.
 
     All commands fired at the NongoDb go through this wrapper.
-    It will spit out debug information if DEBUG is True.
+    It will spit out debug information if mongo debugging is True.
 
     Parameters
     ----------
@@ -4332,7 +4333,7 @@ The command must be listed in the mongo.yaml config file.</dd>
 
     method = getattr(mongo[table], command, None) if command in M_COMMANDS else None
     warning = &#34;&#34;&#34;!UNDEFINED&#34;&#34;&#34; if method is None else E
-    if DEBUG:
+    if DEBUG_MONGO:
         argRep = args[0] if args and args[0] and command in SHOW_ARGS else E
         kwargRep = COMMA.join(f&#34;{k}={v}&#34; for (k, v) in kwargs.items())
         serverprint(
