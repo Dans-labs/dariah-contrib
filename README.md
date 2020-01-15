@@ -1,6 +1,6 @@
 # DARIAH Contribution Tool
 
-**not yet released**
+**testing, not yet released**
 
 This is the code base of the DARIAH contribution tool. 
 
