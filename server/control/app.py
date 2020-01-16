@@ -201,7 +201,7 @@ def appFactory(regime, test, debug, **kwargs):
         return Context(DB, WF, auth)
 
     def tablePerm(table, action=None):
-        return checkTable(table, auth.user) and (action is None or auth.authenticated())
+        return checkTable(auth, table) and (action is None or auth.authenticated())
 
     if debug and auth.isDevel:
         CT.showReferences()

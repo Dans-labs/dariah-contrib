@@ -19,14 +19,12 @@ from control.utils import (
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.perm import (
-    sysadmin,
-    superuser,
-    officeuser,
-    coordinator,
-    authenticated,
     AUTH,
     UNAUTH,
     COORD,
+    OFFICE,
+    ROOT,
+    SYSTEM,
 )
 
 CB = C.base
@@ -94,7 +92,7 @@ class Auth:
         """*string* The groupId of the `auth` permission group.
         """
 
-        self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        self.authUser = {N.group: self.authId}
         """*string* Info of the `auth` permission group.
         """
 
@@ -102,7 +100,7 @@ class Auth:
         """*string* The groupId of the `public` permission group.
         """
 
-        self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        self.unauthUser = {N.group: self.unauthId}
         """*string* Info of the `public` permission group.
         """
 
@@ -191,14 +189,11 @@ class Auth:
             self.clearUser()
             return False
 
-        if N.group in user:
-            if N.groupRep not in user:
-                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                user[N.groupRep] = groupRep
-        else:
-            user[N.group] = authId
-            user[N.groupRep] = AUTH
-        return user[N.groupRep] != UNAUTH
+        group = user[N.group] if N.group in user else authId
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        if N.group not in user:
+            user[N.group] = group
+        return groupRep != UNAUTH
 
     def wrapTestUsers(self):
         """Present a widget to select a test user for login.
@@ -388,7 +383,12 @@ class Auth:
         if user is None:
             user = self.user
 
-        return G(user, N.groupRep) or UNAUTH
+        group = G(user, N.group)
+        if group is None:
+            return UNAUTH
+
+        db = self.db
+        return G(G(db.permissionGroup, group), N.rep) or UNAUTH
 
     def identity(self, user=None):
         """Provide a string representation of the identity of a user.
@@ -582,8 +582,8 @@ class Auth:
         boolean
         """
 
-        user = self.user
-        return authenticated(user)
+        groupRep = self.groupRep()
+        return groupRep != UNAUTH
 
     def coordinator(self, countryId=None):
         """Is the current user a national coordinator?
@@ -605,8 +605,11 @@ class Auth:
         boolean
         """
 
+        groupRep = self.groupRep()
         user = self.user
-        return coordinator(user, countryId)
+        uCountry = G(user, N.country)
+        isCoord = groupRep == COORD
+        return isCoord and (countryId is None or uCountry == countryId)
 
     def officeuser(self):
         """Is the current user a backoffice user?
@@ -616,8 +619,8 @@ class Auth:
         boolean
         """
 
-        user = self.user
-        return officeuser(user)
+        groupRep = self.groupRep()
+        return groupRep == OFFICE
 
     def superuser(self):
         """Is the current user a super user?
@@ -629,8 +632,8 @@ class Auth:
         boolean
         """
 
-        user = self.user
-        return superuser(user)
+        groupRep = self.groupRep()
+        return groupRep in {OFFICE, SYSTEM, ROOT}
 
     def sysadmin(self):
         """Is the current user a system administrator?
@@ -640,8 +643,8 @@ class Auth:
         boolean
         """
 
-        user = self.user
-        return sysadmin(user)
+        groupRep = self.groupRep()
+        return groupRep in {SYSTEM, ROOT}
 
     def country(self):
         """The full country record of the currently logged in user.

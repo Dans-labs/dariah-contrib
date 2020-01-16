@@ -61,7 +61,7 @@ class Details:
         context = self.context
         auth = context.auth
 
-        return checkTable(table, auth.user)
+        return checkTable(auth, table)
 
     def fetchDetails(self, dtable, sortKey=None):
         """Fetch detail records from the database.

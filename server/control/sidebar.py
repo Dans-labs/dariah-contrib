@@ -71,7 +71,7 @@ class Sidebar:
         context = self.context
         auth = context.auth
 
-        return checkTable(table, auth.user)
+        return checkTable(auth, table)
 
     def makeCaption(self, label, entries, rule=False):
         """Produce the caption for a section of navigation items.

@@ -27,7 +27,7 @@ ALLOW_OUR = set(CT.userTables) | set(CT.userEntryTables)
 
 
 def checkTable(
-    table, user,
+    auth, table
 ):
     """Verify whether user's credentials match the requirements for a table.
 
@@ -46,11 +46,11 @@ def checkTable(
 
     Parameters
     ----------
+    auth: object
+        The `control.auth.Auth` singleton, from which the group of the current
+        user can be obtained.
     table: string
         The table for which permission is required.
-    user: dict
-        User attributes, containing in paticular: `group` which is the role a
-        user can play on the basis of his/her identity.
 
     Returns
     -------
@@ -64,7 +64,7 @@ def checkTable(
     if require == UNAUTH:
         return True
 
-    group = G(user, N.groupRep, default=UNAUTH)
+    group = auth.groupRep()
 
     if require == NOBODY:
         return False
@@ -138,96 +138,6 @@ def checkPerm(
 
     if require == COORD:
         return group == COORD and G(perm, N.sameCountry) or isSuper
-
-
-def authenticated(user):
-    """Whether a user is authenticated.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    """
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group != UNAUTH
-
-
-def coordinator(user, countryId):
-    """Whether a user is national coordinator of a country.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-    countryId: ObjectId
-        A country.
-
-    Returns
-    -------
-    boolean
-        Whether the user is National Coordinator of the given country.
-    """
-
-    group = G(user, N.groupRep) or UNAUTH
-    uCountry = G(user, N.country)
-    isCoord = group == COORD
-    return isCoord and (countryId is None or uCountry == countryId)
-
-
-def officeuser(user):
-    """Whether a user belongs to the DARIAH backoffice.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    """
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group == OFFICE
-
-
-def superuser(user):
-    """Whether a user is a superuser: backoffice, system administrator, or root.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    """
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {OFFICE, SYSTEM, ROOT}
-
-
-def sysadmin(user):
-    """Whether a user is a system administrator.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    """
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {SYSTEM, ROOT}
 
 
 def getPermField(table, permRecord, require):
@@ -310,7 +220,7 @@ def permRecord(context, table, record):
     auth = context.auth
     user = auth.user
     uid = G(user, N._id)
-    group = G(user, N.groupRep) or UNAUTH
+    group = auth.groupRep()
     uCountry = G(user, N.country)
 
     cRecord = {}

@@ -546,7 +546,7 @@ class Table:
         table = self.table
         context = self.context
         auth = context.auth
-        return checkTable(table, auth.user) and (action is None or auth.authenticated())
+        return checkTable(auth, table) and (action is None or auth.authenticated())
 
     def title(self, record):
         """Fast way to get a title on the basis of the record only.

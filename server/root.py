@@ -51,10 +51,10 @@ def makeUserRoot(database, eppn, only=False):
     if only:
         mongo.user.update_many(
             {"group": perms["root"]},
-            {"$set": {"group": perms["office"], "groupRep": "office"}},
+            {"$set": {"group": perms["office"]}},
         )
     mongo.user.update_one(
-        {"eppn": eppn}, {"$set": {"group": perms["root"], "groupRep": "root"}},
+        {"eppn": eppn}, {"$set": {"group": perms["root"]}},
     )
     mongo.collect.update_one(
         {"table": "user"}, {"$set": {"dateCollected": now()}}, upsert=True
