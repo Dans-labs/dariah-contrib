@@ -226,8 +226,8 @@ class Table:
 
             The rules are:
             *   authenticated users may create new records in the main user tables:
-                `contrib`, `assessment`, `review` (under additional workflow
-                constraints)
+                `contrib`, and, (under additional workflow constraints),
+                `assessment`, `review`.
             *   superusers may create new value records (under additional
                 constraints)
             *   system admins may create new records in system tables
@@ -247,7 +247,7 @@ class Table:
             id of the inserted item
         """
 
-        mayInsert = force or self.mayInsert
+        mayInsert = force or self.mayInsert and self.withInsert(N.my)
         if not mayInsert:
             return None
 
@@ -404,15 +404,14 @@ class Table:
             params.update(request.args)
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        insertButton = self.insertButton()
+        insertButton = self.insertButton() if self.withInsert(action) else E
         sep = NBSP if insertButton else E
 
         if action == N.assess:
             records = [
                 record
                 for record in records
-                if self.stage(record, N.assessment)
-                in ASSESSMENT_STAGES
+                if self.stage(record, N.assessment) in ASSESSMENT_STAGES
                 and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
                 and uid in self.creators(record, N.assessment)
@@ -444,8 +443,19 @@ class Table:
         nRep = nRepCmt + H.span(f"""{nRecords} {itemLabel}""", cls="stats")
 
         return H.div(
-            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
-            cls=f"table {table}",
+            [H.span([insertButton, sep, nRep])] + recordsHtml, cls=f"table {table}",
+        )
+
+    def withInsert(self, action):
+        context = self.context
+        auth = context.auth
+        table = self.table
+        return (
+            action == N.my and table == MAIN_TABLE
+            or table in VALUE_TABLES
+            and auth.superuser()
+            or table in SYSTEM_TABLES
+            and auth.sysadmin()
         )
 
     @staticmethod

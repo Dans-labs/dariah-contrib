@@ -135,6 +135,7 @@ class Value(Related):
             multiple=multiple,
             active=val,
             hideInActual=True,
+            hideBlockedUsers=True,
         )
         return H.div(
             filterControl
@@ -160,13 +161,15 @@ class Value(Related):
         multiple=False,
         active=None,
         hideInActual=False,
+        hideBlockedUsers=False,
     ):
         if record is None and eid is None:
             return (QQ, QQ) if markup else Qq
 
+        table = self.name
+
         if record is None:
             context = self.context
-            table = self.name
             record = context.getItem(table, eid)
 
         titleStr = self.titleStr(record)
@@ -184,7 +187,14 @@ class Value(Related):
             )
             activeCls = "active " if isActive else E
             inActualCls = self.inActualCls(record=record)
-            hidden = hideInActual and inActualCls and not isActive
+            hidden = (
+                hideInActual
+                and inActualCls
+                and not isActive
+                or hideBlockedUsers
+                and table == N.user
+                and not G(record, N.mayLogin)
+            )
             if hidden:
                 return (E, E)
             atts = dict(cls=f"{baseCls}{activeCls}medium {inActualCls}")
