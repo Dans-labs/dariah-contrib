@@ -40,7 +40,7 @@ class AssessmentD(Details):
             N.review, sortKey=lambda r: G(r, N.dateCreated, default=0),
         )
 
-        byReviewer = {N.expert: [], N.final: []}
+        byReviewer = {N.expert: E, N.final: E}
 
         for dest in (N.expert, N.final):
             byReviewer[dest] = self.wrapDetail(
@@ -53,6 +53,11 @@ class AssessmentD(Details):
                 withN=False,
                 inner=False,
             )
+
+            if not byReviewer[dest]:
+                byReviewer[dest] = H.span(
+                    """No review decision yet""", cls="info small"
+                )
 
         showEid = self.mustShow(N.review, kwargs)
 

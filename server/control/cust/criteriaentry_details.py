@@ -35,7 +35,7 @@ class CriteriaEntryD(Details):
         if not tableObj:
             return E
 
-        byReviewer = {N.expert: [], N.final: []}
+        byReviewer = {N.expert: E, N.final: E}
 
         for dest in (N.expert, N.final):
             byReviewer[dest] = self.wrapDetail(
@@ -47,6 +47,9 @@ class CriteriaEntryD(Details):
                 withN=False,
                 inner=False,
             )
+
+            if not byReviewer[dest]:
+                byReviewer[dest] = H.span("""No review comment yet""", cls="info small")
 
         return H.div(
             [
