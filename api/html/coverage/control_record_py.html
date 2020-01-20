@@ -814,12 +814,12 @@
 <p id="n743" class="stm run hide_run"><a href="#n743">743</a></p>
 <p id="n744" class="pln"><a href="#n744">744</a></p>
 <p id="n745" class="stm run hide_run"><a href="#n745">745</a></p>
-<p id="n746" class="stm run hide_run"><a href="#n746">746</a></p>
+<p id="n746" class="pln"><a href="#n746">746</a></p>
 <p id="n747" class="pln"><a href="#n747">747</a></p>
 <p id="n748" class="stm run hide_run"><a href="#n748">748</a></p>
-<p id="n749" class="stm run hide_run"><a href="#n749">749</a></p>
-<p id="n750" class="pln"><a href="#n750">750</a></p>
-<p id="n751" class="pln"><a href="#n751">751</a></p>
+<p id="n749" class="pln"><a href="#n749">749</a></p>
+<p id="n750" class="stm run hide_run"><a href="#n750">750</a></p>
+<p id="n751" class="stm run hide_run"><a href="#n751">751</a></p>
 <p id="n752" class="pln"><a href="#n752">752</a></p>
 <p id="n753" class="pln"><a href="#n753">753</a></p>
 <p id="n754" class="pln"><a href="#n754">754</a></p>
@@ -842,16 +842,18 @@
 <p id="n771" class="pln"><a href="#n771">771</a></p>
 <p id="n772" class="pln"><a href="#n772">772</a></p>
 <p id="n773" class="pln"><a href="#n773">773</a></p>
-<p id="n774" class="stm run hide_run"><a href="#n774">774</a></p>
-<p id="n775" class="stm run hide_run"><a href="#n775">775</a></p>
-<p id="n776" class="pln"><a href="#n776">776</a></p>
+<p id="n774" class="pln"><a href="#n774">774</a></p>
+<p id="n775" class="pln"><a href="#n775">775</a></p>
+<p id="n776" class="stm run hide_run"><a href="#n776">776</a></p>
 <p id="n777" class="stm run hide_run"><a href="#n777">777</a></p>
-<p id="n778" class="stm run hide_run"><a href="#n778">778</a></p>
-<p id="n779" class="pln"><a href="#n779">779</a></p>
+<p id="n778" class="pln"><a href="#n778">778</a></p>
+<p id="n779" class="stm run hide_run"><a href="#n779">779</a></p>
 <p id="n780" class="stm run hide_run"><a href="#n780">780</a></p>
-<p id="n781" class="stm run hide_run"><a href="#n781">781</a></p>
-<p id="n782" class="pln"><a href="#n782">782</a></p>
+<p id="n781" class="pln"><a href="#n781">781</a></p>
+<p id="n782" class="stm run hide_run"><a href="#n782">782</a></p>
 <p id="n783" class="stm run hide_run"><a href="#n783">783</a></p>
+<p id="n784" class="pln"><a href="#n784">784</a></p>
+<p id="n785" class="stm run hide_run"><a href="#n785">785</a></p>
 
             </td>
             <td class="text">
@@ -1578,7 +1580,7 @@
 <p id="t721" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t722" class="stm run hide_run">        <span class="key">return</span> <span class="nam">Record</span><span class="op">.</span><span class="nam">titleRaw</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">,</span> <span class="nam">cls</span><span class="op">=</span><span class="nam">warningCls</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t723" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t724" class="stm run hide_run">    <span class="key">def</span> <span class="nam">actualCls</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t724" class="stm run hide_run">    <span class="key">def</span> <span class="nam">inActualCls</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t725" class="pln">        <span class="str">"""Get a CSS class name for a record based on whether it is *actual*.</span><span class="strut">&nbsp;</span></p>
 <p id="t726" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t727" class="pln"><span class="str">        Actual records belong to the current `package`, a record that specifies</span><span class="strut">&nbsp;</span></p>
@@ -1599,45 +1601,47 @@
 <p id="t742" class="stm run hide_run">        <span class="key">if</span> <span class="nam">record</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t743" class="stm run hide_run">            <span class="nam">record</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">record</span><span class="strut">&nbsp;</span></p>
 <p id="t744" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t745" class="stm run hide_run">        <span class="nam">isActual</span> <span class="op">=</span> <span class="nam">table</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">ACTUAL_TABLES</span> <span class="key">or</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">actual</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t746" class="stm run hide_run">        <span class="key">return</span> <span class="nam">E</span> <span class="key">if</span> <span class="nam">isActual</span> <span class="key">else</span> <span class="str">"inactual"</span><span class="strut">&nbsp;</span></p>
-<p id="t747" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t748" class="stm run hide_run">    <span class="op">@</span><span class="nam">staticmethod</span><span class="strut">&nbsp;</span></p>
-<p id="t749" class="stm run hide_run">    <span class="key">def</span> <span class="nam">titleRaw</span><span class="op">(</span><span class="nam">obj</span><span class="op">,</span> <span class="nam">record</span><span class="op">,</span> <span class="nam">cls</span><span class="op">=</span><span class="nam">E</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t750" class="pln">        <span class="str">"""Generate a title for a different record.</span><span class="strut">&nbsp;</span></p>
-<p id="t751" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t752" class="pln"><span class="str">        This is fast title generation.</span><span class="strut">&nbsp;</span></p>
-<p id="t753" class="pln"><span class="str">        No record object will be created.</span><span class="strut">&nbsp;</span></p>
-<p id="t754" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t755" class="pln"><span class="str">        The title will be based on the fields in the record,</span><span class="strut">&nbsp;</span></p>
-<p id="t756" class="pln"><span class="str">        and its formatting is assisted by the appropriate</span><span class="strut">&nbsp;</span></p>
-<p id="t757" class="pln"><span class="str">        type class in `control.typ.types`.</span><span class="strut">&nbsp;</span></p>
-<p id="t758" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t759" class="pln"><span class="str">        !!! hint</span><span class="strut">&nbsp;</span></p>
-<p id="t760" class="pln"><span class="str">            If the record is  not "actual", its title will get a warning</span><span class="strut">&nbsp;</span></p>
-<p id="t761" class="pln"><span class="str">            background color.</span><span class="strut">&nbsp;</span></p>
-<p id="t762" class="pln"><span class="str">            See `control.db.Db.collect`.</span><span class="strut">&nbsp;</span></p>
-<p id="t763" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t764" class="pln"><span class="str">        Parameters</span><span class="strut">&nbsp;</span></p>
-<p id="t765" class="pln"><span class="str">        ----------</span><span class="strut">&nbsp;</span></p>
-<p id="t766" class="pln"><span class="str">        obj: object</span><span class="strut">&nbsp;</span></p>
-<p id="t767" class="pln"><span class="str">            Any object that has a table and context arttribute, e.g. a table object</span><span class="strut">&nbsp;</span></p>
-<p id="t768" class="pln"><span class="str">            or a record object</span><span class="strut">&nbsp;</span></p>
-<p id="t769" class="pln"><span class="str">        record: dict</span><span class="strut">&nbsp;</span></p>
-<p id="t770" class="pln"><span class="str">        cls: string, optional, `''`</span><span class="strut">&nbsp;</span></p>
-<p id="t771" class="pln"><span class="str">            A CSS class to add to the outer element of the result</span><span class="strut">&nbsp;</span></p>
-<p id="t772" class="pln"><span class="str">        """</span><span class="strut">&nbsp;</span></p>
-<p id="t773" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t774" class="stm run hide_run">        <span class="nam">table</span> <span class="op">=</span> <span class="nam">obj</span><span class="op">.</span><span class="nam">table</span><span class="strut">&nbsp;</span></p>
-<p id="t775" class="stm run hide_run">        <span class="nam">context</span> <span class="op">=</span> <span class="nam">obj</span><span class="op">.</span><span class="nam">context</span><span class="strut">&nbsp;</span></p>
-<p id="t776" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t777" class="stm run hide_run">        <span class="nam">types</span> <span class="op">=</span> <span class="nam">context</span><span class="op">.</span><span class="nam">types</span><span class="strut">&nbsp;</span></p>
-<p id="t778" class="stm run hide_run">        <span class="nam">typesObj</span> <span class="op">=</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">types</span><span class="op">,</span> <span class="nam">table</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t779" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t780" class="stm run hide_run">        <span class="nam">actualCls</span> <span class="op">=</span> <span class="nam">Record</span><span class="op">.</span><span class="nam">actualCls</span><span class="op">(</span><span class="nam">obj</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t781" class="stm run hide_run">        <span class="nam">atts</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">cls</span><span class="op">=</span><span class="str">f"{cls} {actualCls}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t782" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t783" class="stm run hide_run">        <span class="key">return</span> <span class="nam">H</span><span class="op">.</span><span class="nam">span</span><span class="op">(</span><span class="nam">typesObj</span><span class="op">.</span><span class="nam">title</span><span class="op">(</span><span class="nam">record</span><span class="op">=</span><span class="nam">record</span><span class="op">)</span><span class="op">,</span> <span class="op">**</span><span class="nam">atts</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t745" class="stm run hide_run">        <span class="nam">isActual</span> <span class="op">=</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t746" class="pln">            <span class="nam">table</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">ACTUAL_TABLES</span> <span class="key">or</span> <span class="key">not</span> <span class="nam">record</span> <span class="key">or</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">actual</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t747" class="pln">        <span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t748" class="stm run hide_run">        <span class="key">return</span> <span class="nam">E</span> <span class="key">if</span> <span class="nam">isActual</span> <span class="key">else</span> <span class="str">"inactual"</span><span class="strut">&nbsp;</span></p>
+<p id="t749" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t750" class="stm run hide_run">    <span class="op">@</span><span class="nam">staticmethod</span><span class="strut">&nbsp;</span></p>
+<p id="t751" class="stm run hide_run">    <span class="key">def</span> <span class="nam">titleRaw</span><span class="op">(</span><span class="nam">obj</span><span class="op">,</span> <span class="nam">record</span><span class="op">,</span> <span class="nam">cls</span><span class="op">=</span><span class="nam">E</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t752" class="pln">        <span class="str">"""Generate a title for a different record.</span><span class="strut">&nbsp;</span></p>
+<p id="t753" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t754" class="pln"><span class="str">        This is fast title generation.</span><span class="strut">&nbsp;</span></p>
+<p id="t755" class="pln"><span class="str">        No record object will be created.</span><span class="strut">&nbsp;</span></p>
+<p id="t756" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t757" class="pln"><span class="str">        The title will be based on the fields in the record,</span><span class="strut">&nbsp;</span></p>
+<p id="t758" class="pln"><span class="str">        and its formatting is assisted by the appropriate</span><span class="strut">&nbsp;</span></p>
+<p id="t759" class="pln"><span class="str">        type class in `control.typ.types`.</span><span class="strut">&nbsp;</span></p>
+<p id="t760" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t761" class="pln"><span class="str">        !!! hint</span><span class="strut">&nbsp;</span></p>
+<p id="t762" class="pln"><span class="str">            If the record is  not "actual", its title will get a warning</span><span class="strut">&nbsp;</span></p>
+<p id="t763" class="pln"><span class="str">            background color.</span><span class="strut">&nbsp;</span></p>
+<p id="t764" class="pln"><span class="str">            See `control.db.Db.collect`.</span><span class="strut">&nbsp;</span></p>
+<p id="t765" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t766" class="pln"><span class="str">        Parameters</span><span class="strut">&nbsp;</span></p>
+<p id="t767" class="pln"><span class="str">        ----------</span><span class="strut">&nbsp;</span></p>
+<p id="t768" class="pln"><span class="str">        obj: object</span><span class="strut">&nbsp;</span></p>
+<p id="t769" class="pln"><span class="str">            Any object that has a table and context arttribute, e.g. a table object</span><span class="strut">&nbsp;</span></p>
+<p id="t770" class="pln"><span class="str">            or a record object</span><span class="strut">&nbsp;</span></p>
+<p id="t771" class="pln"><span class="str">        record: dict</span><span class="strut">&nbsp;</span></p>
+<p id="t772" class="pln"><span class="str">        cls: string, optional, `''`</span><span class="strut">&nbsp;</span></p>
+<p id="t773" class="pln"><span class="str">            A CSS class to add to the outer element of the result</span><span class="strut">&nbsp;</span></p>
+<p id="t774" class="pln"><span class="str">        """</span><span class="strut">&nbsp;</span></p>
+<p id="t775" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t776" class="stm run hide_run">        <span class="nam">table</span> <span class="op">=</span> <span class="nam">obj</span><span class="op">.</span><span class="nam">table</span><span class="strut">&nbsp;</span></p>
+<p id="t777" class="stm run hide_run">        <span class="nam">context</span> <span class="op">=</span> <span class="nam">obj</span><span class="op">.</span><span class="nam">context</span><span class="strut">&nbsp;</span></p>
+<p id="t778" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t779" class="stm run hide_run">        <span class="nam">types</span> <span class="op">=</span> <span class="nam">context</span><span class="op">.</span><span class="nam">types</span><span class="strut">&nbsp;</span></p>
+<p id="t780" class="stm run hide_run">        <span class="nam">typesObj</span> <span class="op">=</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">types</span><span class="op">,</span> <span class="nam">table</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t781" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t782" class="stm run hide_run">        <span class="nam">inActualCls</span> <span class="op">=</span> <span class="nam">Record</span><span class="op">.</span><span class="nam">inActualCls</span><span class="op">(</span><span class="nam">obj</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t783" class="stm run hide_run">        <span class="nam">atts</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">cls</span><span class="op">=</span><span class="str">f"{cls} {inActualCls}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t784" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t785" class="stm run hide_run">        <span class="key">return</span> <span class="nam">H</span><span class="op">.</span><span class="nam">span</span><span class="op">(</span><span class="nam">typesObj</span><span class="op">.</span><span class="nam">title</span><span class="op">(</span><span class="nam">record</span><span class="op">=</span><span class="nam">record</span><span class="op">)</span><span class="op">,</span> <span class="op">**</span><span class="nam">atts</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 
             </td>
         </tr>
@@ -1648,7 +1652,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-12 20:09
+            created at 2020-01-20 12:42
         </p>
     </div>
 </div>

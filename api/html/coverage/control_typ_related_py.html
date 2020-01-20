@@ -209,7 +209,9 @@
 <p id="n138" class="stm run hide_run"><a href="#n138">138</a></p>
 <p id="n139" class="pln"><a href="#n139">139</a></p>
 <p id="n140" class="stm run hide_run"><a href="#n140">140</a></p>
-<p id="n141" class="stm run hide_run"><a href="#n141">141</a></p>
+<p id="n141" class="pln"><a href="#n141">141</a></p>
+<p id="n142" class="pln"><a href="#n142">142</a></p>
+<p id="n143" class="stm run hide_run"><a href="#n143">143</a></p>
 
             </td>
             <td class="text">
@@ -323,8 +325,8 @@
 <p id="t108" class="stm par run hide_run"><span class="annotate short">108&#x202F;&#x219B;&#x202F;109</span><span class="annotate long">line 108 didn't jump to line 109, because the condition on line 108 was never true</span>            <span class="key">if</span> <span class="nam">eid</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t109" class="stm mis">                <span class="nam">eid</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">_id</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t110" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t111" class="stm run hide_run">            <span class="nam">actualCls</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">actualCls</span><span class="op">(</span><span class="nam">record</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t112" class="stm run hide_run">            <span class="nam">atts</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">cls</span><span class="op">=</span><span class="str">f"tag medium {actualCls}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t111" class="stm run hide_run">            <span class="nam">inActualCls</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">inActualCls</span><span class="op">(</span><span class="nam">record</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t112" class="stm run hide_run">            <span class="nam">atts</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">cls</span><span class="op">=</span><span class="str">f"tag medium {inActualCls}"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t113" class="stm par run hide_run"><span class="annotate short">113&#x202F;&#x219B;&#x202F;114</span><span class="annotate long">line 113 didn't jump to line 114, because the condition on line 113 was never true</span>            <span class="key">if</span> <span class="nam">titleHint</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t114" class="stm mis">                <span class="nam">atts</span><span class="op">[</span><span class="nam">N</span><span class="op">.</span><span class="nam">title</span><span class="op">]</span> <span class="op">=</span> <span class="nam">titleHint</span><span class="strut">&nbsp;</span></p>
 <p id="t115" class="pln"><span class="strut">&nbsp;</span></p>
@@ -334,7 +336,7 @@
 <p id="t119" class="pln">        <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t120" class="stm run hide_run">            <span class="key">return</span> <span class="nam">titleStr</span><span class="strut">&nbsp;</span></p>
 <p id="t121" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t122" class="stm run hide_run">    <span class="key">def</span> <span class="nam">actualCls</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t122" class="stm run hide_run">    <span class="key">def</span> <span class="nam">inActualCls</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t123" class="pln">        <span class="str">"""Get a CSS class name for a record based on whether it is *actual*.</span><span class="strut">&nbsp;</span></p>
 <p id="t124" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t125" class="pln"><span class="str">        Actual records belong to the current `package`, a record that specifies</span><span class="strut">&nbsp;</span></p>
@@ -352,8 +354,10 @@
 <p id="t137" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t138" class="stm run hide_run">        <span class="nam">table</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">name</span><span class="strut">&nbsp;</span></p>
 <p id="t139" class="pln"><span class="strut">&nbsp;</span></p>
-<p id="t140" class="stm run hide_run">        <span class="nam">isActual</span> <span class="op">=</span> <span class="nam">table</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">ACTUAL_TABLES</span> <span class="key">or</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">actual</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t141" class="stm run hide_run">        <span class="key">return</span> <span class="nam">E</span> <span class="key">if</span> <span class="nam">isActual</span> <span class="key">else</span> <span class="str">"inactual"</span><span class="strut">&nbsp;</span></p>
+<p id="t140" class="stm run hide_run">        <span class="nam">isActual</span> <span class="op">=</span> <span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t141" class="pln">            <span class="nam">table</span> <span class="key">not</span> <span class="key">in</span> <span class="nam">ACTUAL_TABLES</span> <span class="key">or</span> <span class="key">not</span> <span class="nam">record</span> <span class="key">or</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">actual</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="key">False</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t142" class="pln">        <span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t143" class="stm run hide_run">        <span class="key">return</span> <span class="nam">E</span> <span class="key">if</span> <span class="nam">isActual</span> <span class="key">else</span> <span class="str">"inactual"</span><span class="strut">&nbsp;</span></p>
 
             </td>
         </tr>
@@ -364,7 +368,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-11-30 22:52
+            created at 2020-01-20 12:42
         </p>
     </div>
 </div>

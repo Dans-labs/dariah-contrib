@@ -883,7 +883,7 @@
 <p id="t201" class="stm run hide_run">        <span class="key">return</span> <span class="nam">Context</span><span class="op">(</span><span class="nam">DB</span><span class="op">,</span> <span class="nam">WF</span><span class="op">,</span> <span class="nam">auth</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t202" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t203" class="stm run hide_run">    <span class="key">def</span> <span class="nam">tablePerm</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">action</span><span class="op">=</span><span class="key">None</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t204" class="stm run hide_run">        <span class="key">return</span> <span class="nam">checkTable</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span> <span class="key">and</span> <span class="op">(</span><span class="nam">action</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">authenticated</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t204" class="stm run hide_run">        <span class="key">return</span> <span class="nam">checkTable</span><span class="op">(</span><span class="nam">auth</span><span class="op">,</span> <span class="nam">table</span><span class="op">)</span> <span class="key">and</span> <span class="op">(</span><span class="nam">action</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">authenticated</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t205" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t206" class="stm par run hide_run"><span class="annotate short">206&#x202F;&#x219B;&#x202F;207</span><span class="annotate long">line 206 didn't jump to line 207, because the condition on line 206 was never true</span>    <span class="key">if</span> <span class="nam">debug</span> <span class="key">and</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">isDevel</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t207" class="stm mis">        <span class="nam">CT</span><span class="op">.</span><span class="nam">showReferences</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
@@ -1298,7 +1298,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-12 21:44
+            created at 2020-01-20 12:42
         </p>
     </div>
 </div>
