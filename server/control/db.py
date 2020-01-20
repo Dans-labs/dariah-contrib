@@ -439,8 +439,9 @@ class Db:
 
         self.typeCriteria = {}
         for (_id, record) in self.criteria.items():
-            for tp in G(record, N.typeContribution) or []:
-                self.typeCriteria.setdefault(tp, set()).add(_id)
+            if _id in criteriaActual:
+                for tp in G(record, N.typeContribution) or []:
+                    self.typeCriteria.setdefault(tp, set()).add(_id)
 
         serverprint(f"""UPDATED {", ".join(ACTUAL_TABLES)}""")
 
