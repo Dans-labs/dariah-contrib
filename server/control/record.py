@@ -721,7 +721,7 @@ class Record:
 
         return Record.titleRaw(self, record, cls=warningCls)
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         """Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -742,7 +742,9 @@ class Record:
         if record is None:
             record = self.record
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+        )
         return E if isActual else "inactual"
 
     @staticmethod
@@ -777,7 +779,7 @@ class Record:
         types = context.types
         typesObj = getattr(types, table, None)
 
-        actualCls = Record.actualCls(obj, record)
-        atts = dict(cls=f"{cls} {actualCls}")
+        inActualCls = Record.inActualCls(obj, record)
+        atts = dict(cls=f"{cls} {inActualCls}")
 
         return H.span(typesObj.title(record=record), **atts)

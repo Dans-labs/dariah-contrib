@@ -1223,7 +1223,7 @@
 <p id="t546" class="stm run hide_run">        <span class="nam">table</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">table</span><span class="strut">&nbsp;</span></p>
 <p id="t547" class="stm run hide_run">        <span class="nam">context</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">context</span><span class="strut">&nbsp;</span></p>
 <p id="t548" class="stm run hide_run">        <span class="nam">auth</span> <span class="op">=</span> <span class="nam">context</span><span class="op">.</span><span class="nam">auth</span><span class="strut">&nbsp;</span></p>
-<p id="t549" class="stm run hide_run">        <span class="key">return</span> <span class="nam">checkTable</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span> <span class="key">and</span> <span class="op">(</span><span class="nam">action</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">authenticated</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t549" class="stm run hide_run">        <span class="key">return</span> <span class="nam">checkTable</span><span class="op">(</span><span class="nam">auth</span><span class="op">,</span> <span class="nam">table</span><span class="op">)</span> <span class="key">and</span> <span class="op">(</span><span class="nam">action</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">authenticated</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t550" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t551" class="stm run hide_run">    <span class="key">def</span> <span class="nam">title</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
 <p id="t552" class="pln">        <span class="str">"""Fast way to get a title on the basis of the record only.</span><span class="strut">&nbsp;</span></p>
@@ -1288,7 +1288,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2019-12-10 14:29
+            created at 2020-01-20 12:42
         </p>
     </div>
 </div>

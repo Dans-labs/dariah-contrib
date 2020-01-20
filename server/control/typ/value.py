@@ -129,7 +129,13 @@ class Value(Related):
             if len(valueRecords) > FILTER_THRESHOLD
             else []
         )
-        atts = dict(markup=True, clickable=True, multiple=multiple, active=val)
+        atts = dict(
+            markup=True,
+            clickable=True,
+            multiple=multiple,
+            active=val,
+            hideInActual=False,
+        )
         return H.div(
             filterControl
             + [
@@ -153,6 +159,7 @@ class Value(Related):
         clickable=False,
         multiple=False,
         active=None,
+        hideInActual=False,
     ):
         if record is None and eid is None:
             return (QQ, QQ) if markup else Qq
@@ -176,8 +183,11 @@ class Value(Related):
                 else "tag "
             )
             activeCls = "active " if isActive else E
-            actualCls = self.actualCls(record=record)
-            atts = dict(cls=f"{baseCls}{activeCls}medium {actualCls}")
+            inActualCls = self.inActualCls(record=record)
+            hidden = hideInActual and inActualCls and not isActive
+            if hidden:
+                return (E, E)
+            atts = dict(cls=f"{baseCls}{activeCls}medium {inActualCls}")
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)
 

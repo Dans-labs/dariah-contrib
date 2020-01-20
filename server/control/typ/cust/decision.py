@@ -76,9 +76,9 @@ class Decision(Value):
             baseCls = "task" if clickable else "status"
             activeCls = "active " if isActive else E
             extraCls = G(record, N.acro)
-            actualCls = self.actualCls(record)
+            inActualCls = self.inActualCls(record)
             atts = dict(
-                cls=f"{baseCls} {extraCls} {activeCls} large {actualCls}"
+                cls=f"{baseCls} {extraCls} {activeCls} large {inActualCls}"
             )
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)

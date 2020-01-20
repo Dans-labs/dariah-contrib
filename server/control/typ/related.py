@@ -108,8 +108,8 @@ class Related(TypeBase):
             if eid is None:
                 eid = G(record, N._id)
 
-            actualCls = self.actualCls(record)
-            atts = dict(cls=f"tag medium {actualCls}")
+            inActualCls = self.inActualCls(record)
+            atts = dict(cls=f"tag medium {inActualCls}")
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -119,7 +119,7 @@ class Related(TypeBase):
         else:
             return titleStr
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         """Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -137,5 +137,7 @@ class Related(TypeBase):
 
         table = self.name
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+        )
         return E if isActual else "inactual"

@@ -18,7 +18,7 @@ class AssessmentR(Record):
         super().__init__(*args, **kwargs)
 
     def title(self, record=None, *args, **kwargs):
-        actualCls = self.actualCls(record)
+        inActualCls = self.inActualCls(record)
         wfitem = self.wfitem
         if not wfitem:
             return super().title(*args, **kwargs)
@@ -26,7 +26,7 @@ class AssessmentR(Record):
         datetime = self.field(N.dateCreated).wrapBare()
         date = datetime.split(maxsplit=1)[0]
         creator = self.field(N.creator).wrapBare()
-        return H.span(f"""on {date} by {creator}""", cls=f"small {actualCls}")
+        return H.span(f"""on {date} by {creator}""", cls=f"small {inActualCls}")
 
     def field(self, fieldName, **kwargs):
         """Customised factory function to wrap a field object around the data
