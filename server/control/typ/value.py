@@ -134,7 +134,7 @@ class Value(Related):
             clickable=True,
             multiple=multiple,
             active=val,
-            hideInActual=False,
+            hideInActual=True,
         )
         return H.div(
             filterControl
