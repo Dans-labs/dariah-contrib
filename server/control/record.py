@@ -668,6 +668,9 @@ class Record:
             if nCas
             else E
         )
+        cascadeMsgShort = (
+            f""" and {nCas} dependent record{E if nCas == 1 else S}""" if nCas else E
+        )
 
         nRef = G(dependencies, N.reference, default=0)
 
@@ -684,7 +687,6 @@ class Record:
                         f"""{nRef} dependent record{plural}""",
                         cls="label small warning-o right",
                     ),
-                    cascadeMsg,
                 ]
             )
 
@@ -705,9 +707,9 @@ class Record:
                 cascadeMsg,
                 H.iconx(
                     N.delete,
-                    cls="medium right",
-                    href=url,
-                    title=f"""Delete this {itemSingle}""",
+                    cls="medium right warning",
+                    deleteurl=url,
+                    title=f"""delete this {itemSingle}{cascadeMsgShort}""",
                 ),
             ]
         )
@@ -743,7 +745,9 @@ class Record:
             record = self.record
 
         isActual = (
-            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+            table not in ACTUAL_TABLES
+            or not record
+            or G(record, N.actual, default=False)
         )
         return E if isActual else "inactual"
 

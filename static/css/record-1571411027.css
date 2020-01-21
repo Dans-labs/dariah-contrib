@@ -1,0 +1,146 @@
+.dirty
+{
+	color: var(--edit-dirty-fore);
+	background-color: var(--edit-dirty-back);
+	outline: 4px dashed var(--edit-dirty-border);
+}
+.record
+{
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+	align-content: flex-start;
+  background-color: var(--record-back);
+}
+.record.inner
+{
+  border: 1pt solid var(--record-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-left: 1rem;
+}
+.record-row
+{
+	width: 100%;
+	display: inline-flex;
+	margin-bottom: 0.1rem;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: stretch;
+	align-content: flex-start;
+  margin-top: 0.0rem;
+  margin-bottom: 0.0rem;
+}
+.record-details
+{
+  
+  background-color: var(--record-details-back);
+}
+.record-details.inner
+{
+  border: 1pt solid var(--record-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-left: 1rem;
+}
+.record-label
+{
+	flex: 0 0 10rem;
+	font-weight: bold;
+}
+.record-value
+{
+  width: 100%;
+  flex: 1 1 calc(100%);
+	display: inline-flex;
+	flex-flow: row wrap;
+	justify-content: stretch;
+	align-items: flex-start;
+	align-content: flex-start;
+  padding-top: 0.2em;
+  padding-bottom: 0.1rem;
+  background-color: var(--value-back);
+  border: 1pt solid var(--value-border);
+}
+.record-value .values,
+.record-value .tags
+{
+  flex: 1 1 auto;
+	display: inline-flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+	align-content: flex-start;
+}
+.record-value .values
+{
+	flex-flow: column nowrap;
+}
+.record-value .tags
+{
+	flex-flow: row wrap;
+}
+.wvalue
+{
+  flex: 1 1 auto;
+	display: inline-flex;
+	flex-flow: row wrap;
+}
+.record-value .value[wtype="markdown"]
+{
+	width: 100%;
+}
+.record-value.edit,
+.record-value .value.edit
+{
+  background-color: var(--value-edit-back);
+}
+.tag
+{
+  flex: 0 1 auto;
+  color: var(--tag-fore);
+  background-color: var(--tag-back);
+  border: 1pt solid var(--tag-border);
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  margin: 0.1rem 0.3rem;
+}
+.inactual
+{
+  color: var(--tag-inactual-fore) !important;
+  background-color: var(--tag-inactual-back) !important;
+  border-color: var(--tag-inactual-border) !important;
+  border-radius: 0.2rem;
+}
+.delete
+{
+  float: right;
+}
+.stats
+{
+  font-size: small;
+  font-weight: bold;
+  color: var(--stats-value-fore);
+  background-color: var(--stats-value-back);
+  padding: 0.2rem;
+  margin: 0.2rem;
+  border-radius: 0.2rem;
+}
+div.provx
+{
+  margin-left: 2rem;
+  border: 0.2rem solid var(--value-border);
+}
+span.prov
+{
+  font-weight: bold;
+  font-size: small;
+}
+div.prov
+{
+  padding-left: 2rem;
+  font-size: small;
+}
+dt
+{
+  font-weight: bold;
+}

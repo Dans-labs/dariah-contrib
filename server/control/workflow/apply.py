@@ -630,7 +630,9 @@ class WorkflowItem:
             if remaining <= timedelta(hours=0):
                 remaining = False
 
-        if frozen and not remaining:
+        forbidden = frozen or done
+
+        if forbidden and not remaining:
             return False
 
         if table == N.contrib:
@@ -638,7 +640,7 @@ class WorkflowItem:
                 return False
 
             if task == N.startAssessment:
-                return isOwn and mayAdd and not frozen and not done
+                return not forbidden and isOwn and mayAdd
 
             if value == taskValue:
                 return False
@@ -660,11 +662,12 @@ class WorkflowItem:
             return False
 
         if table == N.assessment:
-            if (frozen or done) and not remaining:
+            forbidden = frozen or done
+            if forbidden:
                 return False
 
             if task == N.startReview:
-                return G(mayAdd, myKind)
+                return not forbidden and G(mayAdd, myKind)
 
             if value == taskValue:
                 return False
@@ -695,14 +698,17 @@ class WorkflowItem:
             return False
 
         if table == N.review:
-            if (frozen or done) and not remaining:
+            if frozen:
+                return False
+
+            if done and not remaining:
                 return False
 
             taskKind = G(taskInfo, N.kind)
             if not kind or kind != taskKind or kind != myKind:
                 return False
 
-            answer = remaining or not locked or remaining
+            answer = remaining or not done or remaining
             if not answer:
                 return False
 

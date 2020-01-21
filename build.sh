@@ -28,6 +28,8 @@ function givehelp {
     echo "servetest   :     idem, but use test database"
     echo "servetest p :     idem, but Flask development mode is off"
     echo "ship msg    : run tests, build docs, commit/push all code to github, msg=commit message"
+    echo "stamp       : add a slug to updated css and js file names to invalidate caches"
+    echo "stamp un    : use unslugged css and js file names"
     echo "stats       : collect codebase statistics"
     echo ""
     echo "    Production only:"
@@ -382,6 +384,11 @@ function serverun {
     setvars "$mode"; python3 -m flask run
 }
 
+function stamp {
+    cd $root
+    python3 server/stamp.py "$@"
+}
+
 function stats {
     cd $root
     xd=".git,images,fonts,favicons"
@@ -594,7 +601,7 @@ function update {
 mayrun="1"
 
 case "$1" in
-    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stats)
+    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stamp|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
@@ -617,5 +624,11 @@ elif [[ "$mayrun" == "0" ]]; then
 else
     command="$1"
     shift
+    if [[ "$ON_DANS" == "0" ]]; then
+        case "$command" in
+            gits|guni|gunitest|serve|servetest|ship|test|testc)
+                stamp;;
+        esac
+    fi
     $command "$@"
 fi
