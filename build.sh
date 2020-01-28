@@ -51,7 +51,7 @@ function givehelp {
     echo "install     : install the app as a service running with gunicorn"
     echo "restart     : restart the webservice"
     echo "update      : fetch new code and deploy it on the server"
-    echo "activate36  : activate python36 in a spawned shell"
+    # echo "activate36  : activate python36 in a spawned shell"
     echo ""
     echo "    Both:"
     echo "      prod db = dariah"
@@ -157,13 +157,13 @@ function mongostop {
 
 # PYTHON 36
 
-function activate36here {
-    source /opt/rh/rh-python36/enable
-}
+# function activate36here {
+#     source /opt/rh/rh-python36/enable
+# }
 
-function activate36spawn {
-    scl enable rh-python36 bash
-}
+# function activate36spawn {
+#     scl enable rh-python36 bash
+# }
 
 # SETTING THE DIRECTORY AND LOCAL VARS
 
@@ -488,7 +488,7 @@ function updateprocess {
     gitpullforce
     chown -R guni:guni .
     systemctl stop dariah-contrib.service
-    activate36here
+    # activate36here
     python3 -m compileall server
     guniasservice
     systemctl start dariah-contrib.service
@@ -500,9 +500,9 @@ function updateprocess {
 #   do not perform cd-sensitive shell commands
 #   only call functions of level 0 and 1 or 2
 
-function activate36 {
-    activate36spawn
-}
+# function activate36 {
+#     activate36spawn
+# }
 
 function databu {
     datamanage backup "$@"
@@ -641,7 +641,8 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    activate36|log|gunistatus|gunistop|install|restart|update)
+    log|gunistatus|gunistop|install|restart|update)
+    # activate36|log|gunistatus|gunistop|install|restart|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
