@@ -1,3 +1,5 @@
+# entry point
+
 import sys
 from control.app import appFactory
 from control.utils import serverprint
