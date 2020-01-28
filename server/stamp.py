@@ -1,3 +1,46 @@
+"""Tweak the inclusion of CSS and JS files.
+
+An HTML file that is served on the web, and that references stylesheets and
+scripts, will end up getting them from the browser cache in most cases.
+
+Fact of life: if the developer changes the Javascript or stylesheet, most browser
+do not see it, because they still fetch the old files from cache.
+
+It is tedious to notify your users to do a so-called hard-refresh. The command is
+different for different browsers, the concept is not widely known, and the effect is not
+always guaranteed.
+
+It is also clumsy to set a time-out on the cached files. After a fix, you want
+to see the effect immediately. And if nothing has changed, there is no reason to
+invalidate the cache on a regular basis.
+
+Here we copy the files: we add a *slug* after the base name of the file, where
+the slug is a series of digits, based on the modification time of the file.
+
+Before shipping the html template file(s) and the stylesheets and scripts,
+we make a copy of all stylesheets and scripts with a *slugged* name, and we let
+the templates reference those files by their slugged counterparts.
+
+!!! hint "Calling stamp.py"
+    There are two ways to call this module on the command line:
+
+    ```python3 stamp.py```
+
+    Treats all relevant files with a slug, and takes care that all templates
+    cll them by their slugged copies.
+
+    ```python3 stamp.py un```
+
+    Changes all template files back so that they call the unslugged versions
+    of stylesheets and scripts.
+
+!!! caution "Manual editing"
+    Only edit the unslugged files.
+    As for templates: only edit the template that end in `Base`, as in
+    `indexBase.html`. The version that will call the slugged files is generated
+    from this when `stamp.py` runs and saved as `index.html`.
+"""
+
 import sys
 import os
 import re

@@ -102,8 +102,8 @@ def test_long(clients):
 
 
 def test_static(clientPublic):
-    assertStatus(clientPublic, STATIC, 400)
-    assertStatus(clientPublic, f"{STATIC}/", 400)
+    assertStatus(clientPublic, STATIC, 303)
+    assertStatus(clientPublic, f"{STATIC}/", 303)
     assertStatus(clientPublic, f"{STATIC}{FAV}", 303)
     assertStatus(clientPublic, f"{STATIC}{FAV}/", 303)
 

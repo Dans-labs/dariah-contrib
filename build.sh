@@ -14,8 +14,9 @@ function givehelp {
     echo "Management commands for development, testing, and production"
     echo ""
     echo "    Development only:"
-    echo "      test db = dariah_test"
-    echo "      dev  db = dariah_dev"
+    echo "      test db   = dariah_test"
+    echo "      dev  db   = dariah_dev"
+    echo "      dev  prod = dariah"
     echo "<task>:"
     echo "dataxf lab  : get backup from production directory under lab"
     echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
@@ -27,6 +28,8 @@ function givehelp {
     echo "serve p     :     idem, but Flask development mode is off"
     echo "servetest   :     idem, but use test database"
     echo "servetest p :     idem, but Flask development mode is off"
+    echo "serveprod   :     idem, but use prod database"
+    echo "serveprod p :     idem, but Flask development mode is off"
     echo "ship msg    : run tests, build docs, commit/push all code to github, msg=commit message"
     echo "stamp       : add a slug to updated css and js file names to invalidate caches"
     echo "stamp un    : use unslugged css and js file names"
@@ -55,8 +58,13 @@ function givehelp {
     echo "      dev  db = dariah_dev"
     echo "      test db = dariah_test"
     echo "<task>:"
+    echo "consolidate : convert backup of production db into consolidated yaml"
+    echo "cull        : remove the legacy contributions from the dataset"
     echo "databu [lab]: dump the database into local directory under current date or lab"
     echo "datarest lab: restore the database from local directory under lab"
+    echo "on a server, the dariah db is chosen; on the dev machine dariah_dev is chosen"
+    echo "datarest lab p: restore production database from local directory under lab"
+    echo "choose the dariah db in all cases"
     echo "dbinittest  : clean the test db in Mongo"
     echo "dbroot      : restore the root permissions: only the one user in base.yaml"
     echo "dbroottest  :     idem, but on test database"
@@ -102,13 +110,17 @@ fi
 # FUNCTIONS
 
 function setvars {
+    regime="development"
     if [[ "$1" == "test" ]]; then
         mode="test"
     else
         mode=normal
     fi
+    if [[ "$1" == "prod" ]]; then
+        regime="production"
+    fi
     export PYTHONDONTWRITEBYTECODE=1
-    export FLASK_APP="index:factory('development', '$mode')"
+    export FLASK_APP="index:factory('$regime', '$mode')"
     export FLASK_RUN_PORT=8001
     if [[ "$2" != "p" ]]; then
         export FLASK_ENV=development
@@ -165,6 +177,18 @@ apidocbase='docs/api/html'
 #   cd to the right dir
 #   do not call functions of level 1 or higher
 
+function consolidate {
+    cd $root/export
+    mongostart
+    python3 yamlFromMongo.py
+}
+
+function cull {
+    cd $root/import
+    mongostart
+    python3 cull.py
+}
+
 function datamanage {
     if [[ "$1" == "backup" ]]; then
         shift
@@ -192,11 +216,17 @@ function datamanage {
         if [[ "$1" == "" ]]; then
             echo "No backup specified to restore from"
         else
-            datastore="$BACKUP/$1"
+            label="$1"
+            shift
+            datastore="$BACKUP/$label"
+            chosendb="$DB"
+            if [[ "$1" == "p" ]]; then
+                chosendb="$DB_PROD"
+            fi
             if [ -d "$datastore" ]; then
                 mongostart
-                mongorestore --drop --nsFrom "$DB.*" --nsTo "$DB""_restored.*" "$datastore"
-                echo "Database $DB""_restored restored from $DB"
+                mongorestore --drop --nsFrom "$chosendb.*" --nsTo "$chosendb""_restored.*" "$datastore"
+                echo "Database $chosendb""_restored restored from $chosendb"
             else
                 echo "Could not find directory '$datastore'"
             fi
@@ -378,6 +408,8 @@ function serverun {
     mongostart
     if [[ "$1" == "test" ]]; then
         mode="test"
+    elif [[ "$1" == "prod" ]]; then
+        mode="prod"
     else
         mode=$MODE
     fi
@@ -562,6 +594,10 @@ function serve {
     serverun "" "$@"
 }
 
+function serveprod {
+    serverun "prod" "$@"
+}
+
 function servetest {
     serverun "test" "$@"
 }
@@ -601,7 +637,7 @@ function update {
 mayrun="1"
 
 case "$1" in
-    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|servetest|ship|stamp|stats)
+    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
@@ -609,7 +645,7 @@ case "$1" in
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
-    databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
+    consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
         mayrun="1";;
     *)
         mayrun="-1";;
@@ -626,7 +662,7 @@ else
     shift
     if [[ "$ON_DANS" == "0" ]]; then
         case "$command" in
-            gits|guni|gunitest|serve|servetest|ship|test|testc)
+            gits|guni|gunitest|serve|serveprod|servetest|ship|test|testc)
                 stamp;;
         esac
     fi

@@ -3,7 +3,7 @@ indexPage: index.html
 
 limits:
   action: 20
-  anything: 50
+  anything: 100
   assessed: 2
   country: 5
   default: 50

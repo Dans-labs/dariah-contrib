@@ -164,12 +164,18 @@ class Overview:
         self.isSuperUser = auth.superuser()
         self.isCoord = auth.coordinator()
 
+        colSpecs = COLSPECS
+        groupCols = GROUP_COLS
+        allGroupSet = set(groupCols)
+
         accessRep = auth.credentials()[1]
 
         rawSortCol = request.args.get(N.sortcol, E)
         rawReverse = request.args.get(N.reverse, E)
         country = request.args.get(N.country, E)
-        groups = request.args.get(N.groups, E)
+        groups = COMMA.join(
+            g for g in request.args.get(N.groups, E).split(COMMA) if g in allGroupSet
+        )
 
         self.getCountry(country)
         self.getContribs()
@@ -177,9 +183,6 @@ class Overview:
         chosenCountry = self.chosenCountry
         chosenCountryId = self.chosenCountryId
         chosenCountryIso = self.chosenCountryIso
-
-        colSpecs = COLSPECS
-        groupCols = GROUP_COLS
 
         if chosenCountryId is not None:
             colSpecs = COLSPECS[1:]
@@ -193,7 +196,6 @@ class Overview:
         labels = dict((c[0], c[2] if len(c) > 2 else c[0]) for c in colSpecs)
         sortDefault = cols[-1]
 
-        allGroupSet = set(groupCols)
         groupsChosen = [] if not groups else groups.split(COMMA)
         groupSet = set(groupsChosen)
         groupStr = ("""-by-""" if groupSet else E) + MIN.join(sorted(groupSet))

@@ -125,7 +125,7 @@ def checkBounds(**kwargs):
         is delivered
     """
 
-    default = G(LIMITS, N.default, default=50)
+    default = G(LIMITS, N.default, default=100)
     maxLen = G(LIMITS, N.request, default=default)
 
     if request.content_length and request.content_length > maxLen:
@@ -590,7 +590,6 @@ def appFactory(regime, test, debug, **kwargs):
         checkBounds(anything=anything)
 
         flash(f"Cannot find {anything}", "error")
-        abort(400)
         return redirectResult(START, False)
 
     def noTable(table):
