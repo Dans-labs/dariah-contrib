@@ -47,6 +47,7 @@ function givehelp {
     echo "log s       : see the shibboleth log"
     echo "log sw      : see the shibboleth warning log"
     echo "log st      : see the shibboleth transaction log"
+    echo "gitp        : pulls latest repo contents from github abd overwrites existing contents unconditionally"
     echo "gunistatus  : see the status of the gunicorn service"
     echo "gunistop    : stop serving with gunicorn"
     echo "install     : install the app as a service running with gunicorn"
@@ -669,7 +670,7 @@ case "$1" in
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
-    log|gunistatus|gunistop|install|restart|update)
+    log|gitp|gunistatus|gunistop|install|restart|update)
     # activate36|log|gunistatus|gunistop|install|restart|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
