@@ -124,6 +124,7 @@ function setvars {
     fi
     export PYTHONDONTWRITEBYTECODE=1
     export FLASK_APP="index:factory('$regime', '$mode')"
+    echo "FLASK_APP=$FLASK_APP"
     export FLASK_RUN_PORT=8001
     if [[ "$2" != "p" ]]; then
         export FLASK_ENV=development
