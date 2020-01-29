@@ -581,6 +581,10 @@ function dbroottest {
     dbrootreset "test"
 }
 
+function gitp {
+    gitpullforce "$@"
+}
+
 function gits {
     gitsave "$@"
 }
