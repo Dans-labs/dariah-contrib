@@ -234,7 +234,7 @@ function datamanage {
             restored="_restored"
             if [[ "$1" == "p" ]]; then
                 chosendb="$DB_PROD"
-            elif [[ "$1" == "q" ]]; then
+            elif [[ "$1" == "x" ]]; then
                 restored=""
             fi
             if [ -d "$datastore" ]; then
