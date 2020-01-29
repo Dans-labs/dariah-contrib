@@ -18,7 +18,8 @@ function givehelp {
     echo "      dev  db   = dariah_dev"
     echo "      dev  prod = dariah"
     echo "<task>:"
-    echo "dataxf lab  : get backup from production directory under lab"
+    echo "datadown lab: download backup from production machine in directory lab"
+    echo "dataup lab  : upload backup lab to production machine"
     echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
     echo "docs        : build and serve github pages documentation"
     echo "docsapi     : generate api docs from docstrings, also in tests"
@@ -61,9 +62,10 @@ function givehelp {
     echo "consolidate : convert backup of production db into consolidated yaml"
     echo "cull        : remove the legacy contributions from the dataset"
     echo "databu [lab]: dump the database into local directory under current date or lab"
-    echo "datarest lab: restore the database from local directory under lab"
-    echo "on a server, the dariah db is chosen; on the dev machine dariah_dev is chosen"
-    echo "datarest lab p: restore production database from local directory under lab"
+    echo "databu [lab] p: dump the productiondatabase into local directory under current date or lab"
+    echo "datarest lab: restore the database from local directory under lab, append _restored to db name"
+    echo "datarest lab p: restore production database from local directory under lab, append _restored to db name"
+    echo "datarest lab x: restore production database from local directory under lab, replace existing db"
     echo "choose the dariah db in all cases"
     echo "dbinittest  : clean the test db in Mongo"
     echo "dbroot      : restore the root permissions: only the one user in base.yaml"
@@ -187,16 +189,24 @@ function cull {
     cd $root/import
     mongostart
     python3 cull.py
+    datastore="$BACKUP/culled"
+    mongodump -d "dariah_restored" -o "$datastore"
+    mongorestore --drop --nsFrom "dariah_restored.*" --nsTo "dariah.*" "$datastore"
 }
 
 function datamanage {
     if [[ "$1" == "backup" ]]; then
         shift
-        if [[ "$1" != "" ]]; then
+        if [[ "$1" != "" && "$1" != "p" ]]; then
             datastore="$1"
+            shift
         else
             today=`date +'%Y-%m-%d'`
             datastore="$BACKUP/$today"
+        fi
+        chosendb="$DB"
+        if [[ "$1" == "p" ]]; then
+            chosendb="$DB_PROD"
         fi
         if [ -d "$datastore" ]; then
             echo "Backup destination already exists: '$datastore'"
@@ -205,8 +215,8 @@ function datamanage {
             direrror=$?
             if [[ $direrror == 0 ]]; then
                 mongostart
-                mongodump -d $DB -o "$datastore"
-                echo "Database $DB backed up in $datastore"
+                mongodump -d $chosendb -o "$datastore"
+                echo "Database $chosendb backed up in $datastore"
             else
                 echo "Could not create directory '$datastore'"
             fi
@@ -220,25 +230,35 @@ function datamanage {
             shift
             datastore="$BACKUP/$label"
             chosendb="$DB"
+            restored="_restored"
             if [[ "$1" == "p" ]]; then
                 chosendb="$DB_PROD"
+            elif [[ "$1" == "q" ]]; then
+                restored=""
             fi
             if [ -d "$datastore" ]; then
                 mongostart
-                mongorestore --drop --nsFrom "$chosendb.*" --nsTo "$chosendb""_restored.*" "$datastore"
-                echo "Database $chosendb""_restored restored from $chosendb"
+                mongorestore --drop --nsFrom "$chosendb.*" --nsTo "$chosendb$restored"".*" "$datastore"
+                echo "Database $chosendb$restored"" restored from $chosendb"
             else
                 echo "Could not find directory '$datastore'"
             fi
         fi
-    elif [[ "$1" == "get" ]]; then
+    elif [[ "$1" == "down" ]]; then
         shift
         if [[ "$1" == "" ]]; then
-            echo "No backup specified to restore from"
+            echo "No backup specified to download from production machine"
         else
-            datastore="$BACKUP_PROD/$1"
             cd $BACKUP_DEV
-            scp -r "dirkr@tclarin11.dans.knaw.nl:/$datastore" .
+            scp -r "dirkr@tclarin11.dans.knaw.nl:/$BACKUP_PROD/$1" .
+        fi
+    elif [[ "$1" == "up" ]]; then
+        shift
+        if [[ "$1" == "" ]]; then
+            echo "No backup specified to upload to production machine"
+        else
+            cd $BACKUP_DEV
+            scp -r "$1" "dirkr@tclarin11.dans.knaw.nl:/$BACKUP_PROD"
         fi
     fi
 }
@@ -512,8 +532,12 @@ function datarest {
     datamanage restore "$@"
 }
 
-function dataxf {
-    datamanage get "$@"
+function datadown {
+    datamanage down "$@"
+}
+
+function dataup {
+    datamanage up "$@"
 }
 
 function dbinitdev {
@@ -637,7 +661,7 @@ function update {
 mayrun="1"
 
 case "$1" in
-    dataxf|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
+    datadown|dataup|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;

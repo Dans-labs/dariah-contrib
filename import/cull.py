@@ -1,3 +1,12 @@
+"""Culling
+
+This is a messy, one time task to cull the current contents
+of the production database with contributions.
+
+We have to strip the legacy and remove some frills in the data that have
+been introduced accidentally.
+"""
+
 import sys
 import collections
 from datetime import datetime as dt
@@ -7,12 +16,126 @@ from bson.objectid import ObjectId
 
 
 DATABASE = "dariah_restored"
-DB = MongoClient()[DATABASE]
+DATABASE_PROD = "dariah"
+MC = MongoClient()
+DB = MC[DATABASE]
 
 
 def info(x):
     sys.stdout.write("{}\n".format(x))
 
+
+# get the users
+
+allUsers = [doc for doc in DB.user.find()]
+eppnMap = {doc["eppn"]: doc["_id"] for doc in allUsers}
+userFields = {
+    "creator": False,
+    "editors": True,
+    "reviewerE": False,
+    "reviewerF": False,
+}
+
+# tweak a user
+
+tweakUsers = [
+    doc
+    for doc in allUsers
+    if doc["eppn"] == "PaulinRibbe@dariah.eu" and "name" not in doc
+]
+if tweakUsers:
+    tweakUser = tweakUsers[0]
+    DB.user.update_one(
+        {"_id": tweakUser["_id"]},
+        {"$set": {"firstName": "Paulin", "lastName": "Ribbe", "name": "Paulin Ribbe"}},
+    )
+    info(f"""Updated irregular user "Paulin Ribbe" """)
+    allUsers = [doc for doc in DB.user.find()]
+
+# Drop some stray contributions
+
+for doc in DB.contrib.find({"title": "88milSMS"}):
+    DB.contrib.delete_one({"_id": doc["_id"]})
+    info(f"""Contrib deleted: "{doc["title"]}" """)
+
+# get contribs and assessments
+currentContribs = [doc for doc in DB.contrib.find() if not doc.get("isPristine", False)]
+currentContribIds = {doc["_id"] for doc in currentContribs}
+currentAssessments = [
+    doc for doc in DB.assessment.find() if doc["contrib"] in currentContribIds
+]
+nCurrentAss = len(currentAssessments)
+currentAssessmentIds = {doc["_id"] for doc in currentAssessments}
+
+# Remove a legacy user from an editors field
+
+frnc01 = "FRNC01"
+frnc01Id = eppnMap.get(frnc01, None)
+
+if frnc01Id:
+    for doc in DB.contrib.find({"title": "NAKALA, a tool to expose research data"}):
+        newValue = [u for u in doc.get("editors", []) if u != eppnMap[frnc01]]
+        DB.contrib.update_one({"_id": doc["_id"]}, {"$set": {"editors": newValue}})
+        info(f"""Editors changed: removed {frnc01} from "{doc["title"]}" """)
+
+# Modify a stray score of "7 - " into "4 - complete" in every assesment that uses it,
+# and gthen remove the "7 - score"
+
+strayScoreId = ObjectId("5b44c1f0b5dbf5efda72fad7")
+strayScores = list(DB.score.find({"_id": strayScoreId}))
+if strayScores:
+    strayScore = strayScores[0]
+    strayStr = f"{strayScore.get('score', '??')} : {strayScore.get('level', '??')}"
+
+    criteriaWithStrayScoreIds = list(
+        doc["criteria"] for doc in DB.score.find({"_id": strayScoreId})
+    )
+    if criteriaWithStrayScoreIds:
+        criteriaWithStrayScoreId = criteriaWithStrayScoreIds[0]
+        criteriaWithStrayScores = list(
+            DB.criteria.find({"_id": criteriaWithStrayScoreId})
+        )
+        if criteriaWithStrayScores:
+            criteriaWithStrayScore = criteriaWithStrayScores[0]
+
+            neighbourScores = list(
+                DB.score.find({"criteria": criteriaWithStrayScoreId})
+            )
+            replaceScore = None
+            for doc in neighbourScores:
+                if doc["score"] == 4:
+                    replaceScore = doc
+
+            if replaceScore:
+                replaceStr = (
+                    f"{replaceScore.get('score', '??')} :"
+                    f" {replaceScore.get('level', '??')}"
+                )
+
+                strayCriteriaEntries = list(
+                    DB.criteriaEntry.find({"score": strayScoreId})
+                )
+                strayCriteriaEntryIds = {doc["_id"] for doc in strayCriteriaEntries}
+                strayAssessments = {doc["assessment"] for doc in strayCriteriaEntries}
+
+                tweakAssessments = {}
+                for doc in currentAssessments:
+                    if doc["_id"] in strayAssessments:
+                        tweakAssessments[doc["_id"]] = doc["title"]
+
+                replaceScoreId = replaceScore["_id"]
+                for doc in strayCriteriaEntries:
+                    title = tweakAssessments[doc["assessment"]]
+
+                    DB.criteriaEntry.update_one(
+                        {"_id": doc["_id"]}, {"$set": {"score": replaceScoreId}}
+                    )
+                    info(
+                        f"""Changed score {strayStr} into {replaceStr}"""
+                        f""" in assessment "{title}" """
+                    )
+    DB.score.delete_one({"_id": strayScoreId})
+    info(f"Deleted stray score {strayStr}")
 
 # Drop spurious tables
 
@@ -50,12 +173,6 @@ legacyAssessments = [
 danglingAssessments = [
     doc for doc in DB.assessment.find() if doc["contrib"] not in currentContribIds
 ]
-currentAssessments = [
-    doc for doc in DB.assessment.find() if doc["contrib"] in currentContribIds
-]
-nCurrentAss = len(currentAssessments)
-currentAssessmentIds = {doc["_id"] for doc in currentAssessments}
-
 nLegacyAss = len(legacyAssessments)
 nDanglingAss = len(danglingAssessments)
 
@@ -100,16 +217,21 @@ info(f"Dangling reviewEntries : {nDanglingReviewEntries:>4}")
 # Remove the legacy contributions
 
 DB.contrib.delete_many({"_id": {"$in": list(legacyContribIds)}})
+info(f"Deleted {len(legacyContribIds)} legacy contributions")
+
 allContribs = [doc for doc in DB.contrib.find()]
 nAll = len(allContribs)
 info(f"All remaining contributions: {nAll:>4}")
 
 # Change name of betaPackage into prodPackage and set the end date on 2030
 
-DB.package.update_one(
-    {"title": "betaPackage"},
-    {"$set": {"title": "productionPackage", "endDate": dt(2029, 12, 31, 23, 59, 59)}},
-)
+betaPackages = list(DB.package.find({"title": "betaPackage"}))
+if betaPackages:
+    DB.package.update_one(
+        {"title": "betaPackage"},
+        {"$set": {"title": "productionPackage", "endDate": dt(2029, 12, 31, 23, 59, 59)}},
+    )
+    info(f"""Changed package name "betaPackage" into "productionPackage" """)
 
 # Check the types of the contributions
 
@@ -120,6 +242,7 @@ for doc in DB.package.find():
         continue
     else:
         DB.package.delete_one({"_id": doc["_id"]})
+        info(f"Deleted legacy package: {doc['title']}")
 
 typeInfo = {}
 for doc in DB.typeContribution.find():
@@ -140,10 +263,11 @@ for (docs, field, key) in [
         if typeContribution and typeContribution not in packageTypes:
             legacyTypes[typeContribution][key] += 1
 
-info(f"Found {len(legacyTypes)} legacy type(s):")
-for (typeContribution, data) in sorted(legacyTypes.items()):
-    for (k, n) in sorted(data.items()):
-        info(f"in {n:>3} {k}(s): {typeInfo[typeContribution]}")
+info(f"Found {len(legacyTypes)} legacy type(s) in use.")
+if legacyTypes:
+    for (typeContribution, data) in sorted(legacyTypes.items()):
+        for (k, n) in sorted(data.items()):
+            info(f"in {n:>3} {k}(s): {typeInfo[typeContribution]}")
 
 keepTypes = packageTypes | set(legacyTypes)
 
@@ -154,8 +278,9 @@ for doc in DB.typeContribution.find():
         continue
     else:
         DB.typeContribution.delete_one({"_id": doc["_id"]})
+        info(f"Deleted legacy type: {typeInfo[doc['_id']]}")
 
-info("Keeping types:")
+info(f"Keeping types:")
 for doc in DB.typeContribution.find():
     info(f"{typeInfo[doc['_id']]}")
 
@@ -174,6 +299,7 @@ for doc in DB.criteria.find():
         continue
     else:
         DB.criteria.delete_one({"_id": doc["_id"]})
+        info(f"Deleted legacy criteria: {doc['criterion']}")
 
 allCriteria = [doc for doc in DB.criteria.find()]
 allCriteriaIds = {doc["_id"] for doc in allCriteria}
@@ -198,50 +324,16 @@ for doc in DB.score.find():
         continue
     else:
         DB.score.delete_one({"_id": doc["_id"]})
-
-# Make a note of an outlier score (a later addition by Francesca Morselli)
-
-strayScoreId = ObjectId("5b44c1f0b5dbf5efda72fad7")
-strayScore = list(DB.score.find({"_id": strayScoreId}))[0]
-info(
-    f"Strange score: {strayScore.get('level', '??')} : {strayScore.get('score', '??')}"
-)
-
-criteriaOfStrayId = list(
-    doc["criteria"] for doc in DB.score.find({"_id": strayScoreId})
-)[0]
-criteriaOfStray = list(DB.criteria.find({"_id": criteriaOfStrayId}))[0]
-info(f"Criterion with a strange score:")
-info(criteriaOfStray["criterion"])
-info(criteriaOfStray["remarks"])
-
-neighbourScores = list(DB.score.find({"criteria": criteriaOfStrayId}))
-info("Scores for this criterion:")
-for doc in neighbourScores:
-    info(f"score: {doc.get('level', '??')} : {doc.get('score', '??')}")
-
-strayCriteriaEntries = list(DB.criteriaEntry.find({"score": strayScoreId}))
-info(f"{len(strayCriteriaEntries)} criteria entries use this score")
-strayCriteriaEntryIds = {doc["_id"] for doc in strayCriteriaEntries}
-strayAssessments = {doc["assessment"] for doc in strayCriteriaEntries}
-info(f"{len(strayAssessments)} assessments use this score:")
-for doc in currentAssessments:
-    if doc["_id"] in strayAssessments:
-        info(f"Strange score 7 used in: {doc['title']}")
+        info(
+            f"Deleted legacy score: {doc.get('level', '??')}"
+            f" - {doc.get('score', '??')}"
+        )
 
 
 allScore = [doc for doc in DB.score.find()]
 allScoreIds = {doc["_id"] for doc in allScore}
 info(f"{len(allScore)} scores left")
 
-allUsers = [doc for doc in DB.user.find()]
-eppnMap = {doc["eppn"]: doc["_id"] for doc in allUsers}
-userFields = {
-    "creator": False,
-    "editors": True,
-    "reviewerE": False,
-    "reviewerF": False,
-}
 occurringUsers = collections.defaultdict(list)
 for table in """
     assessment
@@ -286,12 +378,11 @@ legacyUsers = [
     for doc in allUsers
     if doc.get("isPristine", False) and doc["_id"] not in occurringUsers
 ]
-info(f"{len(allUsers)} in user table")
+info(f"{len(allUsers)} users in user table")
 info(f"{len(legacyUsers)} legacy users")
 info(f"{len(keepUsers)} occurring users to keep")
-for (label, users) in (
-    ("Keep users", keepUsers),
-    ("Legacy users", legacyUsers),
+for (i, (label, users)) in enumerate(
+    (("Keep users", keepUsers), ("Legacy users", legacyUsers),)
 ):
     info(label)
     collect = []
@@ -304,32 +395,10 @@ for (label, users) in (
         eppn = doc.get("eppn", "")
         name = fullName if fullName else " ".join(x for x in (firstName, lastName) if x)
         collect.append((f"{name} ({eppn})", pristine, len(occurrences)))
+        if i == 1:
+            DB.user.delete_one({"_id": doc["_id"]})
     for (name, pristine, n) in sorted(collect):
-        info(f"{n:>3} {pristine}{name}")
-
-# note some users:
-
-for eppn in ("CIO01", "FRNC01"):
-    occs = occurringUsers[eppnMap[eppn]]
-    info(f"{eppn}:")
-    for (table, doc, field) in occs:
-        info(f"{table}-{field} ({doc.get('title', doc.get('rep'))})")
-        if eppn == "FRNC01":
-            if field == "editors":
-                newValue = [u for u in doc[field] if u != eppnMap[eppn]]
-                DB[table].update_one({"_id": doc["_id"]}, {"$set": {field: newValue}})
-
-
-tweakUser = [doc for doc in keepUsers if doc["eppn"] == "PaulinRibbe@dariah.eu"][0]
-DB.user.update_one(
-    {"_id": doc["_id"]},
-    {"$set": {"firstName": "Paulin", "lastName": "Ribbe", "name": "Paulin Ribbe"}},
-)
-
-# determine for current contributions
-#   the users involved in contribs, assessments, reviews, criteriaEntries,
-#   reviewEntries, and all valueTables
-#   also think of the editors fields, the reviewerEF fields
-#   delete these users
-#
-# After running this: make a backup and restore it on the production system
+        if i == 1:
+            info(f"Deleted legacy user {n:>3} {pristine}{name}")
+        else:
+            info(f"Kept user {n:>3} {pristine}{name}")
