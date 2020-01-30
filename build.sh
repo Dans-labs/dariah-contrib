@@ -18,8 +18,10 @@ function givehelp {
     echo "      dev  db   = dariah_dev"
     echo "      dev  prod = dariah"
     echo "<task>:"
-    echo "datadown lab: download backup from production machine in directory lab"
-    echo "dataup lab  : upload backup lab to production machine"
+    echo "datadown lab: download backup from remote machine in directory lab"
+    echo "datadown lab p: download backup from prodcution machine in directory lab"
+    echo "dataup lab  : upload backup lab to remote machine"
+    echo "dataup lab p  : upload backup lab to production machine"
     echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
     echo "docs        : build and serve github pages documentation"
     echo "docsapi     : generate api docs from docstrings, also in tests"
@@ -142,7 +144,9 @@ function setvars {
 
 function mongostart {
     if [[ "$ON_DANS" == "1" ]]; then
-        service mongod start
+        if [[ "$ON_PROD" == "1" ]]; then
+            service mongod start
+        fi
     else
         if [[ `ps aux | grep -v grep | grep mongod` ]]; then
             :
@@ -154,7 +158,9 @@ function mongostart {
 
 function mongostop {
     if [[ "$ON_DANS" == "1" ]]; then
-        service mongod stop
+        if [[ "$ON_PROD" == "1" ]]; then
+            service mongod stop
+        fi
     else
         pid=`ps aux | grep -v grep | grep mongod | awk '{print $2}'`
         if [[ "$pid" == "" ]]; then
@@ -255,19 +261,33 @@ function datamanage {
         fi
     elif [[ "$1" == "down" ]]; then
         shift
-        if [[ "$1" == "" ]]; then
+        if [[ "$1" == "" || "$1" == "p" || "$1" == "t" ]]; then
             echo "No backup specified to download from production machine"
         else
             cd $BACKUP_DEV
-            scp -r "dirkr@tclarin11.dans.knaw.nl:/$BACKUP_PROD/$1" .
+            lab="$1"
+            shift
+            if [[ "$1" == "p" ]]; then
+                machine="$HOST_PROD"
+            else
+                machine="$HOST_TEST"
+            fi
+            scp -r "dirkr@${machine}:/$BACKUP_PROD/$lab" .
         fi
     elif [[ "$1" == "up" ]]; then
         shift
-        if [[ "$1" == "" ]]; then
+        if [[ "$1" == "" || "$1" == "p" || "$1" == "t" ]]; then
             echo "No backup specified to upload to production machine"
         else
+            lab="$1"
+            shift
+            if [[ "$1" == "p" ]]; then
+                machine="$HOST_PROD"
+            else
+                machine="$HOST_TEST"
+            fi
             cd $BACKUP_DEV
-            scp -r "$1" "dirkr@tclarin11.dans.knaw.nl:/$BACKUP_PROD"
+            scp -r "$lab" "dirkr@${machine}:/$BACKUP_PROD"
         fi
     fi
 }
