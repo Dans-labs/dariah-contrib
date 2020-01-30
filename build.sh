@@ -331,7 +331,7 @@ function guniasservice {
     cd $root
     id -u dariah
     if [[ "$?" == "1" ]]; then
-        adduser --no-create-home --system dariah
+        adduser --no-create-home --system -g dariah dariah
     fi
     openssl rand -base64 32 > "$APP_DIR/dariah_jwt.secret"
     logdir="/var/log/dariah-contrib"
