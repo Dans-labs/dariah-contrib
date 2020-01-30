@@ -97,6 +97,13 @@ BACKUP_DEV=~/Documents/DANS/projects/has/backups
 
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     ON_DANS="1"
+    if [[ "$HOSTNAME" == "$HOST_PROD" ]]; then
+        ON_PROD="1"
+    elif [[ "$HOSTNAME" == "$HOST_TEST" ]]; then
+        ON_PROD="0"
+    else
+        ON_PROD="0"
+    fi
     APP_DIR="/opt/web-apps"
     DB=$DB_PROD
     MODE="production"
@@ -322,20 +329,21 @@ function gitsave {
 
 function guniasservice {
     cd $root
-    id -u guni
+    id -u dariah
     if [[ "$?" == "1" ]]; then
-        adduser --no-create-home --system guni
+        adduser --no-create-home --system dariah
     fi
+    openssl rand -base64 32 > "$APP_DIR/dariah_jwt.secret"
     logdir="/var/log/dariah-contrib"
     if [ ! -d "$logdir" ]; then
         mkdir "$logdir"
     fi
-    chown -R guni:guni "$logdir"
+    chown -R dariah:dariah "$logdir"
     cp dariah-contrib.service /etc/systemd/system/
     chmod 755 /etc/systemd/system/dariah-contrib.service
     systemctl daemon-reload
     cd server
-    chown -R guni:guni .
+    chown -R dariah:dariah .
 
 }
 
@@ -508,11 +516,13 @@ function testrun {
 function updateprocess {
     cd $root
     gitpullforce
-    chown -R guni:guni .
+    chown -R dariah:dariah .
     systemctl stop dariah-contrib.service
     # activate36here
     python3 -m compileall server
-    guniasservice
+    if [[ "ON_PROD" != "1" ]]; then
+        guniasservice
+    fi
     systemctl start dariah-contrib.service
 }
 

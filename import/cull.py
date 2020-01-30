@@ -52,7 +52,15 @@ if tweakUsers:
     info(f"""Updated irregular user "Paulin Ribbe" """)
     allUsers = [doc for doc in DB.user.find()]
 
+# Drop contributions without a given title
+# (research has shown that no fields have significant content in these contriutions
+# and they do not have assessments etc.
 # Drop some stray contributions
+
+notitles = list(DB.contrib.find({"title": "no title"}))
+for doc in notitles:
+    DB.contrib.delete_one({"_id": doc["_id"]})
+info(f"""Contribs without title deleted: {len(notitles)}""")
 
 for doc in DB.contrib.find({"title": "88milSMS"}):
     DB.contrib.delete_one({"_id": doc["_id"]})

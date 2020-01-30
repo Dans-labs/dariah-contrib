@@ -158,14 +158,9 @@ development web server.
     The server needs a secret key, we store it in a
     fixed place. Here is the command to generate and store the key.
 
-    ```sh tab="server"
-    cd /opt/web-apps
-    date +%s | sha256sum | base64 | head -c 32 > dariah_jwt.secret
     ```
-
-    ``` sh tab="mac"
     cd /opt/web-apps
-    date +%s | shasum -a 256 | base64 | head -c 32 > dariah_jwt.secret
+    openssl rand -base64 32 > dariah_jwt.secret
     ```
 
 ## Web server
