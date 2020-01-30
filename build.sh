@@ -144,7 +144,7 @@ function setvars {
 
 function mongostart {
     if [[ "$ON_DANS" == "1" ]]; then
-        if [[ "$ON_PROD" == "1" ]]; then
+        if [[ "$ON_PROD" != "1" ]]; then
             service mongod start
         fi
     else
@@ -158,7 +158,7 @@ function mongostart {
 
 function mongostop {
     if [[ "$ON_DANS" == "1" ]]; then
-        if [[ "$ON_PROD" == "1" ]]; then
+        if [[ "$ON_PROD" != "1" ]]; then
             service mongod stop
         fi
     else
