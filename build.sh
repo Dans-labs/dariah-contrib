@@ -362,9 +362,7 @@ function guniasservice {
     cp dariah-contrib.service /etc/systemd/system/
     chmod 755 /etc/systemd/system/dariah-contrib.service
     systemctl daemon-reload
-    cd server
     chown -R dariah:dariah .
-
 }
 
 function gunirun {
