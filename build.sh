@@ -79,8 +79,9 @@ function givehelp {
     echo "gunitest    :     idem, but now with the test database"
     echo "mongostart  : start mongo db daemon"
     echo "mongostop   : start mongo db daemon"
-    echo "test       : run all tests"
+    echo "test        : run all tests"
     echo "testc       : run all tests with coverage"
+    echo "values table: print all values in a value table"
 }
 
 # ON WHAT MACHINE ARE WE ?
@@ -353,7 +354,10 @@ function guniasservice {
     if [[ "$?" == "1" ]]; then
         adduser --no-create-home --system -g dariah dariah
     fi
-    openssl rand -base64 32 > "$APP_DIR/dariah_jwt.secret"
+    secret="$APP_DIR/dariah_jwt.secret"
+    openssl rand -base64 32 > "$secret"
+    chown root:dariah $secret
+    chmod u=rw,g=r,o= $secret
     logdir="/var/log/dariah-contrib"
     if [ ! -d "$logdir" ]; then
         mkdir "$logdir"
@@ -538,10 +542,15 @@ function updateprocess {
     systemctl stop dariah-contrib.service
     # activate36here
     python3 -m compileall server
-    if [[ "ON_PROD" != "1" ]]; then
-        guniasservice
-    fi
     systemctl start dariah-contrib.service
+}
+
+function values {
+    cd $root/export
+    table="$1"
+    shift
+    mongostart
+    python3 yamlFromMongo.py "$table"
 }
 
 # LEVEL 2
@@ -704,7 +713,7 @@ case "$1" in
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
-    consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc)
+    consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc|values)
         mayrun="1";;
     *)
         mayrun="-1";;

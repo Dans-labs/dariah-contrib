@@ -167,9 +167,12 @@ DETAILS = {
     for table in USER_CONTENT
 }
 
+VERBOSE = True
+
 
 def info(x):
-    sys.stdout.write("{}\n".format(x))
+    if VERBOSE:
+        sys.stdout.write("{}\n".format(x))
 
 
 def getRep(table, doc):
@@ -344,4 +347,15 @@ def export():
     exportData(outDir)
 
 
-export()
+def printValues(table):
+    getData()
+    valIds = sorted(DATA[table], key=lambda _id: str(REP[table][_id]).lower(),)
+    for valId in valIds:
+        sys.stdout.write(f"""{REP[table][valId]}\n""")
+
+
+if len(sys.argv) == 1:
+    export()
+else:
+    VERBOSE = False
+    printValues(sys.argv[1])
