@@ -374,13 +374,13 @@ function gunirun {
     mongostart
     if [[ "$1" == "stop" ]]; then
         if [[ "$ON_DANS" == "1" ]]; then
-            systemctl stop dariah-contrib.service
+            sudo systemctl stop dariah-contrib.service
         else
             echo "gunicorn does not run as service on $HOSTNAME"
         fi
     elif [[ "$1" == "status" ]]; then
         if [[ "$ON_DANS" == "1" ]]; then
-            systemctl status dariah-contrib.service
+            sudo systemctl status dariah-contrib.service
         else
             echo "gunicorn does not run as service on $HOSTNAME"
         fi
@@ -406,7 +406,7 @@ function gunirun {
     fi
     host='-b 127.0.0.1:8001'
     if [[ "$ON_DANS" == "1" ]]; then
-        systemctl start dariah-contrib.service
+        sudo systemctl start dariah-contrib.service
     else
         logfile="--access-logfile -"
         fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
@@ -451,8 +451,8 @@ function logshow {
 }
 
 function restartprocess {
-    systemctl stop dariah-contrib.service
-    systemctl start dariah-contrib.service
+    sudo systemctl stop dariah-contrib.service
+    sudo systemctl start dariah-contrib.service
 }
 
 function serverun {
@@ -538,11 +538,11 @@ function testrun {
 function updateprocess {
     cd $root
     gitpullforce
-    chown -R dariah:dariah .
-    systemctl stop dariah-contrib.service
+    chown -R dirkr:dariah .
+    sudo systemctl stop dariah-contrib.service
     # activate36here
     python3 -m compileall server
-    systemctl start dariah-contrib.service
+    sudo systemctl start dariah-contrib.service
 }
 
 function values {
