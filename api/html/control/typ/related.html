@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.typ.related API documentation</title>
 <meta name="description" content="Types of values in related tables." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -135,8 +135,8 @@ class Related(TypeBase):
             if eid is None:
                 eid = G(record, N._id)
 
-            actualCls = self.actualCls(record)
-            atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
+            inActualCls = self.inActualCls(record)
+            atts = dict(cls=f&#34;tag medium {inActualCls}&#34;)
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -146,7 +146,7 @@ class Related(TypeBase):
         else:
             return titleStr
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -164,7 +164,9 @@ class Related(TypeBase):
 
         table = self.name
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+        )
         return E if isActual else &#34;inactual&#34;</code></pre>
 </details>
 </section>
@@ -306,8 +308,8 @@ such an id, otherwise <code>None</code>.</dd>
             if eid is None:
                 eid = G(record, N._id)
 
-            actualCls = self.actualCls(record)
-            atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
+            inActualCls = self.inActualCls(record)
+            atts = dict(cls=f&#34;tag medium {inActualCls}&#34;)
             if titleHint:
                 atts[N.title] = titleHint
 
@@ -317,7 +319,7 @@ such an id, otherwise <code>None</code>.</dd>
         else:
             return titleStr
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -335,7 +337,9 @@ such an id, otherwise <code>None</code>.</dd>
 
         table = self.name
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+        )
         return E if isActual else &#34;inactual&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -344,9 +348,16 @@ such an id, otherwise <code>None</code>.</dd>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="control.typ.value.Value" href="value.html#control.typ.value.Value">Value</a></li>
 <li><a title="control.typ.master.Master" href="master.html#control.typ.master.Master">Master</a></li>
+<li><a title="control.typ.value.Value" href="value.html#control.typ.value.Value">Value</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="control.typ.related.Related.needsContext"><code class="name">var <span class="ident">needsContext</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="control.typ.related.Related.context"><code class="name">var <span class="ident">context</span></code></dt>
@@ -356,8 +367,8 @@ such an id, otherwise <code>None</code>.</dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="control.typ.related.Related.actualCls"><code class="name flex">
-<span>def <span class="ident">actualCls</span></span>(<span>self, record)</span>
+<dt id="control.typ.related.Related.inActualCls"><code class="name flex">
+<span>def <span class="ident">inActualCls</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
@@ -377,7 +388,7 @@ which contribution types, and criteria are currently part of the workflow.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def actualCls(self, record):
+<pre><code class="python">def inActualCls(self, record):
     &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
 
     Actual records belong to the current `package`, a record that specifies
@@ -395,7 +406,9 @@ which contribution types, and criteria are currently part of the workflow.</p>
 
     table = self.name
 
-    isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+    isActual = (
+        table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+    )
     return E if isActual else &#34;inactual&#34;</code></pre>
 </details>
 </dd>
@@ -464,8 +477,8 @@ that the current user is interacting with.</dd>
         if eid is None:
             eid = G(record, N._id)
 
-        actualCls = self.actualCls(record)
-        atts = dict(cls=f&#34;tag medium {actualCls}&#34;)
+        inActualCls = self.inActualCls(record)
+        atts = dict(cls=f&#34;tag medium {inActualCls}&#34;)
         if titleHint:
             atts[N.title] = titleHint
 
@@ -508,7 +521,6 @@ that the current user is interacting with.</dd>
 <li><code><b><a title="control.typ.base.TypeBase" href="base.html#control.typ.base.TypeBase">TypeBase</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.base.TypeBase.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.base.TypeBase.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
@@ -542,9 +554,10 @@ that the current user is interacting with.</dd>
 <ul>
 <li>
 <h4><code><a title="control.typ.related.Related" href="#control.typ.related.Related">Related</a></code></h4>
-<ul class="">
-<li><code><a title="control.typ.related.Related.actualCls" href="#control.typ.related.Related.actualCls">actualCls</a></code></li>
+<ul class="two-column">
 <li><code><a title="control.typ.related.Related.context" href="#control.typ.related.Related.context">context</a></code></li>
+<li><code><a title="control.typ.related.Related.inActualCls" href="#control.typ.related.Related.inActualCls">inActualCls</a></code></li>
+<li><code><a title="control.typ.related.Related.needsContext" href="#control.typ.related.Related.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.related.Related.title" href="#control.typ.related.Related.title">title</a></code></li>
 <li><code><a title="control.typ.related.Related.titleHint" href="#control.typ.related.Related.titleHint">titleHint</a></code></li>
 <li><code><a title="control.typ.related.Related.titleStr" href="#control.typ.related.Related.titleStr">titleStr</a></code></li>
@@ -556,7 +569,7 @@ that the current user is interacting with.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

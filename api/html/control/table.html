@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.table API documentation</title>
 <meta name="description" content="Tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -258,8 +258,8 @@ class Table:
 
             The rules are:
             *   authenticated users may create new records in the main user tables:
-                `contrib`, `assessment`, `review` (under additional workflow
-                constraints)
+                `contrib`, and, (under additional workflow constraints),
+                `assessment`, `review`.
             *   superusers may create new value records (under additional
                 constraints)
             *   system admins may create new records in system tables
@@ -279,7 +279,7 @@ class Table:
             id of the inserted item
         &#34;&#34;&#34;
 
-        mayInsert = force or self.mayInsert
+        mayInsert = force or self.mayInsert and self.withInsert(N.my)
         if not mayInsert:
             return None
 
@@ -436,15 +436,14 @@ class Table:
             params.update(request.args)
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        insertButton = self.insertButton()
+        insertButton = self.insertButton() if self.withInsert(action) else E
         sep = NBSP if insertButton else E
 
         if action == N.assess:
             records = [
                 record
                 for record in records
-                if self.stage(record, N.assessment)
-                in ASSESSMENT_STAGES
+                if self.stage(record, N.assessment) in ASSESSMENT_STAGES
                 and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
                 and uid in self.creators(record, N.assessment)
@@ -476,8 +475,19 @@ class Table:
         nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
-            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
-            cls=f&#34;table {table}&#34;,
+            [H.span([insertButton, sep, nRep])] + recordsHtml, cls=f&#34;table {table}&#34;,
+        )
+
+    def withInsert(self, action):
+        context = self.context
+        auth = context.auth
+        table = self.table
+        return (
+            action == N.my and table == MAIN_TABLE
+            or table in VALUE_TABLES
+            and auth.superuser()
+            or table in SYSTEM_TABLES
+            and auth.sysadmin()
         )
 
     @staticmethod
@@ -578,7 +588,7 @@ class Table:
         table = self.table
         context = self.context
         auth = context.auth
-        return checkTable(table, auth.user) and (action is None or auth.authenticated())
+        return checkTable(auth, table) and (action is None or auth.authenticated())
 
     def title(self, record):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
@@ -861,8 +871,8 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 
             The rules are:
             *   authenticated users may create new records in the main user tables:
-                `contrib`, `assessment`, `review` (under additional workflow
-                constraints)
+                `contrib`, and, (under additional workflow constraints),
+                `assessment`, `review`.
             *   superusers may create new value records (under additional
                 constraints)
             *   system admins may create new records in system tables
@@ -882,7 +892,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             id of the inserted item
         &#34;&#34;&#34;
 
-        mayInsert = force or self.mayInsert
+        mayInsert = force or self.mayInsert and self.withInsert(N.my)
         if not mayInsert:
             return None
 
@@ -1039,15 +1049,14 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
             params.update(request.args)
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        insertButton = self.insertButton()
+        insertButton = self.insertButton() if self.withInsert(action) else E
         sep = NBSP if insertButton else E
 
         if action == N.assess:
             records = [
                 record
                 for record in records
-                if self.stage(record, N.assessment)
-                in ASSESSMENT_STAGES
+                if self.stage(record, N.assessment) in ASSESSMENT_STAGES
                 and self.stage(record, N.review, kind=N.final)
                 not in {N.reviewAccept, N.reviewReject}
                 and uid in self.creators(record, N.assessment)
@@ -1079,8 +1088,19 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
         return H.div(
-            [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
-            cls=f&#34;table {table}&#34;,
+            [H.span([insertButton, sep, nRep])] + recordsHtml, cls=f&#34;table {table}&#34;,
+        )
+
+    def withInsert(self, action):
+        context = self.context
+        auth = context.auth
+        table = self.table
+        return (
+            action == N.my and table == MAIN_TABLE
+            or table in VALUE_TABLES
+            and auth.superuser()
+            or table in SYSTEM_TABLES
+            and auth.sysadmin()
         )
 
     @staticmethod
@@ -1181,7 +1201,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
         table = self.table
         context = self.context
         auth = context.auth
-        return checkTable(table, auth.user) and (action is None or auth.authenticated())
+        return checkTable(auth, table) and (action is None or auth.authenticated())
 
     def title(self, record):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
@@ -1239,8 +1259,8 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="control.cust.contrib_table.ContribT" href="cust/contrib_table.html#control.cust.contrib_table.ContribT">ContribT</a></li>
 <li><a title="control.cust.assessment_table.AssessmentT" href="cust/assessment_table.html#control.cust.assessment_table.AssessmentT">AssessmentT</a></li>
+<li><a title="control.cust.contrib_table.ContribT" href="cust/contrib_table.html#control.cust.contrib_table.ContribT">ContribT</a></li>
 <li><a title="control.cust.review_table.ReviewT" href="cust/review_table.html#control.cust.review_table.ReviewT">ReviewT</a></li>
 </ul>
 <h3>Static methods</h3>
@@ -1543,8 +1563,8 @@ See <a title="control.table.Table" href="#control.table.Table"><code>Table</code
 <p>The rules are:
 *
 authenticated users may create new records in the main user tables:
-<code>contrib</code>, <code>assessment</code>, <code>review</code> (under additional workflow
-constraints)
+<code>contrib</code>, and, (under additional workflow constraints),
+<code>assessment</code>, <code>review</code>.
 *
 superusers may create new value records (under additional
 constraints)
@@ -1579,8 +1599,8 @@ records in other tables. The code for specific tables will instruct so.</p>
 
         The rules are:
         *   authenticated users may create new records in the main user tables:
-            `contrib`, `assessment`, `review` (under additional workflow
-            constraints)
+            `contrib`, and, (under additional workflow constraints),
+            `assessment`, `review`.
         *   superusers may create new value records (under additional
             constraints)
         *   system admins may create new records in system tables
@@ -1600,7 +1620,7 @@ records in other tables. The code for specific tables will instruct so.</p>
         id of the inserted item
     &#34;&#34;&#34;
 
-    mayInsert = force or self.mayInsert
+    mayInsert = force or self.mayInsert and self.withInsert(N.my)
     if not mayInsert:
         return None
 
@@ -1705,7 +1725,7 @@ the user may see the list of all records.</dd>
     table = self.table
     context = self.context
     auth = context.auth
-    return checkTable(table, auth.user) and (action is None or auth.authenticated())</code></pre>
+    return checkTable(auth, table) and (action is None or auth.authenticated())</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.myFinished"><code class="name flex">
@@ -1829,14 +1849,14 @@ one of <code>eid</code> or <code>record</code> needs to be passed.</p>
 <dt><strong><code>bodyMethod</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
 <dd>How to compose the HTML for the body of the record.
 If <code>None</code> is passed, the default will be chosen:
-<code>control.record.Record.body</code>.
+<a title="control.record.Record.body" href="record.html#control.record.Record.body"><code>Record.body()</code></a>.
 Some particular tables have their own implementation of <code>body()</code>
 and they may supply alternative body methods as well.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>object</code></dt>
-<dd>A <code>control.record.Record</code> object.</dd>
+<dd>A <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> object.</dd>
 </dl></section>
 <details class="source">
 <summary>
@@ -1981,6 +2001,28 @@ fields from the record itself.</p>
 
     # return obj.record(record=record).title(**atts)
     return self.RecordClass.titleRaw(self, record)</code></pre>
+</details>
+</dd>
+<dt id="control.table.Table.withInsert"><code class="name flex">
+<span>def <span class="ident">withInsert</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withInsert(self, action):
+    context = self.context
+    auth = context.auth
+    table = self.table
+    return (
+        action == N.my and table == MAIN_TABLE
+        or table in VALUE_TABLES
+        and auth.superuser()
+        or table in SYSTEM_TABLES
+        and auth.sysadmin()
+    )</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.wrap"><code class="name flex">
@@ -2136,15 +2178,14 @@ otherwise all records go to the interface.</dd>
         params.update(request.args)
 
     records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-    insertButton = self.insertButton()
+    insertButton = self.insertButton() if self.withInsert(action) else E
     sep = NBSP if insertButton else E
 
     if action == N.assess:
         records = [
             record
             for record in records
-            if self.stage(record, N.assessment)
-            in ASSESSMENT_STAGES
+            if self.stage(record, N.assessment) in ASSESSMENT_STAGES
             and self.stage(record, N.review, kind=N.final)
             not in {N.reviewAccept, N.reviewReject}
             and uid in self.creators(record, N.assessment)
@@ -2176,8 +2217,7 @@ otherwise all records go to the interface.</dd>
     nRep = nRepCmt + H.span(f&#34;&#34;&#34;{nRecords} {itemLabel}&#34;&#34;&#34;, cls=&#34;stats&#34;)
 
     return H.div(
-        [H.span([self.insertButton(), sep, nRep])] + recordsHtml,
-        cls=f&#34;table {table}&#34;,
+        [H.span([insertButton, sep, nRep])] + recordsHtml, cls=f&#34;table {table}&#34;,
     )</code></pre>
 </details>
 </dd>
@@ -2232,6 +2272,7 @@ otherwise all records go to the interface.</dd>
 <li><code><a title="control.table.Table.title" href="#control.table.Table.title">title</a></code></li>
 <li><code><a title="control.table.Table.titleSortkey" href="#control.table.Table.titleSortkey">titleSortkey</a></code></li>
 <li><code><a title="control.table.Table.uid" href="#control.table.Table.uid">uid</a></code></li>
+<li><code><a title="control.table.Table.withInsert" href="#control.table.Table.withInsert">withInsert</a></code></li>
 <li><code><a title="control.table.Table.wrap" href="#control.table.Table.wrap">wrap</a></code></li>
 </ul>
 </li>
@@ -2241,7 +2282,7 @@ otherwise all records go to the interface.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

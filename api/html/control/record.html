@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.record API documentation</title>
 <meta name="description" content="Records in tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -700,6 +700,9 @@ class Record:
             if nCas
             else E
         )
+        cascadeMsgShort = (
+            f&#34;&#34;&#34; and {nCas} dependent record{E if nCas == 1 else S}&#34;&#34;&#34; if nCas else E
+        )
 
         nRef = G(dependencies, N.reference, default=0)
 
@@ -716,7 +719,6 @@ class Record:
                         f&#34;&#34;&#34;{nRef} dependent record{plural}&#34;&#34;&#34;,
                         cls=&#34;label small warning-o right&#34;,
                     ),
-                    cascadeMsg,
                 ]
             )
 
@@ -737,9 +739,9 @@ class Record:
                 cascadeMsg,
                 H.iconx(
                     N.delete,
-                    cls=&#34;medium right&#34;,
-                    href=url,
-                    title=f&#34;&#34;&#34;Delete this {itemSingle}&#34;&#34;&#34;,
+                    cls=&#34;medium right warning&#34;,
+                    deleteurl=url,
+                    title=f&#34;&#34;&#34;delete this {itemSingle}{cascadeMsgShort}&#34;&#34;&#34;,
                 ),
             ]
         )
@@ -753,7 +755,7 @@ class Record:
 
         return Record.titleRaw(self, record, cls=warningCls)
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -774,7 +776,11 @@ class Record:
         if record is None:
             record = self.record
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES
+            or not record
+            or G(record, N.actual, default=False)
+        )
         return E if isActual else &#34;inactual&#34;
 
     @staticmethod
@@ -809,8 +815,8 @@ class Record:
         types = context.types
         typesObj = getattr(types, table, None)
 
-        actualCls = Record.actualCls(obj, record)
-        atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
+        inActualCls = Record.inActualCls(obj, record)
+        atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
         return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -1477,6 +1483,9 @@ that spawns a record object.</p>
             if nCas
             else E
         )
+        cascadeMsgShort = (
+            f&#34;&#34;&#34; and {nCas} dependent record{E if nCas == 1 else S}&#34;&#34;&#34; if nCas else E
+        )
 
         nRef = G(dependencies, N.reference, default=0)
 
@@ -1493,7 +1502,6 @@ that spawns a record object.</p>
                         f&#34;&#34;&#34;{nRef} dependent record{plural}&#34;&#34;&#34;,
                         cls=&#34;label small warning-o right&#34;,
                     ),
-                    cascadeMsg,
                 ]
             )
 
@@ -1514,9 +1522,9 @@ that spawns a record object.</p>
                 cascadeMsg,
                 H.iconx(
                     N.delete,
-                    cls=&#34;medium right&#34;,
-                    href=url,
-                    title=f&#34;&#34;&#34;Delete this {itemSingle}&#34;&#34;&#34;,
+                    cls=&#34;medium right warning&#34;,
+                    deleteurl=url,
+                    title=f&#34;&#34;&#34;delete this {itemSingle}{cascadeMsgShort}&#34;&#34;&#34;,
                 ),
             ]
         )
@@ -1530,7 +1538,7 @@ that spawns a record object.</p>
 
         return Record.titleRaw(self, record, cls=warningCls)
 
-    def actualCls(self, record):
+    def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
 
         Actual records belong to the current `package`, a record that specifies
@@ -1551,7 +1559,11 @@ that spawns a record object.</p>
         if record is None:
             record = self.record
 
-        isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
+        isActual = (
+            table not in ACTUAL_TABLES
+            or not record
+            or G(record, N.actual, default=False)
+        )
         return E if isActual else &#34;inactual&#34;
 
     @staticmethod
@@ -1586,8 +1598,8 @@ that spawns a record object.</p>
         types = context.types
         typesObj = getattr(types, table, None)
 
-        actualCls = Record.actualCls(obj, record)
-        atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
+        inActualCls = Record.inActualCls(obj, record)
+        atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
         return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -1604,10 +1616,7 @@ that spawns a record object.</p>
 <dl>
 <dt id="control.record.Record.inheritProps"><code class="name">var <span class="ident">inheritProps</span></code></dt>
 <dd>
-<section class="desc"><p>Built-in immutable sequence.</p>
-<p>If no argument is given, the constructor returns an empty tuple.
-If iterable is specified the tuple is initialized from iterable's items.</p>
-<p>If the argument is a tuple, the return value is the same object.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -1675,8 +1684,8 @@ def titleRaw(obj, record, cls=E):
     types = context.types
     typesObj = getattr(types, table, None)
 
-    actualCls = Record.actualCls(obj, record)
-    atts = dict(cls=f&#34;{cls} {actualCls}&#34;)
+    inActualCls = Record.inActualCls(obj, record)
+    atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
     return H.span(typesObj.title(record=record), **atts)</code></pre>
 </details>
@@ -1722,53 +1731,6 @@ derived classes.</p></section>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="control.record.Record.actualCls"><code class="name flex">
-<span>def <span class="ident">actualCls</span></span>(<span>self, record)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
-<p>Actual records belong to the current <code>package</code>, a record that specifies
-which contribution types, and criteria are currently part of the workflow.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
-<dd>If <code>self</code> does not have a <code>record</code> attribute, the record data must
-be passed here.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>string</code></dt>
-<dd><code>inactual</code> if the record is not actual, else the empty string.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def actualCls(self, record):
-    &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
-
-    Actual records belong to the current `package`, a record that specifies
-    which contribution types, and criteria are currently part of the workflow.
-
-    Parameters
-    ----------
-    record: dict | `None`
-        If `self` does not have a `record` attribute, the record data must
-        be passed here.
-    Returns
-    -------
-    string
-        `inactual` if the record is not actual, else the empty string.
-    &#34;&#34;&#34;
-
-    table = self.table
-    if record is None:
-        record = self.record
-
-    isActual = table not in ACTUAL_TABLES or G(record, N.actual, default=False)
-    return E if isActual else &#34;inactual&#34;</code></pre>
-</details>
-</dd>
 <dt id="control.record.Record.adjustWorkflow"><code class="name flex">
 <span>def <span class="ident">adjustWorkflow</span></span>(<span>self, update=True, delete=False)</span>
 </code></dt>
@@ -2004,6 +1966,9 @@ cannot delete the record.</p>
         if nCas
         else E
     )
+    cascadeMsgShort = (
+        f&#34;&#34;&#34; and {nCas} dependent record{E if nCas == 1 else S}&#34;&#34;&#34; if nCas else E
+    )
 
     nRef = G(dependencies, N.reference, default=0)
 
@@ -2020,7 +1985,6 @@ cannot delete the record.</p>
                     f&#34;&#34;&#34;{nRef} dependent record{plural}&#34;&#34;&#34;,
                     cls=&#34;label small warning-o right&#34;,
                 ),
-                cascadeMsg,
             ]
         )
 
@@ -2041,9 +2005,9 @@ cannot delete the record.</p>
             cascadeMsg,
             H.iconx(
                 N.delete,
-                cls=&#34;medium right&#34;,
-                href=url,
-                title=f&#34;&#34;&#34;Delete this {itemSingle}&#34;&#34;&#34;,
+                cls=&#34;medium right warning&#34;,
+                deleteurl=url,
+                title=f&#34;&#34;&#34;delete this {itemSingle}{cascadeMsgShort}&#34;&#34;&#34;,
             ),
         ]
     )</code></pre>
@@ -2270,6 +2234,57 @@ permissions allow them</li>
     record = self.record
 
     return db.dependencies(table, record)</code></pre>
+</details>
+</dd>
+<dt id="control.record.Record.inActualCls"><code class="name flex">
+<span>def <span class="ident">inActualCls</span></span>(<span>self, record)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
+<p>Actual records belong to the current <code>package</code>, a record that specifies
+which contribution types, and criteria are currently part of the workflow.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
+<dd>If <code>self</code> does not have a <code>record</code> attribute, the record data must
+be passed here.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>string</code></dt>
+<dd><code>inactual</code> if the record is not actual, else the empty string.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inActualCls(self, record):
+    &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
+
+    Actual records belong to the current `package`, a record that specifies
+    which contribution types, and criteria are currently part of the workflow.
+
+    Parameters
+    ----------
+    record: dict | `None`
+        If `self` does not have a `record` attribute, the record data must
+        be passed here.
+    Returns
+    -------
+    string
+        `inactual` if the record is not actual, else the empty string.
+    &#34;&#34;&#34;
+
+    table = self.table
+    if record is None:
+        record = self.record
+
+    isActual = (
+        table not in ACTUAL_TABLES
+        or not record
+        or G(record, N.actual, default=False)
+    )
+    return E if isActual else &#34;inactual&#34;</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.reload"><code class="name flex">
@@ -2747,7 +2762,6 @@ master record.</dd>
 <h4><code><a title="control.record.Record" href="#control.record.Record">Record</a></code></h4>
 <ul class="two-column">
 <li><code><a title="control.record.Record.DetailsClass" href="#control.record.Record.DetailsClass">DetailsClass</a></code></li>
-<li><code><a title="control.record.Record.actualCls" href="#control.record.Record.actualCls">actualCls</a></code></li>
 <li><code><a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow">adjustWorkflow</a></code></li>
 <li><code><a title="control.record.Record.body" href="#control.record.Record.body">body</a></code></li>
 <li><code><a title="control.record.Record.bodyMethod" href="#control.record.Record.bodyMethod">bodyMethod</a></code></li>
@@ -2758,6 +2772,7 @@ master record.</dd>
 <li><code><a title="control.record.Record.field" href="#control.record.Record.field">field</a></code></li>
 <li><code><a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm">getDelPerm</a></code></li>
 <li><code><a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies">getDependencies</a></code></li>
+<li><code><a title="control.record.Record.inActualCls" href="#control.record.Record.inActualCls">inActualCls</a></code></li>
 <li><code><a title="control.record.Record.inheritProps" href="#control.record.Record.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.record.Record.mayDelete" href="#control.record.Record.mayDelete">mayDelete</a></code></li>
 <li><code><a title="control.record.Record.readonly" href="#control.record.Record.readonly">readonly</a></code></li>
@@ -2779,7 +2794,7 @@ master record.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
