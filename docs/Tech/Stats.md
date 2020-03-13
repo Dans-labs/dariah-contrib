@@ -1,23 +1,23 @@
-cloc|github.com/AlDanial/cloc v 1.82  T=2.77 s (41.6 files/s, 7993.1 lines/s)
+cloc|github.com/AlDanial/cloc v 1.82  T=5.81 s (20.5 files/s, 3991.7 lines/s)
 --- | ---
 
 Language|files|blank|comment|code
 :-------|-------:|-------:|-------:|-------:
-Python|59|2657|3811|6922
-YAML|24|152|9|3622
-Markdown|17|582|0|1697
+Python|62|2776|3975|7532
+YAML|24|152|9|3623
+Markdown|17|583|0|1696
 CSS|7|66|18|1168
-JavaScript|2|42|6|610
-Bourne Shell|3|87|39|546
-HTML|1|0|0|60
+Bourne Shell|3|93|51|648
+JavaScript|2|44|6|627
+HTML|2|0|0|120
 Windows Resource File|1|2|0|9
 INI|1|0|0|4
 --------|--------|--------|--------|--------
-SUM:|115|3588|3883|14638
+SUM:|119|3716|4059|15427
 
 TESTS
 
-cloc|github.com/AlDanial/cloc v 1.82  T=0.12 s (188.6 files/s, 46080.4 lines/s)
+cloc|github.com/AlDanial/cloc v 1.82  T=0.32 s (69.7 files/s, 17019.6 lines/s)
 --- | ---
 
 Language|files|blank|comment|code

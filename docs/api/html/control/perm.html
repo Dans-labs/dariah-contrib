@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.perm API documentation</title>
 <meta name="description" content="Permission library …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -58,7 +58,7 @@ ALLOW_OUR = set(CT.userTables) | set(CT.userEntryTables)
 
 
 def checkTable(
-    table, user,
+    auth, table
 ):
     &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements for a table.
 
@@ -77,11 +77,11 @@ def checkTable(
 
     Parameters
     ----------
+    auth: object
+        The `control.auth.Auth` singleton, from which the group of the current
+        user can be obtained.
     table: string
         The table for which permission is required.
-    user: dict
-        User attributes, containing in paticular: `group` which is the role a
-        user can play on the basis of his/her identity.
 
     Returns
     -------
@@ -95,7 +95,7 @@ def checkTable(
     if require == UNAUTH:
         return True
 
-    group = G(user, N.groupRep, default=UNAUTH)
+    group = auth.groupRep()
 
     if require == NOBODY:
         return False
@@ -169,96 +169,6 @@ def checkPerm(
 
     if require == COORD:
         return group == COORD and G(perm, N.sameCountry) or isSuper
-
-
-def authenticated(user):
-    &#34;&#34;&#34;Whether a user is authenticated.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group != UNAUTH
-
-
-def coordinator(user, countryId):
-    &#34;&#34;&#34;Whether a user is national coordinator of a country.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-    countryId: ObjectId
-        A country.
-
-    Returns
-    -------
-    boolean
-        Whether the user is National Coordinator of the given country.
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    uCountry = G(user, N.country)
-    isCoord = group == COORD
-    return isCoord and (countryId is None or uCountry == countryId)
-
-
-def officeuser(user):
-    &#34;&#34;&#34;Whether a user belongs to the DARIAH backoffice.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group == OFFICE
-
-
-def superuser(user):
-    &#34;&#34;&#34;Whether a user is a superuser: backoffice, system administrator, or root.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {OFFICE, SYSTEM, ROOT}
-
-
-def sysadmin(user):
-    &#34;&#34;&#34;Whether a user is a system administrator.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {SYSTEM, ROOT}
 
 
 def getPermField(table, permRecord, require):
@@ -341,7 +251,7 @@ def permRecord(context, table, record):
     auth = context.auth
     user = auth.user
     uid = G(user, N._id)
-    group = G(user, N.groupRep) or UNAUTH
+    group = auth.groupRep()
     uCountry = G(user, N.country)
 
     cRecord = {}
@@ -402,42 +312,6 @@ def permRecord(context, table, record):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="control.perm.authenticated"><code class="name flex">
-<span>def <span class="ident">authenticated</span></span>(<span>user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Whether a user is authenticated.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A user record.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def authenticated(user):
-    &#34;&#34;&#34;Whether a user is authenticated.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group != UNAUTH</code></pre>
-</details>
-</dd>
 <dt id="control.perm.checkPerm"><code class="name flex">
 <span>def <span class="ident">checkPerm</span></span>(<span>require, perm)</span>
 </code></dt>
@@ -517,7 +391,7 @@ records of which (s)he is creator/editor, or National Coordinator.</dd>
 </details>
 </dd>
 <dt id="control.perm.checkTable"><code class="name flex">
-<span>def <span class="ident">checkTable</span></span>(<span>table, user)</span>
+<span>def <span class="ident">checkTable</span></span>(<span>auth, table)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Verify whether user's credentials match the requirements for a table.</p>
@@ -533,11 +407,11 @@ and fields may be regulated in addition by
 which can open up and close off material.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
+<dt><strong><code>auth</code></strong> :&ensp;<code>object</code></dt>
+<dd>The <a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a> singleton, from which the group of the current
+user can be obtained.</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table for which permission is required.</dd>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>User attributes, containing in paticular: <code>group</code> which is the role a
-user can play on the basis of his/her identity.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -549,7 +423,7 @@ user can play on the basis of his/her identity.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def checkTable(
-    table, user,
+    auth, table
 ):
     &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements for a table.
 
@@ -568,11 +442,11 @@ user can play on the basis of his/her identity.</dd>
 
     Parameters
     ----------
+    auth: object
+        The `control.auth.Auth` singleton, from which the group of the current
+        user can be obtained.
     table: string
         The table for which permission is required.
-    user: dict
-        User attributes, containing in paticular: `group` which is the role a
-        user can play on the basis of his/her identity.
 
     Returns
     -------
@@ -586,7 +460,7 @@ user can play on the basis of his/her identity.</dd>
     if require == UNAUTH:
         return True
 
-    group = G(user, N.groupRep, default=UNAUTH)
+    group = auth.groupRep()
 
     if require == NOBODY:
         return False
@@ -607,49 +481,6 @@ user can play on the basis of his/her identity.</dd>
 
     if require == COORD:
         return group == COORD or isSuper</code></pre>
-</details>
-</dd>
-<dt id="control.perm.coordinator"><code class="name flex">
-<span>def <span class="ident">coordinator</span></span>(<span>user, countryId)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Whether a user is national coordinator of a country.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A user record.</dd>
-<dt><strong><code>countryId</code></strong> :&ensp;<code>ObjectId</code></dt>
-<dd>A country.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>boolean</code></dt>
-<dd>Whether the user is National Coordinator of the given country.</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def coordinator(user, countryId):
-    &#34;&#34;&#34;Whether a user is national coordinator of a country.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-    countryId: ObjectId
-        A country.
-
-    Returns
-    -------
-    boolean
-        Whether the user is National Coordinator of the given country.
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    uCountry = G(user, N.country)
-    isCoord = group == COORD
-    return isCoord and (countryId is None or uCountry == countryId)</code></pre>
 </details>
 </dd>
 <dt id="control.perm.getPermField"><code class="name flex">
@@ -728,42 +559,6 @@ coming from the table specific .yaml files with field specifications.</p>
     return (mayRead, mayEdit)</code></pre>
 </details>
 </dd>
-<dt id="control.perm.officeuser"><code class="name flex">
-<span>def <span class="ident">officeuser</span></span>(<span>user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Whether a user belongs to the DARIAH backoffice.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A user record.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def officeuser(user):
-    &#34;&#34;&#34;Whether a user belongs to the DARIAH backoffice.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group == OFFICE</code></pre>
-</details>
-</dd>
 <dt id="control.perm.permRecord"><code class="name flex">
 <span>def <span class="ident">permRecord</span></span>(<span>context, table, record)</span>
 </code></dt>
@@ -835,7 +630,7 @@ As creator/editor/reviewer/coordinator?</dd>
     auth = context.auth
     user = auth.user
     uid = G(user, N._id)
-    group = G(user, N.groupRep) or UNAUTH
+    group = auth.groupRep()
     uCountry = G(user, N.country)
 
     cRecord = {}
@@ -889,78 +684,6 @@ As creator/editor/reviewer/coordinator?</dd>
     }</code></pre>
 </details>
 </dd>
-<dt id="control.perm.superuser"><code class="name flex">
-<span>def <span class="ident">superuser</span></span>(<span>user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Whether a user is a superuser: backoffice, system administrator, or root.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A user record.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def superuser(user):
-    &#34;&#34;&#34;Whether a user is a superuser: backoffice, system administrator, or root.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {OFFICE, SYSTEM, ROOT}</code></pre>
-</details>
-</dd>
-<dt id="control.perm.sysadmin"><code class="name flex">
-<span>def <span class="ident">sysadmin</span></span>(<span>user)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Whether a user is a system administrator.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>user</code></strong> :&ensp;<code>dict</code></dt>
-<dd>A user record.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>boolean</code></dt>
-<dd>&nbsp;</dd>
-</dl></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sysadmin(user):
-    &#34;&#34;&#34;Whether a user is a system administrator.
-
-    Parameters
-    ----------
-    user: dict
-        A user record.
-
-    Returns
-    -------
-    boolean
-    &#34;&#34;&#34;
-
-    group = G(user, N.groupRep) or UNAUTH
-    return group in {SYSTEM, ROOT}</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -978,23 +701,18 @@ As creator/editor/reviewer/coordinator?</dd>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="control.perm.authenticated" href="#control.perm.authenticated">authenticated</a></code></li>
+<ul class="">
 <li><code><a title="control.perm.checkPerm" href="#control.perm.checkPerm">checkPerm</a></code></li>
 <li><code><a title="control.perm.checkTable" href="#control.perm.checkTable">checkTable</a></code></li>
-<li><code><a title="control.perm.coordinator" href="#control.perm.coordinator">coordinator</a></code></li>
 <li><code><a title="control.perm.getPermField" href="#control.perm.getPermField">getPermField</a></code></li>
-<li><code><a title="control.perm.officeuser" href="#control.perm.officeuser">officeuser</a></code></li>
 <li><code><a title="control.perm.permRecord" href="#control.perm.permRecord">permRecord</a></code></li>
-<li><code><a title="control.perm.superuser" href="#control.perm.superuser">superuser</a></code></li>
-<li><code><a title="control.perm.sysadmin" href="#control.perm.sysadmin">sysadmin</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

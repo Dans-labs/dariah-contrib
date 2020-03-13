@@ -62,7 +62,7 @@ and in websites.
 
 ??? details "Usage in this app"
     This app uses JavaScript in the client only.
-    A [previous incarnation of this app]({{docSiteOrig}}) has been written as a
+    A [previous incarnation of this app]({{repoHistoryUrl}}) has been written as a
     [Single Page App]({{spa}}) which lead to an explosion of Javascript and techniques
     within Javascript, such as React and Redux.
 

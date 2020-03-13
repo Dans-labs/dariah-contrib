@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.auth API documentation</title>
 <meta name="description" content="Authentication …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -51,14 +51,12 @@ from control.utils import (
 from config import Config as C, Names as N
 from control.html import HtmlElements as H
 from control.perm import (
-    sysadmin,
-    superuser,
-    officeuser,
-    coordinator,
-    authenticated,
     AUTH,
     UNAUTH,
     COORD,
+    OFFICE,
+    ROOT,
+    SYSTEM,
 )
 
 CB = C.base
@@ -126,7 +124,7 @@ class Auth:
         &#34;&#34;&#34;*string* The groupId of the `auth` permission group.
         &#34;&#34;&#34;
 
-        self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        self.authUser = {N.group: self.authId}
         &#34;&#34;&#34;*string* Info of the `auth` permission group.
         &#34;&#34;&#34;
 
@@ -134,7 +132,7 @@ class Auth:
         &#34;&#34;&#34;*string* The groupId of the `public` permission group.
         &#34;&#34;&#34;
 
-        self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        self.unauthUser = {N.group: self.unauthId}
         &#34;&#34;&#34;*string* Info of the `public` permission group.
         &#34;&#34;&#34;
 
@@ -223,14 +221,11 @@ class Auth:
             self.clearUser()
             return False
 
-        if N.group in user:
-            if N.groupRep not in user:
-                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                user[N.groupRep] = groupRep
-        else:
-            user[N.group] = authId
-            user[N.groupRep] = AUTH
-        return user[N.groupRep] != UNAUTH
+        group = user[N.group] if N.group in user else authId
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        if N.group not in user:
+            user[N.group] = group
+        return groupRep != UNAUTH
 
     def wrapTestUsers(self):
         &#34;&#34;&#34;Present a widget to select a test user for login.
@@ -420,7 +415,12 @@ class Auth:
         if user is None:
             user = self.user
 
-        return G(user, N.groupRep) or UNAUTH
+        group = G(user, N.group)
+        if group is None:
+            return UNAUTH
+
+        db = self.db
+        return G(G(db.permissionGroup, group), N.rep) or UNAUTH
 
     def identity(self, user=None):
         &#34;&#34;&#34;Provide a string representation of the identity of a user.
@@ -614,8 +614,8 @@ class Auth:
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return authenticated(user)
+        groupRep = self.groupRep()
+        return groupRep != UNAUTH
 
     def coordinator(self, countryId=None):
         &#34;&#34;&#34;Is the current user a national coordinator?
@@ -637,8 +637,11 @@ class Auth:
         boolean
         &#34;&#34;&#34;
 
+        groupRep = self.groupRep()
         user = self.user
-        return coordinator(user, countryId)
+        uCountry = G(user, N.country)
+        isCoord = groupRep == COORD
+        return isCoord and (countryId is None or uCountry == countryId)
 
     def officeuser(self):
         &#34;&#34;&#34;Is the current user a backoffice user?
@@ -648,8 +651,8 @@ class Auth:
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return officeuser(user)
+        groupRep = self.groupRep()
+        return groupRep == OFFICE
 
     def superuser(self):
         &#34;&#34;&#34;Is the current user a super user?
@@ -661,8 +664,8 @@ class Auth:
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return superuser(user)
+        groupRep = self.groupRep()
+        return groupRep in {OFFICE, SYSTEM, ROOT}
 
     def sysadmin(self):
         &#34;&#34;&#34;Is the current user a system administrator?
@@ -672,8 +675,8 @@ class Auth:
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return sysadmin(user)
+        groupRep = self.groupRep()
+        return groupRep in {SYSTEM, ROOT}
 
     def country(self):
         &#34;&#34;&#34;The full country record of the currently logged in user.
@@ -771,7 +774,7 @@ attributes.</p>
         &#34;&#34;&#34;*string* The groupId of the `auth` permission group.
         &#34;&#34;&#34;
 
-        self.authUser = {N.group: self.authId, N.groupRep: AUTH}
+        self.authUser = {N.group: self.authId}
         &#34;&#34;&#34;*string* Info of the `auth` permission group.
         &#34;&#34;&#34;
 
@@ -779,7 +782,7 @@ attributes.</p>
         &#34;&#34;&#34;*string* The groupId of the `public` permission group.
         &#34;&#34;&#34;
 
-        self.unauthUser = {N.group: self.unauthId, N.groupRep: UNAUTH}
+        self.unauthUser = {N.group: self.unauthId}
         &#34;&#34;&#34;*string* Info of the `public` permission group.
         &#34;&#34;&#34;
 
@@ -868,14 +871,11 @@ attributes.</p>
             self.clearUser()
             return False
 
-        if N.group in user:
-            if N.groupRep not in user:
-                groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-                user[N.groupRep] = groupRep
-        else:
-            user[N.group] = authId
-            user[N.groupRep] = AUTH
-        return user[N.groupRep] != UNAUTH
+        group = user[N.group] if N.group in user else authId
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        if N.group not in user:
+            user[N.group] = group
+        return groupRep != UNAUTH
 
     def wrapTestUsers(self):
         &#34;&#34;&#34;Present a widget to select a test user for login.
@@ -1065,7 +1065,12 @@ attributes.</p>
         if user is None:
             user = self.user
 
-        return G(user, N.groupRep) or UNAUTH
+        group = G(user, N.group)
+        if group is None:
+            return UNAUTH
+
+        db = self.db
+        return G(G(db.permissionGroup, group), N.rep) or UNAUTH
 
     def identity(self, user=None):
         &#34;&#34;&#34;Provide a string representation of the identity of a user.
@@ -1259,8 +1264,8 @@ attributes.</p>
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return authenticated(user)
+        groupRep = self.groupRep()
+        return groupRep != UNAUTH
 
     def coordinator(self, countryId=None):
         &#34;&#34;&#34;Is the current user a national coordinator?
@@ -1282,8 +1287,11 @@ attributes.</p>
         boolean
         &#34;&#34;&#34;
 
+        groupRep = self.groupRep()
         user = self.user
-        return coordinator(user, countryId)
+        uCountry = G(user, N.country)
+        isCoord = groupRep == COORD
+        return isCoord and (countryId is None or uCountry == countryId)
 
     def officeuser(self):
         &#34;&#34;&#34;Is the current user a backoffice user?
@@ -1293,8 +1301,8 @@ attributes.</p>
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return officeuser(user)
+        groupRep = self.groupRep()
+        return groupRep == OFFICE
 
     def superuser(self):
         &#34;&#34;&#34;Is the current user a super user?
@@ -1306,8 +1314,8 @@ attributes.</p>
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return superuser(user)
+        groupRep = self.groupRep()
+        return groupRep in {OFFICE, SYSTEM, ROOT}
 
     def sysadmin(self):
         &#34;&#34;&#34;Is the current user a system administrator?
@@ -1317,8 +1325,8 @@ attributes.</p>
         boolean
         &#34;&#34;&#34;
 
-        user = self.user
-        return sysadmin(user)
+        groupRep = self.groupRep()
+        return groupRep in {SYSTEM, ROOT}
 
     def country(self):
         &#34;&#34;&#34;The full country record of the currently logged in user.
@@ -1487,8 +1495,8 @@ identity provider has given updated attributed for that user.</dd>
     boolean
     &#34;&#34;&#34;
 
-    user = self.user
-    return authenticated(user)</code></pre>
+    groupRep = self.groupRep()
+    return groupRep != UNAUTH</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.checkLogin"><code class="name flex">
@@ -1683,8 +1691,11 @@ Otherwise, the country of the logged in user will be used.</dd>
     boolean
     &#34;&#34;&#34;
 
+    groupRep = self.groupRep()
     user = self.user
-    return coordinator(user, countryId)</code></pre>
+    uCountry = G(user, N.country)
+    isCoord = groupRep == COORD
+    return isCoord and (countryId is None or uCountry == countryId)</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.country"><code class="name flex">
@@ -1976,14 +1987,11 @@ info that says that the current user is the public and nothing more.</dd>
         self.clearUser()
         return False
 
-    if N.group in user:
-        if N.groupRep not in user:
-            groupRep = G(G(db.permissionGroup, user[N.group]), N.rep)
-            user[N.groupRep] = groupRep
-    else:
-        user[N.group] = authId
-        user[N.groupRep] = AUTH
-    return user[N.groupRep] != UNAUTH</code></pre>
+    group = user[N.group] if N.group in user else authId
+    groupRep = G(G(db.permissionGroup, group), N.rep)
+    if N.group not in user:
+        user[N.group] = group
+    return groupRep != UNAUTH</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.groupRep"><code class="name flex">
@@ -2023,7 +2031,12 @@ If absent, the currently logged in user will be taken.</dd>
     if user is None:
         user = self.user
 
-    return G(user, N.groupRep) or UNAUTH</code></pre>
+    group = G(user, N.group)
+    if group is None:
+        return UNAUTH
+
+    db = self.db
+    return G(G(db.permissionGroup, group), N.rep) or UNAUTH</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.identity"><code class="name flex">
@@ -2186,8 +2199,8 @@ If absent, the currently logged in user will be taken.</dd>
     boolean
     &#34;&#34;&#34;
 
-    user = self.user
-    return officeuser(user)</code></pre>
+    groupRep = self.groupRep()
+    return groupRep == OFFICE</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.superuser"><code class="name flex">
@@ -2215,8 +2228,8 @@ If absent, the currently logged in user will be taken.</dd>
     boolean
     &#34;&#34;&#34;
 
-    user = self.user
-    return superuser(user)</code></pre>
+    groupRep = self.groupRep()
+    return groupRep in {OFFICE, SYSTEM, ROOT}</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.sysadmin"><code class="name flex">
@@ -2241,8 +2254,8 @@ If absent, the currently logged in user will be taken.</dd>
     boolean
     &#34;&#34;&#34;
 
-    user = self.user
-    return sysadmin(user)</code></pre>
+    groupRep = self.groupRep()
+    return groupRep in {SYSTEM, ROOT}</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.wrapTestUsers"><code class="name flex">
@@ -2347,7 +2360,7 @@ Only in development mode one can select a test user.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

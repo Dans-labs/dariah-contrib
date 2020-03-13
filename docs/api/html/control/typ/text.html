@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.typ.text API documentation</title>
 <meta name="description" content="Types of text." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -140,7 +140,6 @@ class Markdown(TypeBase):
 <dl>
 <dt id="control.typ.text.Email"><code class="flex name class">
 <span>class <span class="ident">Email</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for email strings.</p></section>
@@ -174,15 +173,7 @@ class Markdown(TypeBase):
 <dl>
 <dt id="control.typ.text.Email.pattern"><code class="name">var <span class="ident">pattern</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -190,21 +181,18 @@ errors defaults to 'strict'.</p></section>
 <li><code><b><a title="control.typ.text.Text" href="#control.typ.text.Text">Text</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.text.Text.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.text.Text.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.text.Text.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.text.Text.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.text.Text.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
 <li><code><a title="control.typ.text.Text.toOrig" href="base.html#control.typ.base.TypeBase.toOrig">toOrig</a></code></li>
 <li><code><a title="control.typ.text.Text.validationMsg" href="base.html#control.typ.base.TypeBase.validationMsg">validationMsg</a></code></li>
 <li><code><a title="control.typ.text.Text.widget" href="base.html#control.typ.base.TypeBase.widget">widget</a></code></li>
-<li><code><a title="control.typ.text.Text.widgetType" href="#control.typ.text.Text.widgetType">widgetType</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
 <dt id="control.typ.text.Markdown"><code class="flex name class">
 <span>class <span class="ident">Markdown</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for markdown text.</p>
@@ -246,15 +234,7 @@ errors defaults to 'strict'.</p></section>
 <dl>
 <dt id="control.typ.text.Markdown.widgetType"><code class="name">var <span class="ident">widgetType</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -262,7 +242,6 @@ errors defaults to 'strict'.</p></section>
 <li><code><b><a title="control.typ.base.TypeBase" href="base.html#control.typ.base.TypeBase">TypeBase</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.base.TypeBase.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.base.TypeBase.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
@@ -275,7 +254,6 @@ errors defaults to 'strict'.</p></section>
 </dd>
 <dt id="control.typ.text.Text"><code class="flex name class">
 <span>class <span class="ident">Text</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for text types: String, Url, Email, Markdown.</p></section>
@@ -293,22 +271,14 @@ errors defaults to 'strict'.</p></section>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="control.typ.text.Url" href="#control.typ.text.Url">Url</a></li>
 <li><a title="control.typ.text.Email" href="#control.typ.text.Email">Email</a></li>
+<li><a title="control.typ.text.Url" href="#control.typ.text.Url">Url</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="control.typ.text.Text.widgetType"><code class="name">var <span class="ident">widgetType</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -316,7 +286,6 @@ errors defaults to 'strict'.</p></section>
 <li><code><b><a title="control.typ.base.TypeBase" href="base.html#control.typ.base.TypeBase">TypeBase</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.base.TypeBase.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.base.TypeBase.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
@@ -329,7 +298,6 @@ errors defaults to 'strict'.</p></section>
 </dd>
 <dt id="control.typ.text.Url"><code class="flex name class">
 <span>class <span class="ident">Url</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for url strings.</p></section>
@@ -380,15 +348,7 @@ errors defaults to 'strict'.</p></section>
 <dl>
 <dt id="control.typ.text.Url.pattern"><code class="name">var <span class="ident">pattern</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -396,14 +356,12 @@ errors defaults to 'strict'.</p></section>
 <li><code><b><a title="control.typ.text.Text" href="#control.typ.text.Text">Text</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.text.Text.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.text.Text.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.text.Text.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.text.Text.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.text.Text.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
 <li><code><a title="control.typ.text.Text.toOrig" href="base.html#control.typ.base.TypeBase.toOrig">toOrig</a></code></li>
 <li><code><a title="control.typ.text.Text.validationMsg" href="base.html#control.typ.base.TypeBase.validationMsg">validationMsg</a></code></li>
 <li><code><a title="control.typ.text.Text.widget" href="base.html#control.typ.base.TypeBase.widget">widget</a></code></li>
-<li><code><a title="control.typ.text.Text.widgetType" href="#control.typ.text.Text.widgetType">widgetType</a></code></li>
 </ul>
 </li>
 </ul>
@@ -454,7 +412,7 @@ errors defaults to 'strict'.</p></section>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

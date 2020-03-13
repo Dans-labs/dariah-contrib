@@ -111,9 +111,19 @@ urls:
   info:
     text: Overview
     url: /info
-  logo:
-    text: Documentation
+  help:
+    text: Help
+    url: https://github.com/Dans-labs/dariah-contrib/wiki
+    title: >-
+      User manual (concepts, step-by-step)
+  tech:
+    text: TechDoc
     url: https://dans-labs.github.io/dariah-contrib/
+    title: >-
+      Technical documentation (architecture, api, deployment)
+  logo:
+    text: DARIAH EU
+    url: https://www.dariah.eu/tools-services/contributions/
     src: /static/images/logo.png
     height: 56
   login:

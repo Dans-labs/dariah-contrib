@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.2" />
+<meta name="generator" content="pdoc 0.7.5" />
 <title>control.typ.numeric API documentation</title>
 <meta name="description" content="Numeric types." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
@@ -126,7 +126,6 @@ class Money(Decimal):
 <dl>
 <dt id="control.typ.numeric.Decimal"><code class="flex name class">
 <span>class <span class="ident">Decimal</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for decimal numbers, negative ones and zero included.</p></section>
@@ -153,15 +152,7 @@ class Money(Decimal):
 <dl>
 <dt id="control.typ.numeric.Decimal.pattern"><code class="name">var <span class="ident">pattern</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="control.typ.numeric.Decimal.rawType"><code class="name">var <span class="ident">rawType</span></code></dt>
 <dd>
@@ -174,21 +165,18 @@ errors defaults to 'strict'.</p></section>
 <ul class="hlist">
 <li><code><a title="control.typ.numeric.Numeric.cleanNumber" href="#control.typ.numeric.Numeric.cleanNumber">cleanNumber</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.numeric.Numeric.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toOrig" href="base.html#control.typ.base.TypeBase.toOrig">toOrig</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.validationMsg" href="base.html#control.typ.base.TypeBase.validationMsg">validationMsg</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.widget" href="base.html#control.typ.base.TypeBase.widget">widget</a></code></li>
-<li><code><a title="control.typ.numeric.Numeric.widgetType" href="#control.typ.numeric.Numeric.widgetType">widgetType</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
 <dt id="control.typ.numeric.Int"><code class="flex name class">
 <span>class <span class="ident">Int</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for integer numbers, negative ones and zero included.</p></section>
@@ -211,15 +199,7 @@ errors defaults to 'strict'.</p></section>
 <dl>
 <dt id="control.typ.numeric.Int.pattern"><code class="name">var <span class="ident">pattern</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="control.typ.numeric.Int.rawType"><code class="name">var <span class="ident">rawType</span></code></dt>
 <dd>
@@ -249,21 +229,18 @@ Base 0 means to interpret the base from the string as an integer literal.</p>
 <ul class="hlist">
 <li><code><a title="control.typ.numeric.Numeric.cleanNumber" href="#control.typ.numeric.Numeric.cleanNumber">cleanNumber</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.numeric.Numeric.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.toOrig" href="base.html#control.typ.base.TypeBase.toOrig">toOrig</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.validationMsg" href="base.html#control.typ.base.TypeBase.validationMsg">validationMsg</a></code></li>
 <li><code><a title="control.typ.numeric.Numeric.widget" href="base.html#control.typ.base.TypeBase.widget">widget</a></code></li>
-<li><code><a title="control.typ.numeric.Numeric.widgetType" href="#control.typ.numeric.Numeric.widgetType">widgetType</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
 <dt id="control.typ.numeric.Money"><code class="flex name class">
 <span>class <span class="ident">Money</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type class for money quantities, negative ones and zero included.</p></section>
@@ -292,23 +269,19 @@ Base 0 means to interpret the base from the string as an integer literal.</p>
 <ul class="hlist">
 <li><code><a title="control.typ.numeric.Decimal.cleanNumber" href="#control.typ.numeric.Numeric.cleanNumber">cleanNumber</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.numeric.Decimal.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
-<li><code><a title="control.typ.numeric.Decimal.pattern" href="#control.typ.numeric.Decimal.pattern">pattern</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.rawType" href="#control.typ.numeric.Decimal.rawType">rawType</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.toOrig" href="base.html#control.typ.base.TypeBase.toOrig">toOrig</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.validationMsg" href="base.html#control.typ.base.TypeBase.validationMsg">validationMsg</a></code></li>
 <li><code><a title="control.typ.numeric.Decimal.widget" href="base.html#control.typ.base.TypeBase.widget">widget</a></code></li>
-<li><code><a title="control.typ.numeric.Decimal.widgetType" href="#control.typ.numeric.Numeric.widgetType">widgetType</a></code></li>
 </ul>
 </li>
 </ul>
 </dd>
 <dt id="control.typ.numeric.Numeric"><code class="flex name class">
 <span>class <span class="ident">Numeric</span></span>
-<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for numeric types: Int,
@@ -364,8 +337,8 @@ Decimal, Money.</p></section>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="control.typ.numeric.Int" href="#control.typ.numeric.Int">Int</a></li>
 <li><a title="control.typ.numeric.Decimal" href="#control.typ.numeric.Decimal">Decimal</a></li>
+<li><a title="control.typ.numeric.Int" href="#control.typ.numeric.Int">Int</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -375,15 +348,7 @@ Decimal, Money.</p></section>
 </dd>
 <dt id="control.typ.numeric.Numeric.widgetType"><code class="name">var <span class="ident">widgetType</span></code></dt>
 <dd>
-<section class="desc"><p>str(object='') -&gt; str
-str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
-<p>Create a new string object from the given object. If encoding or
-errors is specified, then the object must expose a data buffer
-that will be decoded using the given encoding and error handler.
-Otherwise, returns the result of object.<strong>str</strong>() (if defined)
-or repr(object).
-encoding defaults to sys.getdefaultencoding().
-errors defaults to 'strict'.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -445,7 +410,6 @@ def cleanNumber(strVal, asInt):
 <li><code><b><a title="control.typ.base.TypeBase" href="base.html#control.typ.base.TypeBase">TypeBase</a></b></code>:
 <ul class="hlist">
 <li><code><a title="control.typ.base.TypeBase.fromStr" href="base.html#control.typ.base.TypeBase.fromStr">fromStr</a></code></li>
-<li><code><a title="control.typ.base.TypeBase.needsContext" href="base.html#control.typ.base.TypeBase.needsContext">needsContext</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.normalize" href="base.html#control.typ.base.TypeBase.normalize">normalize</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toDisplay" href="base.html#control.typ.base.TypeBase.toDisplay">toDisplay</a></code></li>
 <li><code><a title="control.typ.base.TypeBase.toEdit" href="base.html#control.typ.base.TypeBase.toEdit">toEdit</a></code></li>
@@ -503,7 +467,7 @@ def cleanNumber(strVal, asInt):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

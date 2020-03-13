@@ -56,6 +56,9 @@
     --good-fore:                       hsla(120, 100%,  50%, 1  );
     --good-back:                       hsla(120, 100%,  80%, 0.5);
 
+    --help-fore:                       hsla( 90, 100%,   0%, 1  );
+    --help-back:                       hsla( 90, 100%,  90%, 0.8);
+
     --icon-fore:                       hsla(210,   0%,  20%, 1  );
     --icon-special-fore:               hsla(210, 100%,  40%, 1  );
     --icon-error-fore:                 hsla(  0, 100%,  40%, 1  );

@@ -121,6 +121,22 @@ div.headline
   border-radius: 0.2rem;
   padding: 0.2rem;
 }
+div.headlinestart
+{
+  flex: 0 1 auto;
+	display: inline-flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	align-content: flex-start;
+}
+div.headlineend
+{
+  flex: 2 0 auto;
+	display: inline-flex;
+	flex-flow: row nowrap;
+	justify-content: flex-end;
+	align-content: flex-end;
+}
 .user
 {
   flex: 0 1 auto;
@@ -150,9 +166,18 @@ div.headline
   flex: 0 1 auto;
   margin: 0.1rem 1rem;
 }
+.button.help
+{
+  flex: 0 1 auto;
+  margin: 0.5rem .5rem;
+  font-size: large;
+	background-color: var(--help-back);
+	color: var(--help-fore);
+
+}
 #logo
 {
-  flex: 2 0 auto;
+  flex: 0 1 auto;
   text-align: right;
   height: calc(var(--topbar-height) - 1rem);
   z-index: 999;

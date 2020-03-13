@@ -5,11 +5,10 @@
 [DARIAH contribution tool]({{liveBase}})
 
 This is the documentation for the DARIAH contribution tool, an instrument to register
-and assess community contributions to the [DARIAH]({{dariah}}) .
+and assess community contributions to the [DARIAH infrastructure]({{dariah}}) .
 
 ??? abstract "News"
-    Every now and then I resume what has happened during development. It
-    is not regular and not comprehensive! [More ...](News.md)
+    [More ...](News.md)
 
 ## What does it do?
 

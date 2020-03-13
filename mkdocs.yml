@@ -65,8 +65,10 @@ plugins:
 extra:
   # App
   repoName: dariah-contrib
+  repoUrl: https://github.com/Dans-labs/dariah-contrib
+  repoHistoryUrl: https://github.com/Dans-labs/dariah
   repBase: https://github.com/Dans-labs/dariah-contrib/blob/master
-  liveBase: https://dariah-beta.dans.knaw.nl
+  liveBase: https://contrib.dariah.eu
   repo: https://github.com/Dans-labs/dariah-contrib
   docSite: https://dans-labs.github.io/dariah-contrib
   docSiteOrig: https://dans-labs.github.io/dariah

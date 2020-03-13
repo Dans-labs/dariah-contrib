@@ -7,7 +7,7 @@ Here is some reflection on the choices I've made, and the things I've learned.
 ## "Best" practices
 
 The
-[previous incarnation]({{docSiteOrig}})
+[previous incarnation]({{repoHistoryUrl}})
 of the tool has been built using modern,
 top-notch, popular frameworks and tools,
 such as React, Redux, Webpack, MongoDb, Python, modern Javascript (ES6), and its documentation

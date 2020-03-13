@@ -113,6 +113,7 @@ if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     BACKUP=$BACKUP_PROD
 else
     ON_DANS="0"
+    ON_PROD="0"
     APP_DIR=~/github/Dans-labs
     DB=$DB_DEV
     MODE="development"
@@ -273,6 +274,7 @@ function datamanage {
             else
                 machine="$HOST_TEST"
             fi
+            echo "Download $lab in $BACKUP_PROD on $machine to directory $BACKUP_DEV"
             scp -r "dirkr@${machine}:/$BACKUP_PROD/$lab" .
         fi
     elif [[ "$1" == "up" ]]; then
@@ -288,6 +290,7 @@ function datamanage {
                 machine="$HOST_TEST"
             fi
             cd $BACKUP_DEV
+            echo "Upload $lab in $BACKUP_DEV to $machine into directory $BACKUP_PROD"
             scp -r "$lab" "dirkr@${machine}:/$BACKUP_PROD"
         fi
     fi

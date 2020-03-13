@@ -17,6 +17,8 @@ LOGIN = URLS[N.login]
 LOGOUT = URLS[N.logout]
 SLOGOUT = URLS[N.slogout]
 LOGO = URLS[N.logo]
+HELP = URLS[N.help]
+TECH = URLS[N.tech]
 
 
 class Topbar:
@@ -52,8 +54,8 @@ class Topbar:
             if auth.authenticated()
             else (
                 auth.wrapTestUsers()
-                if auth.isDevel else
-                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls="button small loginout")
+                if auth.isDevel
+                else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls="button small loginout")
             )
         )
         logout = (
@@ -73,13 +75,43 @@ class Topbar:
             if auth.authenticated()
             else E
         )
+        techdoc = (
+            H.a(
+                G(TECH, N.text),
+                G(TECH, N.url),
+                target=N._blank,
+                cls="button medium help",
+                title=G(TECH, N.title),
+            )
+        )
+        userhelp = (
+            H.a(
+                G(HELP, N.text),
+                G(HELP, N.url),
+                target=N._blank,
+                cls="button medium help",
+                title=G(HELP, N.title),
+            )
+        )
         return H.div(
             [
-                H.icon(N.devel) if auth.isDevel else E,
-                H.div(identityRep, cls="user"),
-                H.div(accessRep, cls="access"),
-                login,
-                logout,
+                H.div(
+                    [
+                        H.icon(N.devel) if auth.isDevel else E,
+                        H.div(identityRep, cls="user"),
+                        H.div(accessRep, cls="access"),
+                        login,
+                        logout,
+                    ],
+                    cls="headlinestart",
+                ),
+                H.div(
+                    [
+                        techdoc,
+                        userhelp,
+                    ],
+                    cls="headlineend",
+                ),
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),
