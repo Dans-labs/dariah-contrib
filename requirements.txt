@@ -5,6 +5,7 @@ gunicorn
 lxml
 markdown
 mkdocs
+openpyxl
 pdoc3
 pygments
 pymdown-extensions

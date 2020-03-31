@@ -36,6 +36,7 @@ costDescription:
     read: coord
 contactPersonName:
   label: Contact person
+  multiple: true
 contactPersonEmail:
   label: Contact email
   type: email

@@ -153,8 +153,13 @@ prov:
     perm:
       read: auth
       edit: nobody
+  import:
+    label: Imported from
+    perm:
+      read: auth
+      edit: nobody
   isPristine:
-    label: Unchanged legacy
+    label: Unchanged since import
     perm:
       read: auth
       edit: nobody

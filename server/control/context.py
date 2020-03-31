@@ -221,6 +221,7 @@ class Context:
             return None
 
         db = self.db
+        wf = self.wf
 
         info = self.getCached(
             db.getWorkflowItem,
@@ -230,6 +231,8 @@ class Context:
             contribId,
             requireFresh,
         )
+        if not info:
+            info = wf.computeWorkflow(contribId=contribId)
         return WorkflowItem(self, info)
 
     def deleteItem(self, table, eid):

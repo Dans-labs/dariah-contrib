@@ -18,43 +18,45 @@ function givehelp {
     echo "      dev  db   = dariah_dev"
     echo "      dev  prod = dariah"
     echo "<task>:"
-    echo "datadown lab: download backup from remote machine in directory lab"
+    echo "databulk      : upload bulk spreadsheets to remote machine"
+    echo "databulk p    : upload bulk spreadsheets to production machine"
+    echo "datadown lab  : download backup from remote machine in directory lab"
     echo "datadown lab p: download backup from prodcution machine in directory lab"
-    echo "dataup lab  : upload backup lab to remote machine"
+    echo "dataup lab    : upload backup lab to remote machine"
     echo "dataup lab p  : upload backup lab to production machine"
-    echo "dbinitdev   : reset the dariah_dev db in Mongo to fixed legacy content"
-    echo "docs        : build and serve github pages documentation"
-    echo "docsapi     : generate api docs from docstrings, also in tests"
-    echo "docsship msg: build docs, commit/push all code to github. msg=commit message"
-    echo "gits msg    : commits with msg and pushes repo to github"
-    echo "serve       : start serving with Flask development server"
-    echo "serve p     :     idem, but Flask development mode is off"
-    echo "servetest   :     idem, but use test database"
-    echo "servetest p :     idem, but Flask development mode is off"
-    echo "serveprod   :     idem, but use prod database"
-    echo "serveprod p :     idem, but Flask development mode is off"
-    echo "ship msg    : run tests, build docs, commit/push all code to github, msg=commit message"
-    echo "stamp       : add a slug to updated css and js file names to invalidate caches"
-    echo "stamp un    : use unslugged css and js file names"
-    echo "stats       : collect codebase statistics"
+    echo "dbinitdev     : reset the dariah_dev db in Mongo to fixed legacy content"
+    echo "docs          : build and serve github pages documentation"
+    echo "docsapi       : generate api docs from docstrings, also in tests"
+    echo "docsship msg  : build docs, commit/push all code to github. msg=commit message"
+    echo "gits msg      : commits with msg and pushes repo to github"
+    echo "serve         : start serving with Flask development server"
+    echo "serve p       :     idem, but Flask development mode is off"
+    echo "servetest     :     idem, but use test database"
+    echo "servetest p   :     idem, but Flask development mode is off"
+    echo "serveprod     :     idem, but use prod database"
+    echo "serveprod p   :     idem, but Flask development mode is off"
+    echo "ship msg      : run tests, build docs, commit/push all code to github, msg=commit message"
+    echo "stamp         : add a slug to updated css and js file names to invalidate caches"
+    echo "stamp un      : use unslugged css and js file names"
+    echo "stats         : collect codebase statistics"
     echo ""
     echo "    Production only:"
     echo "      prod db = dariah"
     echo "<task>:"
-    echo "log ha      : see the access log of the httpd service"
-    echo "log he      : see the error log of the httpd service"
-    echo "log ga      : see the access log of the gunicorn service"
-    echo "log ge      : see the error log of the gunicorn service"
-    echo "log gE      : see the error journal of the gunicorn service"
-    echo "log s       : see the shibboleth log"
-    echo "log sw      : see the shibboleth warning log"
-    echo "log st      : see the shibboleth transaction log"
-    echo "gitp        : pulls latest repo contents from github abd overwrites existing contents unconditionally"
-    echo "gunistatus  : see the status of the gunicorn service"
-    echo "gunistop    : stop serving with gunicorn"
-    echo "install     : install the app as a service running with gunicorn"
-    echo "restart     : restart the webservice"
-    echo "update      : fetch new code and deploy it on the server"
+    echo "log ha        : see the access log of the httpd service"
+    echo "log he        : see the error log of the httpd service"
+    echo "log ga        : see the access log of the gunicorn service"
+    echo "log ge        : see the error log of the gunicorn service"
+    echo "log gE        : see the error journal of the gunicorn service"
+    echo "log s         : see the shibboleth log"
+    echo "log sw        : see the shibboleth warning log"
+    echo "log st        : see the shibboleth transaction log"
+    echo "gitp          : pulls latest repo contents from github abd overwrites existing contents unconditionally"
+    echo "gunistatus    : see the status of the gunicorn service"
+    echo "gunistop      : stop serving with gunicorn"
+    echo "install       : install the app as a service running with gunicorn"
+    echo "restart       : restart the webservice"
+    echo "update        : fetch new code and deploy it on the server"
     # echo "activate36  : activate python36 in a spawned shell"
     echo ""
     echo "    Both:"
@@ -62,26 +64,33 @@ function givehelp {
     echo "      dev  db = dariah_dev"
     echo "      test db = dariah_test"
     echo "<task>:"
-    echo "consolidate : convert backup of production db into consolidated yaml"
-    echo "cull        : remove the legacy contributions from the dataset"
-    echo "databu [lab]: dump the database into local directory under current date or lab"
+    echo "bulk          : add contributions from a spreadsheet in bulk to production db"
+    echo "bulk d        : add contributions from a spreadsheet in bulk to dev db"
+    echo "bulk t        : add contributions from a spreadsheet in bulk to test db"
+    echo "bulk [td] x   : delete contributions specified in spreadsheet from db but only if pristine"
+    echo "consolidate   : convert backup of production db into consolidated yaml"
+    echo "cull          : remove the legacy contributions from the dataset"
+    echo "databu [lab]  : dump the database into local directory under current date or lab"
     echo "databu [lab] p: dump the productiondatabase into local directory under current date or lab"
     echo "datarest lab: restore the database from local directory under lab, append _restored to db name"
     echo "datarest lab p: restore production database from local directory under lab, append _restored to db name"
     echo "datarest lab x: restore production database from local directory under lab, replace existing db"
     echo "choose the dariah db in all cases"
-    echo "dbinittest  : clean the test db in Mongo"
-    echo "dbroot      : restore the root permissions: only the one user in base.yaml"
-    echo "dbroottest  :     idem, but on test database"
-    echo "dbwf        : (re)initialize the workflow table"
-    echo "dbwftest    :     idem, but on test database"
-    echo "guni        : start serving with gunicorn"
-    echo "gunitest    :     idem, but now with the test database"
-    echo "mongostart  : start mongo db daemon"
-    echo "mongostop   : start mongo db daemon"
-    echo "test        : run all tests"
-    echo "testc       : run all tests with coverage"
-    echo "values table: print all values in a value table"
+    echo "dbinittest    : clean the test db in Mongo"
+    echo "dbroot        : restore the root permissions: only the one user in base.yaml"
+    echo "dbroottest    :     idem, but on test database"
+    echo "dbwf          : (re)initialize the workflow table"
+    echo "dbwftest      :     idem, but on test database"
+    echo "guni          : start serving with gunicorn"
+    echo "gunitest      :     idem, but now with the test database"
+    echo "mongostart    : start mongo db daemon"
+    echo "mongostop     : start mongo db daemon"
+    echo "reshape       : reshape production db: transform a field"
+    echo "reshape d     : reshape dev db: transform a field"
+    echo "reshape t     : reshape test db: transform a field"
+    echo "test          : run all tests"
+    echo "testc         : run all tests with coverage"
+    echo "values table  : print all values in a value table"
 }
 
 # ON WHAT MACHINE ARE WE ?
@@ -96,7 +105,9 @@ DB_DEV="dariah_dev"
 DB_PROD="dariah"
 
 BACKUP_PROD="/home/dirkr/backups"
-BACKUP_DEV=~/Documents/DANS/projects/has/backups
+BULK_PROD="/home/dirkr/bulk"
+BACKUP_DEV=~/Documents/DANS/projects/dariah/backups
+BULK_DEV=~/Documents/DANS/projects/dariah/bulk
 
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     ON_DANS="1"
@@ -111,6 +122,7 @@ if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     DB=$DB_PROD
     MODE="production"
     BACKUP=$BACKUP_PROD
+    BULK=$BULK_PROD
 else
     ON_DANS="0"
     ON_PROD="0"
@@ -118,6 +130,7 @@ else
     DB=$DB_DEV
     MODE="development"
     BACKUP=$BACKUP_DEV
+    BULK=$BULK_DEV
 fi
 
 
@@ -211,6 +224,38 @@ function cull {
     mongorestore --drop --nsFrom "dariah_restored.*" --nsTo "dariah.*" "$datastore"
 }
 
+function reshape {
+    cd $root/import
+    mongostart
+    DB_DEST=$DB_PROD
+    if [[ "$1" == "t" ]]; then
+        DB_DEST=$DB_TEST
+        shift
+    elif [[ "$1" == "d" ]]; then
+        DB_DEST=$DB_DEV
+        shift
+    fi
+    python3 reshape.py "$DB_DEST"
+}
+
+function bulk {
+    cd $root/import
+    mongostart
+    DB_DEST=$DB_PROD
+    if [[ "$1" == "t" ]]; then
+        DB_DEST=$DB_TEST
+        shift
+    elif [[ "$1" == "d" ]]; then
+        DB_DEST=$DB_DEV
+        shift
+    fi
+    action="i"
+    if [[ "$1" == "x" ]]; then
+        action="x"
+    fi
+    python3 bulk.py "$DB_DEST" "$action" "$BULK"
+}
+
 function datamanage {
     if [[ "$1" == "backup" ]]; then
         shift
@@ -293,6 +338,16 @@ function datamanage {
             echo "Upload $lab in $BACKUP_DEV to $machine into directory $BACKUP_PROD"
             scp -r "$lab" "dirkr@${machine}:/$BACKUP_PROD"
         fi
+    elif [[ "$1" == "bulk" ]]; then
+        shift
+        if [[ "$1" == "p" ]]; then
+            machine="$HOST_PROD"
+        else
+            machine="$HOST_TEST"
+        fi
+        echo "Upload $BULK_DEV/todo to $machine into directory $BULK_PROD"
+        cd "$BULK_DEV"
+        scp -r "/todo" "dirkr@${machine}:/$BULK_PROD"
     fi
 }
 
@@ -570,6 +625,10 @@ function databu {
     datamanage backup "$@"
 }
 
+function databulk {
+    datamanage bulk "$@"
+}
+
 function datarest {
     datamanage restore "$@"
 }
@@ -707,16 +766,15 @@ function update {
 mayrun="1"
 
 case "$1" in
-    datadown|dataup|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
+    databulk|datadown|dataup|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
     log|gitp|gunistatus|gunistop|install|restart|update)
-    # activate36|log|gunistatus|gunistop|install|restart|update)
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
-    consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|test|testc|values)
+    bulk|consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|reshape|test|testc|values)
         mayrun="1";;
     *)
         mayrun="-1";;
