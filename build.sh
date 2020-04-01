@@ -249,7 +249,7 @@ function bulk {
     fi
     python3 bulk.py "$DB_DEST" "$action" "$BULK"
     if [[ "$ON_DANS" == "1" ]]; then
-        sudo systemctl stop dariah-contrib.service
+        sudo systemctl start dariah-contrib.service
     fi
 }
 
