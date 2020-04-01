@@ -477,7 +477,7 @@ class Db:
 
         serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
 
-    def bulkContribWorkflow(self, countryId):
+    def bulkContribWorkflow(self, countryId, bulk):
         &#34;&#34;&#34;Collects workflow information in bulk.
 
         When overviews are being produced, workflow info is needed for a lot
@@ -495,8 +495,14 @@ class Db:
             Otherwise, this should be
             the id of a countryId, and only the workflow
             for items belonging to this country are fetched.
+        bulk: boolean
+            If `True`, fetches only records that have been bulk-imported.
+            Those records are marked by the presence of the field `import`.
         &#34;&#34;&#34;
         crit = {} if countryId is None else {&#34;country&#34;: countryId}
+        if bulk:
+            crit[&#34;import&#34;] = {M_EX: True}
+
         project = {
             field: f&#34;${fieldTrans}&#34; for (field, fieldTrans) in OVERVIEW_FIELDS.items()
         }
@@ -1761,7 +1767,7 @@ as recommended in
 
         serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
 
-    def bulkContribWorkflow(self, countryId):
+    def bulkContribWorkflow(self, countryId, bulk):
         &#34;&#34;&#34;Collects workflow information in bulk.
 
         When overviews are being produced, workflow info is needed for a lot
@@ -1779,8 +1785,14 @@ as recommended in
             Otherwise, this should be
             the id of a countryId, and only the workflow
             for items belonging to this country are fetched.
+        bulk: boolean
+            If `True`, fetches only records that have been bulk-imported.
+            Those records are marked by the presence of the field `import`.
         &#34;&#34;&#34;
         crit = {} if countryId is None else {&#34;country&#34;: countryId}
+        if bulk:
+            crit[&#34;import&#34;] = {M_EX: True}
+
         project = {
             field: f&#34;${fieldTrans}&#34; for (field, fieldTrans) in OVERVIEW_FIELDS.items()
         }
@@ -2765,7 +2777,7 @@ to be created by the system.</p></section>
 <h3>Methods</h3>
 <dl>
 <dt id="control.db.Db.bulkContribWorkflow"><code class="name flex">
-<span>def <span class="ident">bulkContribWorkflow</span></span>(<span>self, countryId)</span>
+<span>def <span class="ident">bulkContribWorkflow</span></span>(<span>self, countryId, bulk)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Collects workflow information in bulk.</p>
@@ -2782,12 +2794,15 @@ to simple key-value pair.</p>
 Otherwise, this should be
 the id of a countryId, and only the workflow
 for items belonging to this country are fetched.</dd>
+<dt><strong><code>bulk</code></strong> :&ensp;<code>boolean</code></dt>
+<dd>If <code>True</code>, fetches only records that have been bulk-imported.
+Those records are marked by the presence of the field <code>import</code>.</dd>
 </dl></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bulkContribWorkflow(self, countryId):
+<pre><code class="python">def bulkContribWorkflow(self, countryId, bulk):
     &#34;&#34;&#34;Collects workflow information in bulk.
 
     When overviews are being produced, workflow info is needed for a lot
@@ -2805,8 +2820,14 @@ for items belonging to this country are fetched.</dd>
         Otherwise, this should be
         the id of a countryId, and only the workflow
         for items belonging to this country are fetched.
+    bulk: boolean
+        If `True`, fetches only records that have been bulk-imported.
+        Those records are marked by the presence of the field `import`.
     &#34;&#34;&#34;
     crit = {} if countryId is None else {&#34;country&#34;: countryId}
+    if bulk:
+        crit[&#34;import&#34;] = {M_EX: True}
+
     project = {
         field: f&#34;${fieldTrans}&#34; for (field, fieldTrans) in OVERVIEW_FIELDS.items()
     }
