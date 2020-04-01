@@ -445,7 +445,7 @@ class Db:
 
         serverprint(f"""UPDATED {", ".join(ACTUAL_TABLES)}""")
 
-    def bulkContribWorkflow(self, countryId):
+    def bulkContribWorkflow(self, countryId, bulk):
         """Collects workflow information in bulk.
 
         When overviews are being produced, workflow info is needed for a lot
@@ -463,8 +463,14 @@ class Db:
             Otherwise, this should be
             the id of a countryId, and only the workflow
             for items belonging to this country are fetched.
+        bulk: boolean
+            If `True`, fetches only records that have been bulk-imported.
+            Those records are marked by the presence of the field `import`.
         """
         crit = {} if countryId is None else {"country": countryId}
+        if bulk:
+            crit["import"] = {M_EX: True}
+
         project = {
             field: f"${fieldTrans}" for (field, fieldTrans) in OVERVIEW_FIELDS.items()
         }

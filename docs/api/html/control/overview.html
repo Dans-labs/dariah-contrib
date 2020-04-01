@@ -65,11 +65,11 @@ COLSPECS = (
 )
 
 GROUP_COLS = &#34;&#34;&#34;
-      country
-      year
-      type
-      assessed
-      selected
+    country
+    year
+    type
+    assessed
+    selected
 &#34;&#34;&#34;.strip().split()
 
 SUBHEAD_X_COLS = set(
@@ -138,7 +138,7 @@ class Overview:
         self.chosenCountryId = chosenCountryId
         self.chosenCountryIso = chosenCountryIso
 
-    def getContribs(self):
+    def getContribs(self, bulk):
         context = self.context
         db = context.db
         chosenCountryId = self.chosenCountryId
@@ -147,7 +147,7 @@ class Overview:
         typeType = self.typeType
 
         contribs = {}
-        for record in db.bulkContribWorkflow(chosenCountryId):
+        for record in db.bulkContribWorkflow(chosenCountryId, bulk):
             title = G(record, N.title)
             contribId = G(record, N._id)
 
@@ -202,6 +202,8 @@ class Overview:
 
         accessRep = auth.credentials()[1]
 
+        rawBulk = request.args.get(N.bulk, E)
+        bulk = True if rawBulk else False
         rawSortCol = request.args.get(N.sortcol, E)
         rawReverse = request.args.get(N.reverse, E)
         country = request.args.get(N.country, E)
@@ -210,7 +212,7 @@ class Overview:
         )
 
         self.getCountry(country)
-        self.getContribs()
+        self.getContribs(bulk)
 
         chosenCountry = self.chosenCountry
         chosenCountryId = self.chosenCountryId
@@ -237,6 +239,7 @@ class Overview:
 
         self.cols = cols
         self.labels = labels
+        self.bulk = bulk
         self.groupCols = groupCols
         self.sortCol = sortCol
         self.reverse = reverse
@@ -249,7 +252,7 @@ class Overview:
                 H.a(
                     ALL,
                     (
-                        f&#34;&#34;&#34;{PAGE}?country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                        f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                         f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                     ),
                     cls=&#34;c-control&#34;,
@@ -269,7 +272,8 @@ class Overview:
                     else H.a(
                         name,
                         (
-                            f&#34;&#34;&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                            f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={iso}&amp;&#34;&#34;&#34;
+                            f&#34;&#34;&#34;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                             f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                         ),
                         cls=&#34;c-control&#34;,
@@ -281,12 +285,15 @@ class Overview:
         groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
 
         if not asTsv:
-            urlArgs = (
-                f&#34;&#34;&#34;?country={chosenCountryIso}&amp;&#34;&#34;&#34;
-                f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;&#34;&#34;
+            urlArgsBare = (
+                f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+                f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
             )
-            urlStart1 = f&#34;&#34;&#34;{PAGE}{urlArgs}&#34;&#34;&#34;
-            urlStart = f&#34;&#34;&#34;{urlStart1}&#34;&#34;&#34; f&#34;&amp;groups=&#34;
+            urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
+            urlArgsBulk0 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=&amp;groups={groups}&#34;&#34;&#34;
+            urlArgsBulk1 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=1&amp;groups={groups}&#34;&#34;&#34;
+            urlStart1 = f&#34;&#34;&#34;{PAGE}?{urlArgs}&#34;&#34;&#34;
+            urlStart = f&#34;&#34;&#34;{urlStart1}&amp;groups=&#34;&#34;&#34;
             availableReps = E.join(
                 H.a(
                     f&#34;&#34;&#34;+{g}&#34;&#34;&#34;,
@@ -310,7 +317,7 @@ class Overview:
                     N.clear, urlStart1, cls=&#34;g-x&#34;, title=&#34;&#34;&#34;clear all groups&#34;&#34;&#34;
                 )
             )
-            rArgs = f&#34;&#34;&#34;{urlArgs}groups={groups}&#34;&#34;&#34;
+            rArgs = f&#34;&#34;&#34;{urlArgs}&amp;groups={groups}&#34;&#34;&#34;
 
         headerLine = self.ourCountryHeaders(
             country, groups, asTsv, groupOrder=groupOrder,
@@ -323,6 +330,9 @@ class Overview:
         origin = chosenCountry or ALL.lower()
 
         if not asTsv:
+            bulkHead = &#34;Show all&#34; if bulk else &#34;Show bulk imports only&#34;
+            bulkPre = H.span(&#34;Showing bulk imports only&#34;) + NBSP if bulk else E
+            bulkUrl = f&#34;&#34;&#34;{PAGE}?{urlArgsBulk0 if bulk else urlArgsBulk1}&#34;&#34;&#34;
             material.append(H.h(3, &#34;&#34;&#34;Grouping&#34;&#34;&#34;))
             material.append(
                 H.table(
@@ -348,6 +358,7 @@ class Overview:
                     cls=&#34;mt&#34;,
                 )
             )
+            material.append(H.p([bulkPre, H.a(bulkHead, bulkUrl, cls=&#34;button small&#34;)]))
             material.append(
                 H.h(
                     3,
@@ -663,6 +674,7 @@ class Overview:
     def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
         cols = self.cols
         labels = self.labels
+        bulk = self.bulk
         sortCol = self.sortCol
         reverse = self.reverse
 
@@ -682,7 +694,8 @@ class Overview:
             headers = []
             dirClass = N.desc if reverse else N.asc
             dirIcon = N.adown if reverse else N.aup
-            urlStart = f&#34;&#34;&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;&#34;&#34;
+            rawBulk = &#34;1&#34; if bulk else E
+            urlStart = f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={country}&amp;groups={groups}&#34;&#34;&#34;
             for col in groupOrder:
                 isSorted = col == sortCol
                 thisClass = f&#34;c-{col}&#34;
@@ -698,7 +711,7 @@ class Overview:
                 sep = NBSP if icon else E
                 colControl = H.a(
                     f&#34;&#34;&#34;{label}{icon}&#34;&#34;&#34;,
-                    f&#34;&#34;&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
+                    f&#34;&#34;&#34;{urlStart}&amp;sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
                 )
                 headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
             headers = (headers, {})
@@ -839,7 +852,7 @@ class Overview:
         self.chosenCountryId = chosenCountryId
         self.chosenCountryIso = chosenCountryIso
 
-    def getContribs(self):
+    def getContribs(self, bulk):
         context = self.context
         db = context.db
         chosenCountryId = self.chosenCountryId
@@ -848,7 +861,7 @@ class Overview:
         typeType = self.typeType
 
         contribs = {}
-        for record in db.bulkContribWorkflow(chosenCountryId):
+        for record in db.bulkContribWorkflow(chosenCountryId, bulk):
             title = G(record, N.title)
             contribId = G(record, N._id)
 
@@ -903,6 +916,8 @@ class Overview:
 
         accessRep = auth.credentials()[1]
 
+        rawBulk = request.args.get(N.bulk, E)
+        bulk = True if rawBulk else False
         rawSortCol = request.args.get(N.sortcol, E)
         rawReverse = request.args.get(N.reverse, E)
         country = request.args.get(N.country, E)
@@ -911,7 +926,7 @@ class Overview:
         )
 
         self.getCountry(country)
-        self.getContribs()
+        self.getContribs(bulk)
 
         chosenCountry = self.chosenCountry
         chosenCountryId = self.chosenCountryId
@@ -938,6 +953,7 @@ class Overview:
 
         self.cols = cols
         self.labels = labels
+        self.bulk = bulk
         self.groupCols = groupCols
         self.sortCol = sortCol
         self.reverse = reverse
@@ -950,7 +966,7 @@ class Overview:
                 H.a(
                     ALL,
                     (
-                        f&#34;&#34;&#34;{PAGE}?country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                        f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                         f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                     ),
                     cls=&#34;c-control&#34;,
@@ -970,7 +986,8 @@ class Overview:
                     else H.a(
                         name,
                         (
-                            f&#34;&#34;&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                            f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={iso}&amp;&#34;&#34;&#34;
+                            f&#34;&#34;&#34;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                             f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                         ),
                         cls=&#34;c-control&#34;,
@@ -982,12 +999,15 @@ class Overview:
         groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
 
         if not asTsv:
-            urlArgs = (
-                f&#34;&#34;&#34;?country={chosenCountryIso}&amp;&#34;&#34;&#34;
-                f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;&#34;&#34;
+            urlArgsBare = (
+                f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+                f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
             )
-            urlStart1 = f&#34;&#34;&#34;{PAGE}{urlArgs}&#34;&#34;&#34;
-            urlStart = f&#34;&#34;&#34;{urlStart1}&#34;&#34;&#34; f&#34;&amp;groups=&#34;
+            urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
+            urlArgsBulk0 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=&amp;groups={groups}&#34;&#34;&#34;
+            urlArgsBulk1 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=1&amp;groups={groups}&#34;&#34;&#34;
+            urlStart1 = f&#34;&#34;&#34;{PAGE}?{urlArgs}&#34;&#34;&#34;
+            urlStart = f&#34;&#34;&#34;{urlStart1}&amp;groups=&#34;&#34;&#34;
             availableReps = E.join(
                 H.a(
                     f&#34;&#34;&#34;+{g}&#34;&#34;&#34;,
@@ -1011,7 +1031,7 @@ class Overview:
                     N.clear, urlStart1, cls=&#34;g-x&#34;, title=&#34;&#34;&#34;clear all groups&#34;&#34;&#34;
                 )
             )
-            rArgs = f&#34;&#34;&#34;{urlArgs}groups={groups}&#34;&#34;&#34;
+            rArgs = f&#34;&#34;&#34;{urlArgs}&amp;groups={groups}&#34;&#34;&#34;
 
         headerLine = self.ourCountryHeaders(
             country, groups, asTsv, groupOrder=groupOrder,
@@ -1024,6 +1044,9 @@ class Overview:
         origin = chosenCountry or ALL.lower()
 
         if not asTsv:
+            bulkHead = &#34;Show all&#34; if bulk else &#34;Show bulk imports only&#34;
+            bulkPre = H.span(&#34;Showing bulk imports only&#34;) + NBSP if bulk else E
+            bulkUrl = f&#34;&#34;&#34;{PAGE}?{urlArgsBulk0 if bulk else urlArgsBulk1}&#34;&#34;&#34;
             material.append(H.h(3, &#34;&#34;&#34;Grouping&#34;&#34;&#34;))
             material.append(
                 H.table(
@@ -1049,6 +1072,7 @@ class Overview:
                     cls=&#34;mt&#34;,
                 )
             )
+            material.append(H.p([bulkPre, H.a(bulkHead, bulkUrl, cls=&#34;button small&#34;)]))
             material.append(
                 H.h(
                     3,
@@ -1364,6 +1388,7 @@ class Overview:
     def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
         cols = self.cols
         labels = self.labels
+        bulk = self.bulk
         sortCol = self.sortCol
         reverse = self.reverse
 
@@ -1383,7 +1408,8 @@ class Overview:
             headers = []
             dirClass = N.desc if reverse else N.asc
             dirIcon = N.adown if reverse else N.aup
-            urlStart = f&#34;&#34;&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;&#34;&#34;
+            rawBulk = &#34;1&#34; if bulk else E
+            urlStart = f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={country}&amp;groups={groups}&#34;&#34;&#34;
             for col in groupOrder:
                 isSorted = col == sortCol
                 thisClass = f&#34;c-{col}&#34;
@@ -1399,7 +1425,7 @@ class Overview:
                 sep = NBSP if icon else E
                 colControl = H.a(
                     f&#34;&#34;&#34;{label}{icon}&#34;&#34;&#34;,
-                    f&#34;&#34;&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
+                    f&#34;&#34;&#34;{urlStart}&amp;sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
                 )
                 headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
             headers = (headers, {})
@@ -1816,7 +1842,7 @@ def wrapStatus(contrib, subHead=False):
 </details>
 </dd>
 <dt id="control.overview.Overview.getContribs"><code class="name flex">
-<span>def <span class="ident">getContribs</span></span>(<span>self)</span>
+<span>def <span class="ident">getContribs</span></span>(<span>self, bulk)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -1824,7 +1850,7 @@ def wrapStatus(contrib, subHead=False):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getContribs(self):
+<pre><code class="python">def getContribs(self, bulk):
     context = self.context
     db = context.db
     chosenCountryId = self.chosenCountryId
@@ -1833,7 +1859,7 @@ def wrapStatus(contrib, subHead=False):
     typeType = self.typeType
 
     contribs = {}
-    for record in db.bulkContribWorkflow(chosenCountryId):
+    for record in db.bulkContribWorkflow(chosenCountryId, bulk):
         title = G(record, N.title)
         contribId = G(record, N._id)
 
@@ -2069,6 +2095,7 @@ def wrapStatus(contrib, subHead=False):
 <pre><code class="python">def ourCountryHeaders(self, country, groups, asTsv, groupOrder=None):
     cols = self.cols
     labels = self.labels
+    bulk = self.bulk
     sortCol = self.sortCol
     reverse = self.reverse
 
@@ -2088,7 +2115,8 @@ def wrapStatus(contrib, subHead=False):
         headers = []
         dirClass = N.desc if reverse else N.asc
         dirIcon = N.adown if reverse else N.aup
-        urlStart = f&#34;&#34;&#34;{PAGE}?country={country}&amp;groups={groups}&amp;&#34;&#34;&#34;
+        rawBulk = &#34;1&#34; if bulk else E
+        urlStart = f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={country}&amp;groups={groups}&#34;&#34;&#34;
         for col in groupOrder:
             isSorted = col == sortCol
             thisClass = f&#34;c-{col}&#34;
@@ -2104,7 +2132,7 @@ def wrapStatus(contrib, subHead=False):
             sep = NBSP if icon else E
             colControl = H.a(
                 f&#34;&#34;&#34;{label}{icon}&#34;&#34;&#34;,
-                f&#34;&#34;&#34;{urlStart}sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
+                f&#34;&#34;&#34;{urlStart}&amp;sortcol={col}&amp;reverse={reverseRep}&#34;&#34;&#34;,
             )
             headers.append((colControl, dict(cls=f&#34;och {thisClass}&#34;)))
         headers = (headers, {})
@@ -2149,6 +2177,8 @@ def wrapStatus(contrib, subHead=False):
 
     accessRep = auth.credentials()[1]
 
+    rawBulk = request.args.get(N.bulk, E)
+    bulk = True if rawBulk else False
     rawSortCol = request.args.get(N.sortcol, E)
     rawReverse = request.args.get(N.reverse, E)
     country = request.args.get(N.country, E)
@@ -2157,7 +2187,7 @@ def wrapStatus(contrib, subHead=False):
     )
 
     self.getCountry(country)
-    self.getContribs()
+    self.getContribs(bulk)
 
     chosenCountry = self.chosenCountry
     chosenCountryId = self.chosenCountryId
@@ -2184,6 +2214,7 @@ def wrapStatus(contrib, subHead=False):
 
     self.cols = cols
     self.labels = labels
+    self.bulk = bulk
     self.groupCols = groupCols
     self.sortCol = sortCol
     self.reverse = reverse
@@ -2196,7 +2227,7 @@ def wrapStatus(contrib, subHead=False):
             H.a(
                 ALL,
                 (
-                    f&#34;&#34;&#34;{PAGE}?country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                    f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country=x&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                     f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                 ),
                 cls=&#34;c-control&#34;,
@@ -2216,7 +2247,8 @@ def wrapStatus(contrib, subHead=False):
                 else H.a(
                     name,
                     (
-                        f&#34;&#34;&#34;{PAGE}?country={iso}&amp;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
+                        f&#34;&#34;&#34;{PAGE}?bulk={rawBulk}&amp;country={iso}&amp;&#34;&#34;&#34;
+                        f&#34;&#34;&#34;sortcol={rawSortCol}&amp;&#34;&#34;&#34;
                         f&#34;&#34;&#34;reverse={rawReverse}&amp;groups={groups}&#34;&#34;&#34;
                     ),
                     cls=&#34;c-control&#34;,
@@ -2228,12 +2260,15 @@ def wrapStatus(contrib, subHead=False):
     groupOrder = groupsChosen + [g for g in cols if g not in groupSet]
 
     if not asTsv:
-        urlArgs = (
-            f&#34;&#34;&#34;?country={chosenCountryIso}&amp;&#34;&#34;&#34;
-            f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&amp;&#34;&#34;&#34;
+        urlArgsBare = (
+            f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+            f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
         )
-        urlStart1 = f&#34;&#34;&#34;{PAGE}{urlArgs}&#34;&#34;&#34;
-        urlStart = f&#34;&#34;&#34;{urlStart1}&#34;&#34;&#34; f&#34;&amp;groups=&#34;
+        urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
+        urlArgsBulk0 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=&amp;groups={groups}&#34;&#34;&#34;
+        urlArgsBulk1 = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk=1&amp;groups={groups}&#34;&#34;&#34;
+        urlStart1 = f&#34;&#34;&#34;{PAGE}?{urlArgs}&#34;&#34;&#34;
+        urlStart = f&#34;&#34;&#34;{urlStart1}&amp;groups=&#34;&#34;&#34;
         availableReps = E.join(
             H.a(
                 f&#34;&#34;&#34;+{g}&#34;&#34;&#34;,
@@ -2257,7 +2292,7 @@ def wrapStatus(contrib, subHead=False):
                 N.clear, urlStart1, cls=&#34;g-x&#34;, title=&#34;&#34;&#34;clear all groups&#34;&#34;&#34;
             )
         )
-        rArgs = f&#34;&#34;&#34;{urlArgs}groups={groups}&#34;&#34;&#34;
+        rArgs = f&#34;&#34;&#34;{urlArgs}&amp;groups={groups}&#34;&#34;&#34;
 
     headerLine = self.ourCountryHeaders(
         country, groups, asTsv, groupOrder=groupOrder,
@@ -2270,6 +2305,9 @@ def wrapStatus(contrib, subHead=False):
     origin = chosenCountry or ALL.lower()
 
     if not asTsv:
+        bulkHead = &#34;Show all&#34; if bulk else &#34;Show bulk imports only&#34;
+        bulkPre = H.span(&#34;Showing bulk imports only&#34;) + NBSP if bulk else E
+        bulkUrl = f&#34;&#34;&#34;{PAGE}?{urlArgsBulk0 if bulk else urlArgsBulk1}&#34;&#34;&#34;
         material.append(H.h(3, &#34;&#34;&#34;Grouping&#34;&#34;&#34;))
         material.append(
             H.table(
@@ -2295,6 +2333,7 @@ def wrapStatus(contrib, subHead=False):
                 cls=&#34;mt&#34;,
             )
         )
+        material.append(H.p([bulkPre, H.a(bulkHead, bulkUrl, cls=&#34;button small&#34;)]))
         material.append(
             H.h(
                 3,

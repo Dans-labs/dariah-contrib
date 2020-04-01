@@ -254,6 +254,7 @@ class Context:
             return None
 
         db = self.db
+        wf = self.wf
 
         info = self.getCached(
             db.getWorkflowItem,
@@ -263,6 +264,8 @@ class Context:
             contribId,
             requireFresh,
         )
+        if not info:
+            info = wf.computeWorkflow(contribId=contribId)
         return WorkflowItem(self, info)
 
     def deleteItem(self, table, eid):
@@ -662,6 +665,7 @@ to which it adds caching.</p>
             return None
 
         db = self.db
+        wf = self.wf
 
         info = self.getCached(
             db.getWorkflowItem,
@@ -671,6 +675,8 @@ to which it adds caching.</p>
             contribId,
             requireFresh,
         )
+        if not info:
+            info = wf.computeWorkflow(contribId=contribId)
         return WorkflowItem(self, info)
 
     def deleteItem(self, table, eid):
@@ -985,6 +991,7 @@ fetched value in the cache.</dd>
         return None
 
     db = self.db
+    wf = self.wf
 
     info = self.getCached(
         db.getWorkflowItem,
@@ -994,6 +1001,8 @@ fetched value in the cache.</dd>
         contribId,
         requireFresh,
     )
+    if not info:
+        info = wf.computeWorkflow(contribId=contribId)
     return WorkflowItem(self, info)</code></pre>
 </details>
 </dd>

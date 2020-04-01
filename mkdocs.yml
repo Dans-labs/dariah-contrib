@@ -135,7 +135,9 @@ nav:
   - "What does it do":
     - Business: 'Workings/Business.md'
     - API: 'Workings/API.md'
-    - Content: 'Workings/Content.md'
+    - Import:
+      - Bulk: 'Workings/Bulk.md'
+      - Legacy: 'Workings/Content.md'
   - Technical:
     - Model: 'Tech/Model.md'
     - Workflow: 'Tech/Workflow.md'

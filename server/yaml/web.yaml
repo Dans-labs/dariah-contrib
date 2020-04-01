@@ -5,6 +5,7 @@ limits:
   action: 20
   anything: 100
   assessed: 2
+  bulk: 2
   country: 5
   default: 50
   deid: 30

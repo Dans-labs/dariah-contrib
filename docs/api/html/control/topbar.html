@@ -49,6 +49,8 @@ LOGIN = URLS[N.login]
 LOGOUT = URLS[N.logout]
 SLOGOUT = URLS[N.slogout]
 LOGO = URLS[N.logo]
+HELP = URLS[N.help]
+TECH = URLS[N.tech]
 
 
 class Topbar:
@@ -84,8 +86,8 @@ class Topbar:
             if auth.authenticated()
             else (
                 auth.wrapTestUsers()
-                if auth.isDevel else
-                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+                if auth.isDevel
+                else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
             )
         )
         logout = (
@@ -105,13 +107,43 @@ class Topbar:
             if auth.authenticated()
             else E
         )
+        techdoc = (
+            H.a(
+                G(TECH, N.text),
+                G(TECH, N.url),
+                target=N._blank,
+                cls=&#34;button medium help&#34;,
+                title=G(TECH, N.title),
+            )
+        )
+        userhelp = (
+            H.a(
+                G(HELP, N.text),
+                G(HELP, N.url),
+                target=N._blank,
+                cls=&#34;button medium help&#34;,
+                title=G(HELP, N.title),
+            )
+        )
         return H.div(
             [
-                H.icon(N.devel) if auth.isDevel else E,
-                H.div(identityRep, cls=&#34;user&#34;),
-                H.div(accessRep, cls=&#34;access&#34;),
-                login,
-                logout,
+                H.div(
+                    [
+                        H.icon(N.devel) if auth.isDevel else E,
+                        H.div(identityRep, cls=&#34;user&#34;),
+                        H.div(accessRep, cls=&#34;access&#34;),
+                        login,
+                        logout,
+                    ],
+                    cls=&#34;headlinestart&#34;,
+                ),
+                H.div(
+                    [
+                        techdoc,
+                        userhelp,
+                    ],
+                    cls=&#34;headlineend&#34;,
+                ),
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),
@@ -185,8 +217,8 @@ class Topbar:
             if auth.authenticated()
             else (
                 auth.wrapTestUsers()
-                if auth.isDevel else
-                H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+                if auth.isDevel
+                else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
             )
         )
         logout = (
@@ -206,13 +238,43 @@ class Topbar:
             if auth.authenticated()
             else E
         )
+        techdoc = (
+            H.a(
+                G(TECH, N.text),
+                G(TECH, N.url),
+                target=N._blank,
+                cls=&#34;button medium help&#34;,
+                title=G(TECH, N.title),
+            )
+        )
+        userhelp = (
+            H.a(
+                G(HELP, N.text),
+                G(HELP, N.url),
+                target=N._blank,
+                cls=&#34;button medium help&#34;,
+                title=G(HELP, N.title),
+            )
+        )
         return H.div(
             [
-                H.icon(N.devel) if auth.isDevel else E,
-                H.div(identityRep, cls=&#34;user&#34;),
-                H.div(accessRep, cls=&#34;access&#34;),
-                login,
-                logout,
+                H.div(
+                    [
+                        H.icon(N.devel) if auth.isDevel else E,
+                        H.div(identityRep, cls=&#34;user&#34;),
+                        H.div(accessRep, cls=&#34;access&#34;),
+                        login,
+                        logout,
+                    ],
+                    cls=&#34;headlinestart&#34;,
+                ),
+                H.div(
+                    [
+                        techdoc,
+                        userhelp,
+                    ],
+                    cls=&#34;headlineend&#34;,
+                ),
                 H.img(
                     G(LOGO, N.src),
                     href=G(LOGO, N.url),
@@ -255,8 +317,8 @@ class Topbar:
         if auth.authenticated()
         else (
             auth.wrapTestUsers()
-            if auth.isDevel else
-            H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
+            if auth.isDevel
+            else H.a(G(LOGIN, N.text), G(LOGIN, N.url), cls=&#34;button small loginout&#34;)
         )
     )
     logout = (
@@ -276,13 +338,43 @@ class Topbar:
         if auth.authenticated()
         else E
     )
+    techdoc = (
+        H.a(
+            G(TECH, N.text),
+            G(TECH, N.url),
+            target=N._blank,
+            cls=&#34;button medium help&#34;,
+            title=G(TECH, N.title),
+        )
+    )
+    userhelp = (
+        H.a(
+            G(HELP, N.text),
+            G(HELP, N.url),
+            target=N._blank,
+            cls=&#34;button medium help&#34;,
+            title=G(HELP, N.title),
+        )
+    )
     return H.div(
         [
-            H.icon(N.devel) if auth.isDevel else E,
-            H.div(identityRep, cls=&#34;user&#34;),
-            H.div(accessRep, cls=&#34;access&#34;),
-            login,
-            logout,
+            H.div(
+                [
+                    H.icon(N.devel) if auth.isDevel else E,
+                    H.div(identityRep, cls=&#34;user&#34;),
+                    H.div(accessRep, cls=&#34;access&#34;),
+                    login,
+                    logout,
+                ],
+                cls=&#34;headlinestart&#34;,
+            ),
+            H.div(
+                [
+                    techdoc,
+                    userhelp,
+                ],
+                cls=&#34;headlineend&#34;,
+            ),
             H.img(
                 G(LOGO, N.src),
                 href=G(LOGO, N.url),

@@ -3,6 +3,18 @@
 There are already 800 contributions in the system.
 They have been collected in a FileMaker database in the past.
 
+These contributions have all been present until the production version
+of the system went live on 2020-03-13.
+
+At that point, all current content has been saved for archiving,
+and all untouched legacy content has been weeded out, see
+[culling]({{repBase}}/import/cull.py).
+
+The rest of this page shows how we have managed the data before culling.
+
+After 2020-03-13 data can still be bulk-imported, but now from spreadsheets,
+see [bulk import](Bulk.md).
+
 ??? abstract "Import legacy content"
     We convert this content and use it for an
     initial filling of the contribution tool.

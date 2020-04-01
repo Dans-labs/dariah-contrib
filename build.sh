@@ -64,9 +64,9 @@ function givehelp {
     echo "      dev  db = dariah_dev"
     echo "      test db = dariah_test"
     echo "<task>:"
-    echo "bulk          : add contributions from a spreadsheet in bulk to production db"
-    echo "bulk d        : add contributions from a spreadsheet in bulk to dev db"
-    echo "bulk t        : add contributions from a spreadsheet in bulk to test db"
+    echo "bulk i        : add contributions from a spreadsheet in bulk to production db"
+    echo "bulk d i      : add contributions from a spreadsheet in bulk to dev db"
+    echo "bulk t i      : add contributions from a spreadsheet in bulk to test db"
     echo "bulk [td] x   : delete contributions specified in spreadsheet from db but only if pristine"
     echo "consolidate   : convert backup of production db into consolidated yaml"
     echo "cull          : remove the legacy contributions from the dataset"
@@ -187,16 +187,6 @@ function mongostop {
     fi
 }
 
-# PYTHON 36
-
-# function activate36here {
-#     source /opt/rh/rh-python36/enable
-# }
-
-# function activate36spawn {
-#     scl enable rh-python36 bash
-# }
-
 # SETTING THE DIRECTORY AND LOCAL VARS
 
 cd $APP_DIR/$APP
@@ -253,7 +243,13 @@ function bulk {
     if [[ "$1" == "x" ]]; then
         action="x"
     fi
+    if [[ "$ON_DANS" == "1" ]]; then
+        sudo systemctl stop dariah-contrib.service
+    fi
     python3 bulk.py "$DB_DEST" "$action" "$BULK"
+    if [[ "$ON_DANS" == "1" ]]; then
+        sudo systemctl stop dariah-contrib.service
+    fi
 }
 
 function datamanage {
@@ -598,7 +594,6 @@ function updateprocess {
     gitpullforce
     chown -R dirkr:dariah .
     sudo systemctl stop dariah-contrib.service
-    # activate36here
     python3 -m compileall server
     sudo systemctl start dariah-contrib.service
 }

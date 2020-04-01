@@ -43,7 +43,7 @@ class ContribT(Table):
             N.title: Qt,
             N.year: G(db.yearInv, thisYear()),
             N.country: countryId,
-            N.contactPersonName: name,
+            N.contactPersonName: [name],
             N.contactPersonEmail: [email],
         }
 

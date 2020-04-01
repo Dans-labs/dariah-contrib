@@ -69,7 +69,7 @@ class ContribT(Table):
             N.title: Qt,
             N.year: G(db.yearInv, thisYear()),
             N.country: countryId,
-            N.contactPersonName: name,
+            N.contactPersonName: [name],
             N.contactPersonEmail: [email],
         }
 
@@ -152,7 +152,7 @@ otherwise to the base class <a title="control.record.Record" href="../record.htm
             N.title: Qt,
             N.year: G(db.yearInv, thisYear()),
             N.country: countryId,
-            N.contactPersonName: name,
+            N.contactPersonName: [name],
             N.contactPersonEmail: [email],
         }
 
