@@ -123,6 +123,7 @@ if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     MODE="production"
     BACKUP=$BACKUP_PROD
     BULK=$BULK_PROD
+    export PYTHONIOENCODING=utf-8:surrogateescape
 else
     ON_DANS="0"
     ON_PROD="0"
