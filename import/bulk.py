@@ -241,7 +241,9 @@ def doSheet(fileName):
     for (r, row) in enumerate(rows):
         contrib = {}
         for (i, field) in header.items():
-            value = row[i].value.replace(DASH, "-")
+            value = row[i].value
+            if value is not None:
+                value = value.replace(DASH, "-")
             if field in MULTIPLE:
                 value = (
                     tuple(
