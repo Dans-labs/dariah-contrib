@@ -12,6 +12,7 @@ import warnings
 
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
+DASH = "–"
 
 DATABASE = "dariah"
 ACTION = "i"
@@ -240,7 +241,7 @@ def doSheet(fileName):
     for (r, row) in enumerate(rows):
         contrib = {}
         for (i, field) in header.items():
-            value = row[i].value
+            value = row[i].value.replace(DASH, "-")
             if field in MULTIPLE:
                 value = (
                     tuple(
