@@ -343,7 +343,7 @@ function datamanage {
         fi
         echo "Upload $BULK_DEV/todo to $machine into directory $BULK_PROD"
         cd "$BULK_DEV"
-        scp -r "/todo" "dirkr@${machine}:/$BULK_PROD"
+        scp -r "todo" "dirkr@${machine}:/$BULK_PROD"
     fi
 }
 
