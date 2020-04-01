@@ -319,6 +319,9 @@ span.option
 {
   font-size: small;
 }
+.mono {
+	font-family: monospace;
+}
 summary
 {
   padding-top: 0.1rem;

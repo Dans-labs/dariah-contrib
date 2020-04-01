@@ -210,10 +210,7 @@ def appFactory(regime, test, debug, **kwargs):
     @app.route(f"""/whoami""")
     def serveWhoami():
         checkBounds()
-        if auth.authenticated():
-            return G(auth.user, N.eppn)
-        else:
-            return N.public
+        return G(auth.user, N.eppn) if auth.authenticated() else N.public
 
     @app.route(f"""/{N.static}/<path:filepath>""")
     def serveStatic(filepath):

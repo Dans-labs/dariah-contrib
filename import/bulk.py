@@ -126,7 +126,7 @@ def error(x):
 
 def rep(table, r):
     return (
-        r.get("email", None)
+        r.get("eppn", None)
         if table == "user"
         else r["iso"]
         if table == "country"
@@ -176,9 +176,7 @@ def parseFileName(fileName):
         if not creatorId:
             error(f"""\tnot a DARIAH user: "{creator}" """)
             good = False
-        else:
-            eppn = list(DB["user"].find({"_id": creatorId}))[0].get("eppn", creator)
-    return (countryId, yearId, creatorId, eppn) if good else None
+    return (countryId, yearId, creatorId, creator) if good else None
 
 
 def newVal(field, val):

@@ -47,6 +47,8 @@ class Topbar:
 
         context = self.context
         auth = context.auth
+        eppn = G(auth.user, N.eppn) if auth.authenticated() else N.public
+        eppnRep = H.span(eppn, cls="mono")
 
         (identityRep, accessRep) = auth.credentials()
         login = (
@@ -98,7 +100,7 @@ class Topbar:
                 H.div(
                     [
                         H.icon(N.devel) if auth.isDevel else E,
-                        H.div(identityRep, cls="user"),
+                        H.details(identityRep, eppnRep, "usereppn", cls="user"),
                         H.div(accessRep, cls="access"),
                         login,
                         logout,
