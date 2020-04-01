@@ -63,7 +63,7 @@ Start on your local machine.
     Give the command
 
     ``` sh
-    dab bulk i
+    dab bulk d i
     ```
 
     Inspect the output of the command: when things go wrong it will be clearly
@@ -81,7 +81,7 @@ Start on your local machine.
     make sure the Excel sheets are back in `todo` again and say:
 
     ``` sh
-    dab bulk d
+    dab bulk d x
     ```
 
     If you are ready to import in production, make sure that the Excel sheets are
