@@ -473,13 +473,15 @@ function gunirun {
 
 function logshow {
     hlogdir=/var/log/httpd
+    hlogbase="contrib.dariah.eu"
     glogdir=/var/log/dariah-contrib
     slogdir=/var/log/shibboleth
+
     if [[ "$1" == "ha" ]]; then
-        logfile="dariah-contrib_ssl_access.log"
+        logfile="${hlogbase}_ssl_access.log"
         logdir="$hlogdir"
     elif [[ "$1" == "he" ]]; then
-        logfile="dariah-contrib_ssl_error.log"
+        logfile="${hlogbase}_ssl_error.log"
         logdir="$hlogdir"
     elif [[ "$1" == "ga" ]]; then
         logfile="access.log"
