@@ -254,7 +254,7 @@ class Overview:
 
         if not asTsv:
             urlArgsBare = (
-                f"""country={chosenCountryIso}&"""
+                f"""country={chosenCountryIso or 'x'}&"""
                 f"""sortcol={rawSortCol}&reverse={rawReverse}"""
             )
             urlArgs = f"""{urlArgsBare}&bulk={rawBulk}"""
@@ -334,7 +334,7 @@ class Overview:
                         f"""{things} from {origin}""",
                         H.a(
                             """Download as Excel""",
-                            f"""{PAGEX}{rArgs}""",
+                            f"""{PAGEX}?{rArgs}""",
                             target="_blank",
                             cls="button large",
                         ),
@@ -353,9 +353,17 @@ class Overview:
             material.append(groupRel)
 
         if asTsv:
-            fileName = (
-                f"""dariah-{country or "all-countries"}{groupStr}-for-{accessRep}"""
+            countryRep = (
+                "all-countries"
+                if country == "x"
+                else country
+                if country
+                else "their-country"
             )
+            fileName = (
+                f"""dariah-{countryRep}{groupStr}-for-{accessRep}"""
+            )
+            print([country, groupStr, accessRep], fileName)
             headers = {
                 "Expires": "0",
                 "Cache-Control": "no-cache, no-store, must-revalidate",
