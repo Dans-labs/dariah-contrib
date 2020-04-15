@@ -20,7 +20,7 @@ root:
 debug:
   cache: false
   mongo: false
-  auth: false
+  auth: true
 
 attributes:
   o: org

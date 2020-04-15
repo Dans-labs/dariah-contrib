@@ -959,8 +959,9 @@ class Db:
 
         Returns
         -------
-        ObjectId
-            The id of the newly inserted user record.
+        None
+            But note that the new _id and the generated field values areis added to the
+            record.
         """
 
         creatorId = self.creatorId
@@ -978,7 +979,7 @@ class Db:
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
         self.recollect(N.user)
-        return result.inserted_id
+        record[N._id] = result.inserted_id
 
     def deleteItem(self, table, eid):
         """Delete a record.

@@ -51,6 +51,7 @@ function givehelp {
     echo "log s         : see the shibboleth log"
     echo "log sw        : see the shibboleth warning log"
     echo "log st        : see the shibboleth transaction log"
+    echo "log E         : see the error journal"
     echo "gitp          : pulls latest repo contents from github abd overwrites existing contents unconditionally"
     echo "gunistatus    : see the status of the gunicorn service"
     echo "gunistop      : stop serving with gunicorn"

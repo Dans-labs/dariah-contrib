@@ -118,7 +118,7 @@ class Auth:
         user.clear()
         user.update(self.unauthUser)
 
-    def getUser(self, eppn, email=None):
+    def getUser(self, eppn, email=None, mayCreate=False):
         """Find a user in the database.
 
         This is called to get extra information for an authenticated user
@@ -143,6 +143,10 @@ class Auth:
             New users may not have an eppn, but might already be present in the
             user table by their email.
             If so, the email address can be used to look up the user.
+        mayCreate: boolean, optional `False`
+            If a user cannot be found, they will be created if this flag is `True`.
+            This is relevant for situation where a new user has been authenticated
+            by the identity provider.
 
         Returns
         -------
@@ -176,24 +180,50 @@ class Auth:
             )
         ]
         user.clear()
-        if len(userFound) != 1:
+        if len(userFound) > 1:
             self.clearUser()
+            if DEBUG_AUTH:
+                serverprint(f"LOGIN: multiple matches in user DB: {eppn} / {email}")
             return False
+
+        if len(userFound) == 1:
+            if not G(userFound[0], N.mayLogin, default=True):
+                self.clearUser()
+                if DEBUG_AUTH:
+                    serverprint(f"LOGIN: existing user may not login: {eppn} / {email}")
+                return False
 
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        user.update(userFound[0])
-        if not G(user, N.mayLogin, default=True):
-            # this checks whether mayLogin is explicitly set to False
-            self.clearUser()
-            return False
 
+        if len(userFound) == 0:
+            if mayCreate:
+                db.insertUser(user)
+                if DEBUG_AUTH:
+                    serverprint(f"LOGIN: new user: {eppn} / {email}")
+            else:
+                if DEBUG_AUTH:
+                    serverprint(f"LOGIN: may not create new user: {eppn} / {email}")
+                return False
+        else:
+            user.update(userFound[0])
+            if DEBUG_AUTH:
+                serverprint(f"LOGIN: existing user: {eppn} / {email}")
+
+        # new users do not have yet group information
         group = user[N.group] if N.group in user else authId
-        groupRep = G(G(db.permissionGroup, group), N.rep)
         if N.group not in user:
             user[N.group] = group
-        return groupRep != UNAUTH
+
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        result = groupRep != UNAUTH
+        if DEBUG_AUTH:
+            if result:
+                serverprint(f"LOGIN: user authenticated: {eppn} / {email}")
+            else:
+                serverprint(f"LOGIN: user not authenticated: {eppn} / {email}")
+        return result
 
     def wrapTestUsers(self):
         """Present a widget to select a test user for login.
@@ -242,7 +272,6 @@ class Auth:
         db = self.db
         user = self.user
         isDevel = self.isDevel
-        authUser = self.authUser
         unauthUser = self.unauthUser
 
         contentLength = request.content_length
@@ -255,15 +284,9 @@ class Auth:
                 if k.startswith(f"""AJP_""")
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
-            else {
-                k.lower(): v
-                for (k, v) in request.headers
-            }
+            else {k.lower(): v for (k, v) in request.headers}
             if TRANSPORT_ATTRIBUTES == N.http
-            else {
-                k.lower(): utf8FromLatin1(v)
-                for (k, v) in request.environ.items()
-            }
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
         if DEBUG_AUTH:
             serverprint(f"LOGIN: auth environment/headers")
@@ -271,6 +294,8 @@ class Auth:
                 serverprint(f"LOGIN: ATTRIBUTE {k} = {v}")
         self.clearUser()
         if isDevel:
+            if DEBUG_AUTH:
+                serverprint(f"LOGIN: start authentication in development mode")
             eppn = G(request.args, N.eppn)
             email = None
             if eppn is None:
@@ -278,10 +303,22 @@ class Auth:
                 if AT in email:
                     eppn = email.split(AT, maxsplit=1)[0]
                     if eppn:
-                        return self.getUser(eppn, email=email)
+                        if DEBUG_AUTH:
+                            serverprint(
+                                f"LOGIN: authentication succeeded: {eppn} / {email}"
+                            )
+                        return self.getUser(eppn, email=email, mayCreate=True)
                 user.update(unauthUser)
+                if DEBUG_AUTH:
+                    serverprint(f"LOGIN: authentication failed: no eppn, no email")
                 return False
-            return self.getUser(eppn)
+            result = self.getUser(eppn, mayCreate=False)
+            if DEBUG_AUTH:
+                if result:
+                    serverprint(f"LOGIN: authentication successful")
+                else:
+                    serverprint(f"LOGIN: authentication failed")
+            return result
         else:
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: start authentication with shibboleth")
@@ -289,9 +326,9 @@ class Auth:
             if authenticated:
                 eppn = G(authEnv, N.eppn)
                 email = G(authEnv, N.mail)
-                isUser = self.getUser(eppn, email=email)
+                isUser = self.getUser(eppn, email=email, mayCreate=True)
                 if DEBUG_AUTH:
-                    serverprint(f"LOGIN: shibboleth session found:")
+                    serverprint(f"""LOGIN: shibboleth session found:""")
                     serverprint(f"""LOGIN: eppn   = "{eppn}" """)
                     serverprint(f"""LOGIN: email  = "{email}" """)
                     serverprint(f"""LOGIN: isUser = "{isUser}" """)
@@ -301,10 +338,6 @@ class Auth:
                     if DEBUG_AUTH:
                         serverprint(f"LOGIN: authentication failed")
                     return False
-
-                if N.group not in user:
-                    # new users do not have yet group information
-                    user.update(authUser)
 
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
@@ -319,21 +352,18 @@ class Auth:
                     if currentVal != val:
                         user[att] = val
                         dirty = True
-                if N._id in user:
-                    if dirty:
-                        db.updateUser(user)
-                else:
-                    _id = db.insertUser(user)
-                    user[N._id] = _id
+                if dirty:
+                    db.updateUser(user)
+                    if DEBUG_AUTH:
+                        serverprint(f"LOGIN: user data updated for {eppn}/{email}")
                 if DEBUG_AUTH:
                     serverprint(f"LOGIN: authentication successful")
                 return True
 
+            user.update(unauthUser)
             if DEBUG_AUTH:
                 serverprint(f"LOGIN: No shibboleth session found:")
                 serverprint(f"LOGIN: authentication failed")
-
-            user.update(unauthUser)
             return False
 
     def countryRep(self, user=None):
@@ -553,7 +583,7 @@ class Auth:
 
         eppn = G(session, N.eppn)
         if eppn:
-            if not self.getUser(eppn):
+            if not self.getUser(eppn, mayCreate=False):
                 self.clearUser()
                 return False
             return True
