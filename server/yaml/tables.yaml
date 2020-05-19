@@ -198,7 +198,10 @@ overviewFieldsWorkflow:
   score: assessment.score.overall
   cStage: stage
   aStage: assessment.stage
-  rStage: assessment.reviews.final.stage
+  r1Stage: assessment.reviews.expert.stage
+  r2Stage: assessment.reviews.final.stage
+  reviewerE: assessment.reviewer.expert
+  reviewerF: assessment.reviewer.final
 
 names:
   - bool

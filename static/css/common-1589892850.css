@@ -209,6 +209,41 @@ td
     color: #000000;
     background-color: #88ff88;
 }
+.r-none,.subhead.r-none
+{
+    color: #444444;
+    background-color: #dddddd;
+}
+.r-noreview,.subhead.r-noreview
+{
+    color: #444444;
+    background-color: #eeeeee;
+}
+.r-inreview,.subhead.r-inreview
+{
+    color: #444444;
+    background-color: #eeee00;
+}
+.r-skipreview,.subhead.r-skipreview
+{
+    color: #444444;
+    background-color: #ddff00;
+}
+.r-rejected,.subhead.r-rejected
+{
+    color: #ffffff;
+    background-color: #ff0000;
+}
+.r-revised,.subhead.r-revised
+{
+    color: #444444;
+    background-color: #ff8800;
+}
+.r-accepted,.subhead.r-accepted
+{
+    color: #000000;
+    background-color: #88ff88;
+}
 .c-undecided,.subhead.c-undecided
 {
 }

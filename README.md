@@ -1,7 +1,5 @@
 # DARIAH Contribution Tool
 
-**testing, not yet released**
-
 This is the code base of the DARIAH contribution tool. 
 
 *   [live](https://contrib.dariah.eu)

@@ -76,6 +76,7 @@ function givehelp {
     echo "datarest lab: restore the database from local directory under lab, append _restored to db name"
     echo "datarest lab p: restore production database from local directory under lab, append _restored to db name"
     echo "datarest lab x: restore production database from local directory under lab, replace existing db"
+    echo "                if on development machine, add test users to the restored db"
     echo "choose the dariah db in all cases"
     echo "dbinittest    : clean the test db in Mongo"
     echo "dbroot        : restore the root permissions: only the one user in base.yaml"
@@ -289,17 +290,23 @@ function datamanage {
             label="$1"
             shift
             datastore="$BACKUP/$label"
-            chosendb="$DB"
+            fromdb="$DB"
+            todb="$DB"
             restored="_restored"
             if [[ "$1" == "p" ]]; then
-                chosendb="$DB_PROD"
+                fromdb="$DB_PROD"
             elif [[ "$1" == "x" ]]; then
+                fromdb="$DB_PROD"
                 restored=""
+                if [[ "$ON_DANS" == "0" ]]; then
+                    cd $root/server
+                    python3 testusers.py
+                fi
             fi
             if [ -d "$datastore" ]; then
                 mongostart
-                mongorestore --drop --nsFrom "$chosendb.*" --nsTo "$chosendb$restored"".*" "$datastore"
-                echo "Database $chosendb$restored"" restored from $chosendb"
+                mongorestore --drop --nsFrom "$fromdb.*" --nsTo "$todb$restored"".*" "$datastore"
+                echo "Database $todb$restored"" restored from $fromdb"
             else
                 echo "Could not find directory '$datastore'"
             fi
@@ -318,7 +325,7 @@ function datamanage {
                 machine="$HOST_TEST"
             fi
             echo "Download $lab in $BACKUP_PROD on $machine to directory $BACKUP_DEV"
-            scp -r "dirkr@${machine}:/$BACKUP_PROD/$lab" .
+            scp -r "dirkr@${machine}:$BACKUP_PROD/$lab" .
         fi
     elif [[ "$1" == "up" ]]; then
         shift
@@ -334,7 +341,7 @@ function datamanage {
             fi
             cd $BACKUP_DEV
             echo "Upload $lab in $BACKUP_DEV to $machine into directory $BACKUP_PROD"
-            scp -r "$lab" "dirkr@${machine}:/$BACKUP_PROD"
+            scp -r "$lab" "dirkr@${machine}:$BACKUP_PROD"
         fi
     elif [[ "$1" == "bulk" ]]; then
         shift
@@ -345,7 +352,7 @@ function datamanage {
         fi
         echo "Upload $BULK_DEV/todo to $machine into directory $BULK_PROD"
         cd "$BULK_DEV"
-        scp -r "todo" "dirkr@${machine}:/$BULK_PROD"
+        scp -r "todo" "dirkr@${machine}:$BULK_PROD"
     fi
 }
 

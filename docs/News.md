@@ -1,5 +1,11 @@
 # News
 
+## 2020-05-19
+
+*   The overview page shows 4 additional groups: revewer1, reviewer2, reviewed1, reviewed2.
+    Using them you can get overviews of where the review process is.
+    Only visible to DARIAH office users.
+
 ## 2020-04-01
 
 *   Offline bulk imports implemented. See [Bulk import](Workings/Bulk.md).

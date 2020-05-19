@@ -20,7 +20,32 @@ URLS = CW.urls
 PAGE = URLS[N.info][N.url]
 PAGEX = f"""{PAGE}.tsv"""
 
-COL_PLURAL = dict(country=N.countries,)
+COL_SINGULAR = dict(
+    country=N.country,
+    assessed="stage",
+    selected="stage",
+    reviewed1="stage",
+    reviewed2="stage",
+    reviewer1="expert reviewer",
+    reviewer2="final reviewer",
+)
+
+COL_PLURAL = dict(
+    country=N.countries,
+    assessed="stages",
+    selected="stages",
+    reviewed1="stages",
+    reviewed2="stages",
+    reviewer1="expert reviewers",
+    reviewer2="final reviewers",
+)
+
+REVIEWER1 = "reviewer1"
+REVIEWER2 = "reviewer2"
+REVIEWED1 = "reviewed1"
+REVIEWED2 = "reviewed2"
+R1RANK = "r1Rank"
+R2RANK = "r2Rank"
 
 COLSPECS = (
     (N.country, str),
@@ -29,14 +54,22 @@ COLSPECS = (
     (N.cost, int, """cost (€)"""),
     (N.assessed, tuple),
     (N.selected, bool),
+    (REVIEWER1, str),
+    (REVIEWER2, str),
+    (REVIEWED1, str),
+    (REVIEWED2, str),
     (N.title, str),
 )
 
-GROUP_COLS = """
+GROUP_COLS = f"""
     country
     year
     type
     assessed
+    {REVIEWER1}
+    {REVIEWER2}
+    {REVIEWED1}
+    {REVIEWED2}
     selected
 """.strip().split()
 
@@ -48,7 +81,7 @@ SUBHEAD_X_COLS = set(
 )
 
 ASSESSED_STATUS = {
-    None: ("no", "a-none"),
+    None: ("no assessment", "a-none"),
     N.incomplete: ("started", "a-started"),
     N.incompleteRevised: ("revision", "a-started"),
     N.incompleteWithdrawn: ("withdrawn", "a-none"),
@@ -63,8 +96,50 @@ ASSESSED_STATUS = {
 ASSESSED_LABELS = {stage: info[0] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_CLASS = {stage: info[1] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_CLASS1 = {info[0]: info[1] for info in ASSESSED_STATUS.values()}
-ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
+ASSESSED_DEFAULT_CLASS = ASSESSED_STATUS[None][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
+
+NO_REVIEW = {
+    N.incomplete,
+    N.incompleteRevised,
+    N.incompleteWithdrawn,
+    N.complete,
+    N.completeRevised,
+    N.completeWithdrawn,
+}
+IN_REVIEW = {
+    N.submitted,
+    N.submittedRevised,
+}
+ADVISORY_REVIEW = {
+    N.reviewAdviseAccept,
+    N.reviewAdviseReject,
+    N.reviewAdviseRevise,
+}
+FINAL_REVIEW = {
+    N.reviewAccept,
+    N.reviewReject,
+    N.reviewRevise,
+}
+
+
+REVIEWED_STATUS = {
+    None: ("", "r-none"),
+    "noReview": ("not reviewable", "r-noreview"),
+    "inReview": ("in review", "r-inreview"),
+    "skipReview": ("review skipped", "r-skipreview"),
+    N.reviewAdviseReject: ("rejected", "r-rejected"),
+    N.reviewAdviseAccept: ("accepted", "r-accepted"),
+    N.reviewAdviseRevise: ("revise", "r-revised"),
+    N.reviewReject: ("rejected", "r-rejected"),
+    N.reviewAccept: ("accepted", "r-accepted"),
+    N.reviewRevise: ("revise", "r-revised"),
+}
+REVIEW_LABELS = {stage: info[0] for (stage, info) in REVIEWED_STATUS.items()}
+REVIEW_CLASS = {stage: info[1] for (stage, info) in REVIEWED_STATUS.items()}
+REVIEW_CLASS1 = {info[0]: info[1] for info in REVIEWED_STATUS.values()}
+REVIEW_DEFAULT_CLASS = REVIEWED_STATUS[None][1]
+REVIEW_RANK = {stage: i for (i, stage) in enumerate(REVIEWED_STATUS)}
 
 ALL = """All countries"""
 
@@ -78,6 +153,7 @@ class Overview:
         self.countryType = types.country
         self.yearType = types.year
         self.typeType = types.typeContribution
+        self.userType = types.user
 
     def getCountry(self, country):
         context = self.context
@@ -111,8 +187,12 @@ class Overview:
         db = context.db
         chosenCountryId = self.chosenCountryId
         countryType = self.countryType
+        userType = self.userType
         yearType = self.yearType
         typeType = self.typeType
+        isSuperUser = self.isSuperUser
+
+        users = db.user
 
         contribs = {}
         for record in db.bulkContribWorkflow(chosenCountryId, bulk):
@@ -121,9 +201,9 @@ class Overview:
 
             selected = G(record, N.selected)
             aStage = G(record, N.aStage)
-            rStage = G(record, N.rStage)
-            if rStage in {N.reviewAccept, N.reviewReject}:
-                aStage = rStage
+            r2Stage = G(record, N.r2Stage)
+            if r2Stage in {N.reviewAccept, N.reviewReject}:
+                aStage = r2Stage
             score = G(record, N.score)
             assessed = ASSESSED_STATUS[aStage][0]
             aRank = (G(ASSESSED_RANK, aStage, default=0), score)
@@ -135,7 +215,7 @@ class Overview:
             typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)))
             cost = G(record, N.cost)
 
-            contribs[contribId] = {
+            contribRecord = {
                 N._id: contribId,
                 N._cn: countryRep,
                 N.country: countryRep,
@@ -149,6 +229,52 @@ class Overview:
                 N.score: score,
                 N.selected: selected,
             }
+            if isSuperUser:
+                preR1Stage = G(record, N.r1Stage)
+                noReview = aStage is None or aStage in NO_REVIEW
+                inReview = aStage in IN_REVIEW
+                advReview = preR1Stage in ADVISORY_REVIEW
+                r1Stage = (
+                    "noReview"
+                    if noReview
+                    else preR1Stage if advReview
+                    else "inReview"
+                    if inReview
+                    else "skipReview"
+                )
+                r2Stage = (
+                    "noReview"
+                    if noReview
+                    else "inReview"
+                    if inReview
+                    else G(record, N.r2Stage)
+                )
+                reviewed1 = REVIEWED_STATUS[r1Stage][0]
+                reviewed2 = REVIEWED_STATUS[r2Stage][0]
+                r1Rank = G(REVIEW_RANK, r1Stage, default=0)
+                r2Rank = G(REVIEW_RANK, r2Stage, default=0)
+                reviewer = {}
+                for kind in ("E", "F"):
+                    reviewerId = G(record, getattr(N, f"reviewer{kind}"))
+                    if reviewerId is None:
+                        reviewer[kind] = None
+                    else:
+                        reviewerRecord = G(users, reviewerId)
+                        reviewerRep = userType.titleStr(reviewerRecord)
+                        reviewer[kind] = reviewerRep
+                contribRecord.update(
+                    {
+                        REVIEWER1: reviewer["E"],
+                        REVIEWER2: reviewer["F"],
+                        REVIEWED1: reviewed1,
+                        REVIEWED2: reviewed2,
+                        R1RANK: r1Rank,
+                        R2RANK: r2Rank,
+                        N.r1Stage: r1Stage,
+                        N.r2Stage: r2Stage,
+                    }
+                )
+            contribs[contribId] = contribRecord
 
         self.contribs = contribs
 
@@ -161,11 +287,15 @@ class Overview:
         auth = context.auth
         countryType = self.countryType
 
-        self.isSuperUser = auth.superuser()
+        isSuperUser = auth.superuser()
+        self.isSuperUser = isSuperUser
         self.isCoord = auth.coordinator()
 
         colSpecs = COLSPECS
-        groupCols = GROUP_COLS
+        hiddenCols = (
+            set() if isSuperUser else {REVIEWER1, REVIEWER2, REVIEWED1, REVIEWED2}
+        )
+        groupCols = [gc for gc in GROUP_COLS if gc not in hiddenCols]
         allGroupSet = set(groupCols)
 
         accessRep = auth.credentials()[1]
@@ -187,9 +317,9 @@ class Overview:
         chosenCountryIso = self.chosenCountryIso
 
         if chosenCountryId is not None:
-            colSpecs = COLSPECS[1:]
+            colSpecs = [x for x in COLSPECS if x[0] != N.country]
             groups = self.rmGroup(groups.split(COMMA), N.country)
-            groupCols = GROUP_COLS[1:]
+            groupCols = [x for x in groupCols if x != N.country]
 
         cols = [c[0] for c in colSpecs]
         colSet = {c[0] for c in colSpecs}
@@ -360,10 +490,7 @@ class Overview:
                 if country
                 else "their-country"
             )
-            fileName = (
-                f"""dariah-{countryRep}{groupStr}-for-{accessRep}"""
-            )
-            print([country, groupStr, accessRep], fileName)
+            fileName = f"""dariah-{countryRep}{groupStr}-for-{accessRep}"""
             headers = {
                 "Expires": "0",
                 "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -534,6 +661,7 @@ class Overview:
         hide=False,
     ):
         cols = self.cols
+        isSuperUser = self.isSuperUser
 
         if groupOrder is None:
             groupOrder = cols
@@ -574,6 +702,22 @@ class Overview:
             N.selected: selected,
             N.title: title,
         }
+        if isSuperUser:
+            (r1Label, r1Class) = self.wrapStatus(contrib, subHead=subHead, kind="1")
+            (r2Label, r2Class) = self.wrapStatus(contrib, subHead=subHead, kind="2")
+            if allHead:
+                r1Class = E
+                r2Class = E
+            reviewer1 = G(contrib, REVIEWER1)
+            reviewer2 = G(contrib, REVIEWER2)
+            values.update(
+                {
+                    REVIEWER1: reviewer1 or E,
+                    REVIEWER2: reviewer2 or E,
+                    REVIEWED1: r1Label,
+                    REVIEWED2: r2Label,
+                }
+            )
         recCountry = G(contrib, N._cn) or G(values, N.country)
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth < groupLen else N.title
@@ -593,6 +737,9 @@ class Overview:
         if not asTsv:
             classes = {col: f"c-{col}" for col in groupOrder}
             classes["assessed"] += f" {assessedClass}"
+            if isSuperUser:
+                classes[REVIEWED1] = r1Class
+                classes[REVIEWED2] = r2Class
         if asTsv:
             columns = TAB.join(
                 self.disclose(values, col, recCountry) or E for col in groupOrder
@@ -625,6 +772,10 @@ class Overview:
         def makeKey(contrib):
             if col == N.assessed:
                 return G(contrib, N.arank)
+            elif col == REVIEWED1:
+                return G(contrib, R1RANK)
+            elif col == REVIEWED2:
+                return G(contrib, R2RANK)
             value = G(contrib, col)
             if value is None:
                 return E if colType is str else 0
@@ -700,28 +851,47 @@ class Overview:
         isSuperUser = self.isSuperUser
         isCoord = auth.coordinator(countryId=recCountry)
 
-        disclosed = colName != N.cost or isSuperUser or isCoord
+        disclosed = (
+            (colName not in {N.cost, REVIEWER1, REVIEWED1, REVIEWER2, REVIEWED2})
+            or isSuperUser
+            or isCoord
+        )
         value = values[colName] if disclosed else N.undisclosed
         return value
 
     @staticmethod
-    def wrapStatus(contrib, subHead=False):
+    def wrapStatus(contrib, subHead=False, kind=None):
         aStage = G(contrib, N.astage)
-        assessed = G(contrib, N.assessed) or E
-        score = G(contrib, N.score)
-        scoreRep = E if score is None else f"""{score}% - """
-        baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
-        aClass = (
-            G(ASSESSED_CLASS1, assessed, default=ASSESSED_ACCEPTED_CLASS)
-            if subHead
-            else G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
-        )
-        aLabel = baseLabel if subHead else f"""{scoreRep}{baseLabel}"""
-        return (aLabel, aClass)
+        if kind is None:
+            assessed = G(contrib, N.assessed) or E
+            score = G(contrib, N.score)
+            scoreRep = E if score is None else f"""{score}% - """
+            baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
+            aClass = (
+                G(ASSESSED_CLASS1, assessed, default=ASSESSED_DEFAULT_CLASS)
+                if subHead
+                else G(ASSESSED_CLASS, aStage, default=ASSESSED_DEFAULT_CLASS)
+            )
+            aLabel = baseLabel if subHead else f"""{scoreRep}{baseLabel}"""
+            return (aLabel, aClass)
+        else:
+            rStage = G(contrib, N.r1Stage if kind == "1" else N.r2Stage)
+            reviewed = G(contrib, REVIEWED1 if kind == "1" else REVIEWED2) or E
+            rClass = (
+                G(REVIEW_CLASS1, reviewed, default=REVIEW_DEFAULT_CLASS)
+                if subHead
+                else G(REVIEW_CLASS, rStage, default=REVIEW_DEFAULT_CLASS)
+            )
+            rLabel = reviewed if subHead else G(REVIEW_LABELS, rStage, default=E)
+            return (rLabel, rClass)
 
     @staticmethod
     def colRep(col, n):
-        itemRep = col if n == 1 else G(COL_PLURAL, col, default=f"""{col}s""")
+        itemRep = (
+            G(COL_SINGULAR, col, default=col)
+            if n == 1
+            else G(COL_PLURAL, col, default=f"""{col}s""")
+        )
         return f"""{n} {itemRep}"""
 
     @staticmethod

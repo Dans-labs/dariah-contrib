@@ -427,10 +427,10 @@ class WorkflowItem:
         (stage,) = self.info(table, N.stage, kind=kind)
 
         if table in {N.assessment, N.criteriaEntry}:
-            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            (r2Stage,) = self.info(N.review, N.stage, kind=N.final)
             return (
                 True
-                if rStage == N.reviewAccept
+                if r2Stage == N.reviewAccept
                 else perm[N.isOur]
                 if stage
                 in {
@@ -444,10 +444,10 @@ class WorkflowItem:
 
         if table in {N.review, N.reviewEntry}:
             (creators,) = self.info(N.assessment, N.creators)
-            (rStage,) = self.info(N.review, N.stage, kind=N.final)
+            (r2Stage,) = self.info(N.review, N.stage, kind=N.final)
             result = (
                 True
-                if rStage == N.reviewAccept
+                if r2Stage == N.reviewAccept
                 else uid in creators or perm[N.isOur]
                 if stage
                 in {
@@ -457,7 +457,7 @@ class WorkflowItem:
                     N.reviewRevise,
                     N.reviewReject,
                 }
-                or rStage in {N.reviewRevise, N.reviewReject}
+                or r2Stage in {N.reviewRevise, N.reviewReject}
                 else perm[N.isReviewer] or perm[N.isEdit]
             )
             return result
