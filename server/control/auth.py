@@ -281,7 +281,7 @@ class Auth:
             {
                 k[4:].lower(): utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
-                if k.startswith(f"""AJP_""")
+                if k.startswith("""AJP_""")
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
             else {k.lower(): v for (k, v) in request.headers}
@@ -289,13 +289,16 @@ class Auth:
             else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
         if DEBUG_AUTH:
-            serverprint(f"LOGIN: auth environment/headers")
+            serverprint("LOGIN: auth environment/headers (raw)")
+            for (k, v) in request.environ.items():
+                serverprint(f"LOGIN: ATTRIBUTE {k} ={type(v)}= {repr(v)}")
+            serverprint("LOGIN: auth environment/headers")
             for (k, v) in authEnv.items():
                 serverprint(f"LOGIN: ATTRIBUTE {k} = {v}")
         self.clearUser()
         if isDevel:
             if DEBUG_AUTH:
-                serverprint(f"LOGIN: start authentication in development mode")
+                serverprint("LOGIN: start authentication in development mode")
             eppn = G(request.args, N.eppn)
             email = None
             if eppn is None:
@@ -310,25 +313,25 @@ class Auth:
                         return self.getUser(eppn, email=email, mayCreate=True)
                 user.update(unauthUser)
                 if DEBUG_AUTH:
-                    serverprint(f"LOGIN: authentication failed: no eppn, no email")
+                    serverprint("LOGIN: authentication failed: no eppn, no email")
                 return False
             result = self.getUser(eppn, mayCreate=False)
             if DEBUG_AUTH:
                 if result:
-                    serverprint(f"LOGIN: authentication successful")
+                    serverprint("LOGIN: authentication successful")
                 else:
-                    serverprint(f"LOGIN: authentication failed")
+                    serverprint("LOGIN: authentication failed")
             return result
         else:
             if DEBUG_AUTH:
-                serverprint(f"LOGIN: start authentication with shibboleth")
+                serverprint("LOGIN: start authentication with shibboleth")
             authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
                 eppn = G(authEnv, N.eppn)
                 email = G(authEnv, N.mail)
                 isUser = self.getUser(eppn, email=email, mayCreate=True)
                 if DEBUG_AUTH:
-                    serverprint(f"""LOGIN: shibboleth session found:""")
+                    serverprint("""LOGIN: shibboleth session found:""")
                     serverprint(f"""LOGIN: eppn   = "{eppn}" """)
                     serverprint(f"""LOGIN: email  = "{email}" """)
                     serverprint(f"""LOGIN: isUser = "{isUser}" """)
@@ -336,7 +339,7 @@ class Auth:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
                     if DEBUG_AUTH:
-                        serverprint(f"LOGIN: authentication failed")
+                        serverprint("LOGIN: authentication failed")
                     return False
 
                 # process the attributes provided by the identity server
@@ -357,13 +360,13 @@ class Auth:
                     if DEBUG_AUTH:
                         serverprint(f"LOGIN: user data updated for {eppn}/{email}")
                 if DEBUG_AUTH:
-                    serverprint(f"LOGIN: authentication successful")
+                    serverprint("LOGIN: authentication successful")
                 return True
 
             user.update(unauthUser)
             if DEBUG_AUTH:
-                serverprint(f"LOGIN: No shibboleth session found:")
-                serverprint(f"LOGIN: authentication failed")
+                serverprint("LOGIN: No shibboleth session found:")
+                serverprint("LOGIN: authentication failed")
             return False
 
     def countryRep(self, user=None):
