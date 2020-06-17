@@ -289,8 +289,6 @@ class Auth:
             else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
         if DEBUG_AUTH:
-            serverprint("LOGIN: auth headers (raw)")
-            serverprint(repr(request.headers))
             serverprint("LOGIN: auth environment/headers")
             for (k, v) in authEnv.items():
                 serverprint(f"LOGIN: ATTRIBUTE {k} = {v}")
