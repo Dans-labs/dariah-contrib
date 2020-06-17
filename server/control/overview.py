@@ -771,11 +771,11 @@ class Overview:
 
         def makeKey(contrib):
             if col == N.assessed:
-                return G(contrib, N.arank)
+                return G(contrib, N.arank, default=(E, 0))
             elif col == REVIEWED1:
-                return G(contrib, R1RANK)
+                return G(contrib, R1RANK, default=0)
             elif col == REVIEWED2:
-                return G(contrib, R2RANK)
+                return G(contrib, R2RANK, default=0)
             value = G(contrib, col)
             if value is None:
                 return E if colType is str else 0
@@ -783,7 +783,7 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         def makeKeyInd(value):
             if col == N.assessed:
@@ -794,7 +794,7 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         return makeKeyInd if individual else makeKey
 
