@@ -206,7 +206,7 @@ class Overview:
                 aStage = r2Stage
             score = G(record, N.score)
             assessed = ASSESSED_STATUS[aStage][0]
-            aRank = (G(ASSESSED_RANK, aStage, default=0), score)
+            aRank = (G(ASSESSED_RANK, aStage, default=0), score or 0)
             if aStage != N.reviewAccept:
                 score = None
 
@@ -787,7 +787,7 @@ class Overview:
 
         def makeKeyInd(value):
             if col == N.assessed:
-                return value
+                return value or E
             if value is None:
                 return E if colType is str else 0
             if colType is str:
@@ -917,8 +917,8 @@ class Overview:
     def expandAcontrols(group):
         return E.join(
             (
-                H.iconx(N.addown, href=E, cls=f"dca", gn=group),
-                H.iconx(N.adup, href=E, cls=f"dca", gn=group),
+                H.iconx(N.addown, href=E, cls="dca", gn=group),
+                H.iconx(N.adup, href=E, cls="dca", gn=group),
             )
         )
 

@@ -207,7 +207,7 @@ def appFactory(regime, test, debug, **kwargs):
         CT.showReferences()
         N.showNames()
 
-    @app.route(f"""/whoami""")
+    @app.route("""/whoami""")
     def serveWhoami():
         checkBounds()
         return G(auth.user, N.eppn) if auth.authenticated() else N.public
@@ -315,7 +315,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     # WORKFLOW TASKS
 
-    @app.route(f"""/api/task/<string:task>/<string:eid>""")
+    @app.route("""/api/task/<string:task>/<string:eid>""")
     def serveTask(task, eid):
         checkBounds(task=task, eid=eid)
 
@@ -341,7 +341,7 @@ def appFactory(regime, test, debug, **kwargs):
                 eid = mkTable(context, table).insert()
             if eid:
                 newPath = f"""/{table}/{N.item}/{eid}"""
-                flash(f"item added")
+                flash("item added")
         else:
             flash(f"Cannot add items to {table}", "error")
         return redirectResult(newPath, eid is not None)
@@ -410,7 +410,7 @@ def appFactory(regime, test, debug, **kwargs):
         if action:
             flash(f"Unknown view {action}", "error")
         else:
-            flash(f"Missing view", "error")
+            flash("Missing view", "error")
         return redirectResult(START, False)
 
     # RECORD DELETE
@@ -582,7 +582,7 @@ def appFactory(regime, test, debug, **kwargs):
 
     # FALL-BACK
 
-    @app.route(f"""/<path:anything>""")
+    @app.route("""/<path:anything>""")
     def serveNotFound(anything=None):
         checkBounds(anything=anything)
 

@@ -284,7 +284,7 @@ class Auth:
                 if k.startswith("""AJP_""")
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
-            else {k.lower(): v for (k, v) in request.headers}
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.headers}
             if TRANSPORT_ATTRIBUTES == N.http
             else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
