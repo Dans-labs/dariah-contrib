@@ -434,7 +434,6 @@ function guniasservice {
 
 function gunirun {
     cd $root/server
-    mongostart
     if [[ "$1" == "stop" ]]; then
         if [[ "$ON_DANS" == "1" ]]; then
             sudo systemctl stop dariah-contrib.service
@@ -447,34 +446,37 @@ function gunirun {
         else
             echo "gunicorn does not run as service on $HOSTNAME"
         fi
-    elif [[ "$1" == "test" ]]; then
-        mode="test"
     else
-        mode=$MODE
-    fi
-    if [[ "$1" != "" ]]; then
-        shift
-    fi
-    if [[ "$1" == "" ]]; then
-        workers=""
-    else
-        workers="-w $1"
-        shift
-    fi
-    echo "mode=$mode"
-    if [[ "$mode" == "dev" ]]; then
-        maxw='--worker-connections 1'
-    else
-        maxw=''
-    fi
-    host='-b 127.0.0.1:8001'
-    if [[ "$ON_DANS" == "1" ]]; then
-        sudo systemctl start dariah-contrib.service
-    else
-        logfile="--access-logfile -"
-        fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
-        logformat="--access-logformat '$fmt'" 
-        gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+        if [[ "$1" == "test" ]]; then
+            mode="test"
+        else
+            mode=$MODE
+        fi
+        if [[ "$1" != "" ]]; then
+            shift
+        fi
+        if [[ "$1" == "" ]]; then
+            workers=""
+        else
+            workers="-w $1"
+            shift
+        fi
+        echo "mode=$mode"
+        if [[ "$mode" == "dev" ]]; then
+            maxw='--worker-connections 1'
+        else
+            maxw=''
+        fi
+        host='-b 127.0.0.1:8001'
+        mongostart
+        if [[ "$ON_DANS" == "1" ]]; then
+            sudo systemctl start dariah-contrib.service
+        else
+            logfile="--access-logfile -"
+            fmt='%(p)s・%(m)s・%(U)s・%(q)s・%(s)s'
+            logformat="--access-logformat '$fmt'" 
+            gunicorn $workers $maxw $host $logfile $logformat --preload $mode:application
+        fi
     fi
     
 }
