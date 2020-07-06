@@ -662,7 +662,7 @@ class Record:
         cascadeMsg = (
             H.span(
                 f"""{nCas} detail record{E if nCas == 1 else S}""",
-                title=f"""Detail records will be deleted with the master record""",
+                title="""Detail records will be deleted with the master record""",
                 cls="label small warning-o right",
             )
             if nCas

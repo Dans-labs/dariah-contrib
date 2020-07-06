@@ -38,8 +38,6 @@ EXT = ".xlsx"
 
 FIELDS = set(
     """
-    contributor
-    year
     title
     typeContribution
     vcc
@@ -60,8 +58,6 @@ FIELDS = set(
 
 OBLIGATORY = set(
     """
-    contributor
-    year
     title
     typeContribution
     contactPersonName
@@ -160,16 +156,26 @@ def parseFileName(fileName):
         error(f"\tfilename should have extension `{EXT}`")
         good = False
 
-    if len(name) < 6:
-        error("\tfilename should match CC*.xls")
+    if len(name) < 11:
+        error("\tfilename should match CCYYYYn@d.c")
         good = False
     else:
         country = name[0:2]
+        year = name[2:6]
+        creator = name[6:]
         countryId = VALUES["country"].get(country.upper(), None)
         if not countryId:
             error(f"""\tnot a member country of DARIAH: "{country}" """)
             good = False
-    return countryId if good else None
+        yearId = VALUES["year"].get(year, None)
+        if not yearId:
+            error(f"""\tnot a valid year: "{year}" """)
+            good = False
+        creatorId = VALUES["user"].get(creator, None)
+        if not creatorId:
+            error(f"""\tnot a DARIAH user: "{creator}" """)
+            good = False
+    return (countryId, yearId, creatorId, creator) if good else None
 
 
 def newVal(field, val):
@@ -195,10 +201,11 @@ def getVal(field, val, r):
 def doSheet(fileName):
     good = True
 
-    countryId = parseFileName(fileName)
-    if not countryId:
+    meta = parseFileName(fileName)
+    if not meta:
         good = False
     else:
+        (countryId, yearId, creatorId, eppn) = meta
         good = True
 
     if not good:

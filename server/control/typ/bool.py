@@ -68,7 +68,9 @@ class Bool2(Bool):
     def fromStr(self, editVal):
         return (
             False
-            if editVal is None or editVal.lower() in NONE_VALUES | FALSE_VALUES
+            if editVal is None
+            or (type(editVal) is bool and not editVal)
+            or (type(editVal) is str and editVal.lower() in NONE_VALUES | FALSE_VALUES)
             else True
         )
 
@@ -79,8 +81,10 @@ class Bool3(Bool):
     def fromStr(self, editVal):
         return (
             None
-            if editVal is None or editVal.lower() in NONE_VALUES
+            if editVal is None
+            or (type(editVal) is str and editVal.lower() in NONE_VALUES)
             else False
-            if editVal.lower() in FALSE_VALUES
+            if (type(editVal) is bool and not editVal)
+            or (type(editVal) is str and editVal.lower() in FALSE_VALUES)
             else True
         )

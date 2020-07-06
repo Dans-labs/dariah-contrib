@@ -33,6 +33,7 @@ CW = C.web
 DATABASE = CB.database
 DEBUG = CB.debug
 DEBUG_MONGO = G(DEBUG, N.mongo)
+DEBUG_SYNCH = G(DEBUG, N.synch)
 CREATOR = CB.creator
 
 M_SET = CM.set
@@ -302,7 +303,8 @@ class Db:
             collected[valueTable] = now()
 
         self.collectActualItems()
-        serverprint(f"""COLLECTED {COMMA.join(sorted(VALUE_TABLES))}""")
+        if DEBUG_SYNCH:
+            serverprint(f"""COLLECTED {COMMA.join(sorted(VALUE_TABLES))}""")
 
     def recollect(self, table=None):
         """Collect the contents of the value tables if they have changed.
@@ -384,7 +386,8 @@ class Db:
         self.collectActualItems(tables=affected)
 
         if affected:
-            serverprint(f"""COLLECTED {COMMA.join(sorted(affected))}""")
+            if DEBUG_SYNCH:
+                serverprint(f"""COLLECTED {COMMA.join(sorted(affected))}""")
 
     def collectActualItems(self, tables=None):
         """Determines which items are "actual".
@@ -443,7 +446,8 @@ class Db:
                 for tp in G(record, N.typeContribution) or []:
                     self.typeCriteria.setdefault(tp, set()).add(_id)
 
-        serverprint(f"""UPDATED {", ".join(ACTUAL_TABLES)}""")
+        if DEBUG_SYNCH:
+            serverprint(f"""UPDATED {", ".join(ACTUAL_TABLES)}""")
 
     def bulkContribWorkflow(self, countryId, bulk):
         """Collects workflow information in bulk.

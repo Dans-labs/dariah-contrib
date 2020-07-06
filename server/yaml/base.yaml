@@ -20,7 +20,9 @@ root:
 debug:
   cache: false
   mongo: false
-  auth: true
+  auth: false
+  workflow: false
+  synch: false
 
 attributes:
   o: org

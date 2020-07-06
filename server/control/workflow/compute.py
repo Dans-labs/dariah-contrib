@@ -10,10 +10,13 @@ from config import Config as C, Names as N
 from control.utils import getLast, pick as G, serverprint, creators
 
 
+CB = C.base
 CT = C.tables
 CF = C.workflow
 CM = C.mongo
 
+DEBUG = CB.debug
+DEBUG_WORKFLOW = G(DEBUG, N.workflow)
 USER_TABLES_LIST = CT.userTables
 MAIN_TABLE = USER_TABLES_LIST[0]
 INTER_TABLE = USER_TABLES_LIST[1]
@@ -182,21 +185,26 @@ class Workflow:
         db = self.db
 
         if drop:
-            serverprint("WORKFLOW: Drop exisiting table")
+            if DEBUG_WORKFLOW:
+                serverprint("WORKFLOW: Drop exisiting table")
             db.dropWorkflow()
         else:
-            serverprint("WORKFLOW: Clear exisiting table")
+            if DEBUG_WORKFLOW:
+                serverprint("WORKFLOW: Clear exisiting table")
             db.clearWorkflow()
 
         entries = {}
-        serverprint("WORKFLOW: Read user (entry) tables")
+        if DEBUG_WORKFLOW:
+            serverprint("WORKFLOW: Read user (entry) tables")
         for table in WORKFLOW_TABLES:
             entries[table] = db.entries(table)
 
-        serverprint("WORKFLOW: Link masters and details")
+        if DEBUG_WORKFLOW:
+            serverprint("WORKFLOW: Link masters and details")
         self.aggregate(entries)
 
-        serverprint("WORKFLOW: Compute workflow info")
+        if DEBUG_WORKFLOW:
+            serverprint("WORKFLOW: Compute workflow info")
         wfRecords = []
         for mainRecord in G(entries, MAIN_TABLE, default={}).values():
             info = self.computeWorkflow(record=mainRecord)
@@ -204,29 +212,34 @@ class Workflow:
                 wfRecords.append(info)
 
         nWf = len(wfRecords)
-        serverprint(f"WORKFLOW: Store {nWf} workflow records")
+        if DEBUG_WORKFLOW:
+            serverprint(f"WORKFLOW: Store {nWf} workflow records")
         # check whether the wfRecords are distinct objects, otherwise we'll
         # get a bulk-write error
         wfIds = {}
         for record in wfRecords:
             wfIds.setdefault(id(record), []).append(record)
-        serverprint("WORKFLOW: CHECKING DUPLICATES: ...")
+        if DEBUG_WORKFLOW:
+            serverprint("WORKFLOW: CHECKING DUPLICATES: ...")
         good = True
         for (wfId, records) in wfIds.items():
             if len(records) > 1:
-                serverprint(
-                    f"WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:"
-                )
-                serverprint(records[0])
+                if DEBUG_WORKFLOW:
+                    serverprint(
+                        f"WORKFLOW: DUPLICATE OBJECTS TO BE INSERTED ({len(records)} x:"
+                    )
+                    serverprint(records[0])
                 good = False
         if good:
-            serverprint("WORKFLOW: NO DUPLICATES")
+            if DEBUG_WORKFLOW:
+                serverprint("WORKFLOW: NO DUPLICATES")
         else:
             sys.exit(4)
 
         if wfRecords:
             db.insertWorkflowMany(wfRecords)
-        serverprint("WORKFLOW: Initialization done")
+        if DEBUG_WORKFLOW:
+            serverprint("WORKFLOW: Initialization done")
         return nWf
 
     def insert(self, contribId):
@@ -242,7 +255,8 @@ class Workflow:
 
         info = self.computeWorkflow(contribId=contribId)
         info[N._id] = contribId
-        serverprint(f"WORKFLOW: New workflow info {contribId}")
+        if DEBUG_WORKFLOW:
+            serverprint(f"WORKFLOW: New workflow info {contribId}")
         db.insertWorkflow(info)
 
     def recompute(self, contribId):
@@ -270,7 +284,8 @@ class Workflow:
 
         db = self.db
 
-        serverprint(f"WORKFLOW: Delete workflow info {contribId}")
+        if DEBUG_WORKFLOW:
+            serverprint(f"WORKFLOW: Delete workflow info {contribId}")
         db.deleteWorkflow(contribId)
 
     def computeWorkflow(self, record=None, contribId=None):
@@ -669,9 +684,10 @@ class Workflow:
                     if detailTable in WORKFLOW_TABLES
                 ]
                 for detailTable in detailTablesWf:
-                    serverprint(
-                        f"WORKFLOW: {masterTable}: lookup details from {detailTable}"
-                    )
+                    if DEBUG_WORKFLOW:
+                        serverprint(
+                            f"WORKFLOW: {masterTable}: lookup details from {detailTable}"
+                        )
                     for record in sorted(
                         G(entries, detailTable, default={}).values(),
                         key=lambda r: G(r, N.dateCreated, default=0),

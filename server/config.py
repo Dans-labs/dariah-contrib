@@ -176,7 +176,7 @@ def main():
         serverprint(", ".join(sorted(spuriousNames)))
     else:
         if not TERSE:
-            serverprint(f"NAMES: No spurious names")
+            serverprint("NAMES: No spurious names")
 
     NAME_RE = re.compile(r"""\bN\.[A-Za-z0-9_]+""")
 
@@ -197,7 +197,7 @@ def main():
         serverprint(", ".join(sorted(unusedNames)))
     else:
         if not TERSE:
-            serverprint(f"NAMES: No unused names")
+            serverprint("NAMES: No unused names")
 
     undefNames = usedNames - allPureNames - allNames - methodNames
     if undefNames:
@@ -205,7 +205,7 @@ def main():
         serverprint(", ".join(sorted(undefNames)))
     else:
         if not TERSE:
-            serverprint(f"NAMES: No undefined names")
+            serverprint("NAMES: No undefined names")
 
     if not TERSE:
         serverprint(f"NAMES: {len(allPureNames | allNames):>4} defined in yaml files")

@@ -831,7 +831,7 @@ class WorkflowItem:
                 self.statusOverview(table, kind=kind),
                 self.tasks(table, kind=kind),
             ],
-            cls=f"workflow",
+            cls="workflow",
         )
 
     @staticmethod
@@ -972,7 +972,7 @@ class WorkflowItem:
         )
         frozenCls = N.frozen if frozen else E
         frozenMsg = (
-            H.span(G(STATUS_REP, N.frozen), cls=f"large status info") if frozen else E
+            H.span(G(STATUS_REP, N.frozen), cls="large status info") if frozen else E
         )
 
         statusRep = f"<!-- stage:{stage} -->" + H.div(
