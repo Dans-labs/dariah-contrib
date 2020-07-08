@@ -7,7 +7,7 @@ from shutil import move
 from openpyxl import load_workbook
 from pymongo import MongoClient
 
-from Levenshtein import distance
+# from Levenshtein import distance
 
 import warnings
 
@@ -245,11 +245,12 @@ def doSheet(fileName):
                 error(f"{posRep} not a valid email: `{email}` has no @")
             elif len(parts) > 2:
                 error(f"{posRep} not a valid email: `{email}` has multiple @")
-            person = parts[0]
             site = parts[1]
             if "." in site:
                 _id = itemsEmail.get(email, None)
                 if _id is None:
+                    """
+                    person = parts[0]
                     threshold = 4
                     witnessD = set()
                     for omail in itemsEmail.keys():
@@ -267,6 +268,8 @@ def doSheet(fileName):
                         )
                     else:
                         _id = -1
+                    """
+                    _id = -1
             else:
                 error(f"{posRep} not a valid email: `{email}` has no domain")
         return _id
