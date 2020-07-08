@@ -215,8 +215,6 @@ def doSheet(fileName):
     rows = [row for row in rows if any(c.value for c in row)]
     seen = set()
     header = {}
-    creatorI = None
-    editorsI = None
 
     for (i, cell) in enumerate(headRow):
         field = cell.value
@@ -231,10 +229,6 @@ def doSheet(fileName):
         else:
             seen.add(field)
             header[i] = field
-            if field == "creator":
-                creatorI = i
-            elif field == "editors":
-                editorsI = i
 
     if not good:
         return None
@@ -266,9 +260,10 @@ def doSheet(fileName):
                             witnessD.add(omail)
                     if witnessD:
                         witnesses = "`, `".join(w for w in witnessD)
+                        mid = "" if len(witnessD) == 1 else " one of"
                         error(
                             f"{posRep} mistyped email:"
-                            f" `{email}` should be one of `{witnesses}`"
+                            f" `{email}` should be{mid} `{witnesses}`"
                         )
                     else:
                         _id = -1
@@ -281,9 +276,9 @@ def doSheet(fileName):
     contribs = []
 
     for (r, row) in enumerate(rows):
+        contrib = {field: row[i].value for (i, field) in header.items()}
         posRep = f"\trow {r + 2} column creator:"
-        contrib = {}
-        value = row[creatorI].value
+        value = contrib["creator"]
         creatorId = checkEmail(value, posRep)
         if creatorId == -1:
             if value in newUsers:
@@ -300,9 +295,9 @@ def doSheet(fileName):
         contrib["creator"] = creatorId
         contrib["eppn"] = eppn
 
-        if editorsI is not None:
+        if "editors" in contrib:
             posRep = f"\trow {r + 2} column editors:"
-            value = row[editorsI].value
+            value = contrib["editors"]
             value = (
                 tuple(
                     line.strip()
@@ -327,13 +322,11 @@ def doSheet(fileName):
             contrib["editors"] = vals
         contribs.append(contrib)
 
-    for (r, row) in enumerate(rows):
-        contrib = contribs[r]
-        for (i, field) in header.items():
+    for (r, contrib) in enumerate(contribs):
+        for (field, value) in contrib.items():
             posRep = f"\trow {r + 2} column {field}:"
 
-            value = row[i].value
-            if field in MULTIPLE:
+            if field in MULTIPLE - {"editors"}:
                 value = (
                     tuple(
                         line.strip()
@@ -426,7 +419,6 @@ def doSheet(fileName):
         if newUsers:
             info("INSERTING NEW USERS")
         for (email, _id) in newUsers.items():
-            """
             user = dict(email=email)
             justNow = dt.utcnow()
             user.update(
@@ -441,7 +433,6 @@ def doSheet(fileName):
             )
             result = DB.user.insert_one(user)
             newIndex[_id] = result.inserted_id
-            """
             info(f"\t`{email}` (tempId={_id}) inserted")
 
         justNow = dt.utcnow()
