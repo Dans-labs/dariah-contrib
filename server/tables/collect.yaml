@@ -1,0 +1,9 @@
+table:
+  perm:
+    read: system
+    edit: nobody
+dateCollected:
+  type: datetime
+  perm:
+    read: system
+    edit: nobody

@@ -136,6 +136,9 @@ urls:
   workflow:
     text: Recompute workflow table
     url: /workflow
+  refresh:
+    text: Refresh the cache
+    url: /refresh
   slogout:
     text: log out from DARIAH
     url: /slogout

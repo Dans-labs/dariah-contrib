@@ -240,10 +240,10 @@
     <p id="t186" class="run"><span class="n"><a href="#t186">186</a></span><span class="t">    <span class="key">return</span> <span class="nam">dt</span><span class="op">.</span><span class="nam">utcnow</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">year</span>&nbsp;</span><span class="r"></span></p>
     <p id="t187" class="pln"><span class="n"><a href="#t187">187</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t188" class="pln"><span class="n"><a href="#t188">188</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t189" class="run"><span class="n"><a href="#t189">189</a></span><span class="t"><span class="key">def</span> <span class="nam">serverprint</span><span class="op">(</span><span class="nam">msg</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t189" class="run"><span class="n"><a href="#t189">189</a></span><span class="t"><span class="key">def</span> <span class="nam">serverprint</span><span class="op">(</span><span class="op">*</span><span class="nam">msg</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t190" class="pln"><span class="n"><a href="#t190">190</a></span><span class="t">    <span class="str">"""Print a message to the console immediately."""</span>&nbsp;</span><span class="r"></span></p>
     <p id="t191" class="pln"><span class="n"><a href="#t191">191</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t192" class="run"><span class="n"><a href="#t192">192</a></span><span class="t">    <span class="nam">sys</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">write</span><span class="op">(</span><span class="str">f"""{msg}{NL}"""</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t192" class="run"><span class="n"><a href="#t192">192</a></span><span class="t">    <span class="nam">sys</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">write</span><span class="op">(</span><span class="str">f"""{" ".join(msg)}{NL}"""</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t193" class="run"><span class="n"><a href="#t193">193</a></span><span class="t">    <span class="nam">sys</span><span class="op">.</span><span class="nam">stdout</span><span class="op">.</span><span class="nam">flush</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t194" class="pln"><span class="n"><a href="#t194">194</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t195" class="pln"><span class="n"><a href="#t195">195</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -412,7 +412,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.1</a>,
-            created at 2020-07-06 16:10
+            created at 2020-07-08 09:08
         </p>
     </div>
 </div>

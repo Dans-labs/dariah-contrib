@@ -1,5 +1,12 @@
 # News
 
+## 2020-07-08
+
+*   Bulk import via spreadsheets has been adapted to the format of the Czech
+    input form. Bulk import is still a manual business. Once the rules have settled
+    we can make it available on the webinterface.
+*   There is a control to regresh the server cache on the webinterface, only for sysadmins.
+
 ## 2020-05-19
 
 *   The overview page shows 4 additional groups: revewer1, reviewer2, reviewed1, reviewed2.

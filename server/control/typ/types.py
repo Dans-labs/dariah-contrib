@@ -36,7 +36,7 @@ ALL_TYPES = dict(
     datetime=Datetime,
     country=Country,
     criteria=Criteria,
-    creiteriaEntry=CriteriaEntry,
+    criteriaEntry=CriteriaEntry,
     decision=Decision,
     reviewEntry=ReviewEntry,
     score=Score,
@@ -50,6 +50,7 @@ CT = C.tables
 CW = C.web
 
 SCALAR_TYPES = set(CT.scalarTypes)
+SYSTEM_TABLES = CT.systemTables
 VALUE_TABLES = CT.valueTables
 USER_TABLES = CT.userTables
 USER_ENTRY_TABLES = CT.userEntryTables
@@ -110,7 +111,7 @@ class Types:
             self.make(tp, TypeClass)
             done.add(tp)
 
-        for tp in VALUE_TABLES + USER_TABLES + USER_ENTRY_TABLES:
+        for tp in VALUE_TABLES + USER_TABLES + USER_ENTRY_TABLES + SYSTEM_TABLES:
             if tp in done:
                 continue
             TypeName = cap1(tp)

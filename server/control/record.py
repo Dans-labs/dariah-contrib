@@ -770,7 +770,7 @@ class Record:
         Parameters
         ----------
         obj: object
-            Any object that has a table and context arttribute, e.g. a table object
+            Any object that has a table and context attribute, e.g. a table object
             or a record object
         record: dict
         cls: string, optional, `''`

@@ -221,13 +221,14 @@ def main():
     USER_TABLES = set(CT.userTables)
     USER_ENTRY_TABLES = set(CT.userEntryTables)
     VALUE_TABLES = set(CT.valueTables)
+    SYSTEM_TABLES = set(CT.systemTables)
     SCALAR_TYPES = CT.scalarTypes
     SCALAR_TYPE_SET = set(chain.from_iterable(SCALAR_TYPES.values()))
     PROV_SPECS = CT.prov
     VALUE_SPECS = CT.value
     CASCADE = CT.cascade
 
-    tables = tables | USER_TABLES | USER_ENTRY_TABLES | VALUE_TABLES
+    tables = tables | USER_TABLES | USER_ENTRY_TABLES | VALUE_TABLES | SYSTEM_TABLES
     sortedTables = (
         [MAIN_TABLE]
         + sorted(USER_TABLES - {MAIN_TABLE})

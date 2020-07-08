@@ -63,6 +63,7 @@ DUMMY = URLS[N.dummy][N.url]
 LOGIN = URLS[N.login][N.url]
 LOGOUT = URLS[N.logout][N.url]
 SLOGOUT = URLS[N.slogout][N.url]
+REFRESH = URLS[N.refresh][N.url]
 WORKFLOW = URLS[N.workflow][N.url]
 SHIB_LOGOUT = URLS[N.shibLogout][N.url]
 NO_PAGE = MESSAGES[N.noPage]
@@ -300,6 +301,18 @@ def appFactory(regime, test, debug, **kwargs):
         return redirectResult(START, False)
 
     # SYSADMIN
+
+    @app.route(f"""{REFRESH}""")
+    def serveRefresh():
+        checkBounds()
+        context = getContext()
+        auth.authenticate()
+        done = context.refreshCache()
+        if done:
+            flash("Cache refreshed")
+        else:
+            flash("Cache not refreshed", "error")
+        return redirectResult(START, done)
 
     @app.route(f"""{WORKFLOW}""")
     def serveWorkflow():

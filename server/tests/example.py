@@ -186,7 +186,9 @@ CAPTIONS = (
     ("vccs", POWER_USERS, 2, None, None),
     ("years", POWER_USERS, 20, None, None),
     ("decisions", {SYSTEM, ROOT}, 3, None, None),
+    ("value caches", {SYSTEM, ROOT}, None, None, None),
     ("permission groups", {SYSTEM, ROOT}, 9, None, None),
+    ("Refresh the cache", {SYSTEM, ROOT}, None, WELCOME, None),
     ("Recompute workflow table", {SYSTEM, ROOT}, None, WELCOME, None),
 )
 """Sidebar entries.

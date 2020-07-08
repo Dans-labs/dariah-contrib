@@ -25,6 +25,7 @@ valueTables:
   - year
 
 systemTables:
+  - collect
   - decision
   - permissionGroup
 
@@ -49,6 +50,7 @@ perm:
   year: public
   decision: office
   permissionGroup: office
+  collect: system
   
 actualTables:
   - criteria
@@ -90,6 +92,7 @@ recollect:
 
 items:
   assessmentType: [assessment type, assessment types]
+  collect: [value cache, value caches]
   country: [country, countries]
   contrib: [contribution, contributions]
   criteria: [criterion, criteria]

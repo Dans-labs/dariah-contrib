@@ -3,9 +3,11 @@ import os
 from itertools import chain
 from datetime import datetime as dt
 from shutil import move
-from openpyxl import load_workbook
 
+from openpyxl import load_workbook
 from pymongo import MongoClient
+
+from Levenshtein import distance
 
 import warnings
 
@@ -38,8 +40,10 @@ EXT = ".xlsx"
 
 FIELDS = set(
     """
-    contributor
+    country
     year
+    creator
+    editors
     title
     typeContribution
     vcc
@@ -60,8 +64,9 @@ FIELDS = set(
 
 OBLIGATORY = set(
     """
-    contributor
+    country
     year
+    creator
     title
     typeContribution
     contactPersonName
@@ -71,6 +76,7 @@ OBLIGATORY = set(
 
 MULTIPLE = set(
     """
+    editors
     vcc
     contactPersonName
     contactPersonEmail
@@ -117,6 +123,8 @@ MC = MongoClient()
 DB = MC[DATABASE]
 
 VALUES = {}
+CREATOR_ID = None
+CREATOR_NAME = "HaSProject"
 
 
 def info(x):
@@ -129,7 +137,7 @@ def error(x):
 
 def rep(table, r):
     return (
-        r.get("eppn", None)
+        r.get("email", None)
         if table == "user"
         else r["iso"]
         if table == "country"
@@ -144,10 +152,19 @@ def rep(table, r):
 
 
 def readValueTables():
+    global CREATOR_ID
+
     for table in VALUE_TABLES:
         criterion = {"isMember": True} if table == "country" else {}
         items = {rep(table, r): r["_id"] for r in DB[table].find(criterion)}
         items = {r: _id for (r, _id) in items.items() if r is not None}
+        if table == "user":
+            users = list(DB.user.find(criterion))
+            eppns = {r["_id"]: r.get("eppn", r.get("email", None)) for r in users}
+            CREATOR_ID = [
+                r["_id"] for r in users if r.get("eppn", None) == CREATOR_NAME
+            ][0]
+            VALUES["eppn"] = eppns
         VALUES[table] = items
 
 
@@ -160,16 +177,7 @@ def parseFileName(fileName):
         error(f"\tfilename should have extension `{EXT}`")
         good = False
 
-    if len(name) < 6:
-        error("\tfilename should match CC*.xls")
-        good = False
-    else:
-        country = name[0:2]
-        countryId = VALUES["country"].get(country.upper(), None)
-        if not countryId:
-            error(f"""\tnot a member country of DARIAH: "{country}" """)
-            good = False
-    return countryId if good else None
+    return name if good else None
 
 
 def newVal(field, val):
@@ -185,31 +193,30 @@ def getVal(field, val, r):
         if field in ALLOW_NEW:
             valId = newVal(field, val)
         else:
-            error(
-                f"\trow {r + 2} column {field}: unknown value `{val}`"
-            )
+            error(f"\trow {r + 2} column {field}: unknown value `{val}`")
             valId = None
     return valId
 
 
 def doSheet(fileName):
-    good = True
-
-    countryId = parseFileName(fileName)
-    if not countryId:
-        good = False
-    else:
-        good = True
-
-    if not good:
+    name = parseFileName(fileName)
+    if name is None:
         return None
 
-    wb = load_workbook(f"{TODO_DIR}/{inFile}")
-    ws = wb["contributions"]
+    good = True
+
+    wb = load_workbook(f"{TODO_DIR}/{inFile}", data_only=True)
+    try:
+        ws = wb["contributions"]
+    except Exception:
+        ws = wb.active
 
     (headRow, *rows) = list(ws.rows)
+    rows = [row for row in rows if any(c.value for c in row)]
     seen = set()
     header = {}
+    creatorI = None
+    editorsI = None
 
     for (i, cell) in enumerate(headRow):
         field = cell.value
@@ -224,14 +231,107 @@ def doSheet(fileName):
         else:
             seen.add(field)
             header[i] = field
+            if field == "creator":
+                creatorI = i
+            elif field == "editors":
+                editorsI = i
 
     if not good:
         return None
 
+    itemsEmail = VALUES["user"]
+
+    def checkEmail(email, posRep):
+        _id = None
+        if not email or len(email) < 8:
+            error(f"{posRep} not a valid email: `{email}` is too short")
+        else:
+            parts = email.split("@")
+            if len(parts) == 0:
+                error(f"{posRep} not a valid email: `{email}` has no @")
+            elif len(parts) > 2:
+                error(f"{posRep} not a valid email: `{email}` has multiple @")
+            person = parts[0]
+            site = parts[1]
+            if "." in site:
+                _id = itemsEmail.get(email, None)
+                if _id is None:
+                    threshold = 4
+                    witnessD = set()
+                    for omail in itemsEmail.keys():
+                        (oPerson, oSite) = omail.split("@")
+                        siteLike = distance(site, oSite) <= threshold
+                        personLike = distance(person, oPerson) <= threshold
+                        if email != omail and siteLike and personLike:
+                            witnessD.add(omail)
+                    if witnessD:
+                        witnesses = "`, `".join(w for w in witnessD)
+                        error(
+                            f"{posRep} mistyped email:"
+                            f" `{email}` should be one of `{witnesses}`"
+                        )
+                    else:
+                        _id = -1
+            else:
+                error(f"{posRep} not a valid email: `{email}` has no domain")
+        return _id
+
+    newUsers = {}
+    newId = 0
     contribs = []
+
     for (r, row) in enumerate(rows):
+        posRep = f"\trow {r + 2} column creator:"
         contrib = {}
+        value = row[creatorI].value
+        creatorId = checkEmail(value, posRep)
+        if creatorId == -1:
+            if value in newUsers:
+                creatorId = newUsers[value]
+            else:
+                newId -= 1
+                newUsers[value] = newId
+                creatorId = newId
+            eppn = value
+        elif creatorId:
+            eppn = VALUES["eppn"][creatorId]
+        else:
+            eppn = None
+        contrib["creator"] = creatorId
+        contrib["eppn"] = eppn
+
+        if editorsI is not None:
+            posRep = f"\trow {r + 2} column editors:"
+            value = row[editorsI].value
+            value = (
+                tuple(
+                    line.strip()
+                    for line in chain.from_iterable(
+                        line.split(",") for line in value.splitlines()
+                    )
+                )
+                if value
+                else []
+            )
+            vals = []
+            for val in value:
+                editorId = checkEmail(val, posRep)
+                if editorId == -1:
+                    if val in newUsers:
+                        editorId = newUsers[val]
+                    else:
+                        newId -= 1
+                        newUsers[val] = newId
+                        editorId = newId
+                vals.append(editorId)
+            contrib["editors"] = vals
+        contribs.append(contrib)
+
+    for (r, row) in enumerate(rows):
+        contrib = contribs[r]
         for (i, field) in header.items():
+            posRep = f"\trow {r + 2} column {field}:"
+
             value = row[i].value
             if field in MULTIPLE:
                 value = (
@@ -245,7 +345,27 @@ def doSheet(fileName):
                     else []
                 )
 
-            if field in VALUE_TABLES:
+            if field == "country":
+                countryId = VALUES["country"].get(value.upper(), None)
+                if countryId:
+                    value = countryId
+                else:
+                    error(f"{posRep} not a member country of DARIAH: `{value}`")
+                    good = False
+            elif field == "year":
+                yearId = VALUES["year"].get(str(value), None)
+                if yearId:
+                    value = yearId
+                else:
+                    error(f"{posRep}: not a valid year: `{value}`")
+                    good = False
+            elif field == "creator":
+                if value is None:
+                    good = False
+            elif field == "editors":
+                if any(v is None for v in value):
+                    good = False
+            elif field in VALUE_TABLES:
                 if field in MULTIPLE:
                     valueId = []
                     for val in value:
@@ -265,18 +385,16 @@ def doSheet(fileName):
             elif field in NUMBER:
                 if field in MULTIPLE:
                     for val in value:
-                        if val is not None and (
-                            val.startswith("0") or not value.isdigit()
+                        if val is not None and type(val) is not int and (
+                            str(val).startswith("0") or not str(val).isdigit()
                         ):
-                            error(
-                                f"\trow {r + 2} column {field}: not a number `{value}`"
-                            )
+                            error(f"{posRep} not a number `{value}`")
                             good = False
                 else:
-                    if value is not None and (
-                        value.startswith("0") or not value.isdigit()
+                    if value is not None and type(value) is not int and (
+                        str(value).startswith("0") or not str(value).isdigit()
                     ):
-                        error(f"\trow {r + 2} column {field}: not a number `{value}`")
+                        error(f"{posRep} not a number `{value}`")
                         good = False
 
             contrib[field] = value
@@ -293,17 +411,43 @@ def doSheet(fileName):
             continue
 
         justNow = dt.utcnow()
-        contrib["country"] = countryId
-        contrib["year"] = yearId
         contrib["dateCreated"] = justNow
-        contrib["creator"] = creatorId
+        eppn = contrib["eppn"]
         contrib["modified"] = [f"{eppn} on {justNow}"]
-        contrib["import"] = fileName[0 : -len(EXT)]
+        contrib["import"] = name
         contrib["isPristine"] = True
-        contribs.append(contrib)
 
     if not good:
         return None
+
+    if ACTION == "i":
+        newIndex = {}
+
+        if newUsers:
+            info("INSERTING NEW USERS")
+        for (email, _id) in newUsers.items():
+            """
+            user = dict(email=email)
+            justNow = dt.utcnow()
+            user.update(
+                {
+                    "dateLastLogin": justNow,
+                    "statusLastLogin": "Approved",
+                    "mayLogin": True,
+                    "creator": CREATOR_ID,
+                    "dateCreated": justNow,
+                    "modified": [f"{CREATOR_NAME} on {justNow}"],
+                }
+            )
+            result = DB.user.insert_one(user)
+            newIndex[_id] = result.inserted_id
+            """
+            info(f"\t`{email}` (tempId={_id}) inserted")
+
+        justNow = dt.utcnow()
+        DB.collect.update_one(
+            {"table": "user"}, {"$set": {"dateCollected": justNow}}, upsert=True
+        )
 
     result = 0
     exist = 0
@@ -313,6 +457,20 @@ def doSheet(fileName):
     n = len(contribs)
 
     for contrib in contribs:
+        creatorId = contrib["creator"]
+        editorsId = contrib.get("editors", None)
+        if ACTION == "i":
+            if type(creatorId) is int:
+                creatorId = newIndex[creatorId]
+                contrib["creator"] = creatorId
+            if editorsId is not None:
+                eIds = []
+                for eId in editorsId:
+                    if type(eId) is int:
+                        eId = newIndex[eId]
+                    eIds.append(eId)
+                contrib["editors"] = eIds
+
         candidates = list(
             DB.contrib.find(
                 {

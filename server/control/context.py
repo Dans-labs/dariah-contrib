@@ -176,6 +176,31 @@ class Context:
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
 
+    def refreshCache(self):
+        """Refresh the cache.
+
+        All values stored in value tables will be cached.
+        But all workers will end up with their own cache.
+        They signal each other when to refresh their caches if they change one of these
+        values.
+
+        But you can also manually trigger all workers to refresh their caches.
+
+        Returns
+        -------
+        bool
+            Whether the cache refreshing has been executed.
+        """
+
+        auth = self.auth
+        db = self.db
+
+        done = False
+        if auth.sysadmin():
+            db.recollect(True)
+            done = True
+        return done
+
     def resetWorkflow(self):
         """Recompute the workflow table.
 

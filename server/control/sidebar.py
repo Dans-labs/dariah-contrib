@@ -22,6 +22,8 @@ SORTED_TABLES = CT.sorted
 URLS = CW.urls
 HOME = URLS[N.home]
 OVERVIEW = URLS[N.info][N.url]
+REFRESH = URLS[N.refresh][N.url]
+REFRESH_TEXT = URLS[N.refresh][N.text]
 WORKFLOW = URLS[N.workflow][N.url]
 WORKFLOW_TEXT = URLS[N.workflow][N.text]
 OPTIONS = CW.options
@@ -410,10 +412,15 @@ class Sidebar:
         subEntries = []
         if isSysAdmin:
             subEntries.append(
+                self.makeEntry(REFRESH_TEXT, path=REFRESH, asTask=True)
+            )
+            subEntries.append(self.tableEntry(N.collect))
+            subEntries.append(
                 self.makeEntry(WORKFLOW_TEXT, path=WORKFLOW, asTask=True)
             )
             for table in SYSTEM_TABLES:
-                subEntries.append(self.tableEntry(table))
+                if table != N.collect:
+                    subEntries.append(self.tableEntry(table))
             entries.append(
                 self.makeCaption(G(CAPTIONS, N.system), subEntries, rule=True)
             )

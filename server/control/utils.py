@@ -186,10 +186,10 @@ def thisYear():
     return dt.utcnow().year
 
 
-def serverprint(msg):
+def serverprint(*msg):
     """Print a message to the console immediately."""
 
-    sys.stdout.write(f"""{msg}{NL}""")
+    sys.stdout.write(f"""{" ".join(msg)}{NL}""")
     sys.stdout.flush()
 
 

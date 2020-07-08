@@ -346,9 +346,13 @@ class Db:
             A recollect() without arguments collects *all* value tables that need
             collecting based on the times of change as recorded in the `collect`
             table.
+
             A recollect of a single table means that this worker has made a change.
             After the recollect, a timestamp will go into the `collect` table,
             so that other workers can pick it up.
+
+            If table is `True`, all timestamps in the `collect` table will be set
+            to now, so that each worker will refresh its value cache.
         """
 
         collected = self.collected
@@ -367,6 +371,12 @@ class Db:
                     self.cacheValueTable(valueTable)
                     collected[valueTable] = now()
                     affected.add(valueTable)
+        elif table is True:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                self.cacheValueTable(valueTable)
+                collected[valueTable] = now()
+                affected.add(valueTable)
         else:
             self.cacheValueTable(table)
             collected[table] = now()
@@ -964,7 +974,7 @@ class Db:
         Returns
         -------
         None
-            But note that the new _id and the generated field values areis added to the
+            But note that the new _id and the generated field values are added to the
             record.
         """
 
