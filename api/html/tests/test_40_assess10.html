@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>test_40_assess10 API documentation</title>
 <meta name="description" content="Test scenario for assessments …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -23,8 +23,8 @@
 <p>Test scenario for assessments.</p>
 <h2 id="domain">Domain</h2>
 <ul>
-<li>Users as in <a title="conftest" href="conftest.html"><code>conftest</code></a>, under <em>players</em></li>
-<li>Clean slate, see <a title="starters" href="starters.html"><code>starters</code></a>.</li>
+<li>Users as in <code><a title="conftest" href="conftest.html">conftest</a></code>, under <em>players</em></li>
+<li>Clean slate, see <code><a title="starters" href="starters.html">starters</a></code>.</li>
 <li>The user table</li>
 <li>The country table</li>
 <li>The contribution type table</li>
@@ -33,9 +33,9 @@
 <h2 id="acts">Acts</h2>
 <p>Starting an assessment.</p>
 <dl>
-<dt><a title="test_40_assess10.test_resetType" href="#test_40_assess10.test_resetType"><code>test_resetType()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_resetType" href="#test_40_assess10.test_resetType">test_resetType()</a></code></dt>
 <dd><strong>owner</strong> resets the contribution type to undefined.</dd>
-<dt><a title="test_40_assess10.test_tryStartAll" href="#test_40_assess10.test_tryStartAll"><code>test_tryStartAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_tryStartAll" href="#test_40_assess10.test_tryStartAll">test_tryStartAll()</a></code></dt>
 <dd>
 <p>We start with a contribution without type. Then we cannot start an assessment.
 All users cannot perform out a wrongly shaped task:</p>
@@ -48,7 +48,7 @@ All users cannot perform out a wrongly shaped task:</p>
 <p>All users cannot perform the proper task either, because the contribution
 does not have a type yet.</p>
 </dd>
-<dt><a title="test_40_assess10.test_tryStartAgainAll" href="#test_40_assess10.test_tryStartAgainAll"><code>test_tryStartAgainAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_tryStartAgainAll" href="#test_40_assess10.test_tryStartAgainAll">test_tryStartAgainAll()</a></code></dt>
 <dd>
 <p>We assign a type to the contribution.
 All users try the task <code>startAssessment</code> with the proper contribution.
@@ -58,28 +58,28 @@ caution
 The power users are not allowed to start an assessment of a contribution
 of which they are not owner or editor.</p>
 </dd>
-<dt><a title="test_40_assess10.test_tryStartAgainOwner" href="#test_40_assess10.test_tryStartAgainOwner"><code>test_tryStartAgainOwner()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_tryStartAgainOwner" href="#test_40_assess10.test_tryStartAgainOwner">test_tryStartAgainOwner()</a></code></dt>
 <dd><strong>owner</strong> performs the task <code>startAssessment</code> with the proper contribution.</dd>
-<dt><a title="test_40_assess10.test_sidebar" href="#test_40_assess10.test_sidebar"><code>test_sidebar()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_sidebar" href="#test_40_assess10.test_sidebar">test_sidebar()</a></code></dt>
 <dd>All users check the entries in the sidebar.
 All users should see 1 contribution now and some should see 1 assessment too.</dd>
-<dt><a title="test_40_assess10.test_editor" href="#test_40_assess10.test_editor"><code>test_editor()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_editor" href="#test_40_assess10.test_editor">test_editor()</a></code></dt>
 <dd>Then we add <strong>editor</strong> to the editors of the assessment,</dd>
-<dt><a title="test_40_assess10.test_sidebar2" href="#test_40_assess10.test_sidebar2"><code>test_sidebar2()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_sidebar2" href="#test_40_assess10.test_sidebar2">test_sidebar2()</a></code></dt>
 <dd>All users check the entries in the sidebar.
 The editor should see the assessment now as well.</dd>
-<dt><a title="test_40_assess10.test_inspectTitleAll" href="#test_40_assess10.test_inspectTitleAll"><code>test_inspectTitleAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_inspectTitleAll" href="#test_40_assess10.test_inspectTitleAll">test_inspectTitleAll()</a></code></dt>
 <dd>All users try to check the prefilled title of the assessment.</dd>
-<dt><a title="test_40_assess10.test_inspectTypeAll" href="#test_40_assess10.test_inspectTypeAll"><code>test_inspectTypeAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_inspectTypeAll" href="#test_40_assess10.test_inspectTypeAll">test_inspectTypeAll()</a></code></dt>
 <dd>All users try to check whether the type of the assessment is the same as the one
 for the contribution.</dd>
-<dt><a title="test_40_assess10.test_modifyTypeAll" href="#test_40_assess10.test_modifyTypeAll"><code>test_modifyTypeAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_modifyTypeAll" href="#test_40_assess10.test_modifyTypeAll">test_modifyTypeAll()</a></code></dt>
 <dd>All users cannot change the type of the assessment. The assessment type
 is fixed after creation.</dd>
-<dt><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll"><code>test_modifyTitleAll()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_modifyTitleAll" href="#test_40_assess10.test_modifyTitleAll">test_modifyTitleAll()</a></code></dt>
 <dd>All users try to change the title of the assessment. Only some succeed.
 They change it back.</dd>
-<dt><a title="test_40_assess10.test_assignReviewers" href="#test_40_assess10.test_assignReviewers"><code>test_assignReviewers()</code></a></dt>
+<dt><code><a title="test_40_assess10.test_assignReviewers" href="#test_40_assess10.test_assignReviewers">test_assignReviewers()</a></code></dt>
 <dd>All users try to assign reviewers to this assessment, but they all fail.
 Most users fail because they do not have the right permission level.
 The office user fails because of a workflow condition:
@@ -395,7 +395,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_assignReviewers</span></span>(<span>clients, field, user)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -417,7 +417,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_editor</span></span>(<span>clientOwner)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -434,7 +434,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_inspectTitleAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -461,7 +461,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_inspectTypeAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -483,7 +483,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_modifyTitleAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -513,7 +513,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_modifyTypeAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -535,7 +535,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_resetType</span></span>(<span>clientOwner, clientOffice)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -551,7 +551,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_sidebar</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -573,7 +573,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_sidebar2</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -595,7 +595,7 @@ def test_assignReviewers(clients, field, user):
 <span>def <span class="ident">test_start</span></span>(<span>clientOffice, clientOwner)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -618,7 +618,7 @@ def test_start(clientOffice, clientOwner):
 <span>def <span class="ident">test_tryStartAgainAll</span></span>(<span>clients)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -639,7 +639,7 @@ def test_start(clientOffice, clientOwner):
 <span>def <span class="ident">test_tryStartAgainOwner</span></span>(<span>clientOwner)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -657,7 +657,7 @@ def test_start(clientOffice, clientOwner):
 <span>def <span class="ident">test_tryStartAll</span></span>(<span>clients, url)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -719,7 +719,7 @@ def test_tryStartAll(clients, url):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

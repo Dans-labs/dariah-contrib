@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.db API documentation</title>
 <meta name="description" content="All access to the database …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -65,6 +65,7 @@ CW = C.web
 DATABASE = CB.database
 DEBUG = CB.debug
 DEBUG_MONGO = G(DEBUG, N.mongo)
+DEBUG_SYNCH = G(DEBUG, N.synch)
 CREATOR = CB.creator
 
 M_SET = CM.set
@@ -334,7 +335,8 @@ class Db:
             collected[valueTable] = now()
 
         self.collectActualItems()
-        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
+        if DEBUG_SYNCH:
+            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
 
     def recollect(self, table=None):
         &#34;&#34;&#34;Collect the contents of the value tables if they have changed.
@@ -376,9 +378,13 @@ class Db:
             A recollect() without arguments collects *all* value tables that need
             collecting based on the times of change as recorded in the `collect`
             table.
+
             A recollect of a single table means that this worker has made a change.
             After the recollect, a timestamp will go into the `collect` table,
             so that other workers can pick it up.
+
+            If table is `True`, all timestamps in the `collect` table will be set
+            to now, so that each worker will refresh its value cache.
         &#34;&#34;&#34;
 
         collected = self.collected
@@ -397,6 +403,12 @@ class Db:
                     self.cacheValueTable(valueTable)
                     collected[valueTable] = now()
                     affected.add(valueTable)
+        elif table is True:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                self.cacheValueTable(valueTable)
+                collected[valueTable] = now()
+                affected.add(valueTable)
         else:
             self.cacheValueTable(table)
             collected[table] = now()
@@ -416,7 +428,8 @@ class Db:
         self.collectActualItems(tables=affected)
 
         if affected:
-            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
+            if DEBUG_SYNCH:
+                serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
 
     def collectActualItems(self, tables=None):
         &#34;&#34;&#34;Determines which items are &#34;actual&#34;.
@@ -475,7 +488,8 @@ class Db:
                 for tp in G(record, N.typeContribution) or []:
                     self.typeCriteria.setdefault(tp, set()).add(_id)
 
-        serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
+        if DEBUG_SYNCH:
+            serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
 
     def bulkContribWorkflow(self, countryId, bulk):
         &#34;&#34;&#34;Collects workflow information in bulk.
@@ -991,8 +1005,9 @@ class Db:
 
         Returns
         -------
-        ObjectId
-            The id of the newly inserted user record.
+        None
+            But note that the new _id and the generated field values are added to the
+            record.
         &#34;&#34;&#34;
 
         creatorId = self.creatorId
@@ -1010,7 +1025,7 @@ class Db:
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
         self.recollect(N.user)
-        return result.inserted_id
+        record[N._id] = result.inserted_id
 
     def deleteItem(self, table, eid):
         &#34;&#34;&#34;Delete a record.
@@ -1365,10 +1380,10 @@ class Db:
 <span>(</span><span>regime, test=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>All access to the MongoDb will happen through this class.</p>
+<div class="desc"><p>All access to the MongoDb will happen through this class.</p>
 <p>It will read all content of all value tables and keep it cached.</p>
 <p>The data in the user tables will be cached by the higher level
-<a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a>, but only per request.</p>
+<code><a title="control.context.Context" href="context.html#control.context.Context">Context</a></code>, but only per request.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>We start without a Mongo connection.
@@ -1385,11 +1400,11 @@ as recommended in
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>regime</code></strong> :&ensp;{<code>"production"</code>, <code>"development"</code>}</dt>
+<dt><strong><code>regime</code></strong> :&ensp;<code>{"production", "development"}</code></dt>
 <dd>See below</dd>
 <dt><strong><code>test</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>See below.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1624,7 +1639,8 @@ as recommended in
             collected[valueTable] = now()
 
         self.collectActualItems()
-        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
+        if DEBUG_SYNCH:
+            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)
 
     def recollect(self, table=None):
         &#34;&#34;&#34;Collect the contents of the value tables if they have changed.
@@ -1666,9 +1682,13 @@ as recommended in
             A recollect() without arguments collects *all* value tables that need
             collecting based on the times of change as recorded in the `collect`
             table.
+
             A recollect of a single table means that this worker has made a change.
             After the recollect, a timestamp will go into the `collect` table,
             so that other workers can pick it up.
+
+            If table is `True`, all timestamps in the `collect` table will be set
+            to now, so that each worker will refresh its value cache.
         &#34;&#34;&#34;
 
         collected = self.collected
@@ -1687,6 +1707,12 @@ as recommended in
                     self.cacheValueTable(valueTable)
                     collected[valueTable] = now()
                     affected.add(valueTable)
+        elif table is True:
+            affected = set()
+            for valueTable in VALUE_TABLES:
+                self.cacheValueTable(valueTable)
+                collected[valueTable] = now()
+                affected.add(valueTable)
         else:
             self.cacheValueTable(table)
             collected[table] = now()
@@ -1706,7 +1732,8 @@ as recommended in
         self.collectActualItems(tables=affected)
 
         if affected:
-            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
+            if DEBUG_SYNCH:
+                serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)
 
     def collectActualItems(self, tables=None):
         &#34;&#34;&#34;Determines which items are &#34;actual&#34;.
@@ -1765,7 +1792,8 @@ as recommended in
                 for tp in G(record, N.typeContribution) or []:
                     self.typeCriteria.setdefault(tp, set()).add(_id)
 
-        serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
+        if DEBUG_SYNCH:
+            serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)
 
     def bulkContribWorkflow(self, countryId, bulk):
         &#34;&#34;&#34;Collects workflow information in bulk.
@@ -2281,8 +2309,9 @@ as recommended in
 
         Returns
         -------
-        ObjectId
-            The id of the newly inserted user record.
+        None
+            But note that the new _id and the generated field values are added to the
+            record.
         &#34;&#34;&#34;
 
         creatorId = self.creatorId
@@ -2300,7 +2329,7 @@ as recommended in
         )
         result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
         self.recollect(N.user)
-        return result.inserted_id
+        record[N._id] = result.inserted_id
 
     def deleteItem(self, table, eid):
         &#34;&#34;&#34;Delete a record.
@@ -2646,7 +2675,7 @@ as recommended in
 <span>def <span class="ident">inCrit</span></span>(<span>items)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Compiles a list of items into a Monngo DB <code>$in</code> criterion.</p>
+<div class="desc"><p>Compiles a list of items into a Monngo DB <code>$in</code> criterion.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>items</code></strong> :&ensp;<code>iterable</code> of <code>mixed</code></dt>
@@ -2657,7 +2686,7 @@ as recommended in
 <dt><code>dict</code></dt>
 <dd>A MongoDB criterion that tests whether the thing in question is one
 of the items given.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2685,10 +2714,10 @@ def inCrit(items):
 <span>def <span class="ident">satisfies</span></span>(<span>record, criterion)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Test whether a record satifies a criterion.</p>
+<div class="desc"><p>Test whether a record satifies a criterion.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-<p>See also <a title="control.db.Db.getList" href="#control.db.Db.getList"><code>Db.getList()</code></a>.</p>
+<p>See also <code><a title="control.db.Db.getList" href="#control.db.Db.getList">Db.getList()</a></code>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2705,7 +2734,7 @@ that record.</dd>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2745,33 +2774,33 @@ def satisfies(record, criterion):
 <dl>
 <dt id="control.db.Db.client"><code class="name">var <span class="ident">client</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The MongoDb client.</p></section>
+<div class="desc"><p><em>object</em> The MongoDb client.</p></div>
 </dd>
 <dt id="control.db.Db.collected"><code class="name">var <span class="ident">collected</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> For each value table, the time that this worker last collected it.</p>
+<div class="desc"><p><em>dict</em> For each value table, the time that this worker last collected it.</p>
 <p>In the database there is a table which holds the last time for each value
-table that a worker updated a value in it.</p></section>
+table that a worker updated a value in it.</p></div>
 </dd>
 <dt id="control.db.Db.creatorId"><code class="name">var <span class="ident">creatorId</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> System user.</p>
+<div class="desc"><p><em>ObjectId</em> System user.</p>
 <p>There is a userId, fixed by configuration, that represents the system.
 It is only used when user records are created: those records will said
-to be created by the system.</p></section>
+to be created by the system.</p></div>
 </dd>
 <dt id="control.db.Db.mongo"><code class="name">var <span class="ident">mongo</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The connection to the MongoDb database.</p>
-<p>The connnection exists before the Db singleton is initialized.</p></section>
+<div class="desc"><p><em>object</em> The connection to the MongoDb database.</p>
+<p>The connnection exists before the Db singleton is initialized.</p></div>
 </dd>
 <dt id="control.db.Db.regime"><code class="name">var <span class="ident">regime</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> Whether the app runs in production or in development.</p></section>
+<div class="desc"><p><em>string</em> Whether the app runs in production or in development.</p></div>
 </dd>
 <dt id="control.db.Db.test"><code class="name">var <span class="ident">test</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether to connect to the test database.</p></section>
+<div class="desc"><p><em>boolean</em> Whether to connect to the test database.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -2780,7 +2809,7 @@ to be created by the system.</p></section>
 <span>def <span class="ident">bulkContribWorkflow</span></span>(<span>self, countryId, bulk)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Collects workflow information in bulk.</p>
+<div class="desc"><p>Collects workflow information in bulk.</p>
 <p>When overviews are being produced, workflow info is needed for a lot
 of records. We do not fetch them one by one, but all in one.</p>
 <p>We use the MongoDB aggregation pipeline to collect the
@@ -2797,7 +2826,7 @@ for items belonging to this country are fetched.</dd>
 <dt><strong><code>bulk</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>If <code>True</code>, fetches only records that have been bulk-imported.
 Those records are marked by the presence of the field <code>import</code>.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2861,7 +2890,7 @@ Those records are marked by the presence of the field <code>import</code>.</dd>
 <span>def <span class="ident">cacheValueTable</span></span>(<span>self, valueTable)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Caches the contents of a value table.</p>
+<div class="desc"><p>Caches the contents of a value table.</p>
 <p>The tables will be cached under two attributes:</p>
 <dl>
 <dt>the name of the table</dt>
@@ -2873,7 +2902,7 @@ Those records are marked by the presence of the field <code>import</code>.</dd>
 <dl>
 <dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
 <dd>The value table to be cached.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2924,11 +2953,11 @@ Those records are marked by the presence of the field <code>import</code>.</dd>
 <span>def <span class="ident">clearWorkflow</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Clear the entire workflow table.</p>
+<div class="desc"><p>Clear the entire workflow table.</p>
 <p>The table is not deleted, but all of its records are.
 This happens when the workflow information is reinitialized while the
 webserver remains running, e.g. by command of a sysadmin or office user.
-(Currently this function is not used).</p></section>
+(Currently this function is not used).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2949,7 +2978,7 @@ webserver remains running, e.g. by command of a sysadmin or office user.
 <span>def <span class="ident">collect</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Collect the contents of the value tables.</p>
+<div class="desc"><p>Collect the contents of the value tables.</p>
 <p>Value tables have content that is needed almost all the time.
 All value tables will be completely cached within Db.</p>
 <div class="admonition note">
@@ -2977,7 +3006,7 @@ See for example how <code>root.makeUserRoot</code> handles this.</p>
 <p>This is a complicated app.
 Some tables have records that specify whether other records are "actual".
 After collecting a value table, the "actual" items will be recomputed.</p>
-</div></section>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3018,14 +3047,15 @@ After collecting a value table, the "actual" items will be recomputed.</p>
         collected[valueTable] = now()
 
     self.collectActualItems()
-    serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)</code></pre>
+    if DEBUG_SYNCH:
+        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(VALUE_TABLES))}&#34;&#34;&#34;)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.collectActualItems"><code class="name flex">
 <span>def <span class="ident">collectActualItems</span></span>(<span>self, tables=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Determines which items are "actual".</p>
+<div class="desc"><p>Determines which items are "actual".</p>
 <p>Actual items are those types and criteria that are specified in a
 package record that is itself actual.
 A package record is actual if the current data is between its start
@@ -3039,7 +3069,7 @@ involved in the concept of "actual", nothing will be done.</p>
 <dl>
 <dt><strong><code>tables</code></strong> :&ensp;<code>set</code> of <code>string</code>, optional <code>None</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3101,14 +3131,15 @@ involved in the concept of "actual", nothing will be done.</p>
             for tp in G(record, N.typeContribution) or []:
                 self.typeCriteria.setdefault(tp, set()).add(_id)
 
-    serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)</code></pre>
+    if DEBUG_SYNCH:
+        serverprint(f&#34;&#34;&#34;UPDATED {&#34;, &#34;.join(ACTUAL_TABLES)}&#34;&#34;&#34;)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.deleteItem"><code class="name flex">
 <span>def <span class="ident">deleteItem</span></span>(<span>self, table, eid)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete a record.</p>
+<div class="desc"><p>Delete a record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -3120,7 +3151,7 @@ involved in the concept of "actual", nothing will be done.</p>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>Whether the MongoDB operation was successful</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3154,7 +3185,7 @@ involved in the concept of "actual", nothing will be done.</p>
 <span>def <span class="ident">deleteMany</span></span>(<span>self, table, crit)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete a several records.</p>
+<div class="desc"><p>Delete a several records.</p>
 <p>Typically used to delete all detail records of another record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -3163,7 +3194,7 @@ involved in the concept of "actual", nothing will be done.</p>
 <dt><strong><code>crit</code></strong> :&ensp;<code>dict</code></dt>
 <dd>A criterion that specfifies which records must be deleted.
 Given as a dict.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3189,12 +3220,12 @@ Given as a dict.</dd>
 <span>def <span class="ident">deleteWorkflow</span></span>(<span>self, contribId)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete a workflow record.</p>
+<div class="desc"><p>Delete a workflow record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
 <dd>The id of the workflow item to be deleted.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3216,7 +3247,7 @@ Given as a dict.</dd>
 <span>def <span class="ident">dependencies</span></span>(<span>self, table, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Computes the number of dependent records of a record.</p>
+<div class="desc"><p>Computes the number of dependent records of a record.</p>
 <p>A record is dependent on another record if one of the fields of the
 dependent record contains an id of that other record.</p>
 <p>Detail records are dependent on master records.
@@ -3234,7 +3265,7 @@ dependencies.</dd>
 <dl>
 <dt><code>int</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3293,10 +3324,10 @@ dependencies.</dd>
 <span>def <span class="ident">dropWorkflow</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Drop the entire workflow table.</p>
+<div class="desc"><p>Drop the entire workflow table.</p>
 <p>This happens at startup of the server.
 All workflow information will be computed from scratch before the server starts
-serving pages.</p></section>
+serving pages.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3316,7 +3347,7 @@ serving pages.</p></section>
 <span>def <span class="ident">entries</span></span>(<span>self, table, crit={})</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get relevant records from a table as a dictionary of entries.</p>
+<div class="desc"><p>Get relevant records from a table as a dictionary of entries.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -3336,7 +3367,7 @@ that are relevant to a single contribution.</p>
 <dt><code>dict</code></dt>
 <dd>Keyed by the ids of the selected records. The records themselves
 are the values.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3376,18 +3407,18 @@ are the values.</dd>
 <span>def <span class="ident">getDetails</span></span>(<span>self, table, masterField, eids, sortKey=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch the detail records connected to one or more master records.</p>
+<div class="desc"><p>Fetch the detail records connected to one or more master records.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table from which to fetch the detail records.</dd>
 <dt><strong><code>masterField</code></strong> :&ensp;<code>string</code></dt>
 <dd>The field in the detail records that points to the master record.</dd>
-<dt><strong><code>eids</code></strong> :&ensp;<code>ObjectId</code> | <code>iterable</code> of <code>ObjectId</code></dt>
+<dt><strong><code>eids</code></strong> :&ensp;<code>ObjectId | iterable</code> of <code>ObjectId</code></dt>
 <dd>The id(s) of the master record(s).</dd>
 <dt><strong><code>sortKey</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
 <dd>A function to sort the resulting records.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3424,7 +3455,7 @@ are the values.</dd>
 <span>def <span class="ident">getItem</span></span>(<span>self, table, eid)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a single record from a table.</p>
+<div class="desc"><p>Fetch a single record from a table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -3436,7 +3467,7 @@ are the values.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3472,7 +3503,7 @@ are the values.</dd>
 <span>def <span class="ident">getList</span></span>(<span>self, table, titleSort, my=None, our=None, assign=False, review=None, selectable=None, unfinished=False, select=False, **conditions)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a list of records from a table.</p>
+<div class="desc"><p>Fetch a list of records from a table.</p>
 <p>It fetches all records of a table, but you can constrain
 what is fetched and what is returned in several ways, as specified
 by the optional arguments.</p>
@@ -3492,7 +3523,7 @@ point to the expert reviewer and the final reviewer.</p>
 <p class="admonition-title">Hint</p>
 <p><code>select</code> and <code>**conditions</code> below are used as a consequence of
 the filtering on the interface by the options <code>assessed</code> and <code>reviewed</code>.
-See also <a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit"><code>Db.makeCrit()</code></a> and <a title="control.db.Db.satisfies" href="#control.db.Db.satisfies"><code>Db.satisfies()</code></a>.</p>
+See also <code><a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit">Db.makeCrit()</a></code> and <code><a title="control.db.Db.satisfies" href="#control.db.Db.satisfies">Db.satisfies()</a></code>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -3542,13 +3573,13 @@ and typically, that user is a National Coordinator.</dd>
 <dd><strong>Task: produce a list of records filtered by custom conditions.</strong>
 If <code>select</code>, carry out filtering on the retrieved records, where
 **conditions specify the filtering
-(through <a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit"><code>Db.makeCrit()</code></a> and <a title="control.db.Db.satisfies" href="#control.db.Db.satisfies"><code>Db.satisfies()</code></a>).</dd>
+(through <code><a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit">Db.makeCrit()</a></code> and <code><a title="control.db.Db.satisfies" href="#control.db.Db.satisfies">Db.satisfies()</a></code>).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list</code></dt>
 <dd>The result is a sorted list of records.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3683,14 +3714,14 @@ If <code>select</code>, carry out filtering on the retrieved records, where
 <span>def <span class="ident">getValueIds</span></span>(<span>self, valueTable, constrain)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a set of ids from a value table.</p>
+<div class="desc"><p>Fetch a set of ids from a value table.</p>
 <p>The ids are taken from the value reocrds that satisfy a constraint.
 but with members restricted by a constraint.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table that contains the records.</dd>
-<dt><strong><code>constrain</code></strong> :&ensp;<code>2</code>-<code>tuple</code>, optional <code>None</code></dt>
+<dt><strong><code>constrain</code></strong> :&ensp;<code>2-tuple</code>, optional <code>None</code></dt>
 <dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
 Only records with that value in that field will be delivered.</dd>
 </dl>
@@ -3698,7 +3729,7 @@ Only records with that value in that field will be delivered.</dd>
 <dl>
 <dt><code>set</code> of <code>ObjectId</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3734,8 +3765,8 @@ Only records with that value in that field will be delivered.</dd>
 <span>def <span class="ident">getValueInv</span></span>(<span>self, valueTable, constrain)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a mapping from values to ids from a value table.</p>
-<p>The mapping is like the <em>valueTable</em><code>Inv</code> attribute of <a title="control.db.Db" href="#control.db.Db"><code>Db</code></a>,
+<div class="desc"><p>Fetch a mapping from values to ids from a value table.</p>
+<p>The mapping is like the <em>valueTable</em><code>Inv</code> attribute of <code><a title="control.db.Db" href="#control.db.Db">Db</a></code>,
 but with members restricted by a constraint.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
@@ -3745,7 +3776,7 @@ but with members restricted by a constraint.</p>
 <dl>
 <dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table that contains the records.</dd>
-<dt><strong><code>constrain</code></strong> :&ensp;<code>2</code>-<code>tuple</code>, optional <code>None</code></dt>
+<dt><strong><code>constrain</code></strong> :&ensp;<code>2-tuple</code>, optional <code>None</code></dt>
 <dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
 Only records with that value in that field will be delivered.</dd>
 </dl>
@@ -3753,7 +3784,7 @@ Only records with that value in that field will be delivered.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>Keyed by values, valued by ids.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3798,7 +3829,7 @@ Only records with that value in that field will be delivered.</dd>
 <span>def <span class="ident">getValueRecords</span></span>(<span>self, valueTable, constrain=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch records from a value table.</p>
+<div class="desc"><p>Fetch records from a value table.</p>
 <p>It will apply some standard and custom constraints.</p>
 <p>The standard constraints are: if the valueTable is</p>
 <ul>
@@ -3822,7 +3853,7 @@ that are linked to that criterion record are eligible.</p>
 <dl>
 <dt><strong><code>valueTable</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table from which fetch the records.</dd>
-<dt><strong><code>constrain</code></strong> :&ensp;<code>2</code>-<code>tuple</code>, optional <code>None</code></dt>
+<dt><strong><code>constrain</code></strong> :&ensp;<code>2-tuple</code>, optional <code>None</code></dt>
 <dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
 Only records with that value in that field will be delivered.</dd>
 </dl>
@@ -3830,7 +3861,7 @@ Only records with that value in that field will be delivered.</dd>
 <dl>
 <dt><code>list</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3885,7 +3916,7 @@ Only records with that value in that field will be delivered.</dd>
 <span>def <span class="ident">getWorkflowItem</span></span>(<span>self, contribId)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a single workflow record.</p>
+<div class="desc"><p>Fetch a single workflow record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
@@ -3894,8 +3925,8 @@ Only records with that value in that field will be delivered.</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>dict</code></dt>
-<dd>The record wrapped in a <a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a> object.</dd>
-</dl></section>
+<dd>The record wrapped in a <code><a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem">WorkflowItem</a></code> object.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3926,7 +3957,7 @@ Only records with that value in that field will be delivered.</dd>
 <span>def <span class="ident">insertItem</span></span>(<span>self, table, uid, eppn, onlyIfNew, **fields)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Inserts a new record in a table, possibly only if it is new.</p>
+<div class="desc"><p>Inserts a new record in a table, possibly only if it is new.</p>
 <p>The record will be filled with the specified fields, but also with
 provenance fields.</p>
 <p>The provenance fields are the creation date, the creator,
@@ -3951,7 +3982,7 @@ the DARIAH authentication service.</dd>
 <dt><code>ObjectId</code></dt>
 <dd>The id of the newly inserted record, or the id of the first existing
 record found, if <code>onlyIfNew</code> is true.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4013,7 +4044,7 @@ record found, if <code>onlyIfNew</code> is true.</dd>
 <span>def <span class="ident">insertMany</span></span>(<span>self, table, uid, eppn, records)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Insert several records at once.</p>
+<div class="desc"><p>Insert several records at once.</p>
 <p>Typically used for inserting criteriaEntry en reviewEntry records.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -4026,7 +4057,7 @@ record found, if <code>onlyIfNew</code> is true.</dd>
 the DARIAH authentication service.</dd>
 <dt><strong><code>records</code></strong> :&ensp;<code>iterable</code> of <code>dict</code></dt>
 <dd>The records (as dicts) to insert.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4066,7 +4097,7 @@ the DARIAH authentication service.</dd>
 <span>def <span class="ident">insertUser</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Insert a user record, i.e. a record corresponding to a user.</p>
+<div class="desc"><p>Insert a user record, i.e. a record corresponding to a user.</p>
 <p>NB: the creator of this record is the system, by name of the
 <code>creatorId</code> attribute.</p>
 <h2 id="parameters">Parameters</h2>
@@ -4076,9 +4107,10 @@ the DARIAH authentication service.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>ObjectId</code></dt>
-<dd>The id of the newly inserted user record.</dd>
-</dl></section>
+<dt><code>None</code></dt>
+<dd>But note that the new _id and the generated field values are added to the
+record.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4096,8 +4128,9 @@ the DARIAH authentication service.</dd>
 
     Returns
     -------
-    ObjectId
-        The id of the newly inserted user record.
+    None
+        But note that the new _id and the generated field values are added to the
+        record.
     &#34;&#34;&#34;
 
     creatorId = self.creatorId
@@ -4115,19 +4148,19 @@ the DARIAH authentication service.</dd>
     )
     result = self.mongoCmd(N.insertUser, N.user, N.insert_one, record)
     self.recollect(N.user)
-    return result.inserted_id</code></pre>
+    record[N._id] = result.inserted_id</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.insertWorkflow"><code class="name flex">
 <span>def <span class="ident">insertWorkflow</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Insert a single workflow record.</p>
+<div class="desc"><p>Insert a single workflow record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The record to be inserted, as a dict.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4148,12 +4181,12 @@ the DARIAH authentication service.</dd>
 <span>def <span class="ident">insertWorkflowMany</span></span>(<span>self, records)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Bulk insert records into the workflow table.</p>
+<div class="desc"><p>Bulk insert records into the workflow table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>records</code></strong> :&ensp;<code>iterable</code> of <code>dict</code></dt>
 <dd>The records to be inserted.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4174,7 +4207,7 @@ the DARIAH authentication service.</dd>
 <span>def <span class="ident">makeCrit</span></span>(<span>self, mainTable, conditions)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Translate conditons into a MongoDb criterion.</p>
+<div class="desc"><p>Translate conditons into a MongoDb criterion.</p>
 <p>The conditions come from the options on the interface:
 whether to constrain to items that have assessments and or reviews.</p>
 <p>The result can be fed into an other Mongo query.
@@ -4187,7 +4220,7 @@ It can also be used to filter a list of record that has already been fetched.</p
 </div>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-<p>See also <a title="control.db.Db.getList" href="#control.db.Db.getList"><code>Db.getList()</code></a>.</p>
+<p>See also <code><a title="control.db.Db.getList" href="#control.db.Db.getList">Db.getList()</a></code>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -4198,12 +4231,10 @@ It can also be used to filter a list of record that has already been fetched.</p
 and valued by -1, 0 or 1 (as strings).</dd>
 </dl>
 <h2 id="result">Result</h2>
-<dl>
-<dt><strong><code>dict</code></strong></dt>
-<dd>keyed by the same table name as <code>conditions</code> and valued by a set of
+<p>dict
+keyed by the same table name as <code>conditions</code> and valued by a set of
 mongo ids of items that satisfy the criterion.
-Only for the criteria that do care!</dd>
-</dl></section>
+Only for the criteria that do care!</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4273,9 +4304,9 @@ Only for the criteria that do care!</dd>
 <span>def <span class="ident">mongoClose</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Close connection with MongoDb.</p>
+<div class="desc"><p>Close connection with MongoDb.</p>
 <p>We need this, because before we fork the process to workers,
-all MongoDb connections should be closed.</p></section>
+all MongoDb connections should be closed.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4300,7 +4331,7 @@ all MongoDb connections should be closed.</p></section>
 <span>def <span class="ident">mongoCmd</span></span>(<span>self, label, table, command, *args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrapper around calls to MongoDb.</p>
+<div class="desc"><p>Wrapper around calls to MongoDb.</p>
 <p>All commands fired at the NongoDb go through this wrapper.
 It will spit out debug information if mongo debugging is True.</p>
 <h2 id="parameters">Parameters</h2>
@@ -4321,7 +4352,7 @@ The command must be listed in the mongo.yaml config file.</dd>
 <dl>
 <dt><code>mixed</code></dt>
 <dd>Whatever the the MongoDb returns.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4372,8 +4403,8 @@ The command must be listed in the mongo.yaml config file.</dd>
 <span>def <span class="ident">mongoOpen</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Open connection with MongoDb.</p>
-<p>Which database we open, depends on <a title="control.db.Db.regime" href="#control.db.Db.regime"><code>Db.regime</code></a> and <a title="control.db.Db.test" href="#control.db.Db.test"><code>Db.test</code></a>.</p></section>
+<div class="desc"><p>Open connection with MongoDb.</p>
+<p>Which database we open, depends on <code><a title="control.db.Db.regime" href="#control.db.Db.regime">Db.regime</a></code> and <code><a title="control.db.Db.test" href="#control.db.Db.test">Db.test</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4400,7 +4431,7 @@ The command must be listed in the mongo.yaml config file.</dd>
 <span>def <span class="ident">recollect</span></span>(<span>self, table=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Collect the contents of the value tables if they have changed.</p>
+<div class="desc"><p>Collect the contents of the value tables if they have changed.</p>
 <p>For each value table it will be checked if they have been
 collected (by another worker) after this worker has started and if so,
 those tables and those tables only will be recollected.</p>
@@ -4433,13 +4464,17 @@ something in that value table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
-<dd>A recollect() without arguments collects <em>all</em> value tables that need
+<dd>
+<p>A recollect() without arguments collects <em>all</em> value tables that need
 collecting based on the times of change as recorded in the <code>collect</code>
-table.
-A recollect of a single table means that this worker has made a change.
+table.</p>
+<p>A recollect of a single table means that this worker has made a change.
 After the recollect, a timestamp will go into the <code>collect</code> table,
-so that other workers can pick it up.</dd>
-</dl></section>
+so that other workers can pick it up.</p>
+<p>If table is <code>True</code>, all timestamps in the <code>collect</code> table will be set
+to now, so that each worker will refresh its value cache.</p>
+</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4484,9 +4519,13 @@ so that other workers can pick it up.</dd>
         A recollect() without arguments collects *all* value tables that need
         collecting based on the times of change as recorded in the `collect`
         table.
+
         A recollect of a single table means that this worker has made a change.
         After the recollect, a timestamp will go into the `collect` table,
         so that other workers can pick it up.
+
+        If table is `True`, all timestamps in the `collect` table will be set
+        to now, so that each worker will refresh its value cache.
     &#34;&#34;&#34;
 
     collected = self.collected
@@ -4505,6 +4544,12 @@ so that other workers can pick it up.</dd>
                 self.cacheValueTable(valueTable)
                 collected[valueTable] = now()
                 affected.add(valueTable)
+    elif table is True:
+        affected = set()
+        for valueTable in VALUE_TABLES:
+            self.cacheValueTable(valueTable)
+            collected[valueTable] = now()
+            affected.add(valueTable)
     else:
         self.cacheValueTable(table)
         collected[table] = now()
@@ -4524,14 +4569,15 @@ so that other workers can pick it up.</dd>
     self.collectActualItems(tables=affected)
 
     if affected:
-        serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)</code></pre>
+        if DEBUG_SYNCH:
+            serverprint(f&#34;&#34;&#34;COLLECTED {COMMA.join(sorted(affected))}&#34;&#34;&#34;)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.updateField"><code class="name flex">
 <span>def <span class="ident">updateField</span></span>(<span>self, table, eid, field, data, actor, modified, nowFields=[])</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Update a single field in a single record.</p>
+<div class="desc"><p>Update a single field in a single record.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>Whenever a field is updated in a record which has the field <code>isPristine</code>,
@@ -4563,9 +4609,9 @@ For exampe, if <code>submitted</code> is modified, the current datetime will be 
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>dict</code> | <code>boolean</code></dt>
+<dt><code>dict | boolean</code></dt>
 <dd>The updated record, if the MongoDb operation was successful, else False</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4646,14 +4692,14 @@ For exampe, if <code>submitted</code> is modified, the current datetime will be 
 <span>def <span class="ident">updateUser</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Updates user information.</p>
+<div class="desc"><p>Updates user information.</p>
 <p>When users log in, or when they are assigned an other status,
 some of their attributes will change.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The new user information as a dict.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4691,7 +4737,7 @@ some of their attributes will change.</p>
 <span>def <span class="ident">updateWorkflow</span></span>(<span>self, contribId, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Replace a workflow record by an other one.</p>
+<div class="desc"><p>Replace a workflow record by an other one.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Workflow records have an id that is identical to the id of the contribution
@@ -4703,7 +4749,7 @@ they are about.</p>
 <dd>The id of the workflow record that has to be replaced with new information.</dd>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The new record which acts as replacement.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4795,7 +4841,7 @@ they are about.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

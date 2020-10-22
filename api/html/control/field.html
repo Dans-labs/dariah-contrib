@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.field API documentation</title>
 <meta name="description" content="Fields of records of tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -676,7 +676,7 @@ class Field:
 <span>(</span><span>recordObj, field, asMaster=False, readonly=None, mayRead=None, mayEdit=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with fields.</p>
+<div class="desc"><p>Deals with fields.</p>
 <h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the record object
@@ -684,7 +684,7 @@ that spawns a field object.</p>
 <p>The value of the field will be looked up from the record and saved into the attribute
 <code>value</code>.</p>
 <p>Set the attribute <code>fieldTypeObj</code> to a suitable derived class of
-<a title="control.typ.base.TypeBase" href="typ/base.html#control.typ.base.TypeBase"><code>TypeBase</code></a>.</p>
+<code><a title="control.typ.base.TypeBase" href="typ/base.html#control.typ.base.TypeBase">TypeBase</a></code>.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Fields that point to master records are never editable in this app.</p>
@@ -711,13 +711,13 @@ passing values for them here.</p>
 <dd>See below.</dd>
 <dt><strong><code>asMaster</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>See below.</dd>
-<dt><strong><code>readonly</code></strong> :&ensp;<code>boolean</code> | <code>None</code>, optional <code>None</code></dt>
+<dt><strong><code>readonly</code></strong> :&ensp;<code>boolean |</code>None<code>, optional </code>None``</dt>
 <dd>Whether the field must be presented readonly.</dd>
-<dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean</code> | <code>None</code>, optional <code>None</code></dt>
+<dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean |</code>None<code>, optional </code>None``</dt>
 <dd>If passed, overrides the configured read permission for this field.</dd>
-<dt><strong><code>mayEdit</code></strong> :&ensp;<code>boolean</code> | <code>None</code>, optional <code>None</code></dt>
+<dt><strong><code>mayEdit</code></strong> :&ensp;<code>boolean |</code>None<code>, optional </code>None``</dt>
 <dd>If passed, overrides the configured write permission for this field.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1324,68 +1324,68 @@ passing values for them here.</p>
 <dl>
 <dt id="control.field.Field.inheritProps"><code class="name">var <span class="ident">inheritProps</span></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="control.field.Field.asMaster"><code class="name">var <span class="ident">asMaster</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether this field points to a master record.</p></section>
+<div class="desc"><p><em>boolean</em> Whether this field points to a master record.</p></div>
 </dd>
 <dt id="control.field.Field.atts"><code class="name">var <span class="ident">atts</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> Identification of this field value:
+<div class="desc"><p><em>dict</em> Identification of this field value:
 table, id of record, name of field.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>To be used to pass to buttons in widgets for this field.</p>
-</div></section>
+</div></div>
 </dd>
 <dt id="control.field.Field.extensible"><code class="name">var <span class="ident">extensible</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the user may add new values to the value table of this field.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the user may add new values to the value table of this field.</p></div>
 </dd>
 <dt id="control.field.Field.field"><code class="name">var <span class="ident">field</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The name of the field</p></section>
+<div class="desc"><p><em>string</em> The name of the field</p></div>
 </dd>
 <dt id="control.field.Field.fieldTypeObj"><code class="name">var <span class="ident">fieldTypeObj</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The type object by which the value of this field can be interpreted.</p></section>
+<div class="desc"><p><em>object</em> The type object by which the value of this field can be interpreted.</p></div>
 </dd>
 <dt id="control.field.Field.label"><code class="name">var <span class="ident">label</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> A label to display in front of the field.</p></section>
+<div class="desc"><p><em>string</em> A label to display in front of the field.</p></div>
 </dd>
 <dt id="control.field.Field.multiple"><code class="name">var <span class="ident">multiple</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the field value consists of multiple values or a single one.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the field value consists of multiple values or a single one.</p></div>
 </dd>
 <dt id="control.field.Field.recordObj"><code class="name">var <span class="ident">recordObj</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> A <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> object (or one of a derived class)</p></section>
+<div class="desc"><p><em>object</em> A <code><a title="control.record.Record" href="record.html#control.record.Record">Record</a></code> object (or one of a derived class)</p></div>
 </dd>
 <dt id="control.field.Field.require"><code class="name">var <span class="ident">require</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> The required permissions for this field.</p>
-<p>Keys are <code>read</code> and <code>edit</code>, the values are <code>True</code> or <code>False</code>.</p></section>
+<div class="desc"><p><em>dict</em> The required permissions for this field.</p>
+<p>Keys are <code>read</code> and <code>edit</code>, the values are <code>True</code> or <code>False</code>.</p></div>
 </dd>
 <dt id="control.field.Field.tp"><code class="name">var <span class="ident">tp</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The data type of the field.</p></section>
+<div class="desc"><p><em>string</em> The data type of the field.</p></div>
 </dd>
 <dt id="control.field.Field.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
-<section class="desc"><p><em>mixed</em> The value of the field.</p></section>
+<div class="desc"><p><em>mixed</em> The value of the field.</p></div>
 </dd>
 <dt id="control.field.Field.widgetType"><code class="name">var <span class="ident">widgetType</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The type of widget for presenting an edit view on this field.</p></section>
+<div class="desc"><p><em>string</em> The type of widget for presenting an edit view on this field.</p></div>
 </dd>
 <dt id="control.field.Field.withNow"><code class="name">var <span class="ident">withNow</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> Which field updates need a timestamp?</p>
+<div class="desc"><p><em>dict</em> Which field updates need a timestamp?</p>
 <p>The info comes from tables.yaml, under key <code>withNow</code>.
 It is keyed by table name, then by
 field name, and the value
@@ -1401,11 +1401,11 @@ sets the field to <code>True</code> and the second one when the field becomes <c
 a
 timestamp. When <code>submitted</code> becomes <code>False</code>, it is <code>dateWithdrawn</code> that
 receives the timestamp.</p>
-</div></section>
+</div></div>
 </dd>
 <dt id="control.field.Field.withRefresh"><code class="name">var <span class="ident">withRefresh</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the field needs a refresh button.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the field needs a refresh button.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1414,7 +1414,7 @@ receives the timestamp.</p>
 <span>def <span class="ident">isBlank</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Whether the value(s) is/are blank.</p>
+<div class="desc"><p>Whether the value(s) is/are blank.</p>
 <p>A single value is empty if it is <code>None</code> or <code>''</code>.</p>
 <p>A mutliple value is empty if it is <code>None</code> or <code>[]</code>, or all its
 component values are blank.</p>
@@ -1422,7 +1422,7 @@ component values are blank.</p>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1454,14 +1454,14 @@ component values are blank.</p>
 <span>def <span class="ident">isEmpty</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Whether the value(s) is/are empty.</p>
+<div class="desc"><p>Whether the value(s) is/are empty.</p>
 <p>A single value is empty if it is <code>None</code>.</p>
 <p>A mutliple value is empty if it is <code>None</code> or <code>[]</code>.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1487,7 +1487,7 @@ component values are blank.</p>
 <span>def <span class="ident">save</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Save a new value for this field to MongoDb.</p>
+<div class="desc"><p>Save a new value for this field to MongoDb.</p>
 <p>Before saving, permissions and workflow conditions will be checked.</p>
 <p>After saving, workflow information will be adjusted.</p>
 <div class="admonition caution">
@@ -1502,7 +1502,7 @@ the same value should be put in the detail records, the
 <dd>The new value(s) for this field.
 It comes straight from the client, and will be converted to proper
 Python/MongoDb values</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1623,9 +1623,9 @@ Python/MongoDb values</dd>
 <span>def <span class="ident">wrap</span></span>(<span>self, action=None, asEdit=False, empty=False, withLabel=True, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap the field into HTML.</p>
+<div class="desc"><p>Wrap the field into HTML.</p>
 <p>If there is an <code>action</code>, data from the request is picked up and
-<a title="control.field.Field.save" href="#control.field.Field.save"><code>Field.save()</code></a> is called to save that data to the MongoDB.
+<code><a title="control.field.Field.save" href="#control.field.Field.save">Field.save()</a></code> is called to save that data to the MongoDB.
 Depending on the <code>action</code>, the field is then rendered as follows:</p>
 <table>
 <thead>
@@ -1674,7 +1674,7 @@ Depending on the <code>action</code>, the field is then rendered as follows:</p>
 </table>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>action</code></strong> :&ensp;{<code>save</code>, <code>edit</code>, <code>view</code>}, optional <code>None</code></dt>
+<dt><strong><code>action</code></strong> :&ensp;<code>{save, edit, view}</code>, optional <code>None</code></dt>
 <dd>If present, data will be saved to the database first.</dd>
 <dt><strong><code>asEdit</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>No data will be saved.
@@ -1691,10 +1691,10 @@ file in <code>control/tables</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>If there was an <code>action</code>, the bare representation of the field value is returned.
 Otherwise, and if <code>withLabel</code>, a label is added.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1797,15 +1797,15 @@ Otherwise, and if <code>withLabel</code>, a label is added.</dd>
 <span>def <span class="ident">wrapBare</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Produce the bare field value.</p>
+<div class="desc"><p>Produce the bare field value.</p>
 <p>This is the result of calling the
-<a title="control.typ.base.TypeBase.toDisplay" href="typ/base.html#control.typ.base.TypeBase.toDisplay"><code>TypeBase.toDisplay()</code></a> method on the derived
+<code><a title="control.typ.base.TypeBase.toDisplay" href="typ/base.html#control.typ.base.TypeBase.toDisplay">TypeBase.toDisplay()</a></code> method on the derived
 type class that matches the type of the field.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1842,7 +1842,7 @@ type class that matches the type of the field.</p>
 <span>def <span class="ident">wrapValue</span></span>(<span>self, editable, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wraps the value of a field.</p>
+<div class="desc"><p>Wraps the value of a field.</p>
 <div class="admonition hint">
 <p class="admonition-title">field=value in comments</p>
 <p>In the result we include a string</p>
@@ -1859,13 +1859,13 @@ to spot the fields and their values.</p>
 <dt><strong><code>editable</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether the field should be presented in editable form</dd>
 <dt><strong><code>cls</code></strong></dt>
-<dd>See <a title="control.field.Field.wrap" href="#control.field.Field.wrap"><code>Field.wrap()</code></a></dd>
+<dd>See <code><a title="control.field.Field.wrap" href="#control.field.Field.wrap">Field.wrap()</a></code></dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1965,7 +1965,7 @@ to spot the fields and their values.</p>
 <span>def <span class="ident">wrapWidget</span></span>(<span>self, editable, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap the field value.</p>
+<div class="desc"><p>Wrap the field value.</p>
 <p>A widget shows the value and may have additional controls to</p>
 <ul>
 <li>edit the value</li>
@@ -2002,16 +2002,16 @@ These fields will get a refresh button automatically.</p>
 <dt><strong><code>editable</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether the field should be presented in editable form</dd>
 <dt><strong><code>cls</code></strong></dt>
-<dd>See <a title="control.field.Field.wrap" href="#control.field.Field.wrap"><code>Field.wrap()</code></a></dd>
+<dd>See <code><a title="control.field.Field.wrap" href="#control.field.Field.wrap">Field.wrap()</a></code></dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>button</code></strong> :&ensp;<code>string</code>(<code>html</code>)</dt>
+<dt><strong><code>button</code></strong> :&ensp;<code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>representation</code></strong> :&ensp;<code>string</code>(<code>html</code>)</dt>
+<dt><strong><code>representation</code></strong> :&ensp;<code>string(html)</code></dt>
 <dd>&nbsp;</dd>
 </dl>
-<p>They are packaged as a tuple.</p></section>
+<p>They are packaged as a tuple.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2123,7 +2123,7 @@ These fields will get a refresh button automatically.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

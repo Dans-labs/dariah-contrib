@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>conftest API documentation</title>
 <meta name="description" content="Set up testing the Contribution tool …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -106,19 +106,19 @@ For example: <strong>assigning</strong> reviewers to an assessment.</p>
 </div>
 <h2 id="auxiliary">Auxiliary</h2>
 <dl>
-<dt><a title="client" href="client.html"><code>client</code></a></dt>
-<dd>Wrap the Flask test-<a title="client" href="client.html"><code>client</code></a> in something more capable.</dd>
-<dt><a title="clean" href="clean.html"><code>clean</code></a></dt>
+<dt><code><a title="client" href="client.html">client</a></code></dt>
+<dd>Wrap the Flask test-<code><a title="client" href="client.html">client</a></code> in something more capable.</dd>
+<dt><code><a title="clean" href="clean.html">clean</a></code></dt>
 <dd>Provides a clean slate test database.</dd>
-<dt><a title="starters" href="starters.html"><code>starters</code></a></dt>
+<dt><code><a title="starters" href="starters.html">starters</a></code></dt>
 <dd>Provide test functions with a well-defined initial state.</dd>
-<dt><a title="helpers" href="helpers.html"><code>helpers</code></a></dt>
+<dt><code><a title="helpers" href="helpers.html">helpers</a></code></dt>
 <dd>Low-level library functions for testers.</dd>
-<dt><a title="subtest" href="subtest.html"><code>subtest</code></a></dt>
+<dt><code><a title="subtest" href="subtest.html">subtest</a></code></dt>
 <dd>Higher-level <code>assert</code> functions.</dd>
-<dt><a title="example" href="example.html"><code>example</code></a></dt>
+<dt><code><a title="example" href="example.html">example</a></code></dt>
 <dd>Concrete example values for testers to work with.</dd>
-<dt><a title="analysis" href="analysis.html"><code>analysis</code></a></dt>
+<dt><code><a title="analysis" href="analysis.html">analysis</a></code></dt>
 <dd>Interpret the request log after testing.</dd>
 </dl>
 <h2 id="test-batches">Test batches</h2>
@@ -126,45 +126,45 @@ For example: <strong>assigning</strong> reviewers to an assessment.</p>
 in alphabetical order of the file names.</p>
 <h3 id="tests-app">Tests: app</h3>
 <dl>
-<dt><a title="test_00_app10" href="test_00_app10.html"><code>test_00_app10</code></a></dt>
+<dt><code><a title="test_00_app10" href="test_00_app10.html">test_00_app10</a></code></dt>
 <dd>Checking the app urls and weird deviations from them.</dd>
 </dl>
 <h3 id="tests-setup">Tests: setup</h3>
 <dl>
-<dt><a title="test_10_factory10" href="test_10_factory10.html"><code>test_10_factory10</code></a></dt>
+<dt><code><a title="test_10_factory10" href="test_10_factory10.html">test_10_factory10</a></code></dt>
 <dd>How the app is set up.</dd>
-<dt><a title="test_20_users10" href="test_20_users10.html"><code>test_20_users10</code></a></dt>
+<dt><code><a title="test_20_users10" href="test_20_users10.html">test_20_users10</a></code></dt>
 <dd>Getting to know all users.</dd>
 </dl>
 <h3 id="tests-contributions">Tests: Contributions</h3>
 <dl>
-<dt><a title="test_30_contrib10" href="test_30_contrib10.html"><code>test_30_contrib10</code></a></dt>
+<dt><code><a title="test_30_contrib10" href="test_30_contrib10.html">test_30_contrib10</a></code></dt>
 <dd>Getting started with contributions.</dd>
-<dt><a title="test_30_contrib20" href="test_30_contrib20.html"><code>test_30_contrib20</code></a></dt>
+<dt><code><a title="test_30_contrib20" href="test_30_contrib20.html">test_30_contrib20</a></code></dt>
 <dd>Modifying contribution fields that are typed in by the user.</dd>
-<dt><a title="test_30_contrib30" href="test_30_contrib30.html"><code>test_30_contrib30</code></a></dt>
+<dt><code><a title="test_30_contrib30" href="test_30_contrib30.html">test_30_contrib30</a></code></dt>
 <dd>Modifying contribution fields that have values in value tables.</dd>
-<dt><a title="test_30_contrib40" href="test_30_contrib40.html"><code>test_30_contrib40</code></a></dt>
+<dt><code><a title="test_30_contrib40" href="test_30_contrib40.html">test_30_contrib40</a></code></dt>
 <dd>Checking the visibility of sensitive fields.</dd>
-<dt><a title="test_30_contrib50" href="test_30_contrib50.html"><code>test_30_contrib50</code></a></dt>
+<dt><code><a title="test_30_contrib50" href="test_30_contrib50.html">test_30_contrib50</a></code></dt>
 <dd>Selecting contributions.</dd>
 </dl>
 <h3 id="tests-assessments">Tests: assessments</h3>
 <dl>
-<dt><a title="test_40_assess10" href="test_40_assess10.html"><code>test_40_assess10</code></a></dt>
+<dt><code><a title="test_40_assess10" href="test_40_assess10.html">test_40_assess10</a></code></dt>
 <dd>Starting an assessment.</dd>
-<dt><a title="test_40_assess20" href="test_40_assess20.html"><code>test_40_assess20</code></a></dt>
+<dt><code><a title="test_40_assess20" href="test_40_assess20.html">test_40_assess20</a></code></dt>
 <dd>Starting a second assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code><a title="test_40_assess30" href="test_40_assess30.html">test_40_assess30</a></code></dt>
 <dd>Filling out an assessment.</dd>
-<dt><a title="test_40_assess30" href="test_40_assess30.html"><code>test_40_assess30</code></a></dt>
+<dt><code><a title="test_40_assess30" href="test_40_assess30.html">test_40_assess30</a></code></dt>
 <dd>Assigning reviewers.</dd>
 </dl>
 <h3 id="tests-reviews-filling-out-and-deciding">Tests: Reviews: filling out and deciding.</h3>
 <dl>
-<dt><a title="test_50_review10" href="test_50_review10.html"><code>test_50_review10</code></a></dt>
+<dt><code><a title="test_50_review10" href="test_50_review10.html">test_50_review10</a></code></dt>
 <dd>Starting reviews and filling them out.</dd>
-<dt><a title="test_50_review20" href="test_50_review20.html"><code>test_50_review20</code></a></dt>
+<dt><code><a title="test_50_review20" href="test_50_review20.html">test_50_review20</a></code></dt>
 <dd>Checking visibility of reviews and making review decisions.
 Revising, resubmitting assessments and take a new review decision.</dd>
 </dl>
@@ -479,25 +479,25 @@ def clientRoot(app):
 <dl>
 <dt id="conftest.NAMED_USERS"><code class="name">var <span class="ident">NAMED_USERS</span></code></dt>
 <dd>
-<section class="desc"><p>All authenticated users.</p></section>
+<div class="desc"><p>All authenticated users.</p></div>
 </dd>
 <dt id="conftest.POWER_USERS"><code class="name">var <span class="ident">POWER_USERS</span></code></dt>
 <dd>
-<section class="desc"><p>The power users.</p></section>
+<div class="desc"><p>The power users.</p></div>
 </dd>
 <dt id="conftest.RIGHTFUL_USERS"><code class="name">var <span class="ident">RIGHTFUL_USERS</span></code></dt>
 <dd>
-<section class="desc"><p>The users that have normally access to an item.</p></section>
+<div class="desc"><p>The users that have normally access to an item.</p></div>
 </dd>
 <dt id="conftest.USER_LIST"><code class="name">var <span class="ident">USER_LIST</span></code></dt>
 <dd>
-<section class="desc"><p>The <code>eppn</code> attribute of all relevant test users in this suite.</p>
+<div class="desc"><p>The <code>eppn</code> attribute of all relevant test users in this suite.</p>
 <p>See the table above.</p>
-<p>Here we make fixtures <a title="conftest.clientAuth" href="#conftest.clientAuth"><code>clientAuth()</code></a>, <a title="conftest.clientOwner" href="#conftest.clientOwner"><code>clientOwner()</code></a> etc. for each of them.
+<p>Here we make fixtures <code><a title="conftest.clientAuth" href="#conftest.clientAuth">clientAuth()</a></code>, <code><a title="conftest.clientOwner" href="#conftest.clientOwner">clientOwner()</a></code> etc. for each of them.
 These client fixtures represent a web client with the corresponding user logged in,
 ready to interact with the server (in development mode).</p>
-<p>There is also a fixture <a title="conftest.clientPublic" href="#conftest.clientPublic"><code>clientPublic()</code></a> for the non-authenticated user.</p>
-<p>Finally, there is a fixture <a title="conftest.clients" href="#conftest.clients"><code>clients()</code></a> that contains fixtures for all the users.</p></section>
+<p>There is also a fixture <code><a title="conftest.clientPublic" href="#conftest.clientPublic">clientPublic()</a></code> for the non-authenticated user.</p>
+<p>Finally, there is a fixture <code><a title="conftest.clients" href="#conftest.clients">clients()</a></code> that contains fixtures for all the users.</p></div>
 </dd>
 </dl>
 </section>
@@ -508,11 +508,11 @@ ready to interact with the server (in development mode).</p>
 <span>def <span class="ident">app</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Normal app for testing: development mode, test mode.</p>
+<div class="desc"><p>Normal app for testing: development mode, test mode.</p>
 <p>There is no difference between production and development,
 except for the existence of test users in development mode.
 So most tests are done in development mode, with the test users.</p>
-<p>Only a few tests are in production mode, see below.</p></section>
+<p>Only a few tests are in production mode, see below.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -535,7 +535,7 @@ def app():
 <span>def <span class="ident">clientAuth</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -549,7 +549,7 @@ def clientAuth(app):
 <span>def <span class="ident">clientCoord</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -563,7 +563,7 @@ def clientCoord(app):
 <span>def <span class="ident">clientEditor</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -577,7 +577,7 @@ def clientEditor(app):
 <span>def <span class="ident">clientExpert</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -591,7 +591,7 @@ def clientExpert(app):
 <span>def <span class="ident">clientFinal</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -605,7 +605,7 @@ def clientFinal(app):
 <span>def <span class="ident">clientMycoord</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -619,7 +619,7 @@ def clientMycoord(app):
 <span>def <span class="ident">clientOffice</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -633,7 +633,7 @@ def clientOffice(app):
 <span>def <span class="ident">clientOwner</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -647,7 +647,7 @@ def clientOwner(app):
 <span>def <span class="ident">clientPublic</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -661,7 +661,7 @@ def clientPublic(app):
 <span>def <span class="ident">clientRoot</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -675,7 +675,7 @@ def clientRoot(app):
 <span>def <span class="ident">clientSystem</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -689,10 +689,10 @@ def clientSystem(app):
 <span>def <span class="ident">clients</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A dictionary of client fixtures for each user.</p>
+<div class="desc"><p>A dictionary of client fixtures for each user.</p>
 <p>Keyed by user (eppn), the values are corresponding client fixtures.</p>
 <p>This comes in handy to pass to tests that want to perform the same
-action on behalf of the different users.</p></section>
+action on behalf of the different users.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -714,8 +714,8 @@ def clients(app):
 <span>def <span class="ident">clientsMy</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A dictionary of client fixtures for the owner/editor users.</p>
-<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></section>
+<div class="desc"><p>A dictionary of client fixtures for the owner/editor users.</p>
+<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -734,8 +734,8 @@ def clientsMy(app):
 <span>def <span class="ident">clientsNamed</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A dictionary of client fixtures for all authenticated users.</p>
-<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></section>
+<div class="desc"><p>A dictionary of client fixtures for all authenticated users.</p>
+<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -754,8 +754,8 @@ def clientsNamed(app):
 <span>def <span class="ident">clientsPower</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A dictionary of client fixtures for the power users.</p>
-<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></section>
+<div class="desc"><p>A dictionary of client fixtures for the power users.</p>
+<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -774,8 +774,8 @@ def clientsPower(app):
 <span>def <span class="ident">clientsReviewer</span></span>(<span>app)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A dictionary of client fixtures for the reviewer users.</p>
-<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></section>
+<div class="desc"><p>A dictionary of client fixtures for the reviewer users.</p>
+<p>Keyed by user (eppn), the values are corresponding client fixtures.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -794,7 +794,7 @@ def clientsReviewer(app):
 <span>def <span class="ident">db</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -860,7 +860,7 @@ def db():
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

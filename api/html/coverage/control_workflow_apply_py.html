@@ -21,8 +21,8 @@
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
-            302 statements &nbsp;
-            <span class="run shortkey_r button_toggle_run">286 run</span>
+            303 statements &nbsp;
+            <span class="run shortkey_r button_toggle_run">287 run</span>
             <span class="mis show_mis shortkey_m button_toggle_mis">16 missing</span>
             <span class="exc show_exc shortkey_x button_toggle_exc">0 excluded</span>
                 <span class="par run show_par shortkey_p button_toggle_par">19 partial</span>
@@ -885,11 +885,11 @@
     <p id="t831" class="pln"><span class="n"><a href="#t831">831</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">statusOverview</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">kind</span><span class="op">=</span><span class="nam">kind</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t832" class="pln"><span class="n"><a href="#t832">832</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">tasks</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">kind</span><span class="op">=</span><span class="nam">kind</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t833" class="pln"><span class="n"><a href="#t833">833</a></span><span class="t">            <span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t834" class="pln"><span class="n"><a href="#t834">834</a></span><span class="t">            <span class="nam">cls</span><span class="op">=</span><span class="str">f"workflow"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t834" class="pln"><span class="n"><a href="#t834">834</a></span><span class="t">            <span class="nam">cls</span><span class="op">=</span><span class="str">"workflow"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t835" class="pln"><span class="n"><a href="#t835">835</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t836" class="pln"><span class="n"><a href="#t836">836</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t837" class="run"><span class="n"><a href="#t837">837</a></span><span class="t">    <span class="op">@</span><span class="nam">staticmethod</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t838" class="pln"><span class="n"><a href="#t838">838</a></span><span class="t">    <span class="key">def</span> <span class="nam">isTask</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">field</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t838" class="run"><span class="n"><a href="#t838">838</a></span><span class="t">    <span class="key">def</span> <span class="nam">isTask</span><span class="op">(</span><span class="nam">table</span><span class="op">,</span> <span class="nam">field</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t839" class="pln"><span class="n"><a href="#t839">839</a></span><span class="t">        <span class="str">"""Whether a field in a record is involved in a workflow task.</span>&nbsp;</span><span class="r"></span></p>
     <p id="t840" class="pln"><span class="n"><a href="#t840">840</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t841" class="pln"><span class="n"><a href="#t841">841</a></span><span class="t"><span class="str">        Fields that are involved in workflow tasks can not be read or edited</span>&nbsp;</span><span class="r"></span></p>
@@ -1026,7 +1026,7 @@
     <p id="t972" class="pln"><span class="n"><a href="#t972">972</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t973" class="run"><span class="n"><a href="#t973">973</a></span><span class="t">        <span class="nam">frozenCls</span> <span class="op">=</span> <span class="nam">N</span><span class="op">.</span><span class="nam">frozen</span> <span class="key">if</span> <span class="nam">frozen</span> <span class="key">else</span> <span class="nam">E</span>&nbsp;</span><span class="r"></span></p>
     <p id="t974" class="run"><span class="n"><a href="#t974">974</a></span><span class="t">        <span class="nam">frozenMsg</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t975" class="pln"><span class="n"><a href="#t975">975</a></span><span class="t">            <span class="nam">H</span><span class="op">.</span><span class="nam">span</span><span class="op">(</span><span class="nam">G</span><span class="op">(</span><span class="nam">STATUS_REP</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">frozen</span><span class="op">)</span><span class="op">,</span> <span class="nam">cls</span><span class="op">=</span><span class="str">f"large status info"</span><span class="op">)</span> <span class="key">if</span> <span class="nam">frozen</span> <span class="key">else</span> <span class="nam">E</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t975" class="pln"><span class="n"><a href="#t975">975</a></span><span class="t">            <span class="nam">H</span><span class="op">.</span><span class="nam">span</span><span class="op">(</span><span class="nam">G</span><span class="op">(</span><span class="nam">STATUS_REP</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">frozen</span><span class="op">)</span><span class="op">,</span> <span class="nam">cls</span><span class="op">=</span><span class="str">"large status info"</span><span class="op">)</span> <span class="key">if</span> <span class="nam">frozen</span> <span class="key">else</span> <span class="nam">E</span>&nbsp;</span><span class="r"></span></p>
     <p id="t976" class="pln"><span class="n"><a href="#t976">976</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t977" class="pln"><span class="n"><a href="#t977">977</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t978" class="run"><span class="n"><a href="#t978">978</a></span><span class="t">        <span class="nam">statusRep</span> <span class="op">=</span> <span class="str">f"&lt;!-- stage:{stage} -->"</span> <span class="op">+</span> <span class="nam">H</span><span class="op">.</span><span class="nam">div</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -1170,8 +1170,8 @@
 <div id="footer">
     <div class="content">
         <p>
-            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.0.4</a>,
-            created at 2020-05-19 17:18
+            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.1</a>,
+            created at 2020-07-06 16:10
         </p>
     </div>
 </div>

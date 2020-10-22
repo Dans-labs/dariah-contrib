@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>helpers API documentation</title>
 <meta name="description" content="Helpers to factor our massively redundant test code." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -626,7 +626,7 @@ def viewField(client, table, eid, field):
 <span>def <span class="ident">accessUrl</span></span>(<span>client, url, redirect=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the response on accessing a url.</p></section>
+<div class="desc"><p>Get the response on accessing a url.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -645,8 +645,8 @@ def viewField(client, table, eid, field):
 <span>def <span class="ident">checkWarning</span></span>(<span>text, label)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Whether there is a warned item with <code>label</code>.</p>
-<p>See <a title="helpers.reWarning" href="#helpers.reWarning"><code>reWarning()</code></a>.</p></section>
+<div class="desc"><p>Whether there is a warned item with <code>label</code>.</p>
+<p>See <code><a title="helpers.reWarning" href="#helpers.reWarning">reWarning()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -664,7 +664,7 @@ def viewField(client, table, eid, field):
 <span>def <span class="ident">findCaptions</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the captions from a response.</p>
+<div class="desc"><p>Get the captions from a response.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>They are neatly packaged in comment lines!</p>
@@ -678,7 +678,7 @@ def viewField(client, table, eid, field):
 <dl>
 <dt><code>list</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -706,7 +706,7 @@ def viewField(client, table, eid, field):
 <span>def <span class="ident">findDetails</span></span>(<span>text, dtable)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the details from a response, but only those in a specific table.</p>
+<div class="desc"><p>Get the details from a response, but only those in a specific table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
@@ -716,7 +716,7 @@ def viewField(client, table, eid, field):
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>list</code> of <code>tuple</code> of (<code>string</code>(<code>id</code>), <code>string</code>(<code>html</code>))</dt>
+<dt><code>list</code> of <code>tuple</code> of <code>(string(id), string(html))</code></dt>
 <dd>
 <p>The HTML for the details, chunked per detail record.
 Each chunk consists of the following parts:</p>
@@ -725,7 +725,7 @@ Each chunk consists of the following parts:</p>
 <li>the piece of HTML representing the title of the detail.</li>
 </ul>
 </dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -760,7 +760,7 @@ Each chunk consists of the following parts:</p>
 <span>def <span class="ident">findEid</span></span>(<span>text, multiple=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the entity id(s) from a response.</p>
+<div class="desc"><p>Get the entity id(s) from a response.</p>
 <p>If the response shows one or more records, dig out its entity id(s).</p>
 <p>Otherwise, return <code>None</code></p>
 <h2 id="parameters">Parameters</h2>
@@ -771,7 +771,7 @@ Each chunk consists of the following parts:</p>
 <dd>Whether we should return the list of all found ids or only the last one.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>list of string(ObjectId) | string(ObjectId) | <code>None</code></p></section>
+<p>list of string(ObjectId) | string(ObjectId) | <code>None</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -803,7 +803,7 @@ Each chunk consists of the following parts:</p>
 <span>def <span class="ident">findFields</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the fields from a response.</p>
+<div class="desc"><p>Get the fields from a response.</p>
 <p>If the response shows a record, dig out its fields and values.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -818,7 +818,7 @@ Each chunk consists of the following parts:</p>
 <dl>
 <dt><code>dict</code></dt>
 <dd>Keyed by field names, valued by field values.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -849,7 +849,7 @@ Each chunk consists of the following parts:</p>
 <span>def <span class="ident">findMainN</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the number of main records from a response.</p>
+<div class="desc"><p>Get the number of main records from a response.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>They are neatly packaged in comment lines!</p>
@@ -863,7 +863,7 @@ Each chunk consists of the following parts:</p>
 <dl>
 <dt><code>list</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -891,7 +891,7 @@ Each chunk consists of the following parts:</p>
 <span>def <span class="ident">findMsg</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get flashed messages from a response.</p>
+<div class="desc"><p>Get flashed messages from a response.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
@@ -901,7 +901,7 @@ Each chunk consists of the following parts:</p>
 <dl>
 <dt><code>set</code></dt>
 <dd>All text messages found in the flash bar.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -927,7 +927,7 @@ Each chunk consists of the following parts:</p>
 <span>def <span class="ident">findReviewEntries</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get review entries from a criteria entry record.</p>
+<div class="desc"><p>Get review entries from a criteria entry record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>text</code></strong> :&ensp;<code>string</code></dt>
@@ -938,7 +938,7 @@ Each chunk consists of the following parts:</p>
 <dt><code>dict</code></dt>
 <dd>Keyed by <code>expert</code> or <code>final</code>. The values are the review comments of that
 reviewer on this criteria entry.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -974,7 +974,7 @@ reviewer on this criteria entry.</dd>
 <span>def <span class="ident">findStages</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the workflow stages from a response.</p>
+<div class="desc"><p>Get the workflow stages from a response.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>They are neatly packaged in comment lines!</p>
@@ -988,7 +988,7 @@ reviewer on this criteria entry.</dd>
 <dl>
 <dt><code>list</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1016,7 +1016,7 @@ reviewer on this criteria entry.</dd>
 <span>def <span class="ident">findTasks</span></span>(<span>text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the workflow tasks from a response.</p>
+<div class="desc"><p>Get the workflow tasks from a response.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>They are neatly packaged in comment lines!</p>
@@ -1030,7 +1030,7 @@ reviewer on this criteria entry.</dd>
 <dl>
 <dt><code>list</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1058,7 +1058,7 @@ reviewer on this criteria entry.</dd>
 <span>def <span class="ident">findValues</span></span>(<span>table, text)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the values from the response of a list view on that table.</p>
+<div class="desc"><p>Get the values from the response of a list view on that table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -1070,7 +1070,7 @@ reviewer on this criteria entry.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>keyed by the titles of the records and valued by their ids.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1097,19 +1097,19 @@ reviewer on this criteria entry.</dd>
 <span>def <span class="ident">forall</span></span>(<span>cls, expect, assertFunc, *args)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Executes an assert function for a subset of all clients.</p>
+<div class="desc"><p>Executes an assert function for a subset of all clients.</p>
 <p>The subset is determined by <code>expect</code>, which holds expected outcomes
 for the clients.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>cls</code></strong> :&ensp;<code>fixture</code></dt>
-<dd>Contains a dict of all clients: <a title="conftest.clients" href="conftest.html#conftest.clients"><code>clients()</code></a></dd>
+<dd>Contains a dict of all clients: <code><a title="conftest.clients" href="conftest.html#conftest.clients">clients()</a></code></dd>
 <dt><strong><code>assertFunc</code></strong> :&ensp;<code>function</code></dt>
 <dd>The function to be applied for each client.
 It will be passed all the <code>args</code> and a relevant part of <code>expect</code></dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Keyed by user (eppn), contains the expected value for that user.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1143,7 +1143,7 @@ It will be passed all the <code>args</code> and a relevant part of <code>expect<
 <span>def <span class="ident">getEid</span></span>(<span>client, table, multiple=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Gets the id(s) of the records(s) in the mylist view.</p>
+<div class="desc"><p>Gets the id(s) of the records(s) in the mylist view.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Not all tables have a <code>mylist</code> view. Only contributions, assessments
@@ -1155,7 +1155,7 @@ and reviews.</p>
 <dd>&nbsp;</dd>
 <dt><strong><code>multiple</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether we should return the list of all found ids or only the last one.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1183,15 +1183,15 @@ and reviews.</p>
 <span>def <span class="ident">getItem</span></span>(<span>client, table, eid)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Looks up an item directly.</p>
+<div class="desc"><p>Looks up an item directly.</p>
 <p>The response texts will be analysed into messages and fields</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -1202,7 +1202,7 @@ and reviews.</p>
 <dd>All fields and their values</dd>
 <dt><strong><code>msgs</code></strong> :&ensp;<code>list</code></dt>
 <dd>All entries that have been flashed (and arrived in the flash bar)</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1240,8 +1240,8 @@ and reviews.</p>
 <span>def <span class="ident">getRelatedValues</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get an editable view on a field that represents a related value.""</p>
-<p>We check the contents.</p></section>
+<div class="desc"><p>Get an editable view on a field that represents a related value.""</p>
+<p>We check the contents.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1265,17 +1265,17 @@ and reviews.</p>
 <span>def <span class="ident">getReviewEntryId</span></span>(<span>clients, cId, rEId, rFId)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the review entries associated with a criteria entry.</p>
+<div class="desc"><p>Get the review entries associated with a criteria entry.</p>
 <p>We use a MongoDB query to get the corresponding review entries.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Keyed by user eppns, values by the corresponding client fixtures</dd>
-<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>cId</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of the criteria entry in question</dd>
-<dt><strong><code>rEId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>rEId</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of the expert review</dd>
-<dt><strong><code>rFId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>rFId</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of the final review</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -1283,7 +1283,7 @@ and reviews.</p>
 <dt><code>dict</code></dt>
 <dd>Keyed by reviewer (<code>expert</code> or <code>final</code>), the values are the ids of the
 corresponding review entries.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1330,10 +1330,10 @@ corresponding review entries.</dd>
 <span>def <span class="ident">getScores</span></span>(<span>cId)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get relevant scores directly from Mongo DB.</p>
+<div class="desc"><p>Get relevant scores directly from Mongo DB.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>cId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>cId</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of a criteria entry record whose set of possible scores we
 want to retrieve.</dd>
 </dl>
@@ -1341,7 +1341,7 @@ want to retrieve.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>Keyed by the title of the score, values are their ids.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1379,7 +1379,7 @@ want to retrieve.</dd>
 <span>def <span class="ident">modifyField</span></span>(<span>client, table, eid, field, newValue)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Post data to update a field and analyse the response for the effect.</p></section>
+<div class="desc"><p>Post data to update a field and analyse the response for the effect.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1397,12 +1397,12 @@ want to retrieve.</dd>
 <span>def <span class="ident">postJson</span></span>(<span>client, url, value)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Post data to a url and retrieve the response text.</p>
+<div class="desc"><p>Post data to a url and retrieve the response text.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>function</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>string(url)</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>value</code></strong> :&ensp;<code>mixed</code></dt>
 <dd>The value to post.
@@ -1412,7 +1412,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>The response text</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1446,12 +1446,12 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">reDetail</span></span>(<span>dtable)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Given a detail table name, return a <code>re</code> that looks for the detail records.</p>
+<div class="desc"><p>Given a detail table name, return a <code>re</code> that looks for the detail records.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>dtable</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1476,14 +1476,14 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">reEditField</span></span>(<span>eid, field)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Given a field name, return a <code>re</code> that looks for the value of that field.</p>
+<div class="desc"><p>Given a field name, return a <code>re</code> that looks for the value of that field.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of the record whose field data we are searching</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1514,14 +1514,14 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">reValueList</span></span>(<span>table)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Given a table name, return a <code>re</code> that finds pairs of id and title strings.</p>
+<div class="desc"><p>Given a table name, return a <code>re</code> that finds pairs of id and title strings.</p>
 <p>The text is a list display of value records, and we peel the ids from the
 <code>&lt;detail&gt;</code> elements and the titles from the <code>&lt;summary&gt;</code> within them.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1547,13 +1547,13 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">reWarning</span></span>(<span>label)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Given a label, return a <code>re</code> that looks for warned items with that label.</p>
+<div class="desc"><p>Given a label, return a <code>re</code> that looks for warned items with that label.</p>
 <p>A warned item is an item with a CSS class <code>warning</code> in it.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>label</code></strong> :&ensp;<code>string</code></dt>
 <dd>Usually the title of an item</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1581,7 +1581,7 @@ Will be wrapped into JSON with a proper header.</dd>
 <span>def <span class="ident">shiftDate</span></span>(<span>table, eid, field, amount)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Shifts the date in a field with a certain amount.</p>
+<div class="desc"><p>Shifts the date in a field with a certain amount.</p>
 <p>If the field in question is currently blank, it is assumed to
 represent <code>now</code>.</p>
 <div class="admonition caution">
@@ -1594,13 +1594,13 @@ of the workflow data.</p>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table that contains the date field</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>objectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(objectId)</code></dt>
 <dd>The id of the record that contains the ddate field</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
 <dd>The name of the date field</dd>
 <dt><strong><code>amount</code></strong> :&ensp;<code>timedelta</code></dt>
 <dd>The amount of hours to shift the date field. Can be negative or positive.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1644,7 +1644,7 @@ of the workflow data.</p>
 <span>def <span class="ident">viewField</span></span>(<span>client, table, eid, field)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the response for showing a field.</p></section>
+<div class="desc"><p>Get the response for showing a field.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1704,7 +1704,7 @@ of the workflow data.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

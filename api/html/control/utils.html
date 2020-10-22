@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.utils API documentation</title>
 <meta name="description" content="Things that do not find a more logical place …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -217,10 +217,10 @@ def thisYear():
     return dt.utcnow().year
 
 
-def serverprint(msg):
+def serverprint(*msg):
     &#34;&#34;&#34;Print a message to the console immediately.&#34;&#34;&#34;
 
-    sys.stdout.write(f&#34;&#34;&#34;{msg}{NL}&#34;&#34;&#34;)
+    sys.stdout.write(f&#34;&#34;&#34;{&#34; &#34;.join(msg)}{NL}&#34;&#34;&#34;)
     sys.stdout.flush()
 
 
@@ -393,7 +393,7 @@ def thinM(chunks):
 <dl>
 <dt id="control.utils.REGION_SHIFT"><code class="name">var <span class="ident">REGION_SHIFT</span></code></dt>
 <dd>
-<section class="desc"><p>Offset of the Unicode position where flag symbols start w.r.t. to <code>'A'</code>.</p></section>
+<div class="desc"><p>Offset of the Unicode position where flag symbols start w.r.t. to <code>'A'</code>.</p></div>
 </dd>
 </dl>
 </section>
@@ -404,9 +404,9 @@ def thinM(chunks):
 <span>def <span class="ident">asString</span></span>(<span>value)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Join an iterable of strings into a string.</p>
+<div class="desc"><p>Join an iterable of strings into a string.</p>
 <p>And if the value is already a string, return it, and if it is <code>None</code>
-return the empty string.</p></section>
+return the empty string.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -425,14 +425,14 @@ return the empty string.</p></section>
 <span>def <span class="ident">bdecode</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Interpets a serialized value as a Python value.</p>
+<div class="desc"><p>Interpets a serialized value as a Python value.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>s</code></strong> :&ensp;<code>string</code>(<code>ascii</code>)</dt>
+<dt><strong><code>s</code></strong> :&ensp;<code>string(ascii)</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>Python value.</p></section>
+<p>Python value.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -456,7 +456,7 @@ return the empty string.</p></section>
 <span>def <span class="ident">bencode</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Serialize a complex data structure into a plain ASCII string.</p>
+<div class="desc"><p>Serialize a complex data structure into a plain ASCII string.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>Needed to pass the original value into an edit widget, so that the Javascript
@@ -464,14 +464,14 @@ has a way to know whether an edited value is dirty or not.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>s</code></strong> :&ensp;<code>Python</code> <code>value</code></dt>
+<dt><strong><code>s</code></strong> :&ensp;<code>Python value</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>ascii</code>)</dt>
+<dt><code>string(ascii)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -499,7 +499,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">cap1</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>The first letter capitalized.</p>
+<div class="desc"><p>The first letter capitalized.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>s</code></strong> :&ensp;<code>string</code></dt>
@@ -509,7 +509,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <dl>
 <dt><code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -533,7 +533,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">composeM</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Auxiliary in provenance filtering: compose the trimmed parts.</p></section>
+<div class="desc"><p>Auxiliary in provenance filtering: compose the trimmed parts.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -548,7 +548,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">creators</span></span>(<span>record, creatorField, editorsField)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>List all ids in two fields of a record.</p>
+<div class="desc"><p>List all ids in two fields of a record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
@@ -562,7 +562,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <dl>
 <dt><code>list</code></dt>
 <dd>A sorted list of all ids encountered in those fields.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -594,7 +594,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">decomposeM</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Auxiliary in provenance filtering: split an entry into name and date.</p></section>
+<div class="desc"><p>Auxiliary in provenance filtering: split an entry into name and date.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -610,7 +610,7 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">dtm</span></span>(<span>isostr)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get a datetime value from an ISO string representing time.</p></section>
+<div class="desc"><p>Get a datetime value from an ISO string representing time.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -636,19 +636,19 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">factory</span></span>(<span>name, Base, Deriveds)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Find the base or derived class by registered name.</p>
+<div class="desc"><p>Find the base or derived class by registered name.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>Base</code></strong> :&ensp;<code>class</code></dt>
 <dd>Start the lookup here.</dd>
-<dt><strong><code>Deriveds</code></strong> :&ensp;<code>iterable</code> of (<code>name</code>, <code>class</code>)</dt>
+<dt><strong><code>Deriveds</code></strong> :&ensp;<code>iterable</code> of <code>(name, class)</code></dt>
 <dd>A list of derived classes with their names.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>class</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -681,10 +681,10 @@ has a way to know whether an edited value is dirty or not.</p>
 <span>def <span class="ident">filterModified</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Filter a provenance trail.</p>
+<div class="desc"><p>Filter a provenance trail.</p>
 <p>The provenance trail is a list of strings shaped as <code>"actor on date"</code> corresponding
 to changes in a record.</p>
-<p>After filtering we retain for each day only the last modification event per person.</p></section>
+<p>After filtering we retain for each day only the last modification event per person.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -708,7 +708,7 @@ to changes in a record.</p>
 <span>def <span class="ident">getLast</span></span>(<span>sequence)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the last element of a sequence or <code>None</code> if the sequence is empty.</p></section>
+<div class="desc"><p>Get the last element of a sequence or <code>None</code> if the sequence is empty.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -723,12 +723,12 @@ to changes in a record.</p>
 <span>def <span class="ident">isIterable</span></span>(<span>value)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Whether a value is a non-string iterable.</p>
+<div class="desc"><p>Whether a value is a non-string iterable.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Strings are iterables.
 We want to know whether a value is a string or an iterable of strings.</p>
-</div></section>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -748,7 +748,7 @@ We want to know whether a value is a string or an iterable of strings.</p>
 <span>def <span class="ident">now</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>The current moment in time as a <code>datetime</code> value.</p></section>
+<div class="desc"><p>The current moment in time as a <code>datetime</code> value.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -763,7 +763,7 @@ We want to know whether a value is a string or an iterable of strings.</p>
 <span>def <span class="ident">perDay</span></span>(<span>modified)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Auxiliary in provenance filtering: chunk the trails into daily bits.</p></section>
+<div class="desc"><p>Auxiliary in provenance filtering: chunk the trails into daily bits.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -781,15 +781,15 @@ We want to know whether a value is a string or an iterable of strings.</p>
 <span>def <span class="ident">pick</span></span>(<span>record, field, default=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get the value for a key in a dict, or None if there is no dict.</p>
+<div class="desc"><p>Get the value for a key in a dict, or None if there is no dict.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>But if the value for <code>field</code> in the record is <code>None</code>, <code>None</code> will be returned.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
-<dd><a title="control.utils.pick" href="#control.utils.pick"><code>pick()</code></a> should work in both cases.</dd>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict |</code>None``</dt>
+<dd><code><a title="control.utils.pick" href="#control.utils.pick">pick()</a></code> should work in both cases.</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
 <dd>The field in <code>record</code> we want to extract.</dd>
 <dt><strong><code>default</code></strong> :&ensp;<code>mixed</code></dt>
@@ -799,7 +799,7 @@ We want to know whether a value is a string or an iterable of strings.</p>
 <p>value | <code>None</code>
 The value is the default if the record is <code>None</code>, or if the record has no
 <code>field</code>.
-Otherwise it is the value for <code>field</code> from the record.</p></section>
+Otherwise it is the value for <code>field</code> from the record.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -831,18 +831,18 @@ Otherwise it is the value for <code>field</code> from the record.</p></section>
 </details>
 </dd>
 <dt id="control.utils.serverprint"><code class="name flex">
-<span>def <span class="ident">serverprint</span></span>(<span>msg)</span>
+<span>def <span class="ident">serverprint</span></span>(<span>*msg)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Print a message to the console immediately.</p></section>
+<div class="desc"><p>Print a message to the console immediately.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def serverprint(msg):
+<pre><code class="python">def serverprint(*msg):
     &#34;&#34;&#34;Print a message to the console immediately.&#34;&#34;&#34;
 
-    sys.stdout.write(f&#34;&#34;&#34;{msg}{NL}&#34;&#34;&#34;)
+    sys.stdout.write(f&#34;&#34;&#34;{&#34; &#34;.join(msg)}{NL}&#34;&#34;&#34;)
     sys.stdout.flush()</code></pre>
 </details>
 </dd>
@@ -850,7 +850,7 @@ Otherwise it is the value for <code>field</code> from the record.</p></section>
 <span>def <span class="ident">shiftRegional</span></span>(<span>iso)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Transpose iso country code into flag.</p>
+<div class="desc"><p>Transpose iso country code into flag.</p>
 <p>By shifting the 2-letter iso country code with a fixed offset,
 we get two Unicode characters that browsers know to render as a flag symbol
 for that country.</p>
@@ -861,9 +861,9 @@ for that country.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>flag</code>:<code>string</code></dt>
-<dd>2-letter unicode, starting from <a title="control.utils.REGION_SHIFT" href="#control.utils.REGION_SHIFT"><code>REGION_SHIFT</code></a>.</dd>
-</dl></section>
+<dt><code>flag:string</code></dt>
+<dd>2-letter unicode, starting from <code><a title="control.utils.REGION_SHIFT" href="#control.utils.REGION_SHIFT">REGION_SHIFT</a></code>.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -893,8 +893,8 @@ for that country.</p>
 <span>def <span class="ident">thinM</span></span>(<span>chunks)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Auxiliary in provenance filtering: weed out the non-last
-items per day.</p></section>
+<div class="desc"><p>Auxiliary in provenance filtering: weed out the non-last
+items per day.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -921,7 +921,7 @@ items per day.</p></section>
 <span>def <span class="ident">thisYear</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>The current year as number.</p></section>
+<div class="desc"><p>The current year as number.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -936,14 +936,14 @@ items per day.</p></section>
 <span>def <span class="ident">trimM</span></span>(<span>mdt, trim)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Auxiliary in provenance filtering: trim the secoonds part.</p>
+<div class="desc"><p>Auxiliary in provenance filtering: trim the secoonds part.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>mdt</code></strong> :&ensp;<code>string</code></dt>
 <dd>Modification date in iso shape.</dd>
 <dt><strong><code>trim</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether or not to trim the decimal parts of the seconds aways.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -966,7 +966,7 @@ items per day.</p></section>
 <span>def <span class="ident">utf8FromLatin1</span></span>(<span>s)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get Unicode from a latin1 string.</p>
+<div class="desc"><p>Get Unicode from a latin1 string.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>Needed to process the values of environment variables, in particular
@@ -974,14 +974,14 @@ those from the identity provider..</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>s</code></strong> :&ensp;<code>string</code>(<code>latin1</code>)</dt>
+<dt><strong><code>s</code></strong> :&ensp;<code>string(latin1)</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>utf8</code>)</dt>
+<dt><code>string(utf8)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1054,7 +1054,7 @@ those from the identity provider..</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

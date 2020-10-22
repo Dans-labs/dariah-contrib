@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.overview API documentation</title>
 <meta name="description" content="Overview page of contributions …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -52,7 +52,32 @@ URLS = CW.urls
 PAGE = URLS[N.info][N.url]
 PAGEX = f&#34;&#34;&#34;{PAGE}.tsv&#34;&#34;&#34;
 
-COL_PLURAL = dict(country=N.countries,)
+COL_SINGULAR = dict(
+    country=N.country,
+    assessed=&#34;stage&#34;,
+    selected=&#34;stage&#34;,
+    reviewed1=&#34;stage&#34;,
+    reviewed2=&#34;stage&#34;,
+    reviewer1=&#34;expert reviewer&#34;,
+    reviewer2=&#34;final reviewer&#34;,
+)
+
+COL_PLURAL = dict(
+    country=N.countries,
+    assessed=&#34;stages&#34;,
+    selected=&#34;stages&#34;,
+    reviewed1=&#34;stages&#34;,
+    reviewed2=&#34;stages&#34;,
+    reviewer1=&#34;expert reviewers&#34;,
+    reviewer2=&#34;final reviewers&#34;,
+)
+
+REVIEWER1 = &#34;reviewer1&#34;
+REVIEWER2 = &#34;reviewer2&#34;
+REVIEWED1 = &#34;reviewed1&#34;
+REVIEWED2 = &#34;reviewed2&#34;
+R1RANK = &#34;r1Rank&#34;
+R2RANK = &#34;r2Rank&#34;
 
 COLSPECS = (
     (N.country, str),
@@ -61,14 +86,22 @@ COLSPECS = (
     (N.cost, int, &#34;&#34;&#34;cost (€)&#34;&#34;&#34;),
     (N.assessed, tuple),
     (N.selected, bool),
+    (REVIEWER1, str),
+    (REVIEWER2, str),
+    (REVIEWED1, str),
+    (REVIEWED2, str),
     (N.title, str),
 )
 
-GROUP_COLS = &#34;&#34;&#34;
+GROUP_COLS = f&#34;&#34;&#34;
     country
     year
     type
     assessed
+    {REVIEWER1}
+    {REVIEWER2}
+    {REVIEWED1}
+    {REVIEWED2}
     selected
 &#34;&#34;&#34;.strip().split()
 
@@ -80,7 +113,7 @@ SUBHEAD_X_COLS = set(
 )
 
 ASSESSED_STATUS = {
-    None: (&#34;no&#34;, &#34;a-none&#34;),
+    None: (&#34;no assessment&#34;, &#34;a-none&#34;),
     N.incomplete: (&#34;started&#34;, &#34;a-started&#34;),
     N.incompleteRevised: (&#34;revision&#34;, &#34;a-started&#34;),
     N.incompleteWithdrawn: (&#34;withdrawn&#34;, &#34;a-none&#34;),
@@ -95,8 +128,50 @@ ASSESSED_STATUS = {
 ASSESSED_LABELS = {stage: info[0] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_CLASS = {stage: info[1] for (stage, info) in ASSESSED_STATUS.items()}
 ASSESSED_CLASS1 = {info[0]: info[1] for info in ASSESSED_STATUS.values()}
-ASSESSED_ACCEPTED_CLASS = ASSESSED_STATUS[N.reviewAccept][1]
+ASSESSED_DEFAULT_CLASS = ASSESSED_STATUS[None][1]
 ASSESSED_RANK = {stage: i for (i, stage) in enumerate(ASSESSED_STATUS)}
+
+NO_REVIEW = {
+    N.incomplete,
+    N.incompleteRevised,
+    N.incompleteWithdrawn,
+    N.complete,
+    N.completeRevised,
+    N.completeWithdrawn,
+}
+IN_REVIEW = {
+    N.submitted,
+    N.submittedRevised,
+}
+ADVISORY_REVIEW = {
+    N.reviewAdviseAccept,
+    N.reviewAdviseReject,
+    N.reviewAdviseRevise,
+}
+FINAL_REVIEW = {
+    N.reviewAccept,
+    N.reviewReject,
+    N.reviewRevise,
+}
+
+
+REVIEWED_STATUS = {
+    None: (&#34;&#34;, &#34;r-none&#34;),
+    &#34;noReview&#34;: (&#34;not reviewable&#34;, &#34;r-noreview&#34;),
+    &#34;inReview&#34;: (&#34;in review&#34;, &#34;r-inreview&#34;),
+    &#34;skipReview&#34;: (&#34;review skipped&#34;, &#34;r-skipreview&#34;),
+    N.reviewAdviseReject: (&#34;rejected&#34;, &#34;r-rejected&#34;),
+    N.reviewAdviseAccept: (&#34;accepted&#34;, &#34;r-accepted&#34;),
+    N.reviewAdviseRevise: (&#34;revise&#34;, &#34;r-revised&#34;),
+    N.reviewReject: (&#34;rejected&#34;, &#34;r-rejected&#34;),
+    N.reviewAccept: (&#34;accepted&#34;, &#34;r-accepted&#34;),
+    N.reviewRevise: (&#34;revise&#34;, &#34;r-revised&#34;),
+}
+REVIEW_LABELS = {stage: info[0] for (stage, info) in REVIEWED_STATUS.items()}
+REVIEW_CLASS = {stage: info[1] for (stage, info) in REVIEWED_STATUS.items()}
+REVIEW_CLASS1 = {info[0]: info[1] for info in REVIEWED_STATUS.values()}
+REVIEW_DEFAULT_CLASS = REVIEWED_STATUS[None][1]
+REVIEW_RANK = {stage: i for (i, stage) in enumerate(REVIEWED_STATUS)}
 
 ALL = &#34;&#34;&#34;All countries&#34;&#34;&#34;
 
@@ -110,6 +185,7 @@ class Overview:
         self.countryType = types.country
         self.yearType = types.year
         self.typeType = types.typeContribution
+        self.userType = types.user
 
     def getCountry(self, country):
         context = self.context
@@ -143,8 +219,12 @@ class Overview:
         db = context.db
         chosenCountryId = self.chosenCountryId
         countryType = self.countryType
+        userType = self.userType
         yearType = self.yearType
         typeType = self.typeType
+        isSuperUser = self.isSuperUser
+
+        users = db.user
 
         contribs = {}
         for record in db.bulkContribWorkflow(chosenCountryId, bulk):
@@ -153,12 +233,12 @@ class Overview:
 
             selected = G(record, N.selected)
             aStage = G(record, N.aStage)
-            rStage = G(record, N.rStage)
-            if rStage in {N.reviewAccept, N.reviewReject}:
-                aStage = rStage
+            r2Stage = G(record, N.r2Stage)
+            if r2Stage in {N.reviewAccept, N.reviewReject}:
+                aStage = r2Stage
             score = G(record, N.score)
             assessed = ASSESSED_STATUS[aStage][0]
-            aRank = (G(ASSESSED_RANK, aStage, default=0), score)
+            aRank = (G(ASSESSED_RANK, aStage, default=0), score or 0)
             if aStage != N.reviewAccept:
                 score = None
 
@@ -167,7 +247,7 @@ class Overview:
             typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)))
             cost = G(record, N.cost)
 
-            contribs[contribId] = {
+            contribRecord = {
                 N._id: contribId,
                 N._cn: countryRep,
                 N.country: countryRep,
@@ -181,6 +261,52 @@ class Overview:
                 N.score: score,
                 N.selected: selected,
             }
+            if isSuperUser:
+                preR1Stage = G(record, N.r1Stage)
+                noReview = aStage is None or aStage in NO_REVIEW
+                inReview = aStage in IN_REVIEW
+                advReview = preR1Stage in ADVISORY_REVIEW
+                r1Stage = (
+                    &#34;noReview&#34;
+                    if noReview
+                    else preR1Stage if advReview
+                    else &#34;inReview&#34;
+                    if inReview
+                    else &#34;skipReview&#34;
+                )
+                r2Stage = (
+                    &#34;noReview&#34;
+                    if noReview
+                    else &#34;inReview&#34;
+                    if inReview
+                    else G(record, N.r2Stage)
+                )
+                reviewed1 = REVIEWED_STATUS[r1Stage][0]
+                reviewed2 = REVIEWED_STATUS[r2Stage][0]
+                r1Rank = G(REVIEW_RANK, r1Stage, default=0)
+                r2Rank = G(REVIEW_RANK, r2Stage, default=0)
+                reviewer = {}
+                for kind in (&#34;E&#34;, &#34;F&#34;):
+                    reviewerId = G(record, getattr(N, f&#34;reviewer{kind}&#34;))
+                    if reviewerId is None:
+                        reviewer[kind] = None
+                    else:
+                        reviewerRecord = G(users, reviewerId)
+                        reviewerRep = userType.titleStr(reviewerRecord)
+                        reviewer[kind] = reviewerRep
+                contribRecord.update(
+                    {
+                        REVIEWER1: reviewer[&#34;E&#34;],
+                        REVIEWER2: reviewer[&#34;F&#34;],
+                        REVIEWED1: reviewed1,
+                        REVIEWED2: reviewed2,
+                        R1RANK: r1Rank,
+                        R2RANK: r2Rank,
+                        N.r1Stage: r1Stage,
+                        N.r2Stage: r2Stage,
+                    }
+                )
+            contribs[contribId] = contribRecord
 
         self.contribs = contribs
 
@@ -193,11 +319,15 @@ class Overview:
         auth = context.auth
         countryType = self.countryType
 
-        self.isSuperUser = auth.superuser()
+        isSuperUser = auth.superuser()
+        self.isSuperUser = isSuperUser
         self.isCoord = auth.coordinator()
 
         colSpecs = COLSPECS
-        groupCols = GROUP_COLS
+        hiddenCols = (
+            set() if isSuperUser else {REVIEWER1, REVIEWER2, REVIEWED1, REVIEWED2}
+        )
+        groupCols = [gc for gc in GROUP_COLS if gc not in hiddenCols]
         allGroupSet = set(groupCols)
 
         accessRep = auth.credentials()[1]
@@ -219,9 +349,9 @@ class Overview:
         chosenCountryIso = self.chosenCountryIso
 
         if chosenCountryId is not None:
-            colSpecs = COLSPECS[1:]
+            colSpecs = [x for x in COLSPECS if x[0] != N.country]
             groups = self.rmGroup(groups.split(COMMA), N.country)
-            groupCols = GROUP_COLS[1:]
+            groupCols = [x for x in groupCols if x != N.country]
 
         cols = [c[0] for c in colSpecs]
         colSet = {c[0] for c in colSpecs}
@@ -286,7 +416,7 @@ class Overview:
 
         if not asTsv:
             urlArgsBare = (
-                f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+                f&#34;&#34;&#34;country={chosenCountryIso or &#39;x&#39;}&amp;&#34;&#34;&#34;
                 f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
             )
             urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
@@ -366,7 +496,7 @@ class Overview:
                         f&#34;&#34;&#34;{things} from {origin}&#34;&#34;&#34;,
                         H.a(
                             &#34;&#34;&#34;Download as Excel&#34;&#34;&#34;,
-                            f&#34;&#34;&#34;{PAGEX}{rArgs}&#34;&#34;&#34;,
+                            f&#34;&#34;&#34;{PAGEX}?{rArgs}&#34;&#34;&#34;,
                             target=&#34;_blank&#34;,
                             cls=&#34;button large&#34;,
                         ),
@@ -385,9 +515,14 @@ class Overview:
             material.append(groupRel)
 
         if asTsv:
-            fileName = (
-                f&#34;&#34;&#34;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#34;&#34;&#34;
+            countryRep = (
+                &#34;all-countries&#34;
+                if country == &#34;x&#34;
+                else country
+                if country
+                else &#34;their-country&#34;
             )
+            fileName = f&#34;&#34;&#34;dariah-{countryRep}{groupStr}-for-{accessRep}&#34;&#34;&#34;
             headers = {
                 &#34;Expires&#34;: &#34;0&#34;,
                 &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
@@ -558,6 +693,7 @@ class Overview:
         hide=False,
     ):
         cols = self.cols
+        isSuperUser = self.isSuperUser
 
         if groupOrder is None:
             groupOrder = cols
@@ -598,6 +734,22 @@ class Overview:
             N.selected: selected,
             N.title: title,
         }
+        if isSuperUser:
+            (r1Label, r1Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;1&#34;)
+            (r2Label, r2Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;2&#34;)
+            if allHead:
+                r1Class = E
+                r2Class = E
+            reviewer1 = G(contrib, REVIEWER1)
+            reviewer2 = G(contrib, REVIEWER2)
+            values.update(
+                {
+                    REVIEWER1: reviewer1 or E,
+                    REVIEWER2: reviewer2 or E,
+                    REVIEWED1: r1Label,
+                    REVIEWED2: r2Label,
+                }
+            )
         recCountry = G(contrib, N._cn) or G(values, N.country)
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else N.title
@@ -617,6 +769,9 @@ class Overview:
         if not asTsv:
             classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
             classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+            if isSuperUser:
+                classes[REVIEWED1] = r1Class
+                classes[REVIEWED2] = r2Class
         if asTsv:
             columns = TAB.join(
                 self.disclose(values, col, recCountry) or E for col in groupOrder
@@ -648,7 +803,11 @@ class Overview:
 
         def makeKey(contrib):
             if col == N.assessed:
-                return G(contrib, N.arank)
+                return G(contrib, N.arank, default=(E, 0))
+            elif col == REVIEWED1:
+                return G(contrib, R1RANK, default=0)
+            elif col == REVIEWED2:
+                return G(contrib, R2RANK, default=0)
             value = G(contrib, col)
             if value is None:
                 return E if colType is str else 0
@@ -656,18 +815,18 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         def makeKeyInd(value):
             if col == N.assessed:
-                return value
+                return value or E
             if value is None:
                 return E if colType is str else 0
             if colType is str:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         return makeKeyInd if individual else makeKey
 
@@ -724,28 +883,47 @@ class Overview:
         isSuperUser = self.isSuperUser
         isCoord = auth.coordinator(countryId=recCountry)
 
-        disclosed = colName != N.cost or isSuperUser or isCoord
+        disclosed = (
+            (colName not in {N.cost, REVIEWER1, REVIEWED1, REVIEWER2, REVIEWED2})
+            or isSuperUser
+            or isCoord
+        )
         value = values[colName] if disclosed else N.undisclosed
         return value
 
     @staticmethod
-    def wrapStatus(contrib, subHead=False):
+    def wrapStatus(contrib, subHead=False, kind=None):
         aStage = G(contrib, N.astage)
-        assessed = G(contrib, N.assessed) or E
-        score = G(contrib, N.score)
-        scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
-        baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
-        aClass = (
-            G(ASSESSED_CLASS1, assessed, default=ASSESSED_ACCEPTED_CLASS)
-            if subHead
-            else G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
-        )
-        aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
-        return (aLabel, aClass)
+        if kind is None:
+            assessed = G(contrib, N.assessed) or E
+            score = G(contrib, N.score)
+            scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
+            baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
+            aClass = (
+                G(ASSESSED_CLASS1, assessed, default=ASSESSED_DEFAULT_CLASS)
+                if subHead
+                else G(ASSESSED_CLASS, aStage, default=ASSESSED_DEFAULT_CLASS)
+            )
+            aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
+            return (aLabel, aClass)
+        else:
+            rStage = G(contrib, N.r1Stage if kind == &#34;1&#34; else N.r2Stage)
+            reviewed = G(contrib, REVIEWED1 if kind == &#34;1&#34; else REVIEWED2) or E
+            rClass = (
+                G(REVIEW_CLASS1, reviewed, default=REVIEW_DEFAULT_CLASS)
+                if subHead
+                else G(REVIEW_CLASS, rStage, default=REVIEW_DEFAULT_CLASS)
+            )
+            rLabel = reviewed if subHead else G(REVIEW_LABELS, rStage, default=E)
+            return (rLabel, rClass)
 
     @staticmethod
     def colRep(col, n):
-        itemRep = col if n == 1 else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+        itemRep = (
+            G(COL_SINGULAR, col, default=col)
+            if n == 1
+            else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+        )
         return f&#34;&#34;&#34;{n} {itemRep}&#34;&#34;&#34;
 
     @staticmethod
@@ -771,8 +949,8 @@ class Overview:
     def expandAcontrols(group):
         return E.join(
             (
-                H.iconx(N.addown, href=E, cls=f&#34;dca&#34;, gn=group),
-                H.iconx(N.adup, href=E, cls=f&#34;dca&#34;, gn=group),
+                H.iconx(N.addown, href=E, cls=&#34;dca&#34;, gn=group),
+                H.iconx(N.adup, href=E, cls=&#34;dca&#34;, gn=group),
             )
         )
 
@@ -810,7 +988,7 @@ class Overview:
 <span>(</span><span>context)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -824,6 +1002,7 @@ class Overview:
         self.countryType = types.country
         self.yearType = types.year
         self.typeType = types.typeContribution
+        self.userType = types.user
 
     def getCountry(self, country):
         context = self.context
@@ -857,8 +1036,12 @@ class Overview:
         db = context.db
         chosenCountryId = self.chosenCountryId
         countryType = self.countryType
+        userType = self.userType
         yearType = self.yearType
         typeType = self.typeType
+        isSuperUser = self.isSuperUser
+
+        users = db.user
 
         contribs = {}
         for record in db.bulkContribWorkflow(chosenCountryId, bulk):
@@ -867,12 +1050,12 @@ class Overview:
 
             selected = G(record, N.selected)
             aStage = G(record, N.aStage)
-            rStage = G(record, N.rStage)
-            if rStage in {N.reviewAccept, N.reviewReject}:
-                aStage = rStage
+            r2Stage = G(record, N.r2Stage)
+            if r2Stage in {N.reviewAccept, N.reviewReject}:
+                aStage = r2Stage
             score = G(record, N.score)
             assessed = ASSESSED_STATUS[aStage][0]
-            aRank = (G(ASSESSED_RANK, aStage, default=0), score)
+            aRank = (G(ASSESSED_RANK, aStage, default=0), score or 0)
             if aStage != N.reviewAccept:
                 score = None
 
@@ -881,7 +1064,7 @@ class Overview:
             typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)))
             cost = G(record, N.cost)
 
-            contribs[contribId] = {
+            contribRecord = {
                 N._id: contribId,
                 N._cn: countryRep,
                 N.country: countryRep,
@@ -895,6 +1078,52 @@ class Overview:
                 N.score: score,
                 N.selected: selected,
             }
+            if isSuperUser:
+                preR1Stage = G(record, N.r1Stage)
+                noReview = aStage is None or aStage in NO_REVIEW
+                inReview = aStage in IN_REVIEW
+                advReview = preR1Stage in ADVISORY_REVIEW
+                r1Stage = (
+                    &#34;noReview&#34;
+                    if noReview
+                    else preR1Stage if advReview
+                    else &#34;inReview&#34;
+                    if inReview
+                    else &#34;skipReview&#34;
+                )
+                r2Stage = (
+                    &#34;noReview&#34;
+                    if noReview
+                    else &#34;inReview&#34;
+                    if inReview
+                    else G(record, N.r2Stage)
+                )
+                reviewed1 = REVIEWED_STATUS[r1Stage][0]
+                reviewed2 = REVIEWED_STATUS[r2Stage][0]
+                r1Rank = G(REVIEW_RANK, r1Stage, default=0)
+                r2Rank = G(REVIEW_RANK, r2Stage, default=0)
+                reviewer = {}
+                for kind in (&#34;E&#34;, &#34;F&#34;):
+                    reviewerId = G(record, getattr(N, f&#34;reviewer{kind}&#34;))
+                    if reviewerId is None:
+                        reviewer[kind] = None
+                    else:
+                        reviewerRecord = G(users, reviewerId)
+                        reviewerRep = userType.titleStr(reviewerRecord)
+                        reviewer[kind] = reviewerRep
+                contribRecord.update(
+                    {
+                        REVIEWER1: reviewer[&#34;E&#34;],
+                        REVIEWER2: reviewer[&#34;F&#34;],
+                        REVIEWED1: reviewed1,
+                        REVIEWED2: reviewed2,
+                        R1RANK: r1Rank,
+                        R2RANK: r2Rank,
+                        N.r1Stage: r1Stage,
+                        N.r2Stage: r2Stage,
+                    }
+                )
+            contribs[contribId] = contribRecord
 
         self.contribs = contribs
 
@@ -907,11 +1136,15 @@ class Overview:
         auth = context.auth
         countryType = self.countryType
 
-        self.isSuperUser = auth.superuser()
+        isSuperUser = auth.superuser()
+        self.isSuperUser = isSuperUser
         self.isCoord = auth.coordinator()
 
         colSpecs = COLSPECS
-        groupCols = GROUP_COLS
+        hiddenCols = (
+            set() if isSuperUser else {REVIEWER1, REVIEWER2, REVIEWED1, REVIEWED2}
+        )
+        groupCols = [gc for gc in GROUP_COLS if gc not in hiddenCols]
         allGroupSet = set(groupCols)
 
         accessRep = auth.credentials()[1]
@@ -933,9 +1166,9 @@ class Overview:
         chosenCountryIso = self.chosenCountryIso
 
         if chosenCountryId is not None:
-            colSpecs = COLSPECS[1:]
+            colSpecs = [x for x in COLSPECS if x[0] != N.country]
             groups = self.rmGroup(groups.split(COMMA), N.country)
-            groupCols = GROUP_COLS[1:]
+            groupCols = [x for x in groupCols if x != N.country]
 
         cols = [c[0] for c in colSpecs]
         colSet = {c[0] for c in colSpecs}
@@ -1000,7 +1233,7 @@ class Overview:
 
         if not asTsv:
             urlArgsBare = (
-                f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+                f&#34;&#34;&#34;country={chosenCountryIso or &#39;x&#39;}&amp;&#34;&#34;&#34;
                 f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
             )
             urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
@@ -1080,7 +1313,7 @@ class Overview:
                         f&#34;&#34;&#34;{things} from {origin}&#34;&#34;&#34;,
                         H.a(
                             &#34;&#34;&#34;Download as Excel&#34;&#34;&#34;,
-                            f&#34;&#34;&#34;{PAGEX}{rArgs}&#34;&#34;&#34;,
+                            f&#34;&#34;&#34;{PAGEX}?{rArgs}&#34;&#34;&#34;,
                             target=&#34;_blank&#34;,
                             cls=&#34;button large&#34;,
                         ),
@@ -1099,9 +1332,14 @@ class Overview:
             material.append(groupRel)
 
         if asTsv:
-            fileName = (
-                f&#34;&#34;&#34;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#34;&#34;&#34;
+            countryRep = (
+                &#34;all-countries&#34;
+                if country == &#34;x&#34;
+                else country
+                if country
+                else &#34;their-country&#34;
             )
+            fileName = f&#34;&#34;&#34;dariah-{countryRep}{groupStr}-for-{accessRep}&#34;&#34;&#34;
             headers = {
                 &#34;Expires&#34;: &#34;0&#34;,
                 &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
@@ -1272,6 +1510,7 @@ class Overview:
         hide=False,
     ):
         cols = self.cols
+        isSuperUser = self.isSuperUser
 
         if groupOrder is None:
             groupOrder = cols
@@ -1312,6 +1551,22 @@ class Overview:
             N.selected: selected,
             N.title: title,
         }
+        if isSuperUser:
+            (r1Label, r1Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;1&#34;)
+            (r2Label, r2Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;2&#34;)
+            if allHead:
+                r1Class = E
+                r2Class = E
+            reviewer1 = G(contrib, REVIEWER1)
+            reviewer2 = G(contrib, REVIEWER2)
+            values.update(
+                {
+                    REVIEWER1: reviewer1 or E,
+                    REVIEWER2: reviewer2 or E,
+                    REVIEWED1: r1Label,
+                    REVIEWED2: r2Label,
+                }
+            )
         recCountry = G(contrib, N._cn) or G(values, N.country)
         if depth is not None:
             xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else N.title
@@ -1331,6 +1586,9 @@ class Overview:
         if not asTsv:
             classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
             classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+            if isSuperUser:
+                classes[REVIEWED1] = r1Class
+                classes[REVIEWED2] = r2Class
         if asTsv:
             columns = TAB.join(
                 self.disclose(values, col, recCountry) or E for col in groupOrder
@@ -1362,7 +1620,11 @@ class Overview:
 
         def makeKey(contrib):
             if col == N.assessed:
-                return G(contrib, N.arank)
+                return G(contrib, N.arank, default=(E, 0))
+            elif col == REVIEWED1:
+                return G(contrib, R1RANK, default=0)
+            elif col == REVIEWED2:
+                return G(contrib, R2RANK, default=0)
             value = G(contrib, col)
             if value is None:
                 return E if colType is str else 0
@@ -1370,18 +1632,18 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         def makeKeyInd(value):
             if col == N.assessed:
-                return value
+                return value or E
             if value is None:
                 return E if colType is str else 0
             if colType is str:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
-            return value
+            return E
 
         return makeKeyInd if individual else makeKey
 
@@ -1438,28 +1700,47 @@ class Overview:
         isSuperUser = self.isSuperUser
         isCoord = auth.coordinator(countryId=recCountry)
 
-        disclosed = colName != N.cost or isSuperUser or isCoord
+        disclosed = (
+            (colName not in {N.cost, REVIEWER1, REVIEWED1, REVIEWER2, REVIEWED2})
+            or isSuperUser
+            or isCoord
+        )
         value = values[colName] if disclosed else N.undisclosed
         return value
 
     @staticmethod
-    def wrapStatus(contrib, subHead=False):
+    def wrapStatus(contrib, subHead=False, kind=None):
         aStage = G(contrib, N.astage)
-        assessed = G(contrib, N.assessed) or E
-        score = G(contrib, N.score)
-        scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
-        baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
-        aClass = (
-            G(ASSESSED_CLASS1, assessed, default=ASSESSED_ACCEPTED_CLASS)
-            if subHead
-            else G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
-        )
-        aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
-        return (aLabel, aClass)
+        if kind is None:
+            assessed = G(contrib, N.assessed) or E
+            score = G(contrib, N.score)
+            scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
+            baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
+            aClass = (
+                G(ASSESSED_CLASS1, assessed, default=ASSESSED_DEFAULT_CLASS)
+                if subHead
+                else G(ASSESSED_CLASS, aStage, default=ASSESSED_DEFAULT_CLASS)
+            )
+            aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
+            return (aLabel, aClass)
+        else:
+            rStage = G(contrib, N.r1Stage if kind == &#34;1&#34; else N.r2Stage)
+            reviewed = G(contrib, REVIEWED1 if kind == &#34;1&#34; else REVIEWED2) or E
+            rClass = (
+                G(REVIEW_CLASS1, reviewed, default=REVIEW_DEFAULT_CLASS)
+                if subHead
+                else G(REVIEW_CLASS, rStage, default=REVIEW_DEFAULT_CLASS)
+            )
+            rLabel = reviewed if subHead else G(REVIEW_LABELS, rStage, default=E)
+            return (rLabel, rClass)
 
     @staticmethod
     def colRep(col, n):
-        itemRep = col if n == 1 else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+        itemRep = (
+            G(COL_SINGULAR, col, default=col)
+            if n == 1
+            else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+        )
         return f&#34;&#34;&#34;{n} {itemRep}&#34;&#34;&#34;
 
     @staticmethod
@@ -1485,8 +1766,8 @@ class Overview:
     def expandAcontrols(group):
         return E.join(
             (
-                H.iconx(N.addown, href=E, cls=f&#34;dca&#34;, gn=group),
-                H.iconx(N.adup, href=E, cls=f&#34;dca&#34;, gn=group),
+                H.iconx(N.addown, href=E, cls=&#34;dca&#34;, gn=group),
+                H.iconx(N.adup, href=E, cls=&#34;dca&#34;, gn=group),
             )
         )
 
@@ -1515,7 +1796,7 @@ class Overview:
 <span>def <span class="ident">addGroup</span></span>(<span>groups, g)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1529,14 +1810,18 @@ def addGroup(groups, g):
 <span>def <span class="ident">colRep</span></span>(<span>col, n)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def colRep(col, n):
-    itemRep = col if n == 1 else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+    itemRep = (
+        G(COL_SINGULAR, col, default=col)
+        if n == 1
+        else G(COL_PLURAL, col, default=f&#34;&#34;&#34;{col}s&#34;&#34;&#34;)
+    )
     return f&#34;&#34;&#34;{n} {itemRep}&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
@@ -1544,7 +1829,7 @@ def colRep(col, n):
 <span>def <span class="ident">euro</span></span>(<span>amount)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1558,7 +1843,7 @@ def euro(amount):
 <span>def <span class="ident">expandAcontrols</span></span>(<span>group)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1567,8 +1852,8 @@ def euro(amount):
 def expandAcontrols(group):
     return E.join(
         (
-            H.iconx(N.addown, href=E, cls=f&#34;dca&#34;, gn=group),
-            H.iconx(N.adup, href=E, cls=f&#34;dca&#34;, gn=group),
+            H.iconx(N.addown, href=E, cls=&#34;dca&#34;, gn=group),
+            H.iconx(N.adup, href=E, cls=&#34;dca&#34;, gn=group),
         )
     )</code></pre>
 </details>
@@ -1577,7 +1862,7 @@ def expandAcontrols(group):
 <span>def <span class="ident">expandControls</span></span>(<span>gid, hide=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1598,7 +1883,7 @@ def expandControls(gid, hide=False):
 <span>def <span class="ident">rmGroup</span></span>(<span>groups, g)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1612,7 +1897,7 @@ def rmGroup(groups, g):
 <span>def <span class="ident">subHeadClass</span></span>(<span>col, groupSet, subHead, allHead)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1633,7 +1918,7 @@ def subHeadClass(col, groupSet, subHead, allHead):
 <span>def <span class="ident">valTri</span></span>(<span>tri)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1644,28 +1929,39 @@ def valTri(tri):
 </details>
 </dd>
 <dt id="control.overview.Overview.wrapStatus"><code class="name flex">
-<span>def <span class="ident">wrapStatus</span></span>(<span>contrib, subHead=False)</span>
+<span>def <span class="ident">wrapStatus</span></span>(<span>contrib, subHead=False, kind=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def wrapStatus(contrib, subHead=False):
+def wrapStatus(contrib, subHead=False, kind=None):
     aStage = G(contrib, N.astage)
-    assessed = G(contrib, N.assessed) or E
-    score = G(contrib, N.score)
-    scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
-    baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
-    aClass = (
-        G(ASSESSED_CLASS1, assessed, default=ASSESSED_ACCEPTED_CLASS)
-        if subHead
-        else G(ASSESSED_CLASS, aStage, default=ASSESSED_ACCEPTED_CLASS)
-    )
-    aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
-    return (aLabel, aClass)</code></pre>
+    if kind is None:
+        assessed = G(contrib, N.assessed) or E
+        score = G(contrib, N.score)
+        scoreRep = E if score is None else f&#34;&#34;&#34;{score}% - &#34;&#34;&#34;
+        baseLabel = assessed if subHead else G(ASSESSED_LABELS, aStage, default=E)
+        aClass = (
+            G(ASSESSED_CLASS1, assessed, default=ASSESSED_DEFAULT_CLASS)
+            if subHead
+            else G(ASSESSED_CLASS, aStage, default=ASSESSED_DEFAULT_CLASS)
+        )
+        aLabel = baseLabel if subHead else f&#34;&#34;&#34;{scoreRep}{baseLabel}&#34;&#34;&#34;
+        return (aLabel, aClass)
+    else:
+        rStage = G(contrib, N.r1Stage if kind == &#34;1&#34; else N.r2Stage)
+        reviewed = G(contrib, REVIEWED1 if kind == &#34;1&#34; else REVIEWED2) or E
+        rClass = (
+            G(REVIEW_CLASS1, reviewed, default=REVIEW_DEFAULT_CLASS)
+            if subHead
+            else G(REVIEW_CLASS, rStage, default=REVIEW_DEFAULT_CLASS)
+        )
+        rLabel = reviewed if subHead else G(REVIEW_LABELS, rStage, default=E)
+        return (rLabel, rClass)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1675,7 +1971,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">contribKey</span></span>(<span>self, col, individual=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1687,7 +1983,11 @@ def wrapStatus(contrib, subHead=False):
 
     def makeKey(contrib):
         if col == N.assessed:
-            return G(contrib, N.arank)
+            return G(contrib, N.arank, default=(E, 0))
+        elif col == REVIEWED1:
+            return G(contrib, R1RANK, default=0)
+        elif col == REVIEWED2:
+            return G(contrib, R2RANK, default=0)
         value = G(contrib, col)
         if value is None:
             return E if colType is str else 0
@@ -1695,18 +1995,18 @@ def wrapStatus(contrib, subHead=False):
             return value.lower()
         if colType is bool:
             return 1 if value else -1
-        return value
+        return E
 
     def makeKeyInd(value):
         if col == N.assessed:
-            return value
+            return value or E
         if value is None:
             return E if colType is str else 0
         if colType is str:
             return value.lower()
         if colType is bool:
             return 1 if value else -1
-        return value
+        return E
 
     return makeKeyInd if individual else makeKey</code></pre>
 </details>
@@ -1715,7 +2015,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">disclose</span></span>(<span>self, values, colName, recCountry)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1726,7 +2026,11 @@ def wrapStatus(contrib, subHead=False):
     isSuperUser = self.isSuperUser
     isCoord = auth.coordinator(countryId=recCountry)
 
-    disclosed = colName != N.cost or isSuperUser or isCoord
+    disclosed = (
+        (colName not in {N.cost, REVIEWER1, REVIEWED1, REVIEWER2, REVIEWED2})
+        or isSuperUser
+        or isCoord
+    )
     value = values[colName] if disclosed else N.undisclosed
     return value</code></pre>
 </details>
@@ -1735,7 +2039,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">formatContrib</span></span>(<span>self, contrib, groupId, chosenCountry, asTsv, groupOrder=None, groupSet=set(), subHead=False, allHead=False, groupLen=None, depth=None, thisGroupId=None, nGroups=None, hide=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1757,6 +2061,7 @@ def wrapStatus(contrib, subHead=False):
     hide=False,
 ):
     cols = self.cols
+    isSuperUser = self.isSuperUser
 
     if groupOrder is None:
         groupOrder = cols
@@ -1797,6 +2102,22 @@ def wrapStatus(contrib, subHead=False):
         N.selected: selected,
         N.title: title,
     }
+    if isSuperUser:
+        (r1Label, r1Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;1&#34;)
+        (r2Label, r2Class) = self.wrapStatus(contrib, subHead=subHead, kind=&#34;2&#34;)
+        if allHead:
+            r1Class = E
+            r2Class = E
+        reviewer1 = G(contrib, REVIEWER1)
+        reviewer2 = G(contrib, REVIEWER2)
+        values.update(
+            {
+                REVIEWER1: reviewer1 or E,
+                REVIEWER2: reviewer2 or E,
+                REVIEWED1: r1Label,
+                REVIEWED2: r2Label,
+            }
+        )
     recCountry = G(contrib, N._cn) or G(values, N.country)
     if depth is not None:
         xGroup = groupOrder[depth] if depth == 0 or depth &lt; groupLen else N.title
@@ -1816,6 +2137,9 @@ def wrapStatus(contrib, subHead=False):
     if not asTsv:
         classes = {col: f&#34;c-{col}&#34; for col in groupOrder}
         classes[&#34;assessed&#34;] += f&#34; {assessedClass}&#34;
+        if isSuperUser:
+            classes[REVIEWED1] = r1Class
+            classes[REVIEWED2] = r2Class
     if asTsv:
         columns = TAB.join(
             self.disclose(values, col, recCountry) or E for col in groupOrder
@@ -1845,7 +2169,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">getContribs</span></span>(<span>self, bulk)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1855,8 +2179,12 @@ def wrapStatus(contrib, subHead=False):
     db = context.db
     chosenCountryId = self.chosenCountryId
     countryType = self.countryType
+    userType = self.userType
     yearType = self.yearType
     typeType = self.typeType
+    isSuperUser = self.isSuperUser
+
+    users = db.user
 
     contribs = {}
     for record in db.bulkContribWorkflow(chosenCountryId, bulk):
@@ -1865,12 +2193,12 @@ def wrapStatus(contrib, subHead=False):
 
         selected = G(record, N.selected)
         aStage = G(record, N.aStage)
-        rStage = G(record, N.rStage)
-        if rStage in {N.reviewAccept, N.reviewReject}:
-            aStage = rStage
+        r2Stage = G(record, N.r2Stage)
+        if r2Stage in {N.reviewAccept, N.reviewReject}:
+            aStage = r2Stage
         score = G(record, N.score)
         assessed = ASSESSED_STATUS[aStage][0]
-        aRank = (G(ASSESSED_RANK, aStage, default=0), score)
+        aRank = (G(ASSESSED_RANK, aStage, default=0), score or 0)
         if aStage != N.reviewAccept:
             score = None
 
@@ -1879,7 +2207,7 @@ def wrapStatus(contrib, subHead=False):
         typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)))
         cost = G(record, N.cost)
 
-        contribs[contribId] = {
+        contribRecord = {
             N._id: contribId,
             N._cn: countryRep,
             N.country: countryRep,
@@ -1893,6 +2221,52 @@ def wrapStatus(contrib, subHead=False):
             N.score: score,
             N.selected: selected,
         }
+        if isSuperUser:
+            preR1Stage = G(record, N.r1Stage)
+            noReview = aStage is None or aStage in NO_REVIEW
+            inReview = aStage in IN_REVIEW
+            advReview = preR1Stage in ADVISORY_REVIEW
+            r1Stage = (
+                &#34;noReview&#34;
+                if noReview
+                else preR1Stage if advReview
+                else &#34;inReview&#34;
+                if inReview
+                else &#34;skipReview&#34;
+            )
+            r2Stage = (
+                &#34;noReview&#34;
+                if noReview
+                else &#34;inReview&#34;
+                if inReview
+                else G(record, N.r2Stage)
+            )
+            reviewed1 = REVIEWED_STATUS[r1Stage][0]
+            reviewed2 = REVIEWED_STATUS[r2Stage][0]
+            r1Rank = G(REVIEW_RANK, r1Stage, default=0)
+            r2Rank = G(REVIEW_RANK, r2Stage, default=0)
+            reviewer = {}
+            for kind in (&#34;E&#34;, &#34;F&#34;):
+                reviewerId = G(record, getattr(N, f&#34;reviewer{kind}&#34;))
+                if reviewerId is None:
+                    reviewer[kind] = None
+                else:
+                    reviewerRecord = G(users, reviewerId)
+                    reviewerRep = userType.titleStr(reviewerRecord)
+                    reviewer[kind] = reviewerRep
+            contribRecord.update(
+                {
+                    REVIEWER1: reviewer[&#34;E&#34;],
+                    REVIEWER2: reviewer[&#34;F&#34;],
+                    REVIEWED1: reviewed1,
+                    REVIEWED2: reviewed2,
+                    R1RANK: r1Rank,
+                    R2RANK: r2Rank,
+                    N.r1Stage: r1Stage,
+                    N.r2Stage: r2Stage,
+                }
+            )
+        contribs[contribId] = contribRecord
 
     self.contribs = contribs</code></pre>
 </details>
@@ -1901,7 +2275,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">getCountry</span></span>(<span>self, country)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1938,7 +2312,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">groupList</span></span>(<span>self, groups, selectedCountry, chosenCountry, asTsv)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2087,7 +2461,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">ourCountryHeaders</span></span>(<span>self, country, groups, asTsv, groupOrder=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2144,7 +2518,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">roTri</span></span>(<span>self, tri)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2157,7 +2531,7 @@ def wrapStatus(contrib, subHead=False):
 <span>def <span class="ident">wrap</span></span>(<span>self, asTsv=False)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2168,11 +2542,15 @@ def wrapStatus(contrib, subHead=False):
     auth = context.auth
     countryType = self.countryType
 
-    self.isSuperUser = auth.superuser()
+    isSuperUser = auth.superuser()
+    self.isSuperUser = isSuperUser
     self.isCoord = auth.coordinator()
 
     colSpecs = COLSPECS
-    groupCols = GROUP_COLS
+    hiddenCols = (
+        set() if isSuperUser else {REVIEWER1, REVIEWER2, REVIEWED1, REVIEWED2}
+    )
+    groupCols = [gc for gc in GROUP_COLS if gc not in hiddenCols]
     allGroupSet = set(groupCols)
 
     accessRep = auth.credentials()[1]
@@ -2194,9 +2572,9 @@ def wrapStatus(contrib, subHead=False):
     chosenCountryIso = self.chosenCountryIso
 
     if chosenCountryId is not None:
-        colSpecs = COLSPECS[1:]
+        colSpecs = [x for x in COLSPECS if x[0] != N.country]
         groups = self.rmGroup(groups.split(COMMA), N.country)
-        groupCols = GROUP_COLS[1:]
+        groupCols = [x for x in groupCols if x != N.country]
 
     cols = [c[0] for c in colSpecs]
     colSet = {c[0] for c in colSpecs}
@@ -2261,7 +2639,7 @@ def wrapStatus(contrib, subHead=False):
 
     if not asTsv:
         urlArgsBare = (
-            f&#34;&#34;&#34;country={chosenCountryIso}&amp;&#34;&#34;&#34;
+            f&#34;&#34;&#34;country={chosenCountryIso or &#39;x&#39;}&amp;&#34;&#34;&#34;
             f&#34;&#34;&#34;sortcol={rawSortCol}&amp;reverse={rawReverse}&#34;&#34;&#34;
         )
         urlArgs = f&#34;&#34;&#34;{urlArgsBare}&amp;bulk={rawBulk}&#34;&#34;&#34;
@@ -2341,7 +2719,7 @@ def wrapStatus(contrib, subHead=False):
                     f&#34;&#34;&#34;{things} from {origin}&#34;&#34;&#34;,
                     H.a(
                         &#34;&#34;&#34;Download as Excel&#34;&#34;&#34;,
-                        f&#34;&#34;&#34;{PAGEX}{rArgs}&#34;&#34;&#34;,
+                        f&#34;&#34;&#34;{PAGEX}?{rArgs}&#34;&#34;&#34;,
                         target=&#34;_blank&#34;,
                         cls=&#34;button large&#34;,
                     ),
@@ -2360,9 +2738,14 @@ def wrapStatus(contrib, subHead=False):
         material.append(groupRel)
 
     if asTsv:
-        fileName = (
-            f&#34;&#34;&#34;dariah-{country or &#34;all-countries&#34;}{groupStr}-for-{accessRep}&#34;&#34;&#34;
+        countryRep = (
+            &#34;all-countries&#34;
+            if country == &#34;x&#34;
+            else country
+            if country
+            else &#34;their-country&#34;
         )
+        fileName = f&#34;&#34;&#34;dariah-{countryRep}{groupStr}-for-{accessRep}&#34;&#34;&#34;
         headers = {
             &#34;Expires&#34;: &#34;0&#34;,
             &#34;Cache-Control&#34;: &#34;no-cache, no-store, must-revalidate&#34;,
@@ -2425,7 +2808,7 @@ def wrapStatus(contrib, subHead=False):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

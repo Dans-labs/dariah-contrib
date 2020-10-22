@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.record API documentation</title>
 <meta name="description" content="Records in tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -694,7 +694,7 @@ class Record:
         cascadeMsg = (
             H.span(
                 f&#34;&#34;&#34;{nCas} detail record{E if nCas == 1 else S}&#34;&#34;&#34;,
-                title=f&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
+                title=&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
                 cls=&#34;label small warning-o right&#34;,
             )
             if nCas
@@ -802,7 +802,7 @@ class Record:
         Parameters
         ----------
         obj: object
-            Any object that has a table and context arttribute, e.g. a table object
+            Any object that has a table and context attribute, e.g. a table object
             or a record object
         record: dict
         cls: string, optional, `&#39;&#39;`
@@ -835,7 +835,7 @@ class Record:
 <span>(</span><span>tableObj, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with records.</p>
+<div class="desc"><p>Deals with records.</p>
 <h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>A number of properties will be inherited from the table object
@@ -845,8 +845,8 @@ that spawns a record object.</p>
 <dt><strong><code>tableObj</code></strong> :&ensp;<code>object</code></dt>
 <dd>See below.</dd>
 <dt><strong><code>eid</code></strong>, <strong><code>record</code></strong>, <strong><code>withDetails</code></strong>, <strong><code>readonly</code></strong>, <strong><code>bodyMethod</code></strong></dt>
-<dd>See <a title="control.table.Table.record" href="table.html#control.table.Table.record"><code>Table.record()</code></a></dd>
-</dl></section>
+<dd>See <code><a title="control.table.Table.record" href="table.html#control.table.Table.record">Table.record()</a></code></dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1477,7 +1477,7 @@ that spawns a record object.</p>
         cascadeMsg = (
             H.span(
                 f&#34;&#34;&#34;{nCas} detail record{E if nCas == 1 else S}&#34;&#34;&#34;,
-                title=f&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
+                title=&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
                 cls=&#34;label small warning-o right&#34;,
             )
             if nCas
@@ -1585,7 +1585,7 @@ that spawns a record object.</p>
         Parameters
         ----------
         obj: object
-            Any object that has a table and context arttribute, e.g. a table object
+            Any object that has a table and context attribute, e.g. a table object
             or a record object
         record: dict
         cls: string, optional, `&#39;&#39;`
@@ -1616,7 +1616,7 @@ that spawns a record object.</p>
 <dl>
 <dt id="control.record.Record.inheritProps"><code class="name">var <span class="ident">inheritProps</span></code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -1625,29 +1625,29 @@ that spawns a record object.</p>
 <span>def <span class="ident">titleRaw</span></span>(<span>obj, record, cls='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Generate a title for a different record.</p>
+<div class="desc"><p>Generate a title for a different record.</p>
 <p>This is fast title generation.
 No record object will be created.</p>
 <p>The title will be based on the fields in the record,
 and its formatting is assisted by the appropriate
-type class in <a title="control.typ.types" href="typ/types.html"><code>control.typ.types</code></a>.</p>
+type class in <code><a title="control.typ.types" href="typ/types.html">control.typ.types</a></code>.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>If the record is
 not "actual", its title will get a warning
 background color.
-See <a title="control.db.Db.collect" href="db.html#control.db.Db.collect"><code>Db.collect()</code></a>.</p>
+See <code><a title="control.db.Db.collect" href="db.html#control.db.Db.collect">Db.collect()</a></code>.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>obj</code></strong> :&ensp;<code>object</code></dt>
-<dd>Any object that has a table and context arttribute, e.g. a table object
+<dd>Any object that has a table and context attribute, e.g. a table object
 or a record object</dd>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>cls</code></strong> :&ensp;<code>string</code>, optional, <code>''</code></dt>
+<dt><strong><code>cls</code></strong> :&ensp;<code>string</code>, optional<code>, </code>''``</dt>
 <dd>A CSS class to add to the outer element of the result</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1671,7 +1671,7 @@ def titleRaw(obj, record, cls=E):
     Parameters
     ----------
     obj: object
-        Any object that has a table and context arttribute, e.g. a table object
+        Any object that has a table and context attribute, e.g. a table object
         or a record object
     record: dict
     cls: string, optional, `&#39;&#39;`
@@ -1695,38 +1695,38 @@ def titleRaw(obj, record, cls=E):
 <dl>
 <dt id="control.record.Record.DetailsClass"><code class="name">var <span class="ident">DetailsClass</span></code></dt>
 <dd>
-<section class="desc"><p><em>class</em> The class used for presenting details of this record.</p>
-<p>It might be the base class <a title="control.details.Details" href="details.html#control.details.Details"><code>Details</code></a>
+<div class="desc"><p><em>class</em> The class used for presenting details of this record.</p>
+<p>It might be the base class <code><a title="control.details.Details" href="details.html#control.details.Details">Details</a></code>
 or one of its
-derived classes.</p></section>
+derived classes.</p></div>
 </dd>
 <dt id="control.record.Record.bodyMethod"><code class="name">var <span class="ident">bodyMethod</span></code></dt>
 <dd>
-<section class="desc"><p><em>function</em> How to compose the HTML for the body of the record.</p></section>
+<div class="desc"><p><em>function</em> How to compose the HTML for the body of the record.</p></div>
 </dd>
 <dt id="control.record.Record.eid"><code class="name">var <span class="ident">eid</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> The id of the record.</p></section>
+<div class="desc"><p><em>ObjectId</em> The id of the record.</p></div>
 </dd>
 <dt id="control.record.Record.mayDelete"><code class="name">var <span class="ident">mayDelete</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the user may delete the record.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the user may delete the record.</p></div>
 </dd>
 <dt id="control.record.Record.readonly"><code class="name">var <span class="ident">readonly</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether to present the complete record in readonly mode.</p></section>
+<div class="desc"><p><em>boolean</em> Whether to present the complete record in readonly mode.</p></div>
 </dd>
 <dt id="control.record.Record.record"><code class="name">var <span class="ident">record</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> The data of the record, keyed by field names.</p></section>
+<div class="desc"><p><em>dict</em> The data of the record, keyed by field names.</p></div>
 </dd>
 <dt id="control.record.Record.tableObj"><code class="name">var <span class="ident">tableObj</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> A <a title="control.table.Table" href="table.html#control.table.Table"><code>Table</code></a> object (or one of a derived class)</p></section>
+<div class="desc"><p><em>object</em> A <code><a title="control.table.Table" href="table.html#control.table.Table">Table</a></code> object (or one of a derived class)</p></div>
 </dd>
 <dt id="control.record.Record.withDetails"><code class="name">var <span class="ident">withDetails</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether to present a list of detail records below the record.</p></section>
+<div class="desc"><p><em>boolean</em> Whether to present a list of detail records below the record.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1735,7 +1735,7 @@ derived classes.</p></section>
 <span>def <span class="ident">adjustWorkflow</span></span>(<span>self, update=True, delete=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Recompute workflow information.</p>
+<div class="desc"><p>Recompute workflow information.</p>
 <p>When this record or some other record has changed, it could have had
 an impact on the workflow.
 If there is reason to assume this has happened, this function can be called
@@ -1743,7 +1743,7 @@ to recompute the workflow item.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Do not confuse this method with the one with the same name in Tables:
-<a title="control.table.Table.adjustWorkflow" href="table.html#control.table.Table.adjustWorkflow"><code>Table.adjustWorkflow()</code></a> which does its work after the
+<code><a title="control.table.Table.adjustWorkflow" href="table.html#control.table.Table.adjustWorkflow">Table.adjustWorkflow()</a></code> which does its work after the
 insertion of a record.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
@@ -1761,7 +1761,7 @@ to <code>None</code></dd>
 <dl>
 <dt><code>void</code></dt>
 <dd>The attribute <code>wfitem</code> will be set again.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1814,7 +1814,7 @@ to <code>None</code></dd>
 <span>def <span class="ident">body</span></span>(<span>self, myMasters=None, hideMasters=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap the body of the record in HTML.</p>
+<div class="desc"><p>Wrap the body of the record in HTML.</p>
 <p>This is the part without the provenance information and without
 the detail records.</p>
 <p>This method can be overridden by <code>body</code> methods in derived classes.</p>
@@ -1827,9 +1827,9 @@ the detail records.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1868,12 +1868,12 @@ the detail records.</p>
 <span>def <span class="ident">delete</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete a record.</p>
+<div class="desc"><p>Delete a record.</p>
 <p>Permissions and dependencies will be checked, as a result,
 the deletion may be prevented.
-See <a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies"><code>Record.getDependencies()</code></a> and <a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm"><code>Record.getDelPerm()</code></a>.</p>
+See <code><a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies">Record.getDependencies()</a></code> and <code><a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm">Record.getDelPerm()</a></code>.</p>
 <p>If deletion happens, workflow information will be adapted afterwards.
-See <a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow"><code>Record.adjustWorkflow()</code></a>.</p></section>
+See <code><a title="control.record.Record.adjustWorkflow" href="#control.record.Record.adjustWorkflow">Record.adjustWorkflow()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1922,14 +1922,14 @@ See <a title="control.record.Record.adjustWorkflow" href="#control.record.Record
 <span>def <span class="ident">deleteButton</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Show the delete button and/or the number of dependencies.</p>
+<div class="desc"><p>Show the delete button and/or the number of dependencies.</p>
 <p>Check the permissions in order to not show a delete button if the user
 cannot delete the record.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1960,7 +1960,7 @@ cannot delete the record.</p>
     cascadeMsg = (
         H.span(
             f&#34;&#34;&#34;{nCas} detail record{E if nCas == 1 else S}&#34;&#34;&#34;,
-            title=f&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
+            title=&#34;&#34;&#34;Detail records will be deleted with the master record&#34;&#34;&#34;,
             cls=&#34;label small warning-o right&#34;,
         )
         if nCas
@@ -2017,15 +2017,15 @@ cannot delete the record.</p>
 <span>def <span class="ident">deleteDetails</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete the details of a record.</p>
+<div class="desc"><p>Delete the details of a record.</p>
 <p>Permissions and dependencies will be checked, as a result,
 the deletion may be prevented.
-See <a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies"><code>Record.getDependencies()</code></a> and <a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm"><code>Record.getDelPerm()</code></a>.</p>
+See <code><a title="control.record.Record.getDependencies" href="#control.record.Record.getDependencies">Record.getDependencies()</a></code> and <code><a title="control.record.Record.getDelPerm" href="#control.record.Record.getDelPerm">Record.getDelPerm()</a></code>.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
 <dd>Whether there are still dependencies after deleting the details.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2059,7 +2059,7 @@ See <a title="control.record.Record.getDependencies" href="#control.record.Recor
 <span>def <span class="ident">field</span></span>(<span>self, fieldName, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Factory function to wrap a field object around the data of a field.</p>
+<div class="desc"><p>Factory function to wrap a field object around the data of a field.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Workflow information will be checked whether this record is fixated.
@@ -2072,7 +2072,7 @@ to make it uneditable.</p>
 Such fields are not shown and edited in the normal way,
 hence they will be set to unreadable and uneditable.
 The manipulation of such fields is under control of workflow.
-See <a title="control.workflow.apply.WorkflowItem.isTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isTask"><code>WorkflowItem.isTask()</code></a>.</p>
+See <code><a title="control.workflow.apply.WorkflowItem.isTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.isTask">WorkflowItem.isTask()</a></code>.</p>
 </div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
@@ -2087,8 +2087,8 @@ in the yaml file for the table.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>object</code></dt>
-<dd>A <a title="control.field.Field" href="field.html#control.field.Field"><code>Field</code></a> object.</dd>
-</dl></section>
+<dd>A <code><a title="control.field.Field" href="field.html#control.field.Field">Field</a></code> object.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2145,7 +2145,7 @@ in the yaml file for the table.</p>
 <span>def <span class="ident">getDelPerm</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Compute the delete permission for this record.</p>
+<div class="desc"><p>Compute the delete permission for this record.</p>
 <p>The unbreakable rule is:
 *
 Records with dependencies cannot be deleted if the dependencies
@@ -2164,7 +2164,7 @@ be applied:</p>
 <code>contrib</code>, <code>assessment</code> and <code>review</code> tables</li>
 <li>superusers may delete records if the configured edit
 permissions allow them</li>
-</ul></section>
+</ul></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2216,8 +2216,8 @@ permissions allow them</li>
 <span>def <span class="ident">getDependencies</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Compute dependent records.</p>
-<p>See <a title="control.db.Db.dependencies" href="db.html#control.db.Db.dependencies"><code>Db.dependencies()</code></a>.</p></section>
+<div class="desc"><p>Compute dependent records.</p>
+<p>See <code><a title="control.db.Db.dependencies" href="db.html#control.db.Db.dependencies">Db.dependencies()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2240,12 +2240,12 @@ permissions allow them</li>
 <span>def <span class="ident">inActualCls</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
+<div class="desc"><p>Get a CSS class name for a record based on whether it is <em>actual</em>.</p>
 <p>Actual records belong to the current <code>package</code>, a record that specifies
 which contribution types, and criteria are currently part of the workflow.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>record</code></strong> :&ensp;<code>dict</code> | <code>None</code></dt>
+<dt><strong><code>record</code></strong> :&ensp;<code>dict |</code>None``</dt>
 <dd>If <code>self</code> does not have a <code>record</code> attribute, the record data must
 be passed here.</dd>
 </dl>
@@ -2253,7 +2253,7 @@ be passed here.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd><code>inactual</code> if the record is not actual, else the empty string.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2291,9 +2291,9 @@ be passed here.</dd>
 <span>def <span class="ident">reload</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Re-initializes a record object if its underlying data has changed.</p>
+<div class="desc"><p>Re-initializes a record object if its underlying data has changed.</p>
 <p>This might be caused by an update in the record itself,
-or a change in workflow conditions.</p></section>
+or a change in workflow conditions.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2317,8 +2317,8 @@ or a change in workflow conditions.</p></section>
 <span>def <span class="ident">setPerm</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Compute permission info for this record.</p>
-<p>See <a title="control.perm.permRecord" href="perm.html#control.perm.permRecord"><code>permRecord()</code></a>.</p></section>
+<div class="desc"><p>Compute permission info for this record.</p>
+<p>See <code><a title="control.perm.permRecord" href="perm.html#control.perm.permRecord">permRecord()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2340,12 +2340,12 @@ or a change in workflow conditions.</p></section>
 <span>def <span class="ident">setWorkflow</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Compute a workflow item for this record.</p>
+<div class="desc"><p>Compute a workflow item for this record.</p>
 <p>The workflow item corresponds to this record
 if it is in the contrib table, otherwise to the
 contrib that is the (grand)master of this record.</p>
-<p>See <a title="control.context.Context.getWorkflowItem" href="context.html#control.context.Context.getWorkflowItem"><code>Context.getWorkflowItem()</code></a> and
-<a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a>.</p>
+<p>See <code><a title="control.context.Context.getWorkflowItem" href="context.html#control.context.Context.getWorkflowItem">Context.getWorkflowItem()</a></code> and
+<code><a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem">WorkflowItem</a></code>.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>void</code></dt>
@@ -2353,7 +2353,7 @@ contrib that is the (grand)master of this record.</p>
 If the record is not a valid part of any workflow,
 or if there is no workflow item found,
 <code>wfitem</code> will be set to <code>None</code>.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2411,8 +2411,8 @@ or if there is no workflow item found,
 <span>def <span class="ident">task</span></span>(<span>self, task)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Perform a workflow task.</p>
-<p>See <a title="control.workflow.apply.WorkflowItem.doTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doTask"><code>WorkflowItem.doTask()</code></a>.</p></section>
+<div class="desc"><p>Perform a workflow task.</p>
+<p>See <code><a title="control.workflow.apply.WorkflowItem.doTask" href="workflow/apply.html#control.workflow.apply.WorkflowItem.doTask">WorkflowItem.doTask()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2444,7 +2444,7 @@ or if there is no workflow item found,
 <span>def <span class="ident">title</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Generate a title for the record.</p></section>
+<div class="desc"><p>Generate a title for the record.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2463,7 +2463,7 @@ or if there is no workflow item found,
 <span>def <span class="ident">wrap</span></span>(<span>self, inner=True, wrapMethod=None, expanded=1, withProv=True, hideMasters=False, showTable=None, showEid=None, extraCls='')</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap the record into HTML.</p>
+<div class="desc"><p>Wrap the record into HTML.</p>
 <p>A record can be displayed in several states:</p>
 <table>
 <thead>
@@ -2515,16 +2515,16 @@ is already on the client, and that it does not have to be fetched.</p>
 <p class="admonition-title">Note</p>
 <p>There are several ways to customise the effect of <code>wrap</code> for specific
 tables. Start with writing a derived class for that table with
-<a title="control.record.Record" href="#control.record.Record"><code>Record</code></a> as base class.</p>
+<code><a title="control.record.Record" href="#control.record.Record">Record</a></code> as base class.</p>
 <ul>
-<li>write an alternative for <a title="control.record.Record.body" href="#control.record.Record.body"><code>Record.body()</code></a>,
-e.g. <a title="control.cust.review_record.ReviewR.bodyCompact" href="cust/review_record.html#control.cust.review_record.ReviewR.bodyCompact"><code>ReviewR.bodyCompact()</code></a>, and
-initialize the <a title="control.record.Record" href="#control.record.Record"><code>Record</code></a> with <code>(bodyMethod='compact')</code>.
+<li>write an alternative for <code><a title="control.record.Record.body" href="#control.record.Record.body">Record.body()</a></code>,
+e.g. <code><a title="control.cust.review_record.ReviewR.bodyCompact" href="cust/review_record.html#control.cust.review_record.ReviewR.bodyCompact">ReviewR.bodyCompact()</a></code>, and
+initialize the <code><a title="control.record.Record" href="#control.record.Record">Record</a></code> with <code>(bodyMethod='compact')</code>.
 Just specify the part of the name after <code>body</code> as string starting
 with a lower case.</li>
-<li>override <a title="control.record.Record.body" href="#control.record.Record.body"><code>Record.body()</code></a>. This app does not do this currently.</li>
+<li>override <code><a title="control.record.Record.body" href="#control.record.Record.body">Record.body()</a></code>. This app does not do this currently.</li>
 <li>use a custom <code>wrap</code> function, by defining it in your derived class,
-e.g. <a title="control.cust.score_record.ScoreR.wrapHelp" href="cust/score_record.html#control.cust.score_record.ScoreR.wrapHelp"><code>ScoreR.wrapHelp()</code></a>.
+e.g. <code><a title="control.cust.score_record.ScoreR.wrapHelp" href="cust/score_record.html#control.cust.score_record.ScoreR.wrapHelp">ScoreR.wrapHelp()</a></code>.
 Use it by calling <code>Record.wrap(wrapMethod=scoreObj.wrapHelp)</code>.</li>
 </ul>
 </div>
@@ -2537,7 +2537,7 @@ Use it by calling <code>Record.wrap(wrapMethod=scoreObj.wrapHelp)</code>.</li>
 Typically defined in a derived class.
 If passed, this function will be called to deliver the result.
 Otherwise, <code>wrap</code> does the composition itself.</dd>
-<dt><strong><code>expanded</code></strong> :&ensp;{-<code>1</code>, <code>0</code>, <code>1</code>}</dt>
+<dt><strong><code>expanded</code></strong> :&ensp;<code>{-1, 0, 1}</code></dt>
 <dd>Whether to expand the record.
 See the table above.</dd>
 <dt><strong><code>withProv</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
@@ -2551,9 +2551,9 @@ master record.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2794,7 +2794,7 @@ master record.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

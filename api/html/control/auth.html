@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.auth API documentation</title>
 <meta name="description" content="Authentication …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -150,7 +150,7 @@ class Auth:
         user.clear()
         user.update(self.unauthUser)
 
-    def getUser(self, eppn, email=None):
+    def getUser(self, eppn, email=None, mayCreate=False):
         &#34;&#34;&#34;Find a user in the database.
 
         This is called to get extra information for an authenticated user
@@ -175,6 +175,10 @@ class Auth:
             New users may not have an eppn, but might already be present in the
             user table by their email.
             If so, the email address can be used to look up the user.
+        mayCreate: boolean, optional `False`
+            If a user cannot be found, they will be created if this flag is `True`.
+            This is relevant for situation where a new user has been authenticated
+            by the identity provider.
 
         Returns
         -------
@@ -208,24 +212,50 @@ class Auth:
             )
         ]
         user.clear()
-        if len(userFound) != 1:
+        if len(userFound) &gt; 1:
             self.clearUser()
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: multiple matches in user DB: {eppn} / {email}&#34;)
             return False
+
+        if len(userFound) == 1:
+            if not G(userFound[0], N.mayLogin, default=True):
+                self.clearUser()
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: existing user may not login: {eppn} / {email}&#34;)
+                return False
 
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        user.update(userFound[0])
-        if not G(user, N.mayLogin, default=True):
-            # this checks whether mayLogin is explicitly set to False
-            self.clearUser()
-            return False
 
+        if len(userFound) == 0:
+            if mayCreate:
+                db.insertUser(user)
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: new user: {eppn} / {email}&#34;)
+            else:
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: may not create new user: {eppn} / {email}&#34;)
+                return False
+        else:
+            user.update(userFound[0])
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: existing user: {eppn} / {email}&#34;)
+
+        # new users do not have yet group information
         group = user[N.group] if N.group in user else authId
-        groupRep = G(G(db.permissionGroup, group), N.rep)
         if N.group not in user:
             user[N.group] = group
-        return groupRep != UNAUTH
+
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        result = groupRep != UNAUTH
+        if DEBUG_AUTH:
+            if result:
+                serverprint(f&#34;LOGIN: user authenticated: {eppn} / {email}&#34;)
+            else:
+                serverprint(f&#34;LOGIN: user not authenticated: {eppn} / {email}&#34;)
+        return result
 
     def wrapTestUsers(self):
         &#34;&#34;&#34;Present a widget to select a test user for login.
@@ -274,7 +304,6 @@ class Auth:
         db = self.db
         user = self.user
         isDevel = self.isDevel
-        authUser = self.authUser
         unauthUser = self.unauthUser
 
         contentLength = request.content_length
@@ -284,25 +313,21 @@ class Auth:
             {
                 k[4:].lower(): utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
-                if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+                if k.startswith(&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
-            else {
-                k.lower(): v
-                for (k, v) in request.headers
-            }
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.headers}
             if TRANSPORT_ATTRIBUTES == N.http
-            else {
-                k.lower(): utf8FromLatin1(v)
-                for (k, v) in request.environ.items()
-            }
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
         if DEBUG_AUTH:
-            serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+            serverprint(&#34;LOGIN: auth environment/headers&#34;)
             for (k, v) in authEnv.items():
                 serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
         self.clearUser()
         if isDevel:
+            if DEBUG_AUTH:
+                serverprint(&#34;LOGIN: start authentication in development mode&#34;)
             eppn = G(request.args, N.eppn)
             email = None
             if eppn is None:
@@ -310,20 +335,32 @@ class Auth:
                 if AT in email:
                     eppn = email.split(AT, maxsplit=1)[0]
                     if eppn:
-                        return self.getUser(eppn, email=email)
+                        if DEBUG_AUTH:
+                            serverprint(
+                                f&#34;LOGIN: authentication succeeded: {eppn} / {email}&#34;
+                            )
+                        return self.getUser(eppn, email=email, mayCreate=True)
                 user.update(unauthUser)
+                if DEBUG_AUTH:
+                    serverprint(&#34;LOGIN: authentication failed: no eppn, no email&#34;)
                 return False
-            return self.getUser(eppn)
+            result = self.getUser(eppn, mayCreate=False)
+            if DEBUG_AUTH:
+                if result:
+                    serverprint(&#34;LOGIN: authentication successful&#34;)
+                else:
+                    serverprint(&#34;LOGIN: authentication failed&#34;)
+            return result
         else:
             if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
+                serverprint(&#34;LOGIN: start authentication with shibboleth&#34;)
             authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
                 eppn = G(authEnv, N.eppn)
                 email = G(authEnv, N.mail)
-                isUser = self.getUser(eppn, email=email)
+                isUser = self.getUser(eppn, email=email, mayCreate=True)
                 if DEBUG_AUTH:
-                    serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
+                    serverprint(&#34;&#34;&#34;LOGIN: shibboleth session found:&#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
@@ -331,12 +368,8 @@ class Auth:
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
                     if DEBUG_AUTH:
-                        serverprint(f&#34;LOGIN: authentication failed&#34;)
+                        serverprint(&#34;LOGIN: authentication failed&#34;)
                     return False
-
-                if N.group not in user:
-                    # new users do not have yet group information
-                    user.update(authUser)
 
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
@@ -351,21 +384,18 @@ class Auth:
                     if currentVal != val:
                         user[att] = val
                         dirty = True
-                if N._id in user:
-                    if dirty:
-                        db.updateUser(user)
-                else:
-                    _id = db.insertUser(user)
-                    user[N._id] = _id
+                if dirty:
+                    db.updateUser(user)
+                    if DEBUG_AUTH:
+                        serverprint(f&#34;LOGIN: user data updated for {eppn}/{email}&#34;)
                 if DEBUG_AUTH:
-                    serverprint(f&#34;LOGIN: authentication successful&#34;)
+                    serverprint(&#34;LOGIN: authentication successful&#34;)
                 return True
 
-            if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-                serverprint(f&#34;LOGIN: authentication failed&#34;)
-
             user.update(unauthUser)
+            if DEBUG_AUTH:
+                serverprint(&#34;LOGIN: No shibboleth session found:&#34;)
+                serverprint(&#34;LOGIN: authentication failed&#34;)
             return False
 
     def countryRep(self, user=None):
@@ -585,7 +615,7 @@ class Auth:
 
         eppn = G(session, N.eppn)
         if eppn:
-            if not self.getUser(eppn):
+            if not self.getUser(eppn, mayCreate=False):
                 self.clearUser()
                 return False
             return True
@@ -711,17 +741,17 @@ class Auth:
 <span>(</span><span>db, regime)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deal with user Authentication.</p>
+<div class="desc"><p>Deal with user Authentication.</p>
 <p>Facilitates the login/logout process of users.
 Maintains the attributes that the DARIAH Identity Provider supplies about users.</p>
 <h2 id="initialization">Initialization</h2>
-<p>Include a handle to <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> into the
+<p>Include a handle to <code><a title="control.db.Db" href="db.html#control.db.Db">Db</a></code> into the
 attributes.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>db</code></strong> :&ensp;<code>object</code></dt>
 <dd>See below.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -800,7 +830,7 @@ attributes.</p>
         user.clear()
         user.update(self.unauthUser)
 
-    def getUser(self, eppn, email=None):
+    def getUser(self, eppn, email=None, mayCreate=False):
         &#34;&#34;&#34;Find a user in the database.
 
         This is called to get extra information for an authenticated user
@@ -825,6 +855,10 @@ attributes.</p>
             New users may not have an eppn, but might already be present in the
             user table by their email.
             If so, the email address can be used to look up the user.
+        mayCreate: boolean, optional `False`
+            If a user cannot be found, they will be created if this flag is `True`.
+            This is relevant for situation where a new user has been authenticated
+            by the identity provider.
 
         Returns
         -------
@@ -858,24 +892,50 @@ attributes.</p>
             )
         ]
         user.clear()
-        if len(userFound) != 1:
+        if len(userFound) &gt; 1:
             self.clearUser()
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: multiple matches in user DB: {eppn} / {email}&#34;)
             return False
+
+        if len(userFound) == 1:
+            if not G(userFound[0], N.mayLogin, default=True):
+                self.clearUser()
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: existing user may not login: {eppn} / {email}&#34;)
+                return False
 
         user.update({N.eppn: eppn, N.authority: authority})
         if email:
             user[N.email] = email
-        user.update(userFound[0])
-        if not G(user, N.mayLogin, default=True):
-            # this checks whether mayLogin is explicitly set to False
-            self.clearUser()
-            return False
 
+        if len(userFound) == 0:
+            if mayCreate:
+                db.insertUser(user)
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: new user: {eppn} / {email}&#34;)
+            else:
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: may not create new user: {eppn} / {email}&#34;)
+                return False
+        else:
+            user.update(userFound[0])
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: existing user: {eppn} / {email}&#34;)
+
+        # new users do not have yet group information
         group = user[N.group] if N.group in user else authId
-        groupRep = G(G(db.permissionGroup, group), N.rep)
         if N.group not in user:
             user[N.group] = group
-        return groupRep != UNAUTH
+
+        groupRep = G(G(db.permissionGroup, group), N.rep)
+        result = groupRep != UNAUTH
+        if DEBUG_AUTH:
+            if result:
+                serverprint(f&#34;LOGIN: user authenticated: {eppn} / {email}&#34;)
+            else:
+                serverprint(f&#34;LOGIN: user not authenticated: {eppn} / {email}&#34;)
+        return result
 
     def wrapTestUsers(self):
         &#34;&#34;&#34;Present a widget to select a test user for login.
@@ -924,7 +984,6 @@ attributes.</p>
         db = self.db
         user = self.user
         isDevel = self.isDevel
-        authUser = self.authUser
         unauthUser = self.unauthUser
 
         contentLength = request.content_length
@@ -934,25 +993,21 @@ attributes.</p>
             {
                 k[4:].lower(): utf8FromLatin1(v)
                 for (k, v) in request.environ.items()
-                if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+                if k.startswith(&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
             }
             if TRANSPORT_ATTRIBUTES == N.ajp
-            else {
-                k.lower(): v
-                for (k, v) in request.headers
-            }
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.headers}
             if TRANSPORT_ATTRIBUTES == N.http
-            else {
-                k.lower(): utf8FromLatin1(v)
-                for (k, v) in request.environ.items()
-            }
+            else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
         )
         if DEBUG_AUTH:
-            serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+            serverprint(&#34;LOGIN: auth environment/headers&#34;)
             for (k, v) in authEnv.items():
                 serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
         self.clearUser()
         if isDevel:
+            if DEBUG_AUTH:
+                serverprint(&#34;LOGIN: start authentication in development mode&#34;)
             eppn = G(request.args, N.eppn)
             email = None
             if eppn is None:
@@ -960,20 +1015,32 @@ attributes.</p>
                 if AT in email:
                     eppn = email.split(AT, maxsplit=1)[0]
                     if eppn:
-                        return self.getUser(eppn, email=email)
+                        if DEBUG_AUTH:
+                            serverprint(
+                                f&#34;LOGIN: authentication succeeded: {eppn} / {email}&#34;
+                            )
+                        return self.getUser(eppn, email=email, mayCreate=True)
                 user.update(unauthUser)
+                if DEBUG_AUTH:
+                    serverprint(&#34;LOGIN: authentication failed: no eppn, no email&#34;)
                 return False
-            return self.getUser(eppn)
+            result = self.getUser(eppn, mayCreate=False)
+            if DEBUG_AUTH:
+                if result:
+                    serverprint(&#34;LOGIN: authentication successful&#34;)
+                else:
+                    serverprint(&#34;LOGIN: authentication failed&#34;)
+            return result
         else:
             if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
+                serverprint(&#34;LOGIN: start authentication with shibboleth&#34;)
             authenticated = G(authEnv, SHIB_KEY)
             if authenticated:
                 eppn = G(authEnv, N.eppn)
                 email = G(authEnv, N.mail)
-                isUser = self.getUser(eppn, email=email)
+                isUser = self.getUser(eppn, email=email, mayCreate=True)
                 if DEBUG_AUTH:
-                    serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
+                    serverprint(&#34;&#34;&#34;LOGIN: shibboleth session found:&#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                     serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
@@ -981,12 +1048,8 @@ attributes.</p>
                     # the user is refused because the database says (s)he may not login
                     self.clearUser()
                     if DEBUG_AUTH:
-                        serverprint(f&#34;LOGIN: authentication failed&#34;)
+                        serverprint(&#34;LOGIN: authentication failed&#34;)
                     return False
-
-                if N.group not in user:
-                    # new users do not have yet group information
-                    user.update(authUser)
 
                 # process the attributes provided by the identity server
                 # they may have been changed after the last login
@@ -1001,21 +1064,18 @@ attributes.</p>
                     if currentVal != val:
                         user[att] = val
                         dirty = True
-                if N._id in user:
-                    if dirty:
-                        db.updateUser(user)
-                else:
-                    _id = db.insertUser(user)
-                    user[N._id] = _id
+                if dirty:
+                    db.updateUser(user)
+                    if DEBUG_AUTH:
+                        serverprint(f&#34;LOGIN: user data updated for {eppn}/{email}&#34;)
                 if DEBUG_AUTH:
-                    serverprint(f&#34;LOGIN: authentication successful&#34;)
+                    serverprint(&#34;LOGIN: authentication successful&#34;)
                 return True
 
-            if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-                serverprint(f&#34;LOGIN: authentication failed&#34;)
-
             user.update(unauthUser)
+            if DEBUG_AUTH:
+                serverprint(&#34;LOGIN: No shibboleth session found:&#34;)
+                serverprint(&#34;LOGIN: authentication failed&#34;)
             return False
 
     def countryRep(self, user=None):
@@ -1235,7 +1295,7 @@ attributes.</p>
 
         eppn = G(session, N.eppn)
         if eppn:
-            if not self.getUser(eppn):
+            if not self.getUser(eppn, mayCreate=False):
                 self.clearUser()
                 return False
             return True
@@ -1350,42 +1410,42 @@ attributes.</p>
 <dl>
 <dt id="control.auth.Auth.authId"><code class="name">var <span class="ident">authId</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The groupId of the <code>auth</code> permission group.</p></section>
+<div class="desc"><p><em>string</em> The groupId of the <code>auth</code> permission group.</p></div>
 </dd>
 <dt id="control.auth.Auth.authUser"><code class="name">var <span class="ident">authUser</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> Info of the <code>auth</code> permission group.</p></section>
+<div class="desc"><p><em>string</em> Info of the <code>auth</code> permission group.</p></div>
 </dd>
 <dt id="control.auth.Auth.authority"><code class="name">var <span class="ident">authority</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The name of the authority that identifies users.</p>
+<div class="desc"><p><em>string</em> The name of the authority that identifies users.</p>
 <p>In production it is "DARIAH", which stands for the DARIAH Identity Provider.
-In development it is "local".</p></section>
+In development it is "local".</p></div>
 </dd>
 <dt id="control.auth.Auth.db"><code class="name">var <span class="ident">db</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton</p>
+<div class="desc"><p><em>object</em> The <code><a title="control.db.Db" href="db.html#control.db.Db">Db</a></code> singleton</p>
 <p>Provides methods to retrieve user
-info from the database and store user info there.</p></section>
+info from the database and store user info there.</p></div>
 </dd>
 <dt id="control.auth.Auth.isDevel"><code class="name">var <span class="ident">isDevel</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the server runs in production or in development.</p>
+<div class="desc"><p><em>boolean</em> Whether the server runs in production or in development.</p>
 <p>In production we use the DARIAH Identity provider,
 while in development we use a simple, console-based way of
-logging a few test users in.</p></section>
+logging a few test users in.</p></div>
 </dd>
 <dt id="control.auth.Auth.unauthId"><code class="name">var <span class="ident">unauthId</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The groupId of the <code>public</code> permission group.</p></section>
+<div class="desc"><p><em>string</em> The groupId of the <code>public</code> permission group.</p></div>
 </dd>
 <dt id="control.auth.Auth.unauthUser"><code class="name">var <span class="ident">unauthUser</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> Info of the <code>public</code> permission group.</p></section>
+<div class="desc"><p><em>string</em> Info of the <code>public</code> permission group.</p></div>
 </dd>
 <dt id="control.auth.Auth.user"><code class="name">var <span class="ident">user</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> The attributes of the currently logged in user.</p></section>
+<div class="desc"><p><em>dict</em> The attributes of the currently logged in user.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1394,7 +1454,7 @@ logging a few test users in.</p></section>
 <span>def <span class="ident">authenticate</span></span>(<span>self, login=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Verify the authenticated status of the current user.</p>
+<div class="desc"><p>Verify the authenticated status of the current user.</p>
 <p>This function is called for every request that requires authentication.
 Whether a user is authenticated or not depends on whether a session for
 that user is present. And that depends on whether the identity provider
@@ -1416,7 +1476,7 @@ identity provider has given updated attributed for that user.</dd>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>Whether the current user is authenticated.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1464,7 +1524,7 @@ identity provider has given updated attributed for that user.</dd>
 
     eppn = G(session, N.eppn)
     if eppn:
-        if not self.getUser(eppn):
+        if not self.getUser(eppn, mayCreate=False):
             self.clearUser()
             return False
         return True
@@ -1477,12 +1537,12 @@ identity provider has given updated attributed for that user.</dd>
 <span>def <span class="ident">authenticated</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the current user authenticated?</p>
+<div class="desc"><p>Is the current user authenticated?</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1503,11 +1563,11 @@ identity provider has given updated attributed for that user.</dd>
 <span>def <span class="ident">checkLogin</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Checks for a currently logged in user and sets <code>user</code> accordingly.</p>
+<div class="desc"><p>Checks for a currently logged in user and sets <code>user</code> accordingly.</p>
 <p>This happens after a login action and is meant to adapt the <code>user</code> attribute
 to a newly logged-in user.</p>
 <h2 id="returns">Returns</h2>
-<p>Whether an authenticated user has just logged in.</p></section>
+<p>Whether an authenticated user has just logged in.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1526,7 +1586,6 @@ to a newly logged-in user.</p>
     db = self.db
     user = self.user
     isDevel = self.isDevel
-    authUser = self.authUser
     unauthUser = self.unauthUser
 
     contentLength = request.content_length
@@ -1536,25 +1595,21 @@ to a newly logged-in user.</p>
         {
             k[4:].lower(): utf8FromLatin1(v)
             for (k, v) in request.environ.items()
-            if k.startswith(f&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
+            if k.startswith(&#34;&#34;&#34;AJP_&#34;&#34;&#34;)
         }
         if TRANSPORT_ATTRIBUTES == N.ajp
-        else {
-            k.lower(): v
-            for (k, v) in request.headers
-        }
+        else {k.lower(): utf8FromLatin1(v) for (k, v) in request.headers}
         if TRANSPORT_ATTRIBUTES == N.http
-        else {
-            k.lower(): utf8FromLatin1(v)
-            for (k, v) in request.environ.items()
-        }
+        else {k.lower(): utf8FromLatin1(v) for (k, v) in request.environ.items()}
     )
     if DEBUG_AUTH:
-        serverprint(f&#34;LOGIN: auth environment/headers&#34;)
+        serverprint(&#34;LOGIN: auth environment/headers&#34;)
         for (k, v) in authEnv.items():
             serverprint(f&#34;LOGIN: ATTRIBUTE {k} = {v}&#34;)
     self.clearUser()
     if isDevel:
+        if DEBUG_AUTH:
+            serverprint(&#34;LOGIN: start authentication in development mode&#34;)
         eppn = G(request.args, N.eppn)
         email = None
         if eppn is None:
@@ -1562,20 +1617,32 @@ to a newly logged-in user.</p>
             if AT in email:
                 eppn = email.split(AT, maxsplit=1)[0]
                 if eppn:
-                    return self.getUser(eppn, email=email)
+                    if DEBUG_AUTH:
+                        serverprint(
+                            f&#34;LOGIN: authentication succeeded: {eppn} / {email}&#34;
+                        )
+                    return self.getUser(eppn, email=email, mayCreate=True)
             user.update(unauthUser)
+            if DEBUG_AUTH:
+                serverprint(&#34;LOGIN: authentication failed: no eppn, no email&#34;)
             return False
-        return self.getUser(eppn)
+        result = self.getUser(eppn, mayCreate=False)
+        if DEBUG_AUTH:
+            if result:
+                serverprint(&#34;LOGIN: authentication successful&#34;)
+            else:
+                serverprint(&#34;LOGIN: authentication failed&#34;)
+        return result
     else:
         if DEBUG_AUTH:
-            serverprint(f&#34;LOGIN: start authentication with shibboleth&#34;)
+            serverprint(&#34;LOGIN: start authentication with shibboleth&#34;)
         authenticated = G(authEnv, SHIB_KEY)
         if authenticated:
             eppn = G(authEnv, N.eppn)
             email = G(authEnv, N.mail)
-            isUser = self.getUser(eppn, email=email)
+            isUser = self.getUser(eppn, email=email, mayCreate=True)
             if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: shibboleth session found:&#34;)
+                serverprint(&#34;&#34;&#34;LOGIN: shibboleth session found:&#34;&#34;&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: eppn   = &#34;{eppn}&#34; &#34;&#34;&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: email  = &#34;{email}&#34; &#34;&#34;&#34;)
                 serverprint(f&#34;&#34;&#34;LOGIN: isUser = &#34;{isUser}&#34; &#34;&#34;&#34;)
@@ -1583,12 +1650,8 @@ to a newly logged-in user.</p>
                 # the user is refused because the database says (s)he may not login
                 self.clearUser()
                 if DEBUG_AUTH:
-                    serverprint(f&#34;LOGIN: authentication failed&#34;)
+                    serverprint(&#34;LOGIN: authentication failed&#34;)
                 return False
-
-            if N.group not in user:
-                # new users do not have yet group information
-                user.update(authUser)
 
             # process the attributes provided by the identity server
             # they may have been changed after the last login
@@ -1603,21 +1666,18 @@ to a newly logged-in user.</p>
                 if currentVal != val:
                     user[att] = val
                     dirty = True
-            if N._id in user:
-                if dirty:
-                    db.updateUser(user)
-            else:
-                _id = db.insertUser(user)
-                user[N._id] = _id
+            if dirty:
+                db.updateUser(user)
+                if DEBUG_AUTH:
+                    serverprint(f&#34;LOGIN: user data updated for {eppn}/{email}&#34;)
             if DEBUG_AUTH:
-                serverprint(f&#34;LOGIN: authentication successful&#34;)
+                serverprint(&#34;LOGIN: authentication successful&#34;)
             return True
 
-        if DEBUG_AUTH:
-            serverprint(f&#34;LOGIN: No shibboleth session found:&#34;)
-            serverprint(f&#34;LOGIN: authentication failed&#34;)
-
         user.update(unauthUser)
+        if DEBUG_AUTH:
+            serverprint(&#34;LOGIN: No shibboleth session found:&#34;)
+            serverprint(&#34;LOGIN: authentication failed&#34;)
         return False</code></pre>
 </details>
 </dd>
@@ -1625,9 +1685,9 @@ to a newly logged-in user.</p>
 <span>def <span class="ident">clearUser</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Forgets the currently logged in user.</p>
+<div class="desc"><p>Forgets the currently logged in user.</p>
 <p>The attributes in the <code>user</code> attribute will be cleared and attributes
-for an unauthenticated user will take their place.</p></section>
+for an unauthenticated user will take their place.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1648,7 +1708,7 @@ for an unauthenticated user will take their place.</p></section>
 <span>def <span class="ident">coordinator</span></span>(<span>self, countryId=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the current user a national coordinator?</p>
+<div class="desc"><p>Is the current user a national coordinator?</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>On the overview page, we display contributions of many countries.
@@ -1666,7 +1726,7 @@ Otherwise, the country of the logged in user will be used.</dd>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1702,7 +1762,7 @@ Otherwise, the country of the logged in user will be used.</dd>
 <span>def <span class="ident">country</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>The full country record of the currently logged in user.</p>
+<div class="desc"><p>The full country record of the currently logged in user.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>This function is used to get the country on the Sidebar.</p>
@@ -1711,7 +1771,7 @@ Otherwise, the country of the logged in user will be used.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1739,7 +1799,7 @@ Otherwise, the country of the logged in user will be used.</dd>
 <span>def <span class="ident">countryRep</span></span>(<span>self, user=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide a short representation of the country of a user.</p>
+<div class="desc"><p>Provide a short representation of the country of a user.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>user</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
@@ -1752,7 +1812,7 @@ If absent, the currently logged in user will be taken.</dd>
 <dd>The representation consists of the 2-letter country code plus
 a derived two letter unicode character combination that will
 be turned into a flag of that country.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1792,7 +1852,7 @@ be turned into a flag of that country.</dd>
 <span>def <span class="ident">credentials</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide a string representation of the identity and permissions of a user.</p>
+<div class="desc"><p>Provide a string representation of the identity and permissions of a user.</p>
 <p>This is used to present the currently logged in user on the interface.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1805,7 +1865,7 @@ limited information about users will be shown.</p>
 <dd>identity</dd>
 <dt><code>string</code></dt>
 <dd>group description</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1849,13 +1909,13 @@ limited information about users will be shown.</p>
 <span>def <span class="ident">deauthenticate</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Log out the current user.</p>
+<div class="desc"><p>Log out the current user.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>void</code></dt>
 <dd>If there is a logged in authenticated user, his/her data will be
 cleared and the session will be deleted.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1875,10 +1935,10 @@ cleared and the session will be deleted.</dd>
 </details>
 </dd>
 <dt id="control.auth.Auth.getUser"><code class="name flex">
-<span>def <span class="ident">getUser</span></span>(<span>self, eppn, email=None)</span>
+<span>def <span class="ident">getUser</span></span>(<span>self, eppn, email=None, mayCreate=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Find a user in the database.</p>
+<div class="desc"><p>Find a user in the database.</p>
 <p>This is called to get extra information for an authenticated user
 from the database.
 The resulting data will be stored in the <code>user</code> attribute of Auth.</p>
@@ -1902,6 +1962,10 @@ attributes become known, and are merged into a record in the user table.</p>
 <dd>New users may not have an eppn, but might already be present in the
 user table by their email.
 If so, the email address can be used to look up the user.</dd>
+<dt><strong><code>mayCreate</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
+<dd>If a user cannot be found, they will be created if this flag is <code>True</code>.
+This is relevant for situation where a new user has been authenticated
+by the identity provider.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1911,12 +1975,12 @@ The attributes retrieved from the database will be merged into
 the <code>user</code> attribute.
 If no user was logged in, the <code>user</code> attribute will be filled with
 info that says that the current user is the public and nothing more.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getUser(self, eppn, email=None):
+<pre><code class="python">def getUser(self, eppn, email=None, mayCreate=False):
     &#34;&#34;&#34;Find a user in the database.
 
     This is called to get extra information for an authenticated user
@@ -1941,6 +2005,10 @@ info that says that the current user is the public and nothing more.</dd>
         New users may not have an eppn, but might already be present in the
         user table by their email.
         If so, the email address can be used to look up the user.
+    mayCreate: boolean, optional `False`
+        If a user cannot be found, they will be created if this flag is `True`.
+        This is relevant for situation where a new user has been authenticated
+        by the identity provider.
 
     Returns
     -------
@@ -1974,31 +2042,57 @@ info that says that the current user is the public and nothing more.</dd>
         )
     ]
     user.clear()
-    if len(userFound) != 1:
+    if len(userFound) &gt; 1:
         self.clearUser()
+        if DEBUG_AUTH:
+            serverprint(f&#34;LOGIN: multiple matches in user DB: {eppn} / {email}&#34;)
         return False
+
+    if len(userFound) == 1:
+        if not G(userFound[0], N.mayLogin, default=True):
+            self.clearUser()
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: existing user may not login: {eppn} / {email}&#34;)
+            return False
 
     user.update({N.eppn: eppn, N.authority: authority})
     if email:
         user[N.email] = email
-    user.update(userFound[0])
-    if not G(user, N.mayLogin, default=True):
-        # this checks whether mayLogin is explicitly set to False
-        self.clearUser()
-        return False
 
+    if len(userFound) == 0:
+        if mayCreate:
+            db.insertUser(user)
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: new user: {eppn} / {email}&#34;)
+        else:
+            if DEBUG_AUTH:
+                serverprint(f&#34;LOGIN: may not create new user: {eppn} / {email}&#34;)
+            return False
+    else:
+        user.update(userFound[0])
+        if DEBUG_AUTH:
+            serverprint(f&#34;LOGIN: existing user: {eppn} / {email}&#34;)
+
+    # new users do not have yet group information
     group = user[N.group] if N.group in user else authId
-    groupRep = G(G(db.permissionGroup, group), N.rep)
     if N.group not in user:
         user[N.group] = group
-    return groupRep != UNAUTH</code></pre>
+
+    groupRep = G(G(db.permissionGroup, group), N.rep)
+    result = groupRep != UNAUTH
+    if DEBUG_AUTH:
+        if result:
+            serverprint(f&#34;LOGIN: user authenticated: {eppn} / {email}&#34;)
+        else:
+            serverprint(f&#34;LOGIN: user not authenticated: {eppn} / {email}&#34;)
+    return result</code></pre>
 </details>
 </dd>
 <dt id="control.auth.Auth.groupRep"><code class="name flex">
 <span>def <span class="ident">groupRep</span></span>(<span>self, user=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide a string representation of the permission group of a user.</p>
+<div class="desc"><p>Provide a string representation of the permission group of a user.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>user</code></strong> :&ensp;<code>dict</code>, optional <code>None</code></dt>
@@ -2009,7 +2103,7 @@ If absent, the currently logged in user will be taken.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2043,7 +2137,7 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">identity</span></span>(<span>self, user=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide a string representation of the identity of a user.</p>
+<div class="desc"><p>Provide a string representation of the identity of a user.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Care will be taken that to unauthenticated users only
@@ -2059,7 +2153,7 @@ If absent, the currently logged in user will be taken.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2124,7 +2218,7 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">nameEmail</span></span>(<span>self, user=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Provide a string representation of the name and email of the user.</p>
+<div class="desc"><p>Provide a string representation of the name and email of the user.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Care will be taken that to unauthenticated users only
@@ -2140,7 +2234,7 @@ If absent, the currently logged in user will be taken.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2181,12 +2275,12 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">officeuser</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the current user a backoffice user?</p>
+<div class="desc"><p>Is the current user a backoffice user?</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2207,13 +2301,13 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">superuser</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the current user a super user?</p>
+<div class="desc"><p>Is the current user a super user?</p>
 <p>Superusers are backoffice users, sysadmins and root.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2236,12 +2330,12 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">sysadmin</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the current user a system administrator?</p>
+<div class="desc"><p>Is the current user a system administrator?</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2262,12 +2356,12 @@ If absent, the currently logged in user will be taken.</dd>
 <span>def <span class="ident">wrapTestUsers</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Present a widget to select a test user for login.</p>
+<div class="desc"><p>Present a widget to select a test user for login.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>In production this will do nothing.
 Only in development mode one can select a test user.</p>
-</div></section>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2360,7 +2454,7 @@ Only in development mode one can select a test user.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
