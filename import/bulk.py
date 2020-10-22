@@ -168,6 +168,25 @@ def readValueTables():
         VALUES[table] = items
 
 
+def refreshValueTable(table):
+    criterion = {"isMember": True} if table == "country" else {}
+    items = {rep(table, r): r["_id"] for r in DB[table].find(criterion)}
+    items = {r: _id for (r, _id) in items.items() if r is not None}
+    if table == "user":
+        users = list(DB.user.find(criterion))
+        eppns = {r["_id"]: r.get("eppn", r.get("email", None)) for r in users}
+        VALUES["eppn"] = eppns
+    VALUES[table] = items
+
+
+def recollectTables():
+    justNow = dt.utcnow()
+    for table in ALLOW_NEW:
+        DB.collect.update_one(
+            {"table": table}, {"$set": {"dateCollected": justNow}}, upsert=True
+        )
+
+
 def parseFileName(fileName):
     (name, ext) = os.path.splitext(fileName)
 
@@ -182,6 +201,7 @@ def parseFileName(fileName):
 
 def newVal(field, val):
     result = DB[field].insert_one({"rep": val})
+    refreshValueTable(field)
     return result.inserted_id
 
 
@@ -442,6 +462,7 @@ def doSheet(fileName):
         DB.collect.update_one(
             {"table": "user"}, {"$set": {"dateCollected": justNow}}, upsert=True
         )
+        refreshValueTable("user")
 
     result = 0
     exist = 0
@@ -549,3 +570,5 @@ for inFile in files:
             info(
                 "Left spreadsheet to /done because not all of its data has been imported"
             )
+
+recollectTables()

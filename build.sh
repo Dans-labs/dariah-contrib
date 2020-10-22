@@ -69,6 +69,9 @@ function givehelp {
     echo "bulk d i      : add contributions from a spreadsheet in bulk to dev db"
     echo "bulk t i      : add contributions from a spreadsheet in bulk to test db"
     echo "bulk [td] x   : delete contributions specified in spreadsheet from db but only if pristine"
+    echo "cleandup      : clean duplicates of keyword/disciplines in production db"
+    echo "cleandup d    : clean duplicates of keyword/disciplines in dev db"
+    echo "cleandup t    : clean duplicates of keyword/disciplines in test db"
     echo "consolidate   : convert backup of production db into consolidated yaml"
     echo "cull          : remove the legacy contributions from the dataset"
     echo "databu [lab]  : dump the database into local directory under current date or lab"
@@ -250,6 +253,26 @@ function bulk {
         sudo systemctl stop dariah-contrib.service
     fi
     python3 bulk.py "$DB_DEST" "$action" "$BULK"
+    if [[ "$ON_DANS" == "1" ]]; then
+        sudo systemctl start dariah-contrib.service
+    fi
+}
+
+function cleandup {
+    cd $root/maintain
+    mongostart
+    DB_DEST=$DB_PROD
+    if [[ "$1" == "t" ]]; then
+        DB_DEST=$DB_TEST
+        shift
+    elif [[ "$1" == "d" ]]; then
+        DB_DEST=$DB_DEV
+        shift
+    fi
+    if [[ "$ON_DANS" == "1" ]]; then
+        sudo systemctl stop dariah-contrib.service
+    fi
+    python3 cleandup.py "$DB_DEST"
     if [[ "$ON_DANS" == "1" ]]; then
         sudo systemctl start dariah-contrib.service
     fi
@@ -782,7 +805,7 @@ case "$1" in
         if [[ "$ON_DANS" == "0" ]]; then
             mayrun="0"
         fi;;
-    bulk|consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|reshape|test|testc|values)
+    bulk|cleandup|consolidate|cull|databu|datarest|dbinittest|dbroot|dbroottest|dbwf|dbwftest|mongostart|mongostop|guni|gunitest|reshape|test|testc|values)
         mayrun="1";;
     *)
         mayrun="-1";;
