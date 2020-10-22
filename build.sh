@@ -321,14 +321,16 @@ function datamanage {
             elif [[ "$1" == "x" ]]; then
                 fromdb="$DB_PROD"
                 restored=""
-                if [[ "$ON_DANS" == "0" ]]; then
-                    cd $root/server
-                    python3 testusers.py
-                fi
             fi
             if [ -d "$datastore" ]; then
                 mongostart
                 mongorestore --drop --nsFrom "$fromdb.*" --nsTo "$todb$restored"".*" "$datastore"
+                if [[ "$1" == "x" ]]; then
+                    if [[ "$ON_DANS" == "0" ]]; then
+                        cd $root/server
+                        python3 testusers.py
+                    fi
+                fi
                 echo "Database $todb$restored"" restored from $fromdb"
             else
                 echo "Could not find directory '$datastore'"

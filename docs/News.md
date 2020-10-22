@@ -2,6 +2,10 @@
 
 ## 2020-10-22
 
+* Representation of users on the interface has been fixed: there was a subtle bug:
+  when user information is displayed on the screen, the permission level of the logged in user
+  determines what details are disclosed. But the app looked at the permission level of the user
+  whose details were to be displayed!
 * Bulk import has caused duplicate entries for keywords and disciplines of contributions.
 * Fix-1: the bulkimport script will not do that again.
 * Fix-2: there is a clean-dup script that can clean the database from all duplicate values.

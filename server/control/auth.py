@@ -449,7 +449,7 @@ class Auth:
             firstName = G(user, N.firstName) or E
             lastName = G(user, N.lastName) or E
             name = firstName + (BLANK if firstName and lastName else E) + lastName
-        group = self.groupRep(user=user)
+        group = self.groupRep()  # the power of the currently logged in user!
         isAuth = group != UNAUTH
         org = G(user, N.org) or E
         orgRep = f""" ({org})""" if org else E
