@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>subtest API documentation</title>
 <meta name="description" content="Higher level assert functions test helpers …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -24,7 +24,7 @@
 <p>This module contains a bunch of <code>assertXXX</code> functions,
 which all have a client as first argument and an expected outcome as last.
 They perform higher level tasks for a single client and can be conveniently be
-used in iterations using <a title="helpers.forall" href="helpers.html#helpers.forall"><code>forall()</code></a>.</p>
+used in iterations using <code><a title="helpers.forall" href="helpers.html#helpers.forall">forall()</a></code>.</p>
 <p>There are also some functions that are even higher level, and have been
 factored out from concrete test functions.</p>
 <details class="source">
@@ -603,12 +603,12 @@ def startAssessment(clients, eid, expect):
 <span>def <span class="ident">assertAddItem</span></span>(<span>client, table, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Adds an item to a table.</p>
+<div class="desc"><p>Adds an item to a table.</p>
 <p>The response texts will be analysed into messages and fields, the eid
 of the new item will be read off.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
@@ -617,9 +617,9 @@ of the new item will be read off.</p>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>str(ObjectId)</code></dt>
 <dd>The id of the inserted item.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -657,14 +657,14 @@ of the new item will be read off.</p>
 <span>def <span class="ident">assertCaptions</span></span>(<span>client, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether a response text shows a certain set of captions.</p>
+<div class="desc"><p>Check whether a response text shows a certain set of captions.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>set</code> of <code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -705,18 +705,18 @@ of the new item will be read off.</p>
 <span>def <span class="ident">assertDelItem</span></span>(<span>client, table, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deletes an item from a table.</p>
+<div class="desc"><p>Deletes an item from a table.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -739,20 +739,20 @@ of the new item will be read off.</p>
 <span>def <span class="ident">assertEditor</span></span>(<span>client, table, eid, valueTables, expect, clear=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Sets the <code>editors</code> of an item to <strong>editor</strong>, or clears the <code>editors</code> field.</p>
+<div class="desc"><p>Sets the <code>editors</code> of an item to <strong>editor</strong>, or clears the <code>editors</code> field.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>valueTables</code></strong> :&ensp;<code>the</code> <code>store</code> <code>for</code> <code>the</code> <code>value</code> <code>tables</code></dt>
+<dt><strong><code>valueTables</code></strong> :&ensp;<code>the store for the value tables</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>clear</code></strong> :&ensp;<code>boolean</code>, optional <code>False</code></dt>
 <dd>If True, clears the editors field.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -783,11 +783,11 @@ of the new item will be read off.</p>
 <span>def <span class="ident">assertFieldValue</span></span>(<span>source, field, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Verify whether a field has a certain expected value.</p>
+<div class="desc"><p>Verify whether a field has a certain expected value.</p>
 <p>If we pass expect <code>None</code> we want to assert that the field is not present at all.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>source</code></strong> :&ensp;<code>dict</code> | (<a title="client" href="client.html"><code>client</code></a>: <code>fixture</code>, <code>table</code>: <code>string</code>, <code>eid</code>: <code>string</code>)</dt>
+<dt><strong><code>source</code></strong> :&ensp;<code>dict | (client: fixture, table: string, eid: string)</code></dt>
 <dd>The dictionary of fields and values of a retrieved response.
 If it is a tuple, the dictionary will be retrieved by looking up
 the item specified by <code>table</code> and <code>eid</code>.</dd>
@@ -795,7 +795,7 @@ the item specified by <code>table</code> and <code>eid</code>.</dd>
 <dd>The name of the specific field.</dd>
 </dl>
 <p>expect:
-The expected value for this field.</p></section>
+The expected value for this field.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -838,7 +838,7 @@ The expected value for this field.</p></section>
 <span>def <span class="ident">assertModifyField</span></span>(<span>client, table, eid, field, newValue, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Try to modify a field and check the outcome.</p>
+<div class="desc"><p>Try to modify a field and check the outcome.</p>
 <div class="admonition note">
 <p class="admonition-title">Read access</p>
 <p>The test has to reckon with the fact that the client may not even have
@@ -846,20 +846,20 @@ read access to the field.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId | string</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>newValue</code></strong> :&ensp;<code>string</code> | <code>tuple</code></dt>
+<dt><strong><code>newValue</code></strong> :&ensp;<code>string | tuple</code></dt>
 <dd>If a tuple, the first component is the modification value,
 and the second component is the value we read back from the modified record</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>Whether we expect the modification to succeed</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -913,7 +913,7 @@ and the second component is the value we read back from the modified record</dd>
 <span>def <span class="ident">assertReviewDecisions</span></span>(<span>clients, reviewId, kinds, decisions, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether the reviewers can take certain decisions.</p>
+<div class="desc"><p>Check whether the reviewers can take certain decisions.</p>
 <p>You specify which reviewers take which decisions, and they will
 all be carried out in that order.</p>
 <p>You specifiy the expected outcomes in a dict or a boolean, telling
@@ -924,11 +924,11 @@ whether the taking of the decision is expected to succeed or not.</p>
 <dd>Mapping from users to client fixtures.</dd>
 <dt><strong><code>reviewId</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The review ids for the expert and final review</dd>
-<dt><strong><code>kinds</code></strong> :&ensp;<code>list</code> of {<code>expert</code>, <code>final</code>}</dt>
+<dt><strong><code>kinds</code></strong> :&ensp;<code>list</code> of <code>{expert, final}</code></dt>
 <dd>At most one of each, the order is important.</dd>
-<dt><strong><code>decisions</code></strong> :&ensp;<code>list</code> of {<code>Reject</code>, <code>Revise</code>, <code>Accept</code>, <code>Revoke</code>}</dt>
+<dt><strong><code>decisions</code></strong> :&ensp;<code>list</code> of <code>{Reject, Revise, Accept, Revoke}</code></dt>
 <dd>At most one of each, the order is important.</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>bool</code> | <code>dict</code></dt>
+<dt><strong><code>expect</code></strong> :&ensp;<code>bool | dict</code></dt>
 <dd>Expected outcomes.
 If it is a boolean, that is the expected outcome of all actions by all
 reviewers.
@@ -936,7 +936,7 @@ Otherwise the dict is keyed by kind of reviewer.
 The values are booleans or dicts.
 A boolean indicates the expected outcome of all actions for that reviewer.
 A dict specifies per action of that reviewer what the outcome is.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -994,8 +994,8 @@ A dict specifies per action of that reviewer what the outcome is.</dd>
 <span>def <span class="ident">assertShiftDate</span></span>(<span>clientSys, table, eid, field, amount)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Shifts the date in a field annd recomputes workflow.</p>
-<p>See <a title="helpers.shiftDate" href="helpers.html#helpers.shiftDate"><code>shiftDate()</code></a>.</p></section>
+<div class="desc"><p>Shifts the date in a field annd recomputes workflow.</p>
+<p>See <code><a title="helpers.shiftDate" href="helpers.html#helpers.shiftDate">shiftDate()</a></code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1013,23 +1013,23 @@ A dict specifies per action of that reviewer what the outcome is.</dd>
 <span>def <span class="ident">assertStage</span></span>(<span>client, table, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Check whether a record has a certain workflow stage.</p>
+<div class="desc"><p>Check whether a record has a certain workflow stage.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code> | <code>string</code></dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId | string</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>string</code> | <code>set</code> of <code>string</code></dt>
+<dt><strong><code>expect</code></strong> :&ensp;<code>string | set</code> of <code>string</code></dt>
 <dd>If a set, we expect one of the values in the set</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>dict</code></dt>
 <dd>The text, fields, msgs and stage of the record</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1066,26 +1066,26 @@ A dict specifies per action of that reviewer what the outcome is.</dd>
 <span>def <span class="ident">assertStartTask</span></span>(<span>client, task, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Issues a start workflow command.</p>
-<p>There are <a title="subtest.startAssessment" href="#subtest.startAssessment"><code>startAssessment()</code></a> and <code>startReview</code> tasks that create a record,
+<div class="desc"><p>Issues a start workflow command.</p>
+<p>There are <code><a title="subtest.startAssessment" href="#subtest.startAssessment">startAssessment()</a></code> and <code>startReview</code> tasks that create a record,
 and there are task that set a field in an existing recordd.</p>
 <p>Tasks take as arguments the eid of a record in a table.</p>
 <p>The response texts will be analysed into messages and fields.
 For start tasks, the new eid will be read off and returned, otherwise None is returned.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>fixture</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>fixture</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id that is the argumenent for the workflow task.</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>eid</code></strong> :&ensp;<code>str</code>(<code>ObjectId</code>) | <code>None</code></dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>str(ObjectId) |</code>None``</dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1129,18 +1129,18 @@ For start tasks, the new eid will be read off and returned, otherwise None is re
 <span>def <span class="ident">assertStatus</span></span>(<span>client, url, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Get data and see whether that went right or wrong.</p>
+<div class="desc"><p>Get data and see whether that went right or wrong.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><a title="client" href="client.html"><code>client</code></a></strong> :&ensp;<code>function</code></dt>
+<dt><strong><code>client</code></strong> :&ensp;<code>function</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>url</code></strong> :&ensp;<code>string</code>(<code>url</code>)</dt>
+<dt><strong><code>url</code></strong> :&ensp;<code>string(url)</code></dt>
 <dd>The url to retrieve from the server</dd>
-<dt><strong><code>expect</code></strong> :&ensp;<code>boolean</code> | <code>int</code> | <code>set</code> of <code>int</code></dt>
+<dt><strong><code>expect</code></strong> :&ensp;<code>boolean | int | set</code> of <code>int</code></dt>
 <dd>If boolean: Whether it is expected to be successful
 If int: status code should be exactly this
 If set of int: status code should be contained in this</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1188,7 +1188,7 @@ If set of int: status code should be contained in this</dd>
 <span>def <span class="ident">assignReviewers</span></span>(<span>clients, users, aId, field, user, keep, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Verify assigning reviewers to an assessment.</p>
+<div class="desc"><p>Verify assigning reviewers to an assessment.</p>
 <p>A reviewer will be assigned to an assessment and immediately be unassigned.
 But the undo can be suppressed.</p>
 <h2 id="parameters">Parameters</h2>
@@ -1197,7 +1197,7 @@ But the undo can be suppressed.</p>
 <dd>Mapping from users to client fixtures</dd>
 <dt><strong><code>users</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Mapping of users to ids</dd>
-<dt><strong><code>aId</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>aId</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>Assessment id</dd>
 <dt><strong><code>field</code></strong> :&ensp;<code>string</code></dt>
 <dd>Reviewer field (<code>reviewerE</code> or <code>reviewerF</code>)</dd>
@@ -1207,7 +1207,7 @@ But the undo can be suppressed.</p>
 <dd>If True, the assignment will not be undone</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
 <dd>For each user a boolean saying whether that user can assign the reviewer</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1250,7 +1250,7 @@ But the undo can be suppressed.</p>
 <span>def <span class="ident">illegalize</span></span>(<span>clients, url, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Append illegal/long arguments to an url and trigger a 400 response.</p>
+<div class="desc"><p>Append illegal/long arguments to an url and trigger a 400 response.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
@@ -1258,7 +1258,7 @@ But the undo can be suppressed.</p>
 <dt><strong><code>kwargs</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Additional parameters to illegalize.
 The url will be expanded by formatting it with the <code>kwargs</code> values.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1303,18 +1303,18 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
 <span>def <span class="ident">inspectTitleAll</span></span>(<span>clients, table, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Verify the title of an item, as seen by each user.</p>
+<div class="desc"><p>Verify the title of an item, as seen by each user.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Mapping from users to client fixtures</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>the</code> <code>table</code> of <code>the</code> <code>item</code></dt>
+<dt><strong><code>table</code></strong> :&ensp;<code>the table</code> of <code>the item</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>the</code> <code>id</code> of <code>the</code> <code>item</code></dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>the id</code> of <code>the item</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The expected values, keyed per user</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1342,18 +1342,18 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
 <span>def <span class="ident">modifyTitleAll</span></span>(<span>clients, table, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Modify the title of an item, performed by each user.</p>
+<div class="desc"><p>Modify the title of an item, performed by each user.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Mapping from users to client fixtures</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>the</code> <code>table</code> of <code>the</code> <code>item</code></dt>
+<dt><strong><code>table</code></strong> :&ensp;<code>the table</code> of <code>the item</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>the</code> <code>id</code> of <code>the</code> <code>item</code></dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>the id</code> of <code>the item</code></dt>
 <dd>&nbsp;</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The expected values, keyed per user</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1383,7 +1383,7 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
 <span>def <span class="ident">sidebar</span></span>(<span>clients, amounts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Verify the sidebar.</p>
+<div class="desc"><p>Verify the sidebar.</p>
 <p>It will be verified whether each user sees the right entries,
 and that following an entry leads to the expected results.</p>
 <h2 id="parameters">Parameters</h2>
@@ -1395,7 +1395,7 @@ and that following an entry leads to the expected results.</p>
 Each instruction is a pair <code>(set of users, amount)</code>, leading
 to setting the indicated amount for the indicated users.
 The set of users can be left out, then all users are implied.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1449,17 +1449,17 @@ The set of users can be left out, then all users are implied.</dd>
 <span>def <span class="ident">startAssessment</span></span>(<span>clients, eid, expect)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Starts an assessment and deletes it immediately afterwards.</p>
+<div class="desc"><p>Starts an assessment and deletes it immediately afterwards.</p>
 <p>All users in <code>clients</code> for which there is an entry in <code>expect</code> do this.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Mapping from users to client fixtures</dd>
-<dt><strong><code>eid</code></strong> :&ensp;<code>string</code>(<code>ObjectId</code>)</dt>
+<dt><strong><code>eid</code></strong> :&ensp;<code>string(ObjectId)</code></dt>
 <dd>The id of the contribution for an assessment is started</dd>
 <dt><strong><code>expect</code></strong> :&ensp;<code>dict</code></dt>
 <dd>Per user whether the starting of an assessment succeeds or not</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1526,7 +1526,7 @@ The set of users can be left out, then all users are implied.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

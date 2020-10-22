@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.table API documentation</title>
 <meta name="description" content="Tables …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -659,18 +659,18 @@ class Table:
 <span>(</span><span>context, table)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Deals with tables.</p>
+<div class="desc"><p>Deals with tables.</p>
 <h2 id="initialization">Initialization</h2>
 <p>Store the incoming information.</p>
 <p>Set the RecordClass to a suitable derived class of Record,
-otherwise to the base class <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> itself.</p>
+otherwise to the base class <code><a title="control.record.Record" href="record.html#control.record.Record">Record</a></code> itself.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>context</code></strong> :&ensp;<code>object</code></dt>
 <dd>See below.</dd>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>See below.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1269,7 +1269,7 @@ otherwise to the base class <a title="control.record.Record" href="record.html#c
 <span>def <span class="ident">forceOpen</span></span>(<span>theEid, openEid)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>HTML attribute that trigger forced opening.</p>
+<div class="desc"><p>HTML attribute that trigger forced opening.</p>
 <p>Elements with the <code>forceopen</code> attribute will be found by Javascript
 and be forced to open after loading.</p>
 <p>We only return this attribute if <code>theId</code> is equal to <code>openEid</code>.</p>
@@ -1289,7 +1289,7 @@ add the <code>forceopen</code> attribute for a specific record.</p>
 <dl>
 <dt><code>dict</code></dt>
 <dd><code>{forceopen='1'}</code> | <code>None</code></dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1325,7 +1325,7 @@ def forceOpen(theEid, openEid):
 <span>def <span class="ident">myKind</span></span>(<span>uid, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Quickly determine the kind of reviewer that somebody is.</p>
+<div class="desc"><p>Quickly determine the kind of reviewer that somebody is.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>uid</code></strong> :&ensp;<code>ObjectId</code></dt>
@@ -1334,7 +1334,7 @@ def forceOpen(theEid, openEid):
 <dd>The review of which the user is or is not a reviewer.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>string {<code>expert</code>, <code>final</code>} | <code>None</code></p></section>
+<p>string {<code>expert</code>, <code>final</code>} | <code>None</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1369,99 +1369,99 @@ def myKind(uid, record):
 <dl>
 <dt id="control.table.Table.RecordClass"><code class="name">var <span class="ident">RecordClass</span></code></dt>
 <dd>
-<section class="desc"><p><em>class</em> The class used for manipulating records of this table.</p>
-<p>It might be the base class <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a>
+<div class="desc"><p><em>class</em> The class used for manipulating records of this table.</p>
+<p>It might be the base class <code><a title="control.record.Record" href="record.html#control.record.Record">Record</a></code>
 or one of its
-derived classes.</p></section>
+derived classes.</p></div>
 </dd>
 <dt id="control.table.Table.context"><code class="name">var <span class="ident">context</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> A <a title="control.context.Context" href="context.html#control.context.Context"><code>Context</code></a> singleton.</p></section>
+<div class="desc"><p><em>object</em> A <code><a title="control.context.Context" href="context.html#control.context.Context">Context</a></code> singleton.</p></div>
 </dd>
 <dt id="control.table.Table.countryId"><code class="name">var <span class="ident">countryId</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> The country of the current user.</p></section>
+<div class="desc"><p><em>ObjectId</em> The country of the current user.</p></div>
 </dd>
 <dt id="control.table.Table.eppn"><code class="name">var <span class="ident">eppn</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> The eppn of the current user.</p>
+<div class="desc"><p><em>ObjectId</em> The eppn of the current user.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>The eppn is the user identifying attribute from the identity provider.</p>
-</div></section>
+</div></div>
 </dd>
 <dt id="control.table.Table.fields"><code class="name">var <span class="ident">fields</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em>
+<div class="desc"><p><em>dict</em>
 Field specifications for the fields in this table.</p>
 <p>As in the xxx.yaml file in the <code>server/tables</code>, where <code>xxx</code> is the name of
-the table.</p></section>
+the table.</p></div>
 </dd>
 <dt id="control.table.Table.group"><code class="name">var <span class="ident">group</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> The permission group of the current user.</p></section>
+<div class="desc"><p><em>ObjectId</em> The permission group of the current user.</p></div>
 </dd>
 <dt id="control.table.Table.isInterTable"><code class="name">var <span class="ident">isInterTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is the inter table, i.e. <code>assessment</code>.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the table is the inter table, i.e. <code>assessment</code>.</p></div>
 </dd>
 <dt id="control.table.Table.isMainTable"><code class="name">var <span class="ident">isMainTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is the main table, i.e. <code>contrib</code>.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the table is the main table, i.e. <code>contrib</code>.</p></div>
 </dd>
 <dt id="control.table.Table.isSystemTable"><code class="name">var <span class="ident">isSystemTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is a system table.</p>
-<p>Some value tables are deemed system tables, e.g. <code>decision</code>, <code>permissionGroup</code>.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the table is a system table.</p>
+<p>Some value tables are deemed system tables, e.g. <code>decision</code>, <code>permissionGroup</code>.</p></div>
 </dd>
 <dt id="control.table.Table.isUserEntryTable"><code class="name">var <span class="ident">isUserEntryTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is one that collects user entries.</p>
+<div class="desc"><p><em>boolean</em> Whether the table is one that collects user entries.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p><code>criteriaEntry</code> and <code>reviewEntry</code>.</p>
-</div></section>
+</div></div>
 </dd>
 <dt id="control.table.Table.isUserTable"><code class="name">var <span class="ident">isUserTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is one that collects user content.</p>
+<div class="desc"><p><em>boolean</em> Whether the table is one that collects user content.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>As opposed to value tables.</p>
-</div></section>
+</div></div>
 </dd>
 <dt id="control.table.Table.isValueTable"><code class="name">var <span class="ident">isValueTable</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the table is a value table.</p>
+<div class="desc"><p><em>boolean</em> Whether the table is a value table.</p>
 <p>Value tables have records that contain representations of fixed
 values,
-e.g. disciplines, decisions, scores, and also users and criteria.</p></section>
+e.g. disciplines, decisions, scores, and also users and criteria.</p></div>
 </dd>
 <dt id="control.table.Table.itemLabels"><code class="name">var <span class="ident">itemLabels</span></code></dt>
 <dd>
-<section class="desc"><p><em>(string, string)</em> How to call an item in the table, singular and plural.</p></section>
+<div class="desc"><p><em>(string, string)</em> How to call an item in the table, singular and plural.</p></div>
 </dd>
 <dt id="control.table.Table.mayInsert"><code class="name">var <span class="ident">mayInsert</span></code></dt>
 <dd>
-<section class="desc"><p><em>boolean</em> Whether the user may insert a
-new record into this table.</p></section>
+<div class="desc"><p><em>boolean</em> Whether the user may insert a
+new record into this table.</p></div>
 </dd>
 <dt id="control.table.Table.prov"><code class="name">var <span class="ident">prov</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> Field specifications for the provenance fields.</p>
-<p>As in tables.yaml under key <code>prov</code>.</p></section>
+<div class="desc"><p><em>dict</em> Field specifications for the provenance fields.</p>
+<p>As in tables.yaml under key <code>prov</code>.</p></div>
 </dd>
 <dt id="control.table.Table.table"><code class="name">var <span class="ident">table</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> Name of the table.</p></section>
+<div class="desc"><p><em>string</em> Name of the table.</p></div>
 </dd>
 <dt id="control.table.Table.titleSortkey"><code class="name">var <span class="ident">titleSortkey</span></code></dt>
 <dd>
-<section class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p></section>
+<div class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p></div>
 </dd>
 <dt id="control.table.Table.uid"><code class="name">var <span class="ident">uid</span></code></dt>
 <dd>
-<section class="desc"><p><em>ObjectId</em> The id of the current user.</p></section>
+<div class="desc"><p><em>ObjectId</em> The id of the current user.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1470,7 +1470,7 @@ new record into this table.</p></section>
 <span>def <span class="ident">adjustWorkflow</span></span>(<span>self, contribId, new=True)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Adjust the <a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a>
+<div class="desc"><p>Adjust the <code><a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem">WorkflowItem</a></code>
 that is dependent on changed data.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -1479,7 +1479,7 @@ that is dependent on changed data.</p>
 <dt><strong><code>new</code></strong> :&ensp;<code>boolean</code>, optional <code>True</code></dt>
 <dd>If <code>True</code>, insert the computed workflow as a new item;
 otherwise update the existing item.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1510,19 +1510,19 @@ otherwise update the existing item.</dd>
 <span>def <span class="ident">creators</span></span>(<span>self, record, table, kind=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Retrieve the workflow attribute <code>creators</code> from a record, if existing.</p>
+<div class="desc"><p>Retrieve the workflow attribute <code>creators</code> from a record, if existing.</p>
 <p>This is a quick and direct way to retrieve workflow info for a record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The full record</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code> {<code>contrib</code>, <code>assessment</code>, <code>review</code>}</dt>
+<dt><strong><code>table</code></strong> :&ensp;<code>string {contrib, assessment, review}</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}, optional <code>None</code></dt>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string {</code>expert<code>, </code>final<code>}</code>, optional <code>None</code></dt>
 <dd>Only if we want review attributes</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>(list of ObjectId) | <code>None</code></p></section>
+<p>(list of ObjectId) | <code>None</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1555,11 +1555,11 @@ otherwise update the existing item.</dd>
 <span>def <span class="ident">insert</span></span>(<span>self, force=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Insert a new, (blank) record into the table.</p>
+<div class="desc"><p>Insert a new, (blank) record into the table.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The permission is defined upon intialization of the record.
-See <a title="control.table.Table" href="#control.table.Table"><code>Table</code></a> .</p>
+See <code><a title="control.table.Table" href="#control.table.Table">Table</a></code> .</p>
 <p>The rules are:
 *
 authenticated users may create new records in the main user tables:
@@ -1585,7 +1585,7 @@ records in other tables. The code for specific tables will instruct so.</p>
 <dl>
 <dt><code>ObjectId</code></dt>
 <dd>id of the inserted item</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1641,8 +1641,8 @@ records in other tables. The code for specific tables will instruct so.</p>
 <span>def <span class="ident">insertButton</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Present an insert button on the interface.</p>
-<p>Only if the user has rights to insert new items in this table.</p></section>
+<div class="desc"><p>Present an insert button on the interface.</p>
+<p>Only if the user has rights to insert new items in this table.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1672,7 +1672,7 @@ records in other tables. The code for specific tables will instruct so.</p>
 <span>def <span class="ident">mayList</span></span>(<span>self, action=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Checks permission for a list action.</p>
+<div class="desc"><p>Checks permission for a list action.</p>
 <p>Hera are the rules:</p>
 <ul>
 <li>all users may see the whole contrib table (not all fields!);</li>
@@ -1694,7 +1694,7 @@ the user may see the list of all records.</dd>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1732,7 +1732,7 @@ the user may see the list of all records.</dd>
 <span>def <span class="ident">myFinished</span></span>(<span>self, uid, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Quickly determine whethe somebody is done reviewing.</p>
+<div class="desc"><p>Quickly determine whethe somebody is done reviewing.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>uid</code></strong> :&ensp;<code>ObjectId</code></dt>
@@ -1746,7 +1746,7 @@ has the final reviewer already decided anyway?</p>
 <dl>
 <dt><code>bool</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1784,7 +1784,7 @@ has the final reviewer already decided anyway?</p>
 <span>def <span class="ident">readable</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Is the record readable?</p>
+<div class="desc"><p>Is the record readable?</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Readibility is a workflow condition.
@@ -1800,7 +1800,7 @@ to find out.</p>
 <dl>
 <dt><code>boolean</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1830,7 +1830,7 @@ to find out.</p>
 <span>def <span class="ident">record</span></span>(<span>self, eid=None, record=None, withDetails=False, readonly=False, bodyMethod=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Factory function to wrap a record object around the data of a record.</p>
+<div class="desc"><p>Factory function to wrap a record object around the data of a record.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only
@@ -1849,15 +1849,15 @@ one of <code>eid</code> or <code>record</code> needs to be passed.</p>
 <dt><strong><code>bodyMethod</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
 <dd>How to compose the HTML for the body of the record.
 If <code>None</code> is passed, the default will be chosen:
-<a title="control.record.Record.body" href="record.html#control.record.Record.body"><code>Record.body()</code></a>.
+<code><a title="control.record.Record.body" href="record.html#control.record.Record.body">Record.body()</a></code>.
 Some particular tables have their own implementation of <code>body()</code>
 and they may supply alternative body methods as well.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>object</code></dt>
-<dd>A <a title="control.record.Record" href="record.html#control.record.Record"><code>Record</code></a> object.</dd>
-</dl></section>
+<dd>A <code><a title="control.record.Record" href="record.html#control.record.Record">Record</a></code> object.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1907,19 +1907,19 @@ and they may supply alternative body methods as well.</dd>
 <span>def <span class="ident">stage</span></span>(<span>self, record, table, kind=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Retrieve the workflow attribute <code>stage</code> from a record, if existing.</p>
+<div class="desc"><p>Retrieve the workflow attribute <code>stage</code> from a record, if existing.</p>
 <p>This is a quick and direct way to retrieve workflow info for a record.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>record</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The full record</dd>
-<dt><strong><code>table</code></strong> :&ensp;<code>string</code> {<code>contrib</code>, <code>assessment</code>, <code>review</code>}</dt>
+<dt><strong><code>table</code></strong> :&ensp;<code>string {contrib, assessment, review}</code></dt>
 <dd>&nbsp;</dd>
-<dt><strong><code>kind</code></strong> :&ensp;<code>string</code> {<code>expert</code>, <code>final</code>}, optional <code>None</code></dt>
+<dt><strong><code>kind</code></strong> :&ensp;<code>string {</code>expert<code>, </code>final<code>}</code>, optional <code>None</code></dt>
 <dd>Only if we want review attributes</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>string | <code>None</code></p></section>
+<p>string | <code>None</code></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1952,7 +1952,7 @@ and they may supply alternative body methods as well.</dd>
 <span>def <span class="ident">title</span></span>(<span>self, record)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fast way to get a title on the basis of the record only.</p>
+<div class="desc"><p>Fast way to get a title on the basis of the record only.</p>
 <p>When record titles have to be generated for many records in a list,
 we forego the sophistications of the special tables, and we pick some
 fields from the record itself.</p>
@@ -1969,7 +1969,7 @@ fields from the record itself.</p>
 <dl>
 <dt><code>string</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2007,7 +2007,7 @@ fields from the record itself.</p>
 <span>def <span class="ident">withInsert</span></span>(<span>self, action)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2029,7 +2029,7 @@ fields from the record itself.</p>
 <span>def <span class="ident">wrap</span></span>(<span>self, openEid, action=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap the list of records into HTML.</p>
+<div class="desc"><p>Wrap the list of records into HTML.</p>
 <table>
 <thead>
 <tr>
@@ -2069,7 +2069,7 @@ fields from the record itself.</p>
 </tbody>
 </table>
 <p>Permissions will be checked before executing one of these list actions.
-See <a title="control.table.Table.mayList" href="#control.table.Table.mayList"><code>Table.mayList()</code></a>.</p>
+See <code><a title="control.table.Table.mayList" href="#control.table.Table.mayList">Table.mayList()</a></code>.</p>
 <div class="admonition caution">
 <p class="admonition-title">Workflow restrictions</p>
 <p>There might be additional restrictions on individual records
@@ -2091,15 +2091,15 @@ so that the usercan start filling in the blank record straightaway.</p>
 <dl>
 <dt><strong><code>openEid</code></strong> :&ensp;<code>ObjectId</code></dt>
 <dd>The id of a record that must forcibly be opened.</dd>
-<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dt><strong><code>action</code></strong> :&ensp;<code>string</code>, optional<code>, </code>None``</dt>
 <dd>If present, a specific record selection will be presented,
 otherwise all records go to the interface.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2282,7 +2282,7 @@ otherwise all records go to the interface.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

@@ -1,5 +1,13 @@
 # News
 
+## 2020-10-22
+
+* Bulk import has caused duplicate entries for keywords and disciplines of contributions.
+* Fix-1: the bulkimport script will not do that again.
+* Fix-2: there is a clean-dup script that can clean the database from all duplicate values.
+* The clean-dup script has been run on the production database
+  (after making a backup).
+
 ## 2020-07-08
 
 *   Bulk import via spreadsheets has been adapted to the format of the Czech

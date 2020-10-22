@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.context API documentation</title>
 <meta name="description" content="All context info …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -209,6 +209,31 @@ class Context:
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
 
+    def refreshCache(self):
+        &#34;&#34;&#34;Refresh the cache.
+
+        All values stored in value tables will be cached.
+        But all workers will end up with their own cache.
+        They signal each other when to refresh their caches if they change one of these
+        values.
+
+        But you can also manually trigger all workers to refresh their caches.
+
+        Returns
+        -------
+        bool
+            Whether the cache refreshing has been executed.
+        &#34;&#34;&#34;
+
+        auth = self.auth
+        db = self.db
+
+        done = False
+        if auth.sysadmin():
+            db.recollect(True)
+            done = True
+        return done
+
     def resetWorkflow(self):
         &#34;&#34;&#34;Recompute the workflow table.
 
@@ -348,7 +373,7 @@ class Context:
 <span>(</span><span>db, wf, auth)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Combines low-level classes and adds caching.</p>
+<div class="desc"><p>Combines low-level classes and adds caching.</p>
 <p>Several classes deal with database data,
 and they
 might be needed all over the place, so we combine them in a
@@ -399,20 +424,20 @@ just for the duration of requests.</p>
 <tr>
 <td>MongoDb</td>
 <td>permanent</td>
-<td>the workflow table, see <a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a></td>
+<td>the workflow table, see <code><a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow">Workflow</a></code></td>
 </tr>
 <tr>
-<td><a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a></td>
+<td><code><a title="control.db.Db" href="db.html#control.db.Db">Db</a></code></td>
 <td>worker process</td>
 <td>cache for all data in all value tables</td>
 </tr>
 <tr>
-<td><a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a></td>
+<td><code><a title="control.auth.Auth" href="auth.html#control.auth.Auth">Auth</a></code></td>
 <td>request</td>
 <td>holds current user data</td>
 </tr>
 <tr>
-<td><a title="control.context.Context.cache" href="#control.context.Context.cache"><code>Context.cache</code></a></td>
+<td><code><a title="control.context.Context.cache" href="#control.context.Context.cache">Context.cache</a></code></td>
 <td>request</td>
 <td>cache for some records inuser tables</td>
 </tr>
@@ -446,7 +471,7 @@ But this happens very rarely.</p>
 <p>Another worker may have changed a value in a value table.
 Then our cache of that table is invalid.
 We detect it by inspecting the table <code>collect</code> in MongoDb.
-See <a title="control.db.Db.recollect" href="db.html#control.db.Db.recollect"><code>Db.recollect()</code></a>.</p>
+See <code><a title="control.db.Db.recollect" href="db.html#control.db.Db.recollect">Db.recollect()</a></code>.</p>
 </div>
 <h2 id="initialization">Initialization</h2>
 <p>Creates a context singleton and initializes its cache.</p>
@@ -460,7 +485,7 @@ to which it adds caching.</p>
 <dd>See below.</dd>
 <dt><strong><code>auth</code></strong> :&ensp;<code>object</code></dt>
 <dd>See below.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -620,6 +645,31 @@ to which it adds caching.</p>
             db.getItem, N.getItem, [table, eid], table, eid, requireFresh,
         )
 
+    def refreshCache(self):
+        &#34;&#34;&#34;Refresh the cache.
+
+        All values stored in value tables will be cached.
+        But all workers will end up with their own cache.
+        They signal each other when to refresh their caches if they change one of these
+        values.
+
+        But you can also manually trigger all workers to refresh their caches.
+
+        Returns
+        -------
+        bool
+            Whether the cache refreshing has been executed.
+        &#34;&#34;&#34;
+
+        auth = self.auth
+        db = self.db
+
+        done = False
+        if auth.sysadmin():
+            db.recollect(True)
+            done = True
+        return done
+
     def resetWorkflow(self):
         &#34;&#34;&#34;Recompute the workflow table.
 
@@ -748,29 +798,29 @@ to which it adds caching.</p>
 <dl>
 <dt id="control.context.Context.auth"><code class="name">var <span class="ident">auth</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The <a title="control.auth.Auth" href="auth.html#control.auth.Auth"><code>Auth</code></a> singleton</p>
-<p>Provides methods to access the attributes of the current user.</p></section>
+<div class="desc"><p><em>object</em> The <code><a title="control.auth.Auth" href="auth.html#control.auth.Auth">Auth</a></code> singleton</p>
+<p>Provides methods to access the attributes of the current user.</p></div>
 </dd>
 <dt id="control.context.Context.cache"><code class="name">var <span class="ident">cache</span></code></dt>
 <dd>
-<section class="desc"><p><em>dict</em> The cache to store items from the database.</p>
-<p>The cache lives as long as the request.</p></section>
+<div class="desc"><p><em>dict</em> The cache to store items from the database.</p>
+<p>The cache lives as long as the request.</p></div>
 </dd>
 <dt id="control.context.Context.db"><code class="name">var <span class="ident">db</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> singleton</p>
+<div class="desc"><p><em>object</em> The <code><a title="control.db.Db" href="db.html#control.db.Db">Db</a></code> singleton</p>
 <p>Provides methods to retrieve user
-info from the database and store user info there.</p></section>
+info from the database and store user info there.</p></div>
 </dd>
 <dt id="control.context.Context.types"><code class="name">var <span class="ident">types</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The <a title="control.typ.types.Types" href="typ/types.html#control.typ.types.Types"><code>Types</code></a> singleton</p>
-<p>Provides methods to deal with values and their types.</p></section>
+<div class="desc"><p><em>object</em> The <code><a title="control.typ.types.Types" href="typ/types.html#control.typ.types.Types">Types</a></code> singleton</p>
+<p>Provides methods to deal with values and their types.</p></div>
 </dd>
 <dt id="control.context.Context.wf"><code class="name">var <span class="ident">wf</span></code></dt>
 <dd>
-<section class="desc"><p><em>object</em> The <a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow"><code>Workflow</code></a> singleton</p>
-<p>Provides methods to handle workflow.</p></section>
+<div class="desc"><p><em>object</em> The <code><a title="control.workflow.compute.Workflow" href="workflow/compute.html#control.workflow.compute.Workflow">Workflow</a></code> singleton</p>
+<p>Provides methods to handle workflow.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -779,14 +829,14 @@ info from the database and store user info there.</p></section>
 <span>def <span class="ident">deleteItem</span></span>(<span>self, table, eid)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Delete a record and also remove it from the cache.</p>
+<div class="desc"><p>Delete a record and also remove it from the cache.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table which holds the record to be deleted.</dd>
 <dt><strong><code>eid</code></strong> :&ensp;<code>ObjectId</code></dt>
 <dd>(Entity) id of the record to be deleted.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -819,12 +869,12 @@ info from the database and store user info there.</p></section>
 <span>def <span class="ident">getCached</span></span>(<span>self, method, methodName, methodArgs, table, eid, requireFresh)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Helper to wrap caching around a raw Db fetch method.</p>
+<div class="desc"><p>Helper to wrap caching around a raw Db fetch method.</p>
 <p>Only for methods that fetch single records.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>method</code></strong> :&ensp;<code>function</code></dt>
-<dd>The raw <a title="control.db.Db" href="db.html#control.db.Db"><code>Db</code></a> method.</dd>
+<dd>The raw <code><a title="control.db.Db" href="db.html#control.db.Db">Db</a></code> method.</dd>
 <dt><strong><code>methodName</code></strong> :&ensp;<code>string</code></dt>
 <dd>The name of the raw Db method. Only used to display if cache
 debugging is on.</dd>
@@ -842,7 +892,7 @@ fetched value in the cache.</dd>
 <dl>
 <dt><code>mixed</code></dt>
 <dd>Whatever the underlying fetch method returns or would return.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -894,7 +944,7 @@ fetched value in the cache.</dd>
 <span>def <span class="ident">getItem</span></span>(<span>self, table, eid, requireFresh=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch an item from the database, possibly from cache.</p>
+<div class="desc"><p>Fetch an item from the database, possibly from cache.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -909,7 +959,7 @@ fetched value in the cache.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>The record as a dict.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -950,7 +1000,7 @@ fetched value in the cache.</dd>
 <span>def <span class="ident">getWorkflowItem</span></span>(<span>self, contribId, requireFresh=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Fetch a single workflow record from the database, possibly from cache.</p>
+<div class="desc"><p>Fetch a single workflow record from the database, possibly from cache.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>contribId</code></strong> :&ensp;<code>ObjectId</code></dt>
@@ -963,8 +1013,8 @@ fetched value in the cache.</dd>
 <dl>
 <dt><code>dict</code></dt>
 <dd>the record wrapped in a
-<a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem"><code>WorkflowItem</code></a> singleton</dd>
-</dl></section>
+<code><a title="control.workflow.apply.WorkflowItem" href="workflow/apply.html#control.workflow.apply.WorkflowItem">WorkflowItem</a></code> singleton</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1006,11 +1056,56 @@ fetched value in the cache.</dd>
     return WorkflowItem(self, info)</code></pre>
 </details>
 </dd>
+<dt id="control.context.Context.refreshCache"><code class="name flex">
+<span>def <span class="ident">refreshCache</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Refresh the cache.</p>
+<p>All values stored in value tables will be cached.
+But all workers will end up with their own cache.
+They signal each other when to refresh their caches if they change one of these
+values.</p>
+<p>But you can also manually trigger all workers to refresh their caches.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>Whether the cache refreshing has been executed.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def refreshCache(self):
+    &#34;&#34;&#34;Refresh the cache.
+
+    All values stored in value tables will be cached.
+    But all workers will end up with their own cache.
+    They signal each other when to refresh their caches if they change one of these
+    values.
+
+    But you can also manually trigger all workers to refresh their caches.
+
+    Returns
+    -------
+    bool
+        Whether the cache refreshing has been executed.
+    &#34;&#34;&#34;
+
+    auth = self.auth
+    db = self.db
+
+    done = False
+    if auth.sysadmin():
+        db.recollect(True)
+        done = True
+    return done</code></pre>
+</details>
+</dd>
 <dt id="control.context.Context.resetWorkflow"><code class="name flex">
 <span>def <span class="ident">resetWorkflow</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Recompute the workflow table.</p>
+<div class="desc"><p>Recompute the workflow table.</p>
 <p>The workflow table contains only information that can be derived from the
 other tables. In case the workflow table appears out of sync, a system
 administrator can trigger a clearing of the workflow table followed by
@@ -1020,7 +1115,7 @@ a recomputation of all workflow info.</p>
 <dt><code>int</code></dt>
 <dd>The number of resulting workflow records.
 If the recomputation did not take place, -1 is returned.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1077,6 +1172,7 @@ If the recomputation did not take place, -1 is returned.</dd>
 <li><code><a title="control.context.Context.getCached" href="#control.context.Context.getCached">getCached</a></code></li>
 <li><code><a title="control.context.Context.getItem" href="#control.context.Context.getItem">getItem</a></code></li>
 <li><code><a title="control.context.Context.getWorkflowItem" href="#control.context.Context.getWorkflowItem">getWorkflowItem</a></code></li>
+<li><code><a title="control.context.Context.refreshCache" href="#control.context.Context.refreshCache">refreshCache</a></code></li>
 <li><code><a title="control.context.Context.resetWorkflow" href="#control.context.Context.resetWorkflow">resetWorkflow</a></code></li>
 <li><code><a title="control.context.Context.types" href="#control.context.Context.types">types</a></code></li>
 <li><code><a title="control.context.Context.wf" href="#control.context.Context.wf">wf</a></code></li>
@@ -1088,7 +1184,7 @@ If the recomputation did not take place, -1 is returned.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.7.5" />
+<meta name="generator" content="pdoc 0.8.1" />
 <title>control.html API documentation</title>
 <meta name="description" content="HTML generation made easy …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
-<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 </head>
 <body>
@@ -738,14 +738,14 @@ class HtmlElements:
 <span>(</span><span>name)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrapping of attributes and content into an HTML element.</p>
+<div class="desc"><p>Wrapping of attributes and content into an HTML element.</p>
 <h2 id="initialization">Initialization</h2>
 <p>An HtmlElement object.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
 <dd>See below.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -855,7 +855,7 @@ class HtmlElements:
 <span>def <span class="ident">atNormal</span></span>(<span>k)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Substitute the <code>cls</code> attribute name with <code>class</code>.</p></section>
+<div class="desc"><p>Substitute the <code>cls</code> attribute name with <code>class</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -871,7 +871,7 @@ def atNormal(k):
 <span>def <span class="ident">attStr</span></span>(<span>atts, addClass=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Stringify attributes.</p>
+<div class="desc"><p>Stringify attributes.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>Attributes with value <code>True</code> are represented as bare attributes, without
@@ -896,7 +896,7 @@ Otherwise a fresh class attribute will be created.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>The serialzed attributes.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -948,7 +948,7 @@ def attStr(atts, addClass=None):
 <dl>
 <dt id="control.html.HtmlElement.name"><code class="name">var <span class="ident">name</span></code></dt>
 <dd>
-<section class="desc"><p><em>string</em> The element name.</p></section>
+<div class="desc"><p><em>string</em> The element name.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -957,15 +957,15 @@ def attStr(atts, addClass=None):
 <span>def <span class="ident">wrap</span></span>(<span>self, material, addClass=None, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wraps attributes and content into an element.</p>
+<div class="desc"><p>Wraps attributes and content into an element.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>No HTML escaping of special characters will take place.
-You have to use <a title="control.html.HtmlElements.he" href="#control.html.HtmlElements.he"><code>HtmlElements.he()</code></a> yourself.</p>
+You have to use <code><a title="control.html.HtmlElements.he" href="#control.html.HtmlElements.he">HtmlElements.he()</a></code> yourself.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>The element content. If the material is not a string but another
 iterable, the items will be joined by the empty string.</dd>
 <dt><strong><code>addClass</code></strong> :&ensp;<code>string</code></dt>
@@ -977,7 +977,7 @@ Otherwise a fresh class attribute will be created.</dd>
 <dl>
 <dt><code>string</code></dt>
 <dd>The serialzed element.</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1023,12 +1023,12 @@ Otherwise a fresh class attribute will be created.</dd>
 <span>class <span class="ident">HtmlElements</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>Wrap specific HTML elements and patterns.</p>
+<div class="desc"><p>Wrap specific HTML elements and patterns.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Nearly all elements accept an arbitrary supply of attributes
 in the <code>**atts</code> parameter, which will not further be documented.</p>
-</div></section>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1601,20 +1601,20 @@ in the <code>**atts</code> parameter, which will not further be documented.</p>
 <span>def <span class="ident">a</span></span>(<span>material, href, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>A.</p>
+<div class="desc"><p>A.</p>
 <p>Hyperlink.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>Text of the link.</dd>
 <dt><strong><code>href</code></strong> :&ensp;<code>url</code></dt>
 <dd>Destination of the link.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1644,13 +1644,13 @@ def a(material, href, **atts):
 <span>def <span class="ident">br</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>BR.</p>
+<div class="desc"><p>BR.</p>
 <p>Line break.</p>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1673,7 +1673,7 @@ def br():
 <span>def <span class="ident">checkbox</span></span>(<span>var, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>INPUT type=checkbox.</p>
+<div class="desc"><p>INPUT type=checkbox.</p>
 <p>The element to receive user clicks.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -1682,9 +1682,9 @@ def br():
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1714,18 +1714,18 @@ def checkbox(var, **atts):
 <span>def <span class="ident">dd</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DD.</p>
+<div class="desc"><p>DD.</p>
 <p>The definition part of a term.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1752,22 +1752,22 @@ def dd(material, **atts):
 <span>def <span class="ident">details</span></span>(<span>summary, material, itemkey, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DETAILS.</p>
+<div class="desc"><p>DETAILS.</p>
 <p>Collapsible details element.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>summary</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>summary</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>The summary.</dd>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>The expansion.</dd>
 <dt><strong><code>itemkey</code></strong> :&ensp;<code>string</code></dt>
 <dd>Identifier for reference from Javascript.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1802,7 +1802,7 @@ def details(summary, material, itemkey, **atts):
 <span>def <span class="ident">detailx</span></span>(<span>icons, material, itemkey, openAtts={}, closeAtts={}, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>detailx.</p>
+<div class="desc"><p>detailx.</p>
 <p>Collapsible details pseudo element.</p>
 <p>Unlike the HTML <code>details</code> element, this one allows separate open and close
 controls. There is no summary.</p>
@@ -1817,20 +1817,20 @@ under the key <code>icons</code>. The icon itself is a Unicode character.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>icons</code></strong> :&ensp;<code>string</code> | (<code>string</code>, <code>string</code>)</dt>
+<dt><strong><code>icons</code></strong> :&ensp;<code>string | (string, string)</code></dt>
 <dd>Names of the icons that open and close the element.</dd>
 <dt><strong><code>itemkey</code></strong> :&ensp;<code>string</code></dt>
 <dd>Identifier for reference from Javascript.</dd>
-<dt><strong><code>openAtts</code></strong> :&ensp;<code>dict</code>, <code>optinal</code>, <code>{}</code></dt>
+<dt><strong><code>openAtts</code></strong> :&ensp;<code>dict, optinal, </code>{}``</dt>
 <dd>Attributes for the open icon.</dd>
-<dt><strong><code>closeAtts</code></strong> :&ensp;<code>dict</code>, <code>optinal</code>, <code>{}</code></dt>
+<dt><strong><code>closeAtts</code></strong> :&ensp;<code>dict, optinal, </code>{}``</dt>
 <dd>Attributes for the close icon.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1890,17 +1890,17 @@ def detailx(
 <span>def <span class="ident">div</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DIV.</p>
+<div class="desc"><p>DIV.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1925,18 +1925,18 @@ def div(material, **atts):
 <span>def <span class="ident">dl</span></span>(<span>items, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DL.</p>
+<div class="desc"><p>DL.</p>
 <p>Definition list.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>items</code></strong> :&ensp;<code>iterable</code> of (<code>string</code>, <code>string</code>)</dt>
+<dt><strong><code>items</code></strong> :&ensp;<code>iterable</code> of <code>(string, string)</code></dt>
 <dd>These are the list items, which are term-definition pairs.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1970,18 +1970,18 @@ def dl(items, **atts):
 <span>def <span class="ident">dt</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>DT.</p>
+<div class="desc"><p>DT.</p>
 <p>Term of a definition.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2008,19 +2008,19 @@ def dt(material, **atts):
 <span>def <span class="ident">h</span></span>(<span>level, material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>H1, H2, H3, H4, H5, H6.</p>
+<div class="desc"><p>H1, H2, H3, H4, H5, H6.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>level</code></strong> :&ensp;<code>int</code></dt>
 <dd>The heading level.</dd>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>The heading content.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2048,11 +2048,11 @@ def h(level, material, **atts):
 <span>def <span class="ident">he</span></span>(<span>val)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Escape HTML characters.</p>
+<div class="desc"><p>Escape HTML characters.</p>
 <p>The following characters will be replaced by entities:</p>
 <pre><code>&amp; &lt; ' &quot;
 </code></pre>
-<p>The dollar sign will be wrapped into a <code>&lt;span&gt;</code>.</p></section>
+<p>The dollar sign will be wrapped into a <code>&lt;span&gt;</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2087,7 +2087,7 @@ def he(val):
 <span>def <span class="ident">icon</span></span>(<span>icon, asChar=False, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>icon.</p>
+<div class="desc"><p>icon.</p>
 <p>Pseudo element for an icon.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -2098,16 +2098,16 @@ under the key <code>icons</code>. The icon itself is a Unicode character.</p>
 <dl>
 <dt><strong><code>icon</code></strong> :&ensp;<code>string</code></dt>
 <dd>Name of the icon.</dd>
-<dt><strong><code>asChar</code></strong> :&ensp;<code>boolean</code>, optional, <code>False</code></dt>
+<dt><strong><code>asChar</code></strong> :&ensp;<code>boolean</code>, optional<code>, </code>False``</dt>
 <dd>If <code>True</code>, just output the icon character.
 Otherwise, wrap it in a <code>&lt;span&gt;</code> with all
 attributes that might have been passed.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2147,7 +2147,7 @@ def icon(icon, asChar=False, **atts):
 <span>def <span class="ident">iconr</span></span>(<span>itemKey, tag, msg=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>iconr.</p>
+<div class="desc"><p>iconr.</p>
 <p>Refresh icon.
 Special case of <code>iconx</code>, but used for refreshing an element.</p>
 <div class="admonition warning">
@@ -2163,14 +2163,14 @@ under the key <code>icons</code>. The icon itself is a Unicode character.</p>
 <dd>Attribute <code>tag</code>, used by Javascript for scrolling to this
 element after the refresh. It is meant to distinhuish it from
 other refresh icons for the same element.</dd>
-<dt><strong><code>msg</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dt><strong><code>msg</code></strong> :&ensp;<code>string</code>, optional<code>, </code>None``</dt>
 <dd>Message for in the tooltip.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2218,7 +2218,7 @@ def iconr(itemKey, tag, msg=None):
 <span>def <span class="ident">iconx</span></span>(<span>icon, href=None, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>iconx.</p>
+<div class="desc"><p>iconx.</p>
 <p>Pseudo element for a clickable icon.
 It will be wrapped in an <code>&lt;a href="..."&gt;...&lt;/a&gt;</code> element or a <span...>
 if <code>href</code> is <code>None</code>.</p>
@@ -2233,15 +2233,15 @@ under the key <code>icons</code>. The icon itself is a Unicode character.</p>
 <dl>
 <dt><strong><code>icon</code></strong> :&ensp;<code>string</code></dt>
 <dd>Name of the icon.</dd>
-<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional, <code>None</code></dt>
+<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional<code>, </code>None``</dt>
 <dd>Destination of the icon when clicked.
 Will be left out when equal to the empty string.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2288,7 +2288,7 @@ def iconx(icon, href=None, **atts):
 <span>def <span class="ident">img</span></span>(<span>src, href=None, title=None, imgAtts={}, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>IMG.</p>
+<div class="desc"><p>IMG.</p>
 <p>Image element.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -2300,20 +2300,20 @@ The <code>imgAtts</code> only go to the <code>&lt;img&gt;</code> element.</p>
 <dl>
 <dt><strong><code>src</code></strong> :&ensp;<code>url</code></dt>
 <dd>The url of the image.</dd>
-<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional, <code>None</code></dt>
+<dt><strong><code>href</code></strong> :&ensp;<code>url</code>, optional<code>, </code>None``</dt>
 <dd>The destination to navigate to if the image is clicked.
 The images is then wrapped in an <code>&lt;a&gt;</code> element.
 If missing, the image is not wrapped further.</dd>
-<dt><strong><code>title</code></strong> :&ensp;<code>string</code>, optional, <code>None</code></dt>
+<dt><strong><code>title</code></strong> :&ensp;<code>string</code>, optional<code>, </code>None``</dt>
 <dd>Tooltip.</dd>
 <dt><strong><code>imgAtts</code></strong> :&ensp;<code>dict</code>, optional <code>{}</code></dt>
 <dd>Attributes that go to the <code>&lt;img&gt;</code> element.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2363,23 +2363,23 @@ def img(src, href=None, title=None, imgAtts={}, **atts):
 <span>def <span class="ident">input</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>INPUT.</p>
+<div class="desc"><p>INPUT.</p>
 <p>The element to receive types user input.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Do not use this for checkboxes. Use
-<a title="control.html.HtmlElements.checkbox" href="#control.html.HtmlElements.checkbox"><code>HtmlElements.checkbox()</code></a> instead.</p>
+<code><a title="control.html.HtmlElements.checkbox" href="#control.html.HtmlElements.checkbox">HtmlElements.checkbox()</a></code> instead.</p>
 </div>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>This goes into the <code>value</code> attribute of the element, after HTML escaping.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2412,20 +2412,20 @@ def input(material, **atts):
 <span>def <span class="ident">join</span></span>(<span>material)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>fragment.</p>
+<div class="desc"><p>fragment.</p>
 <p>This is a pseudo element.
 The material will be joined together, without wrapping it in an element.
 There are no attributes.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2454,18 +2454,18 @@ def join(material):
 <span>def <span class="ident">p</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>P.</p>
+<div class="desc"><p>P.</p>
 <p>Paragraph.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2492,17 +2492,17 @@ def p(material, **atts):
 <span>def <span class="ident">script</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>SCRIPT.</p>
+<div class="desc"><p>SCRIPT.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>The Javascript.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2528,18 +2528,18 @@ def script(material, **atts):
 <span>def <span class="ident">span</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>SPAN.</p>
+<div class="desc"><p>SPAN.</p>
 <p>Inline element.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2566,7 +2566,7 @@ def span(material, **atts):
 <span>def <span class="ident">table</span></span>(<span>headers, rows, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>TABLE.</p>
+<div class="desc"><p>TABLE.</p>
 <p>The table element.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -2582,9 +2582,9 @@ into <code>&lt;th&gt;</code>.</p>
 </div>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2623,18 +2623,18 @@ def table(headers, rows, **atts):
 <span>def <span class="ident">textarea</span></span>(<span>material, **atts)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>TEXTAREA.</p>
+<div class="desc"><p>TEXTAREA.</p>
 <p>Input element for larger text, typically Markdown.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>material</code></strong> :&ensp;<code>string</code> | <code>iterable</code></dt>
+<dt><strong><code>material</code></strong> :&ensp;<code>string | iterable</code></dt>
 <dd>&nbsp;</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2662,7 +2662,7 @@ def textarea(material, **atts):
 <span>def <span class="ident">wrapTable</span></span>(<span>data, td)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Rows and cells.</p>
+<div class="desc"><p>Rows and cells.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt>data: iterable of iterables.</dt>
@@ -2673,9 +2673,9 @@ to wrapping them in either <code>&lt;th&gt;</code> or <code>&lt;td&gt;</code> el
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>string</code>(<code>html</code>)</dt>
+<dt><code>string(html)</code></dt>
 <dd>&nbsp;</dd>
-</dl></section>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2768,7 +2768,7 @@ def wrapTable(data, td):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad()</script>
