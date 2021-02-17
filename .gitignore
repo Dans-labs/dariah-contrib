@@ -19,6 +19,7 @@ errors/*
 cache/*
 site/*
 .cache/*
+_local
 _temp
 _temp/*
 __pycache__/*

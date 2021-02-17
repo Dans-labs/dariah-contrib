@@ -1,5 +1,12 @@
 # News
 
+## 2021-02-17
+
+* The bulk import script assumed that the cost field was called `cost`. The proper name is
+  `costTotal`.
+  The script now uses the new name. Hower, it still accepts spreadsheets in which the column header
+  reads `cost` and it will silently convert that to `costTotal`.
+
 ## 2020-10-22
 
 * Representation of users on the interface has been fixed: there was a subtle bug:

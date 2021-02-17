@@ -48,7 +48,7 @@ FIELDS = set(
     typeContribution
     vcc
     description
-    cost
+    costTotal
     costDescription
     contactPersonName
     contactPersonEmail
@@ -60,6 +60,10 @@ FIELDS = set(
     discipline
     keyword
 """.strip().split()
+)
+
+FIELD_ALIAS = dict(
+    cost="costTotal",
 )
 
 OBLIGATORY = set(
@@ -238,6 +242,8 @@ def doSheet(fileName):
 
     for (i, cell) in enumerate(headRow):
         field = cell.value
+        if field in FIELD_ALIAS:
+            field = FIELD_ALIAS[field]
         if field is None:
             continue
         if field not in FIELDS:
