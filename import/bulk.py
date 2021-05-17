@@ -1,6 +1,6 @@
 import sys
 import os
-from itertools import chain
+import re
 from datetime import datetime as dt
 from shutil import move
 
@@ -130,6 +130,8 @@ VALUES = {}
 CREATOR_ID = None
 CREATOR_NAME = "HaSProject"
 
+FIELD_SEP = re.compile(r"""[ \t]*[,\n]+[ \t]*""")
+
 
 def info(x):
     sys.stdout.write("{}\n".format(x))
@@ -153,6 +155,10 @@ def rep(table, r):
         if table in ALLOW_NEW
         else r["rep"]
     )
+
+
+def multiValue(value):
+    return tuple(FIELD_SEP.split(value)) if value else []
 
 
 def readValueTables():
@@ -327,16 +333,7 @@ def doSheet(fileName):
         if "editors" in contrib:
             posRep = f"\trow {r + 2} column editors:"
             value = contrib["editors"]
-            value = (
-                tuple(
-                    line.strip()
-                    for line in chain.from_iterable(
-                        line.split(",") for line in value.splitlines()
-                    )
-                )
-                if value
-                else []
-            )
+            value = multiValue(value)
             vals = []
             for val in value:
                 editorId = checkEmail(val, posRep)
@@ -356,26 +353,17 @@ def doSheet(fileName):
             posRep = f"\trow {r + 2} column {field}:"
 
             if field in MULTIPLE - {"editors"}:
-                value = (
-                    tuple(
-                        line.strip()
-                        for line in chain.from_iterable(
-                            line.split(",") for line in value.splitlines()
-                        )
-                    )
-                    if value
-                    else []
-                )
+                value = multiValue(value)
 
             if field == "country":
-                countryId = VALUES["country"].get(value.upper(), None)
+                countryId = VALUES["country"].get(value.upper().strip(), None)
                 if countryId:
                     value = countryId
                 else:
                     error(f"{posRep} not a member country of DARIAH: `{value}`")
                     good = False
             elif field == "year":
-                yearId = VALUES["year"].get(str(value), None)
+                yearId = VALUES["year"].get(str(value).strip(), None)
                 if yearId:
                     value = yearId
                 else:
@@ -391,7 +379,7 @@ def doSheet(fileName):
                 if field in MULTIPLE:
                     valueId = []
                     for val in value:
-                        valId = getVal(field, val, r)
+                        valId = getVal(field, val.strip(), r)
                         if valId is None:
                             good = False
                         else:
@@ -400,7 +388,7 @@ def doSheet(fileName):
                     if value is None:
                         valueId = None
                     else:
-                        valueId = getVal(field, value, r)
+                        valueId = getVal(field, value.strip(), r)
                         if valueId is None:
                             good = False
                 value = valueId
@@ -574,7 +562,7 @@ for inFile in files:
             info("Moved spreadsheet to /done")
         else:
             info(
-                "Left spreadsheet to /done because not all of its data has been imported"
+                "Left spreadsheet to /todo because not all of its data has been imported"
             )
 
 recollectTables()

@@ -111,8 +111,8 @@ DB_PROD="dariah"
 
 BACKUP_PROD="/home/dirkr/backups"
 BULK_PROD="/home/dirkr/bulk"
-BACKUP_DEV=~/Documents/DANS/projects/dariah/backups
-BULK_DEV=~/Documents/DANS/projects/dariah/bulk
+BACKUP_DEV=~/Documents/projects/dariah/backups
+BULK_DEV=~/Documents/projects/dariah/bulk
 
 if [[ "$HOSTNAME" == "$HOST_TEST" || "$HOSTNAME" == "$HOST_PROD" ]]; then
     ON_DANS="1"
