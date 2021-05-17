@@ -103,7 +103,7 @@ ALLOW_NEW = set(
 
 NUMBER = set(
     """
-    cost
+    costTotal
 """.strip().split()
 )
 
@@ -226,6 +226,18 @@ def getVal(field, val, r):
             error(f"\trow {r + 2} column {field}: unknown value `{val}`")
             valId = None
     return valId
+
+
+def intLike(val):
+    if val is None:
+        return (None, True, None)
+    if type(val) is int:
+        return (val, True, None)
+    if type(val) is str:
+        if not val.startswith("0") and val.isdigit():
+            return (int(val), True, f"converted from string `{val}`")
+        return (None, False, f"string `{val}` cannot be converted to an integer")
+    return (None, False, f"{type(val).__name__} `{val}` cannot be converted to an integer")
 
 
 def doSheet(fileName):
@@ -394,17 +406,25 @@ def doSheet(fileName):
                 value = valueId
             elif field in NUMBER:
                 if field in MULTIPLE:
+                    newValue = []
                     for val in value:
-                        if val is not None and type(val) is not int and (
-                            str(val).startswith("0") or not str(val).isdigit()
-                        ):
-                            error(f"{posRep} not a number `{value}`")
+                        (fVal, fGood, fError) = intLike(val)
+                        if fGood:
+                            newValue.append(fVal)
+                            if fError:
+                                info(f"{posRep} {fError}")
+                        else:
+                            error(f"{posRep} {fError}")
                             good = False
+                    value = newValue
                 else:
-                    if value is not None and type(value) is not int and (
-                        str(value).startswith("0") or not str(value).isdigit()
-                    ):
-                        error(f"{posRep} not a number `{value}`")
+                    (fValue, fGood, fError) = intLike(value)
+                    if fGood:
+                        newValue = fValue
+                        if fError:
+                            info(f"{posRep} {fError}")
+                    else:
+                        error(f"{posRep} {fError}")
                         good = False
 
             contrib[field] = value
@@ -491,13 +511,17 @@ def doSheet(fileName):
             )
         )
         if ACTION == "i":
+            cost = contrib.get("costTotal", None)
+            costRep = "??" if cost is None else cost
+            costTp = "" if cost is None else type(cost).__name__
+            costRep = f"{costRep} ({costTp})"
             if candidates:
-                info(f"\t0 {contrib['title']}")
+                info(f"\t0 {contrib['title']} {costRep}")
                 exist += 1
             else:
                 DB.contrib.insert_one(contrib)
                 result += 1
-                info(f"\t+ {contrib['title']}")
+                info(f"\t+ {contrib['title']} {costRep}")
         elif ACTION == "x":
             if not candidates:
                 info(f"\t? {contrib['title']}")
