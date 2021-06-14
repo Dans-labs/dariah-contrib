@@ -550,7 +550,7 @@ class Db:
         activeOptions = {
             G(G(OPTIONS, cond), N.table): crit == ONE
             for (cond, crit) in conditions.items()
-            if crit in {ONE, MINONE}
+            if crit == ONE or crit == MINONE
         }
         if None in activeOptions:
             del activeOptions[None]

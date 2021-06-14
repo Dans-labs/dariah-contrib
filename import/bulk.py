@@ -526,6 +526,7 @@ def doSheet(fileName):
             if not candidates:
                 info(f"\t? {contrib['title']}")
                 notexist += 1
+                print(contrib)
             for cand in candidates:
                 isPristine = cand.get("isPristine", False)
                 if isPristine:

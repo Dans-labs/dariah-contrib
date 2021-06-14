@@ -1,6 +1,7 @@
 ============================= test session starts ==============================
-platform darwin -- Python 3.8.5, pytest-5.4.3, py-1.8.1, pluggy-0.13.1
-rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, inifile: pytest.ini, testpaths: tests
+platform darwin -- Python 3.9.5, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, configfile: pytest.ini, testpaths: tests
+plugins: anyio-2.2.0, ordering-0.6
 collected 185 items
 
 tests/test_00_app10.py ...................                            [ 19/185]
@@ -17,7 +18,69 @@ tests/test_40_assess30.py ............................                [164/185]
 tests/test_50_review10.py ........                                    [172/185]
 tests/test_50_review20.py .............                               [185/185]
 
-======================= 185 passed in 126.91s (0:02:06) ========================
+=============================== warnings summary ===============================
+../../../../../../Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:31
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:31: DeprecationWarning: Importing 'itsdangerous.json' is deprecated and will be removed in 2.1. Use Python's 'json' module instead.
+    _slash_escape = "\\/" not in _json.dumps("/")
+
+../../../../../../Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:61
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:61: DeprecationWarning: Importing 'itsdangerous.json' is deprecated and will be removed in 2.1. Use Python's 'json' module instead.
+    class JSONEncoder(_json.JSONEncoder):
+
+../../../../../../Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:103
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:103: DeprecationWarning: Importing 'itsdangerous.json' is deprecated and will be removed in 2.1. Use Python's 'json' module instead.
+    class JSONDecoder(_json.JSONDecoder):
+
+tests/test_00_app10.py: 6805 warnings
+tests/test_10_factory10.py: 77 warnings
+tests/test_20_users10.py: 285 warnings
+tests/test_30_contrib10.py: 4041 warnings
+tests/test_30_contrib20.py: 1208 warnings
+tests/test_30_contrib30.py: 449 warnings
+tests/test_30_contrib40.py: 213 warnings
+tests/test_30_contrib50.py: 1736 warnings
+tests/test_40_assess10.py: 3951 warnings
+tests/test_40_assess20.py: 166 warnings
+tests/test_40_assess30.py: 4888 warnings
+tests/test_50_review10.py: 2311 warnings
+tests/test_50_review20.py: 4875 warnings
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:211: DeprecationWarning: Importing 'itsdangerous.json' is deprecated and will be removed in 2.1. Use Python's 'json' module instead.
+    rv = _json.dumps(obj, **kwargs)
+
+tests/test_00_app10.py: 2148 warnings
+tests/test_10_factory10.py: 22 warnings
+tests/test_20_users10.py: 71 warnings
+tests/test_30_contrib10.py: 619 warnings
+tests/test_30_contrib20.py: 193 warnings
+tests/test_30_contrib30.py: 79 warnings
+tests/test_30_contrib40.py: 32 warnings
+tests/test_30_contrib50.py: 425 warnings
+tests/test_40_assess10.py: 719 warnings
+tests/test_40_assess20.py: 29 warnings
+tests/test_40_assess30.py: 898 warnings
+tests/test_50_review10.py: 394 warnings
+tests/test_50_review20.py: 1055 warnings
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/app.py:2113: DeprecationWarning: 'BaseResponse' is deprecated and will be removed in Werkzeug version 2.1. Use 'isinstance(obj, Response)' instead.
+    elif isinstance(rv, BaseResponse) or callable(rv):
+
+tests/test_00_app10.py: 3644 warnings
+tests/test_10_factory10.py: 32 warnings
+tests/test_20_users10.py: 128 warnings
+tests/test_30_contrib10.py: 1722 warnings
+tests/test_30_contrib20.py: 540 warnings
+tests/test_30_contrib30.py: 200 warnings
+tests/test_30_contrib40.py: 80 warnings
+tests/test_30_contrib50.py: 745 warnings
+tests/test_40_assess10.py: 1711 warnings
+tests/test_40_assess20.py: 71 warnings
+tests/test_40_assess30.py: 2130 warnings
+tests/test_50_review10.py: 993 warnings
+tests/test_50_review20.py: 2155 warnings
+  /Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/Flask-1.1.2-py3.9.egg/flask/json/__init__.py:253: DeprecationWarning: Importing 'itsdangerous.json' is deprecated and will be removed in 2.1. Use Python's 'json' module instead.
+    return _json.loads(s, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+=============== 185 passed, 51843 warnings in 168.96s (0:02:48) ================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
       4786        331        6.2       14.5
