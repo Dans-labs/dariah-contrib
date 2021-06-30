@@ -30,17 +30,22 @@ class ReviewEntryR(Record):
         uid = self.uid
         record = self.record
 
+        markup = kwargs.get("markup", True)
         creatorId = G(record, N.creator)
-
+        creator = self.field(N.creator).wrapBare(markup=markup)
         youRep = f""" ({N.you})""" if creatorId == uid else E
+
         lastModified = G(record, N.modified)
         lastModifiedRep = (
             self.field(N.modified).value[-1].rsplit(DOT, maxsplit=1)[0]
             if lastModified
-            else Qu
+            else ("not modified" if markup is None else Qu)
         )
-
-        return H.span(f"""{lastModifiedRep}{youRep}""", cls=f"rentrytitle")
+        return (
+            H.span(f"""{lastModifiedRep}{creator}{youRep}""", cls="rentrytitle")
+            if markup
+            else f"""{lastModifiedRep}{creator}{youRep}"""
+        )
 
     def bodyCompact(self, **kwargs):
         perm = self.perm
@@ -54,4 +59,4 @@ class ReviewEntryR(Record):
             + """<!-- end review comment -->"""
         )
 
-        return H.div([theTitle, comments], cls=f"reviewentry")
+        return H.div([theTitle, comments], cls="reviewentry")

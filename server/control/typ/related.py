@@ -63,15 +63,16 @@ class Related(TypeBase):
         result = self.title(eid=val, markup=markup)
         return result[1] if markup else result
 
-    def titleStr(self, record):
-        return H.he(G(record, N.title)) or H.he(G(record, N.rep)) or Qq
+    def titleStr(self, record, markup=True):
+        valBare = (
+            G(record, N.title) or G(record, N.rep) or (E if markup is None else Qq)
+        )
+        return valBare if markup is None else H.he(valBare)
 
     def titleHint(self, record):
         return None
 
-    def title(
-        self, record=None, eid=None, markup=False, active=None,
-    ):
+    def title(self, record=None, eid=None, markup=False, active=None):
         """Generate a title for a rlated record.
 
         Parameters
@@ -92,7 +93,7 @@ class Related(TypeBase):
         """
 
         if record is None and eid is None:
-            return (QQ, QQ) if markup else Qq
+            return None if markup is None else (QQ, QQ) if markup else Qq
 
         table = self.name
 
@@ -100,11 +101,10 @@ class Related(TypeBase):
             context = self.context
             record = context.getItem(table, eid)
 
-        titleStr = self.titleStr(record)
+        titleStr = self.titleStr(record, markup=markup)
         titleHint = self.titleHint(record)
 
         if markup:
-
             if eid is None:
                 eid = G(record, N._id)
 
@@ -138,6 +138,8 @@ class Related(TypeBase):
         table = self.name
 
         isActual = (
-            table not in ACTUAL_TABLES or not record or G(record, N.actual, default=False)
+            table not in ACTUAL_TABLES
+            or not record
+            or G(record, N.actual, default=False)
         )
         return E if isActual else "inactual"

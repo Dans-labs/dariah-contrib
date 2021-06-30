@@ -664,6 +664,7 @@ class Db:
         list
             The result is a sorted list of records.
         """
+
         crit = {}
         if my:
             crit.update({M_OR: [{N.creator: my}, {N.editors: my}]})

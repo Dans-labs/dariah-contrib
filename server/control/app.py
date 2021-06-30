@@ -25,6 +25,7 @@ from control.context import Context
 from control.sidebar import Sidebar
 from control.topbar import Topbar
 from control.overview import Overview
+from control.api import Api
 from control.cust.factory_table import make as mkTable
 
 
@@ -325,6 +326,29 @@ def appFactory(regime, test, debug, **kwargs):
         else:
             flash("workflow not recomputed", "error")
         return redirectResult(START, nWf >= 0)
+
+    # API CALLS
+
+    @app.route('/api/db/<string:table>/<string:eid>', methods=['GET', 'POST'])
+    def serveApiDbView(table, eid):
+        checkBounds(table=table, eid=eid)
+        context = getContext()
+        auth.authenticate()
+        return Api(context).view(table, eid)
+
+    @app.route('/api/db/<string:table>', methods=['GET', 'POST'])
+    def serveApiDbList(table):
+        checkBounds(table=table)
+        context = getContext()
+        auth.authenticate()
+        return Api(context).list(table)
+
+    @app.route('/api/db/<path:verb>', methods=['GET', 'POST'])
+    def serveApiDb(verb):
+        checkBounds()
+        context = getContext()
+        auth.authenticate()
+        return Api(context).do(verb)
 
     # WORKFLOW TASKS
 

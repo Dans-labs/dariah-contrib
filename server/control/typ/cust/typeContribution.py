@@ -15,16 +15,17 @@ class TypeContribution(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record):
+    def titleStr(self, record, markup=True):
         """Put the main type and the sub type in the title."""
 
         if not record:
-            return Qq
+            return E if markup is None else Qq
 
         mainType = G(record, N.mainType) or E
         subType = G(record, N.subType) or E
         sep = WHYPHEN if mainType and subType else E
-        return H.he(f"""{mainType}{sep}{subType}""")
+        valBare = f"""{mainType}{sep}{subType}"""
+        return valBare if markup is None else H.he(valBare)
 
     def titleHint(self, record):
         return H.join(G(record, N.explanation) or [])

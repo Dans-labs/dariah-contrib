@@ -125,24 +125,24 @@ class Record:
     def getDelPerm(self):
         """Compute the delete permission for this record.
 
-            The unbreakable rule is:
-            *   Records with dependencies cannot be deleted if the dependencies
-                are not configured as `cascade-delete` in tables.yaml.
+        The unbreakable rule is:
+        *   Records with dependencies cannot be deleted if the dependencies
+            are not configured as `cascade-delete` in tables.yaml.
 
-            The next rules are workflow rules:
+        The next rules are workflow rules:
 
-            *   if a record is fixed due to workflow constraints, no one can delete it;
-            *   if a record is unfixed due to workflow, a user may delete it,
-                irrespective of normal permissions; workflow will determine
-                which records will appear unfixed to which users;
+        *   if a record is fixed due to workflow constraints, no one can delete it;
+        *   if a record is unfixed due to workflow, a user may delete it,
+            irrespective of normal permissions; workflow will determine
+            which records will appear unfixed to which users;
 
-            If these rules do not clinch it, the normal permission rules will
-            be applied:
+        If these rules do not clinch it, the normal permission rules will
+        be applied:
 
-            *   authenticated users may delete their own records in the
-                `contrib`, `assessment` and `review` tables
-            *   superusers may delete records if the configured edit
-                permissions allow them
+        *   authenticated users may delete their own records in the
+            `contrib`, `assessment` and `review` tables
+        *   superusers may delete records if the configured edit
+            permissions allow them
         """
 
         context = self.context
@@ -165,7 +165,8 @@ class Record:
         return False if fixed else normalDelPerm
 
     def reload(
-        self, record,
+        self,
+        record,
     ):
         """Re-initializes a record object if its underlying data has changed.
 
@@ -493,7 +494,7 @@ class Record:
             expanding and collapsing.
 
         !!! hint
-            Pay extra attension to the attribute `fat`!
+            Pay extra attention to the attribute `fat`!
             When it is present, it is an indication that the expanded material
             is already on the client, and that it does not have to be fetched.
 
@@ -636,6 +637,31 @@ class Record:
             else H.div(main + details)
         )
 
+    def wrapLogical(self):
+        """Wrap the record into a dict.
+
+        A record can be displayed in several states:
+
+        full details
+
+        Returns
+        -------
+        dict
+        """
+
+        table = self.table
+        fieldSpecs = self.fields
+        provSpecs = self.prov
+        myMasters = G(MASTERS, table, default=[])
+
+        record = {
+            field: self.field(field, asMaster=field in myMasters).wrapBare(markup=None)
+            for field in fieldSpecs
+            if (field not in provSpecs and not (field in myMasters))
+        }
+        record["id"] = self.eid
+        return record
+
     def deleteButton(self):
         """Show the delete button and/or the number of dependencies.
 
@@ -714,14 +740,14 @@ class Record:
             ]
         )
 
-    def title(self):
+    def title(self, markup=True):
         """Generate a title for the record."""
         record = self.record
         valid = self.valid
 
         warningCls = E if valid else " warning "
 
-        return Record.titleRaw(self, record, cls=warningCls)
+        return Record.titleRaw(self, record, cls=warningCls, markup=markup)
 
     def inActualCls(self, record):
         """Get a CSS class name for a record based on whether it is *actual*.
@@ -752,7 +778,7 @@ class Record:
         return E if isActual else "inactual"
 
     @staticmethod
-    def titleRaw(obj, record, cls=E):
+    def titleRaw(obj, record, cls=E, markup=True):
         """Generate a title for a different record.
 
         This is fast title generation.
@@ -779,9 +805,12 @@ class Record:
 
         table = obj.table
         context = obj.context
-
         types = context.types
         typesObj = getattr(types, table, None)
+        valueBare = typesObj.title(record=record)
+
+        if markup is None:
+            return valueBare
 
         inActualCls = Record.inActualCls(obj, record)
         atts = dict(cls=f"{cls} {inActualCls}")

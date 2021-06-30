@@ -6,6 +6,7 @@ gunicorn
 lxml
 markdown
 mkdocs
+mkdocs-markdownextradata-plugin
 openpyxl
 pdoc3
 pygments

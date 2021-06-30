@@ -117,8 +117,8 @@ class TypeBase:
         """
 
         if val is None:
-            return QQ if markup else Qq
-        valBare = H.he(self.normalize(str(val)))
+            return None if markup is None else QQ if markup else Qq
+        valBare = val if markup is None else H.he(self.normalize(str(val)))
         return H.span(valBare) if markup else valBare
 
     def toEdit(self, val):

@@ -36,17 +36,17 @@ perm:
   criteriaEntry: public
   reviewEntry: public
   country: public
-  criteria: office
+  criteria: public
   discipline: public
   keyword: public
   package: office
-  score: office
+  score: public
   tadirahActivity: public
   tadirahObject: public
   tadirahTechnique: public
   typeContribution: public
   user: office
-  vcc: office
+  vcc: public
   year: public
   decision: office
   permissionGroup: office

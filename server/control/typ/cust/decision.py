@@ -18,13 +18,17 @@ class Decision(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record):
+    def titleStr(self, record, markup=True):
         """The title string is a suitable icon plus the participle field."""
         decision = G(record, N.participle)
         if decision is None:
-            return Qq
-        sign = G(record, N.sign)
-        decision = f"""{sign}{NBSP}{decision}"""
+            return E if markup is None else Qq
+        sign = G(record, N.sign) or E
+        decision = (
+            f"""{sign} {decision}"""
+            if markup is None
+            else f"""{sign}{NBSP}{decision}"""
+        )
         return decision
 
     def title(
@@ -58,14 +62,14 @@ class Decision(Value):
         """
 
         if record is None and eid is None:
-            return (QQ, QQ) if markup else Qq
+            return None if markup is None else (QQ, QQ) if markup else Qq
 
         if record is None:
             context = self.context
             table = self.name
             record = context.getItem(table, eid)
 
-        titleStr = self.titleStr(record)
+        titleStr = self.titleStr(record, markup=markup)
         titleHint = self.titleHint(record)
 
         if markup:
@@ -77,9 +81,7 @@ class Decision(Value):
             activeCls = "active " if isActive else E
             extraCls = G(record, N.acro)
             inActualCls = self.inActualCls(record)
-            atts = dict(
-                cls=f"{baseCls} {extraCls} {activeCls} large {inActualCls}"
-            )
+            atts = dict(cls=f"{baseCls} {extraCls} {activeCls} large {inActualCls}")
             if clickable and eid is not None:
                 atts[N.eid] = str(eid)
 

@@ -32,14 +32,18 @@ class ReviewR(Record):
         record = self.record
 
         creatorId = G(record, N.creator)
-
-        datetime = self.field(N.dateCreated).wrapBare()
+        markup = kwargs.get("markup", True)
+        datetime = self.field(N.dateCreated).wrapBare(markup=markup)
         date = datetime.split(maxsplit=1)[0]
-        creator = self.field(N.creator).wrapBare()
+        creator = self.field(N.creator).wrapBare(markup=markup)
         youRep = f""" ({N.you})""" if creatorId == uid else E
         kindRep = kind or ORPHAN
 
-        return H.span(f"""{kindRep} on {date} by {creator}{youRep}""", cls=f"small")
+        return (
+            H.span(f"""{kindRep} on {date} by {creator}{youRep}""", cls="small")
+            if markup
+            else f"""{kindRep} on {date} by {creator}"""
+        )
 
     def bodyCompact(self, myMasters=None, hideMasters=False):
         perm = self.perm
@@ -53,4 +57,4 @@ class ReviewR(Record):
             self.field(N.decision).wrap(withLabel=False, asEdit=G(perm, N.isEdit))
         )
 
-        return H.div([decisionPart, theTitle, remarks], cls=f"review")
+        return H.div([decisionPart, theTitle, remarks], cls="review")

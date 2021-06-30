@@ -32,36 +32,45 @@ class CriteriaEntryR(Record):
         record = self.record
         mkTable = self.mkTable
 
-        critObj = mkTable(context, N.criteria)
-        critId = G(record, N.criteria)
-        critRecord = critObj.record(eid=critId)
-        self.critId = critId
-        """*ObjectId* The id of the `criteria` record to which this entry refers.
-        """
+        if mkTable:
+            critObj = mkTable(context, N.criteria)
+            critId = G(record, N.criteria)
+            critRecord = critObj.record(eid=critId)
+            self.critId = critId
+            """*ObjectId* The id of the `criteria` record to which this entry refers.
+            """
 
-        self.critRecord = critRecord
-        """*dict* The `criteria` record to which this entry refers.
-        """
+            self.critRecord = critRecord
+            """*dict* The `criteria` record to which this entry refers.
+            """
 
     def title(self, *args, **kwargs):
         record = self.record
         critRecord = self.critRecord
 
-        withEvidence = H.icon(
-            N.missing if self.field(N.evidence).isBlank() else N.check
-        )
-        status = H.span(f"""evidence{NBSP}{withEvidence}""", cls="right small")
-        seq = G(record, N.seq, default=Q)
-        scoreRep = self.field(N.score).wrapBare()
+        markup = kwargs.get("markup", True)
+        if markup:
+            withEvidence = H.icon(
+                N.missing if self.field(N.evidence).isBlank() else N.check
+            )
+            status = H.span(f"""evidence{NBSP}{withEvidence}""", cls="right small")
+            seq = G(record, N.seq, default=(E if markup is None else Q))
+            scoreRep = self.field(N.score).wrapBare()
 
-        return H.span(
-            [
-                H.span([f"""{seq}{DOT}{NBSP}""", critRecord.title()], cls="col1"),
-                H.span(scoreRep, cls="col2"),
-                status,
-            ],
-            cls=f"centrytitle criteria",
-        )
+            return H.span(
+                [
+                    H.span([f"""{seq}{DOT}{NBSP}""", critRecord.title()], cls="col1"),
+                    H.span(scoreRep, cls="col2"),
+                    status,
+                ],
+                cls="centrytitle criteria",
+            )
+        else:
+            hasEvidence = "without" if self.field(N.evidence).isBlank() else "with"
+            evidence = f"""{hasEvidence} evidence"""
+            scoreRep = self.field(N.score).wrapBare(markup=markup)
+            critRep = critRecord.title(markup=markup)
+            return f"""{seq}{DOT} {critRep} {scoreRep}, {evidence}"""
 
     def bodyCompact(self, **kwargs):
         critId = self.critId

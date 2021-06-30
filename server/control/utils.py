@@ -6,8 +6,12 @@
 
 import sys
 import json
+from json import JSONEncoder
+from bson.objectid import ObjectId
+
 from base64 import b64encode, b64decode
 from datetime import datetime as dt
+from flask import request
 
 
 REGION_SHIFT = 0x1F1E6 - ord("A")
@@ -60,6 +64,21 @@ UTF8 = "utf8"
 EMPTY_DATE = "1900-01-01T00:00:00Z"
 
 ITER = "__iter__"
+
+
+class MongoJSONEncoder(JSONEncoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def default(self, obj):
+        if isinstance(obj, dt):
+            return obj.isoformat()
+        elif isinstance(obj, ObjectId):
+            return str(obj)
+        return JSONEncoder.default(self, obj)
+
+
+mjson = MongoJSONEncoder(ensure_ascii=False).encode
 
 
 def factory(name, Base, Deriveds):
@@ -353,3 +372,7 @@ def thinM(chunks):
         for m in sorted(thinned, key=lambda x: x[1]):
             modified.append((m, 2 if isLast else 1))
     return modified
+
+
+def getq(name):
+    return request.args.get(name, "")[0:64]

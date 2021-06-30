@@ -164,7 +164,7 @@ class Value(Related):
         hideBlockedUsers=False,
     ):
         if record is None and eid is None:
-            return (QQ, QQ) if markup else Qq
+            return None if markup is None else (QQ, QQ) if markup else Qq
 
         table = self.name
 
@@ -172,7 +172,7 @@ class Value(Related):
             context = self.context
             record = context.getItem(table, eid)
 
-        titleStr = self.titleStr(record)
+        titleStr = self.titleStr(record, markup=markup)
         titleHint = self.titleHint(record)
 
         if markup:

@@ -23,10 +23,16 @@ class AssessmentR(Record):
         if not wfitem:
             return super().title(*args, **kwargs)
 
-        datetime = self.field(N.dateCreated).wrapBare()
+        markup = kwargs.get("markup", True)
+        datetime = self.field(N.dateCreated).wrapBare(markup=markup)
         date = datetime.split(maxsplit=1)[0]
-        creator = self.field(N.creator).wrapBare()
-        return H.span(f"""on {date} by {creator}""", cls=f"small {inActualCls}")
+        creator = self.field(N.creator).wrapBare(markup=markup)
+        valBare = f"""on {date} by {creator}"""
+        return (
+            H.span(f"""on {date} by {creator}""", cls=f"small {inActualCls}")
+            if markup
+            else valBare
+        )
 
     def field(self, fieldName, **kwargs):
         """Customised factory function to wrap a field object around the data

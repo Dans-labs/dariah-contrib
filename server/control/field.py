@@ -289,7 +289,13 @@ class Field:
                 nowFields.append(withNowField)
 
         result = db.updateField(
-            table, eid, field, data, eppn, modified, nowFields=nowFields,
+            table,
+            eid,
+            field,
+            data,
+            eppn,
+            modified,
+            nowFields=nowFields,
         )
         if not result:
             return False
@@ -364,7 +370,7 @@ class Field:
             and (value == [] or all(v is None or v == E for v in value))
         )
 
-    def wrapBare(self):
+    def wrapBare(self, markup=True):
         """Produce the bare field value.
 
         This is the result of calling the
@@ -386,9 +392,17 @@ class Field:
         method = fieldTypeObj.toDisplay
 
         return (
-            BLANK.join(method(val) for val in (value or []))
-            if multiple
-            else method(value)
+            (
+                [method(val, markup=markup) for val in (value or [])]
+                if multiple
+                else method(value, markup=markup)
+            )
+            if markup is None
+            else (
+                BLANK.join(method(val, markup=markup) for val in (value or []))
+                if multiple
+                else method(value, markup=markup)
+            )
         )
 
     def wrap(self, action=None, asEdit=False, empty=False, withLabel=True, cls=E):
@@ -530,7 +544,11 @@ class Field:
                 H.iconx(N.edit, cls="small", action=N.edit, **atts)
                 if mayEdit
                 else H.iconx(
-                    N.refresh, cls="small", action=N.view, title=REFRESH, **atts,
+                    N.refresh,
+                    cls="small",
+                    action=N.view,
+                    title=REFRESH,
+                    **atts,
                 )
                 if withRefresh
                 else E

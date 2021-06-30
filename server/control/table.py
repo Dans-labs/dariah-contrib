@@ -22,6 +22,7 @@ INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
 USER_ENTRY_TABLES = set(CT.userEntryTables)
 SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
+SENSITIVE_FIELDS = {"costTotal", "costDescription"}
 VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
@@ -330,8 +331,8 @@ class Table:
         wfitem = recordObj.wfitem
         return wfitem.creators(table, kind=kind) if wfitem else None
 
-    def wrap(self, openEid, action=None):
-        """Wrap the list of records into HTML.
+    def wrap(self, openEid, action=None, logical=False):
+        """Wrap the list of records into HTML or Json.
 
         action | selection
         --- | ---
@@ -366,10 +367,12 @@ class Table:
         action: string, optional, `None`
             If present, a specific record selection will be presented,
             otherwise all records go to the interface.
+        logical: boolean, optional `False`
+            If True, return the data as a dict or list, otherwise wrap it in HTML
 
         Returns
         -------
-        string(html)
+        string(html) or any
         """
 
         if not self.mayList(action=action):
@@ -404,8 +407,9 @@ class Table:
             params.update(request.args)
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
-        insertButton = self.insertButton() if self.withInsert(action) else E
-        sep = NBSP if insertButton else E
+        if not logical:
+            insertButton = self.insertButton() if self.withInsert(action) else E
+            sep = NBSP if insertButton else E
 
         if action == N.assess:
             records = [
@@ -421,23 +425,31 @@ class Table:
         if action == N.reviewdone:
             records = [record for record in records if self.myFinished(uid, record)]
 
+        recordsJson = []
         recordsHtml = []
+        nRecords = 0
         sensitive = table in SENSITIVE_TABLES
         for record in records:
             if not sensitive or self.readable(record) is not False:
-                recordsHtml.append(
-                    H.details(
-                        self.title(record),
-                        H.div(ELLIPS),
-                        f"""{table}/{G(record, N._id)}""",
-                        fetchurl=f"""/api/{table}/{N.item}/{G(record, N._id)}""",
-                        urltitle=E,
-                        urlextra=E,
-                        **self.forceOpen(G(record, N._id), openEid),
+                nRecords += 1
+                if logical:
+                    recordsJson.append(self.record(record=record).wrapLogical())
+                else:
+                    recordsHtml.append(
+                        H.details(
+                            self.title(record),
+                            H.div(ELLIPS),
+                            f"""{table}/{G(record, N._id)}""",
+                            fetchurl=f"""/api/{table}/{N.item}/{G(record, N._id)}""",
+                            urltitle=E,
+                            urlextra=E,
+                            **self.forceOpen(G(record, N._id), openEid),
+                        )
                     )
-                )
 
-        nRecords = len(recordsHtml)
+        if logical:
+            return recordsJson
+
         itemLabel = itemSingular if nRecords == 1 else itemPlural
         nRepCmt = f"""<!-- mainN~{nRecords}~{itemLabel} -->"""
         nRep = nRepCmt + H.span(f"""{nRecords} {itemLabel}""", cls="stats")
@@ -558,7 +570,7 @@ class Table:
         auth = context.auth
         return checkTable(auth, table) and (action is None or auth.authenticated())
 
-    def title(self, record):
+    def title(self, record, markup=True):
         """Fast way to get a title on the basis of the record only.
 
         When record titles have to be generated for many records in a list,
@@ -584,7 +596,7 @@ class Table:
         """
 
         # return obj.record(record=record).title(**atts)
-        return self.RecordClass.titleRaw(self, record)
+        return self.RecordClass.titleRaw(self, record, markup=markup)
 
     @staticmethod
     def forceOpen(theEid, openEid):

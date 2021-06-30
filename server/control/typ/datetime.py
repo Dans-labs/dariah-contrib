@@ -36,10 +36,10 @@ DATETIME_FORMAT = """{:>04}-{:>02}-{:>02} {:>02}:{:>02}:{:>02}"""
 def genDatetimePattern():
     s = """[ /:.-]"""
     t = """[T /:.-]"""
-    yr = f"""([12][0-9][0-9][0-9])"""
-    mth = f"""((0[1-9])|(1[0-2])|[1-9])"""
-    d = f"""((0[1-9])|([12][0-9])|(3[01])|[1-9])"""
-    hr = f"""(([0-5][0-9])|[0-9])"""
+    yr = """([12][0-9][0-9][0-9])"""
+    mth = """((0[1-9])|(1[0-2])|[1-9])"""
+    d = """((0[1-9])|([12][0-9])|(3[01])|[1-9])"""
+    hr = """(([0-5][0-9])|[0-9])"""
     m = hr
     sec = hr
     return (
@@ -117,7 +117,7 @@ class Datetime(TypeBase):
 
     def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ if markup else Qq
+            return None if markup is None else QQ if markup else Qq
         valBare = self.normalize(val.isoformat())
         return H.span(valBare) if markup else valBare
 

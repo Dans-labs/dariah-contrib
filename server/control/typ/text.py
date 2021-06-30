@@ -53,8 +53,10 @@ class Url(Text):
 
     def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ if markup else Qq
-        valBare = H.he(self.normalize(str(val)))
+            return None if markup is None else QQ if markup else Qq
+        valBare = self.normalize(str(val))
+        if markup is not None:
+            valBare = H.he(valBare)
         return H.a(valBare, valBare) if markup else valBare
 
 
@@ -71,8 +73,10 @@ class Email(Text):
 
     def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ if markup else Qq
-        valBare = H.he(self.normalize(str(val)))
+            return None if markup is None else QQ if markup else Qq
+        valBare = self.normalize(str(val))
+        if markup is not None:
+            valBare = H.he(valBare)
         return H.a(valBare, valBare) if markup else valBare
 
 
@@ -92,8 +96,8 @@ class Markdown(TypeBase):
 
     def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ if markup else Qq
-        return H.div(markdown(val)) if markup else val
+            return None if markup is None else QQ if markup else Qq
+        return H.div(markdown(val)) if markup is True else val
 
     def toEdit(self, val):
         return val

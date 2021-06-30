@@ -83,6 +83,7 @@ class Money(Decimal):
 
     def toDisplay(self, val, markup=True):
         if val is None:
-            return QQ if markup else Qq
-        valBare = f"""{EURO} {self.normalize(str(val))}"""
+            return None if markup is None else QQ if markup else Qq
+        unit = "euro" if markup is None else EURO
+        valBare = f"""{unit} {self.normalize(str(val))}"""
         return H.span(valBare) if markup else valBare

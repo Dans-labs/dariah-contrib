@@ -420,7 +420,7 @@ class Auth:
         db = self.db
         return G(G(db.permissionGroup, group), N.rep) or UNAUTH
 
-    def identity(self, user=None):
+    def identity(self, user=None, markup=True):
         """Provide a string representation of the identity of a user.
 
         !!! note
@@ -442,7 +442,11 @@ class Auth:
             user = self.user
 
         if self.isDevel:
-            return G(user, N.eppn, default=G(user, N.email, default=Qu))
+            return G(
+                user,
+                N.eppn,
+                default=G(user, N.email, default=(E if markup is None else Qu)),
+            )
 
         name = G(user, N.name) or E
         if not name:
