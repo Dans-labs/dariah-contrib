@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
     <title>Coverage for control/typ/cust/criteriaEntry.py: 100%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -22,10 +23,10 @@
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             17 statements &nbsp;
-            <span class="run shortkey_r button_toggle_run">17 run</span>
-            <span class="mis show_mis shortkey_m button_toggle_mis">0 missing</span>
-            <span class="exc show_exc shortkey_x button_toggle_exc">0 excluded</span>
-                <span class="par run show_par shortkey_p button_toggle_par">0 partial</span>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">17 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">0 missing</button>
+            <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
+            <button type="button" class="par run show_par shortkey_p button_toggle_par" title="Toggle lines partially run">0 partial</button>
         </h2>
     </div>
 </div>
@@ -53,7 +54,7 @@
 </div>
 <div id="source">
     <p id="t1" class="run"><span class="n"><a href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">config</span> <span class="key">import</span> <span class="nam">Config</span> <span class="key">as</span> <span class="nam">C</span><span class="op">,</span> <span class="nam">Names</span> <span class="key">as</span> <span class="nam">N</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">control</span><span class="op">.</span><span class="nam">utils</span> <span class="key">import</span> <span class="nam">pick</span> <span class="key">as</span> <span class="nam">G</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">control</span><span class="op">.</span><span class="nam">utils</span> <span class="key">import</span> <span class="nam">pick</span> <span class="key">as</span> <span class="nam">G</span><span class="op">,</span> <span class="nam">E</span>&nbsp;</span><span class="r"></span></p>
     <p id="t3" class="run"><span class="n"><a href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">control</span><span class="op">.</span><span class="nam">html</span> <span class="key">import</span> <span class="nam">HtmlElements</span> <span class="key">as</span> <span class="nam">H</span>&nbsp;</span><span class="r"></span></p>
     <p id="t4" class="run"><span class="n"><a href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">control</span><span class="op">.</span><span class="nam">typ</span><span class="op">.</span><span class="nam">master</span> <span class="key">import</span> <span class="nam">Master</span>&nbsp;</span><span class="r"></span></p>
     <p id="t5" class="pln"><span class="n"><a href="#t5">5</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -69,22 +70,28 @@
     <p id="t15" class="run"><span class="n"><a href="#t15">15</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">context</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t16" class="run"><span class="n"><a href="#t16">16</a></span><span class="t">        <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__init__</span><span class="op">(</span><span class="nam">context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t17" class="pln"><span class="n"><a href="#t17">17</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t18" class="run"><span class="n"><a href="#t18">18</a></span><span class="t">    <span class="key">def</span> <span class="nam">titleStr</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t18" class="run"><span class="n"><a href="#t18">18</a></span><span class="t">    <span class="key">def</span> <span class="nam">titleStr</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">record</span><span class="op">,</span> <span class="nam">markup</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t19" class="pln"><span class="n"><a href="#t19">19</a></span><span class="t">        <span class="str">"""The title is a sequence number plus the short criterion text."""</span>&nbsp;</span><span class="r"></span></p>
     <p id="t20" class="pln"><span class="n"><a href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t21" class="run"><span class="n"><a href="#t21">21</a></span><span class="t">        <span class="nam">context</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">context</span>&nbsp;</span><span class="r"></span></p>
     <p id="t22" class="run"><span class="n"><a href="#t22">22</a></span><span class="t">        <span class="nam">types</span> <span class="op">=</span> <span class="nam">context</span><span class="op">.</span><span class="nam">types</span>&nbsp;</span><span class="r"></span></p>
     <p id="t23" class="pln"><span class="n"><a href="#t23">23</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t24" class="run"><span class="n"><a href="#t24">24</a></span><span class="t">        <span class="nam">seq</span> <span class="op">=</span> <span class="nam">H</span><span class="op">.</span><span class="nam">he</span><span class="op">(</span><span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">seq</span><span class="op">)</span><span class="op">)</span> <span class="key">or</span> <span class="nam">Qn</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t24" class="run"><span class="n"><a href="#t24">24</a></span><span class="t">        <span class="nam">seqBare</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">seq</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t25" class="run"><span class="n"><a href="#t25">25</a></span><span class="t">        <span class="nam">eid</span> <span class="op">=</span> <span class="nam">G</span><span class="op">(</span><span class="nam">record</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">criteria</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t26" class="run"><span class="n"><a href="#t26">26</a></span><span class="t">        <span class="nam">title</span> <span class="op">=</span> <span class="nam">Qq</span> <span class="key">if</span> <span class="nam">eid</span> <span class="key">is</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">types</span><span class="op">.</span><span class="nam">criteria</span><span class="op">.</span><span class="nam">title</span><span class="op">(</span><span class="nam">eid</span><span class="op">=</span><span class="nam">eid</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t27" class="run"><span class="n"><a href="#t27">27</a></span><span class="t">        <span class="key">return</span> <span class="str">f"""{seq}. {title}"""</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t26" class="run"><span class="n"><a href="#t26">26</a></span><span class="t">        <span class="nam">titleBare</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t27" class="pln"><span class="n"><a href="#t27">27</a></span><span class="t">            <span class="nam">E</span> <span class="key">if</span> <span class="nam">eid</span> <span class="key">is</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">types</span><span class="op">.</span><span class="nam">criteria</span><span class="op">.</span><span class="nam">title</span><span class="op">(</span><span class="nam">eid</span><span class="op">=</span><span class="nam">eid</span><span class="op">,</span> <span class="nam">markup</span><span class="op">=</span><span class="nam">markup</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t28" class="pln"><span class="n"><a href="#t28">28</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t29" class="run"><span class="n"><a href="#t29">29</a></span><span class="t">        <span class="key">return</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t30" class="pln"><span class="n"><a href="#t30">30</a></span><span class="t">            <span class="str">f"""{seqBare or E}.{titleBare}"""</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t31" class="pln"><span class="n"><a href="#t31">31</a></span><span class="t">            <span class="key">if</span> <span class="nam">markup</span> <span class="key">is</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t32" class="pln"><span class="n"><a href="#t32">32</a></span><span class="t">            <span class="key">else</span> <span class="str">f"""{H.he(seqBare) or Qn}. {Qq if titleBare is None else titleBare}"""</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t33" class="pln"><span class="n"><a href="#t33">33</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </div>
 <div id="footer">
     <div class="content">
         <p>
-            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.1</a>,
-            created at 2020-07-08 09:08
+            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.5</a>,
+            created at 2021-06-30 13:55 +0200
         </p>
     </div>
 </div>
