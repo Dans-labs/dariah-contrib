@@ -56,6 +56,7 @@ INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
 USER_ENTRY_TABLES = set(CT.userEntryTables)
 SENSITIVE_TABLES = (USER_TABLES - {MAIN_TABLE}) | USER_ENTRY_TABLES
+SENSITIVE_FIELDS = {&#34;costTotal&#34;, &#34;costDescription&#34;}
 VALUE_TABLES = set(CT.valueTables)
 SYSTEM_TABLES = set(CT.systemTables)
 ITEMS = CT.items
@@ -438,8 +439,6 @@ class Table:
         )
         if request.args:
             params.update(request.args)
-            if &#34;table&#34; in params:
-                del params[&#34;table&#34;]
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
         if not logical:
@@ -1064,8 +1063,6 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         )
         if request.args:
             params.update(request.args)
-            if &#34;table&#34; in params:
-                del params[&#34;table&#34;]
 
         records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
         if not logical:
@@ -2208,8 +2205,6 @@ otherwise all records go to the interface.</dd>
     )
     if request.args:
         params.update(request.args)
-        if &#34;table&#34; in params:
-            del params[&#34;table&#34;]
 
     records = db.getList(table, titleSortkey, select=self.isMainTable, **params)
     if not logical:

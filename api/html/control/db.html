@@ -610,7 +610,7 @@ class Db:
     def getList(
         self,
         table,
-        titleSort,
+        titleSort=None,
         my=None,
         our=None,
         assign=False,
@@ -647,10 +647,11 @@ class Db:
         ----------
         table: string
             The table from which the record are fetched.
-        titleSort: function
+        titleSort: function, optional `None`
             The sort key by which the resulting list of records will be sorted.
             It must be a function that takes a record and returns a key, for example
             the title string of that record.
+            If absent or None, records will not be sorted.
         my: ObjectId, optional `None`
             **Task: produce a list of &#34;my&#34; records.**
             If passed, it should be the id of a user (typically the one that is
@@ -731,7 +732,7 @@ class Db:
         if select:
             criterion = self.makeCrit(table, conditions)
             records = (record for record in records if Db.satisfies(record, criterion))
-        return sorted(records, key=titleSort)
+        return records if titleSort is None else sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
         &#34;&#34;&#34;Fetch a single record from a table.
@@ -1915,7 +1916,7 @@ as recommended in
     def getList(
         self,
         table,
-        titleSort,
+        titleSort=None,
         my=None,
         our=None,
         assign=False,
@@ -1952,10 +1953,11 @@ as recommended in
         ----------
         table: string
             The table from which the record are fetched.
-        titleSort: function
+        titleSort: function, optional `None`
             The sort key by which the resulting list of records will be sorted.
             It must be a function that takes a record and returns a key, for example
             the title string of that record.
+            If absent or None, records will not be sorted.
         my: ObjectId, optional `None`
             **Task: produce a list of &#34;my&#34; records.**
             If passed, it should be the id of a user (typically the one that is
@@ -2036,7 +2038,7 @@ as recommended in
         if select:
             criterion = self.makeCrit(table, conditions)
             records = (record for record in records if Db.satisfies(record, criterion))
-        return sorted(records, key=titleSort)
+        return records if titleSort is None else sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
         &#34;&#34;&#34;Fetch a single record from a table.
@@ -3504,7 +3506,7 @@ are the values.</dd>
 </details>
 </dd>
 <dt id="control.db.Db.getList"><code class="name flex">
-<span>def <span class="ident">getList</span></span>(<span>self, table, titleSort, my=None, our=None, assign=False, review=None, selectable=None, unfinished=False, select=False, **conditions)</span>
+<span>def <span class="ident">getList</span></span>(<span>self, table, titleSort=None, my=None, our=None, assign=False, review=None, selectable=None, unfinished=False, select=False, **conditions)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fetch a list of records from a table.</p>
@@ -3533,10 +3535,11 @@ See also <code><a title="control.db.Db.makeCrit" href="#control.db.Db.makeCrit">
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>The table from which the record are fetched.</dd>
-<dt><strong><code>titleSort</code></strong> :&ensp;<code>function</code></dt>
+<dt><strong><code>titleSort</code></strong> :&ensp;<code>function</code>, optional <code>None</code></dt>
 <dd>The sort key by which the resulting list of records will be sorted.
 It must be a function that takes a record and returns a key, for example
-the title string of that record.</dd>
+the title string of that record.
+If absent or None, records will not be sorted.</dd>
 <dt><strong><code>my</code></strong> :&ensp;<code>ObjectId</code>, optional <code>None</code></dt>
 <dd><strong>Task: produce a list of "my" records.</strong>
 If passed, it should be the id of a user (typically the one that is
@@ -3591,7 +3594,7 @@ If <code>select</code>, carry out filtering on the retrieved records, where
 <pre><code class="python">def getList(
     self,
     table,
-    titleSort,
+    titleSort=None,
     my=None,
     our=None,
     assign=False,
@@ -3628,10 +3631,11 @@ If <code>select</code>, carry out filtering on the retrieved records, where
     ----------
     table: string
         The table from which the record are fetched.
-    titleSort: function
+    titleSort: function, optional `None`
         The sort key by which the resulting list of records will be sorted.
         It must be a function that takes a record and returns a key, for example
         the title string of that record.
+        If absent or None, records will not be sorted.
     my: ObjectId, optional `None`
         **Task: produce a list of &#34;my&#34; records.**
         If passed, it should be the id of a user (typically the one that is
@@ -3712,7 +3716,7 @@ If <code>select</code>, carry out filtering on the retrieved records, where
     if select:
         criterion = self.makeCrit(table, conditions)
         records = (record for record in records if Db.satisfies(record, criterion))
-    return sorted(records, key=titleSort)</code></pre>
+    return records if titleSort is None else sorted(records, key=titleSort)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.getValueIds"><code class="name flex">
