@@ -8,7 +8,7 @@
 from flask import make_response
 
 from config import Names as N
-from control.utils import mjson, pick as G
+from control.utils import mjson, mktsv, pick as G, serverprint
 from control.table import Table, SENSITIVE_TABLES, SENSITIVE_FIELDS
 from control.typ.related import castObjectId
 
@@ -88,33 +88,53 @@ class Api:
         self.countryType = types.country
         self.yearType = types.year
         self.typeType = types.typeContribution
+        self.headers = dict(
+            json={
+                "Expires": "0",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Content-Type": "application/json",
+                "Content-Encoding": "utf-8",
+            },
+            tsv={
+                "Expires": "0",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Content-Type": "text/tab-separated-values",
+                "Content-Encoding": "utf-8",
+            },
+        )
 
-    def list(self, table):
+    def notimplemented(self, verb):
+        serverprint(f"Invalid api call requested: {verb}")
+        return make_response(mjson(None), self.headers["json"])
+
+    def list(self, givenTable):
+        parts = givenTable.rsplit(".", 1)
+        if len(parts) == 1:
+            table = givenTable
+            ext = "json"
+        else:
+            (table, ext) = parts
+        if ext not in {"json", "tsv"}:
+            serverprint(f"Invalid extension: {ext} in {givenTable}")
+            return make_response(mjson(None), self.headers["json"])
+
         data = None
-        headers = {
-            "Expires": "0",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Content-Type": "application/json",
-            "Content-Encoding": "utf-8",
-        }
         if table is not None and table not in SENSITIVE_TABLES:
             if table == "contrib":
-                data = self.getContribs()
+                data = self.getContribs(ext)
             else:
                 context = self.context
                 tableObj = Table(context, table)
                 data = tableObj.wrap(None, logical=True)
-        return make_response(mjson(data), headers)
+        if data is None:
+            serverprint(f"Non existing table requested: {table}")
+        return make_response(
+            mjson(data) if ext == "json" else mktsv(data), self.headers[ext]
+        )
 
-    def view(self, table, eid):
+    def view(self, table, givenEid):
         record = None
-        headers = {
-            "Expires": "0",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Content-Type": "application/json",
-            "Content-Encoding": "utf-8",
-        }
-        eid = castObjectId(eid)
+        eid = castObjectId(givenEid)
         if table is not None and eid is not None and table not in SENSITIVE_TABLES:
             context = self.context
             tableObj = Table(context, table)
@@ -131,7 +151,9 @@ class Api:
                 if k in record:
                     record["type"] = record[k]
                     del record[k]
-        return make_response(mjson(record), headers)
+        if record is None:
+            serverprint(f"Non existing record requested: {table}/{givenEid}")
+        return make_response(mjson(record), self.headers["json"])
 
     def getExtra(self, record):
         context = self.context
@@ -192,14 +214,21 @@ class Api:
         )
         return extra
 
-    def getContribs(self):
+    def getContribs(self, ext):
         context = self.context
         db = context.db
         countryType = self.countryType
         yearType = self.yearType
         typeType = self.typeType
 
+        asTsv = ext == "tsv"
+
         contribs = []
+
+        if asTsv:
+            contribsFull = {G(r, N._id): r for r in db.getList(N.contrib)}
+            context = self.context
+            tableObj = Table(context, N.contrib)
 
         for record in db.bulkContribWorkflow(None, False):
             title = G(record, N.title)
@@ -216,9 +245,13 @@ class Api:
             if aStage != N.reviewAccept:
                 score = None
 
-            countryRep = countryType.titleStr(G(db.country, G(record, N.country)), markup=None)
+            countryRep = countryType.titleStr(
+                G(db.country, G(record, N.country)), markup=None
+            )
             yearRep = yearType.titleStr(G(db.year, G(record, N.year)), markup=None)
-            typeRep = typeType.titleStr(G(db.typeContribution, G(record, N.type)), markup=None)
+            typeRep = typeType.titleStr(
+                G(db.typeContribution, G(record, N.type)), markup=None
+            )
 
             contribRecord = {
                 N._id: contribId,
@@ -266,6 +299,23 @@ class Api:
                     N.r2Stage: r2Stage,
                 }
             )
+            if asTsv:
+                fullObj = tableObj.record(record=G(contribsFull, contribId, {}))
+                full = fullObj.wrapLogical()
+                contribRecord.update({
+                    N.dateDecided: G(full, N.dateDecided),
+                    N.vcc: G(full, N.vcc),
+                    N.description: G(full, N.description),
+                    N.contactPersonName: G(full, N.contactPersonName),
+                    N.contactPersonEmail: G(full, N.contactPersonEmail),
+                    N.urlContribution: G(full, N.urlContribution),
+                    N.urlAcademic: G(full, N.urlAcademic),
+                    N.tadirahObject: G(full, N.tadirahObject),
+                    N.tadirahActivity: G(full, N.tadirahActivity),
+                    N.tadirahTechnique: G(full, N.tadirahTechnique),
+                    N.keyword: G(full, N.keyword),
+                    N.discipline: G(full, N.discipline),
+                })
             contribs.append(contribRecord)
 
         return contribs

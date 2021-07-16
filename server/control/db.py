@@ -576,7 +576,7 @@ class Db:
     def getList(
         self,
         table,
-        titleSort,
+        titleSort=None,
         my=None,
         our=None,
         assign=False,
@@ -613,10 +613,11 @@ class Db:
         ----------
         table: string
             The table from which the record are fetched.
-        titleSort: function
+        titleSort: function, optional `None`
             The sort key by which the resulting list of records will be sorted.
             It must be a function that takes a record and returns a key, for example
             the title string of that record.
+            If absent or None, records will not be sorted.
         my: ObjectId, optional `None`
             **Task: produce a list of "my" records.**
             If passed, it should be the id of a user (typically the one that is
@@ -697,7 +698,7 @@ class Db:
         if select:
             criterion = self.makeCrit(table, conditions)
             records = (record for record in records if Db.satisfies(record, criterion))
-        return sorted(records, key=titleSort)
+        return records if titleSort is None else sorted(records, key=titleSort)
 
     def getItem(self, table, eid):
         """Fetch a single record from a table.

@@ -348,7 +348,7 @@ def appFactory(regime, test, debug, **kwargs):
         checkBounds()
         context = getContext()
         auth.authenticate()
-        return Api(context).do(verb)
+        return Api(context).notimplemented(verb)
 
     # WORKFLOW TASKS
 

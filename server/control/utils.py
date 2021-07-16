@@ -48,6 +48,8 @@ S = "s"
 
 NL = "\n"
 TAB = "\t"
+LINE_SEP = "§"
+MIDDLE_DOT = "\u00b7"
 
 PLUS = "+"
 MIN = "-"
@@ -79,6 +81,30 @@ class MongoJSONEncoder(JSONEncoder):
 
 
 mjson = MongoJSONEncoder(ensure_ascii=False).encode
+
+
+def mktsv(data):
+    if data is None:
+        return ""
+
+    allHeaders = set()
+    for row in data:
+        allHeaders |= set(row)
+    allHeaders = sorted(allHeaders)
+
+    lines = ["\t".join(allHeaders)]
+    for row in data:
+        values = []
+        for field in allHeaders:
+            value = row.get(field, "")
+            if type(value) in {list, tuple}:
+                value = MIDDLE_DOT.join(str(v) for v in value)
+            else:
+                value = str(value)
+            value = value.replace("\n", LINE_SEP).replace("\t", "  ")
+            values.append(value)
+        lines.append("\t".join(values))
+    return "\n".join(lines)
 
 
 def factory(name, Base, Deriveds):

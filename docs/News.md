@@ -1,5 +1,15 @@
 # News
 
+## 2021-07-16
+
+The API supports calls for tab-separated data as well.
+See [API](Workings/API.md).
+
+## 2021-06-30
+
+The public API is working again.
+See [API](Workings/API.md).
+
 ## 2021-02-17
 
 * The bulk import script assumed that the cost field was called `cost`. The proper name is

@@ -80,7 +80,7 @@ tests/test_50_review20.py: 2155 warnings
     return _json.loads(s, **kwargs)
 
 -- Docs: https://docs.pytest.org/en/stable/warnings.html
-=============== 185 passed, 51843 warnings in 170.54s (0:02:50) ================
+=============== 185 passed, 51843 warnings in 171.89s (0:02:51) ================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
       4786        331        6.2       14.5

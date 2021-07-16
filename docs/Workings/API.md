@@ -8,7 +8,8 @@ The API supports retrieving all records of a table and retrieving a single recor
 
 *single record*: `{{liveBase}}/api/db/`**table**`/`**id**
 
-The result is always in JSON format.
+The result is in JSON format by default, but lists of records can also be retrieved
+as tab-separated values.
 
 # Tables
 
@@ -29,6 +30,20 @@ url | description
 {{liveBase}}/api/db/vcc | value list of virtual competence centers
 {{liveBase}}/api/db/year | value list of years
 
+If output as TSV is preferred, append `.tsv` to the request:
+
+{{liveBase}}/api/db/contrib.tsv
+
+{{liveBase}}/api/db/country.tsv
+
+**N.B.: the tsv output for the contrib table is richer than the json output. See below**.
+
+You can also add `.json`, but that has the same effect as no extension at all:
+
+{{liveBase}}/api/db/contrib.json
+
+{{liveBase}}/api/db/country.json
+
 # Records
 
 For all tables except *contrib*, the result of the *list* call is the list of the
@@ -41,6 +56,10 @@ The list call for contributions delivers a list with reduced records.
 However, some additional *workflow* fields are included, i.e. information
 about the current assessment, review, and selection status of the contribution.
 This enables you to make a selection first before retrieving individual contributions.
+
+However, the `.tsv` call for contrib records contain all the above fields plus the all
+the exportable fields of each record.
+
 See below.
 
 # Fields
