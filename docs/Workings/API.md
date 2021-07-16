@@ -71,6 +71,12 @@ to see what fields there are in each table.
 !!! caution "Permissions"
     You only get the publicly accessible values.
 
+!!! note "TSV exports"
+    When delivering tab-separated data, the following measures are taken:
+
+    *   if a field has multiple values, they will be separated by middle dots: `·`
+    *   newlines in field values will be replaced by `§`
+    *   tabs in fields will be replaced by `  ` (a sequence of two spaces)
 
 As said above, for contrib records the fields are a bit different.
 Here is a (fictitious) example:

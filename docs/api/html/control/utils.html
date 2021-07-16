@@ -81,6 +81,8 @@ S = &#34;s&#34;
 
 NL = &#34;\n&#34;
 TAB = &#34;\t&#34;
+LINE_SEP = &#34;§&#34;
+MIDDLE_DOT = &#34;\u00b7&#34;
 
 PLUS = &#34;+&#34;
 MIN = &#34;-&#34;
@@ -100,6 +102,9 @@ ITER = &#34;__iter__&#34;
 
 
 class MongoJSONEncoder(JSONEncoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def default(self, obj):
         if isinstance(obj, dt):
             return obj.isoformat()
@@ -108,7 +113,31 @@ class MongoJSONEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
-mjson = MongoJSONEncoder().encode
+mjson = MongoJSONEncoder(ensure_ascii=False).encode
+
+
+def mktsv(data):
+    if data is None:
+        return &#34;&#34;
+
+    allHeaders = set()
+    for row in data:
+        allHeaders |= set(row)
+    allHeaders = sorted(allHeaders)
+
+    lines = [&#34;\t&#34;.join(allHeaders)]
+    for row in data:
+        values = []
+        for field in allHeaders:
+            value = row.get(field, &#34;&#34;)
+            if type(value) in {list, tuple}:
+                value = MIDDLE_DOT.join(str(v) for v in value)
+            else:
+                value = str(value)
+            value = value.replace(&#34;\n&#34;, LINE_SEP).replace(&#34;\t&#34;, &#34;  &#34;)
+            values.append(value)
+        lines.append(&#34;\t&#34;.join(values))
+    return &#34;\n&#34;.join(lines)
 
 
 def factory(name, Base, Deriveds):
@@ -779,6 +808,39 @@ We want to know whether a value is a string or an iterable of strings.</p>
     return type(value) is not str and hasattr(value, ITER)</code></pre>
 </details>
 </dd>
+<dt id="control.utils.mktsv"><code class="name flex">
+<span>def <span class="ident">mktsv</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mktsv(data):
+    if data is None:
+        return &#34;&#34;
+
+    allHeaders = set()
+    for row in data:
+        allHeaders |= set(row)
+    allHeaders = sorted(allHeaders)
+
+    lines = [&#34;\t&#34;.join(allHeaders)]
+    for row in data:
+        values = []
+        for field in allHeaders:
+            value = row.get(field, &#34;&#34;)
+            if type(value) in {list, tuple}:
+                value = MIDDLE_DOT.join(str(v) for v in value)
+            else:
+                value = str(value)
+            value = value.replace(&#34;\n&#34;, LINE_SEP).replace(&#34;\t&#34;, &#34;  &#34;)
+            values.append(value)
+        lines.append(&#34;\t&#34;.join(values))
+    return &#34;\n&#34;.join(lines)</code></pre>
+</details>
+</dd>
 <dt id="control.utils.now"><code class="name flex">
 <span>def <span class="ident">now</span></span>(<span>)</span>
 </code></dt>
@@ -1046,7 +1108,7 @@ those from the identity provider..</p>
 <dl>
 <dt id="control.utils.MongoJSONEncoder"><code class="flex name class">
 <span>class <span class="ident">MongoJSONEncoder</span></span>
-<span>(</span><span>*, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, sort_keys=False, indent=None, separators=None, default=None)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Extensible JSON <a href="http://json.org">http://json.org</a> encoder for Python data structures.</p>
@@ -1129,6 +1191,9 @@ version of the object or raise a <code>TypeError</code>.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MongoJSONEncoder(JSONEncoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def default(self, obj):
         if isinstance(obj, dt):
             return obj.isoformat()
@@ -1209,6 +1274,7 @@ implement default like this::</p>
 <li><code><a title="control.utils.getLast" href="#control.utils.getLast">getLast</a></code></li>
 <li><code><a title="control.utils.getq" href="#control.utils.getq">getq</a></code></li>
 <li><code><a title="control.utils.isIterable" href="#control.utils.isIterable">isIterable</a></code></li>
+<li><code><a title="control.utils.mktsv" href="#control.utils.mktsv">mktsv</a></code></li>
 <li><code><a title="control.utils.now" href="#control.utils.now">now</a></code></li>
 <li><code><a title="control.utils.perDay" href="#control.utils.perDay">perDay</a></code></li>
 <li><code><a title="control.utils.pick" href="#control.utils.pick">pick</a></code></li>
