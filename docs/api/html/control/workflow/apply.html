@@ -705,7 +705,7 @@ class WorkflowItem:
 
         (contribId,) = self.info(N.contrib, N._id)
 
-        isOwn = uid in creators
+        isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
@@ -1790,7 +1790,7 @@ details of the current user can be read off.</dd>
 
         (contribId,) = self.info(N.contrib, N._id)
 
-        isOwn = uid in creators
+        isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 
@@ -3259,7 +3259,7 @@ the task acts on: contrib, assessment, or review.</dd>
 
     (contribId,) = self.info(N.contrib, N._id)
 
-    isOwn = uid in creators
+    isOwn = creators and uid in creators
     isCoord = countryId and auth.coordinator(countryId=countryId)
     isSuper = auth.superuser()
 

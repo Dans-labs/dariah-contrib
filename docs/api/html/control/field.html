@@ -61,8 +61,7 @@ CASCADE_SPECS = CT.cascade
 WORKFLOW_FIELDS = CF.fields
 
 REFRESH = CW.messages[N.refresh]
-LIMITS = CW.limits
-LIMIT_JSON = G(LIMITS, N.json, default=1000000)
+LIMIT_JSON = CW.limitJson
 
 
 class Field:

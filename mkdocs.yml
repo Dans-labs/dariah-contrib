@@ -9,7 +9,7 @@ repo_name: Dans-labs/dariah-contrib
 repo_url: 'https://github.com/dans-labs/dariah-contrib/'
 
 theme:
-  name: dans
+  name: material
   logo: 'images/inkind_logo.png'
   favicon: 'icons/favicon.ico'
   development: false

@@ -394,6 +394,7 @@ def assertStatus(client, url, expect):
     except Exception as e:
         serverprint(f&#34;APPLICATION ERROR: {e}&#34;)
         code = 4000
+        raise
 
     if type(expect) is set:
         good = code in expect
@@ -475,12 +476,26 @@ def illegalize(clients, url, **kwargs):
     passable = {200, 301, 302, 303}
     for (i, ux) in enumerate(uxs):
         expectx = {
-            user: 400 if i &gt; 2 or i == 1 and len(kwargsx) else passable
+            user: 400 if i &gt; 1 or i == 1 and len(kwargsx) else passable
             for user in USERS
             if user in clients
         }
         serverprint(f&#34;LEGAL URL ? ({ux})&#34;)
         forall(clients, expectx, assertStatus, ux)
+
+
+def isIllegal(clients, url):
+    &#34;&#34;&#34;Make sure that the ur triggers a 400 response for all clients.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    &#34;&#34;&#34;
+
+    expectx = {user: 400 for user in USERS if user in clients}
+    serverprint(f&#34;HACKED URL ! ({url})&#34;)
+    forall(clients, expectx, assertStatus, url)
 
 
 def inspectTitleAll(clients, table, eid, expect):
@@ -1167,6 +1182,7 @@ If set of int: status code should be contained in this</dd>
     except Exception as e:
         serverprint(f&#34;APPLICATION ERROR: {e}&#34;)
         code = 4000
+        raise
 
     if type(expect) is set:
         good = code in expect
@@ -1293,7 +1309,7 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
     passable = {200, 301, 302, 303}
     for (i, ux) in enumerate(uxs):
         expectx = {
-            user: 400 if i &gt; 2 or i == 1 and len(kwargsx) else passable
+            user: 400 if i &gt; 1 or i == 1 and len(kwargsx) else passable
             for user in USERS
             if user in clients
         }
@@ -1338,6 +1354,34 @@ The url will be expanded by formatting it with the <code>kwargs</code> values.</
         assertFieldValue((cl, table, eid), TITLE, exp)
 
     forall(clients, expect, assertIt)</code></pre>
+</details>
+</dd>
+<dt id="subtest.isIllegal"><code class="name flex">
+<span>def <span class="ident">isIllegal</span></span>(<span>clients, url)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make sure that the ur triggers a 400 response for all clients.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>clients</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mapping from users to client fixtures</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isIllegal(clients, url):
+    &#34;&#34;&#34;Make sure that the ur triggers a 400 response for all clients.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    &#34;&#34;&#34;
+
+    expectx = {user: 400 for user in USERS if user in clients}
+    serverprint(f&#34;HACKED URL ! ({url})&#34;)
+    forall(clients, expectx, assertStatus, url)</code></pre>
 </details>
 </dd>
 <dt id="subtest.modifyTitleAll"><code class="name flex">
@@ -1519,6 +1563,7 @@ The set of users can be left out, then all users are implied.</dd>
 <li><code><a title="subtest.assignReviewers" href="#subtest.assignReviewers">assignReviewers</a></code></li>
 <li><code><a title="subtest.illegalize" href="#subtest.illegalize">illegalize</a></code></li>
 <li><code><a title="subtest.inspectTitleAll" href="#subtest.inspectTitleAll">inspectTitleAll</a></code></li>
+<li><code><a title="subtest.isIllegal" href="#subtest.isIllegal">isIllegal</a></code></li>
 <li><code><a title="subtest.modifyTitleAll" href="#subtest.modifyTitleAll">modifyTitleAll</a></code></li>
 <li><code><a title="subtest.sidebar" href="#subtest.sidebar">sidebar</a></code></li>
 <li><code><a title="subtest.startAssessment" href="#subtest.startAssessment">startAssessment</a></code></li>

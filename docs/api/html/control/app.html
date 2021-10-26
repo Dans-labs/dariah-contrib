@@ -44,7 +44,21 @@ from flask import (
 )
 
 from config import Config as C, Names as N
-from control.utils import pick as G, E, serverprint
+from control.utils import (
+    pick as G,
+    E,
+    serverprint,
+    isIdLike,
+    isEmailLike,
+    isEppnLike,
+    isNameLike,
+    isNamesLike,
+    isFileLike,
+    saveParam,
+    ZERO,
+    ONE,
+    MINONE,
+)
 from control.db import Db
 from control.workflow.compute import Workflow
 from control.workflow.apply import execute
@@ -61,6 +75,7 @@ from control.cust.factory_table import make as mkTable
 CB = C.base
 CT = C.tables
 CW = C.web
+CF = C.workflow
 
 SECRET_FILE = CB.secretFile
 
@@ -73,7 +88,12 @@ USER_TABLES = set(USER_TABLES_LIST)
 MASTERS = CT.masters
 DETAILS = CT.details
 
+TASKS = CF.tasks
+
 LIMITS = CW.limits
+LIMIT_DEFAULT = CW.limitDefault
+LIMIT_REQUEST = CW.limitRequest
+LIMIT_KEYS = CW.limitKeys
 
 URLS = CW.urls
 &#34;&#34;&#34;A dictionary of fixed fall-back urls.&#34;&#34;&#34;
@@ -86,6 +106,9 @@ LANDING = CW.landing
 BODY_METHODS = set(CW.bodyMethods)
 LIST_ACTIONS = set(CW.listActions)
 FIELD_ACTIONS = set(CW.fieldActions)
+OTHER_ACTIONS = set(CW.otherActions)
+OPTIONS = CW.options
+OPTION_SET = set(OPTIONS)
 
 START = URLS[N.home][N.url]
 OVERVIEW = URLS[N.info][N.url]
@@ -156,23 +179,88 @@ def checkBounds(**kwargs):
         is delivered
     &#34;&#34;&#34;
 
-    default = G(LIMITS, N.default, default=100)
-    maxLen = G(LIMITS, N.request, default=default)
-
-    if request.content_length and request.content_length &gt; maxLen:
+    if request.content_length and request.content_length &gt; LIMIT_REQUEST:
         abort(400)
 
     n = len(request.args)
-    boundN = G(LIMITS, N.keys, default=default)
-    if len(kwargs) &gt; boundN:
-        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {boundN} KEYS IN {kwargs}&#34;&#34;&#34;)
+    if len(kwargs) &gt; LIMIT_KEYS:
+        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {LIMIT_KEYS} KEYS IN {kwargs}&#34;&#34;&#34;)
         abort(400)
+
     for (k, v) in chain.from_iterable((kwargs.items(), request.args.items())):
         if k not in LIMITS:
+            serverprint(f&#34;&#34;&#34;ILLEGAL PARAMETER NAME `{k}`: `{saveParam(v)}`&#34;&#34;&#34;)
             abort(400)
-        valN = G(LIMITS, k, default=default)
+        valN = G(LIMITS, k, default=LIMIT_DEFAULT)
         if v is not None and len(v) &gt; valN:
-            serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({v})&#34;&#34;&#34;)
+            serverprint(
+                f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({saveParam(v)})&#34;&#34;&#34;
+            )
+            abort(400)
+        if not v:
+            # no value for v: no risk
+            return
+
+        # we taste the value of v and verify it conforms to expectations
+        if k == N.action:
+            if v not in LIST_ACTIONS | FIELD_ACTIONS | OTHER_ACTIONS:
+                serverprint(f&#34;&#34;&#34;ILLEGAL ACTION: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in OPTION_SET | {N.reverse}:  # assessed reviewed
+            if v not in {ZERO, ONE, MINONE}:
+                serverprint(f&#34;&#34;&#34;`{k}` with non-3-boolean value: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.bulk:
+            if v not in {ZERO, ONE}:
+                serverprint(f&#34;&#34;&#34;`{k}` with non-boolean value: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.country:
+            if not v.isalpha() or not v == v.upper():
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a country code: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.deid, N.eid, N.masterId}:
+            if not isIdLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a mongo id: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.dtable:
+            if v not in MASTERS:
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a details table: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.email:
+            if not isEmailLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an email address : `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.eppn:
+            if not isEppnLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an eppn: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.field:
+            if not isNameLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an field name: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.filepath, N.anything}:
+            if not isFileLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an file path: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.groups, N.sortcol}:
+            if not isNamesLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a list of names: `{v}`&#34;&#34;&#34;)
+                abort(400)
+            pass
+        elif k == N.method:
+            if v not in BODY_METHODS:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a method: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.table:
+            if v not in ALL_TABLES:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a table name: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.task:
+            if v not in TASKS:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a workflow task: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        else:
+            serverprint(f&#34;&#34;&#34;FORGOTTEN TO IMPLEMENT CHECK FOR `{k}`: `{v}`&#34;&#34;&#34;)
             abort(400)
 
 
@@ -358,21 +446,21 @@ def appFactory(regime, test, debug, **kwargs):
 
     # API CALLS
 
-    @app.route(&#39;/api/db/&lt;string:table&gt;/&lt;string:eid&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;string:table&gt;/&lt;string:eid&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDbView(table, eid):
         checkBounds(table=table, eid=eid)
         context = getContext()
         auth.authenticate()
         return Api(context).view(table, eid)
 
-    @app.route(&#39;/api/db/&lt;string:table&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;string:table&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDbList(table):
         checkBounds(table=table)
         context = getContext()
         auth.authenticate()
         return Api(context).list(table)
 
-    @app.route(&#39;/api/db/&lt;path:verb&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;path:verb&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDb(verb):
         checkBounds()
         context = getContext()
@@ -470,7 +558,10 @@ def appFactory(regime, test, debug, **kwargs):
                     flash(f&#34;{action or E} view on {table} not allowed&#34;, &#34;error&#34;)
                     return redirectResult(START, False)
                 return render_template(
-                    INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
+                    INDEX,
+                    topbar=topbar,
+                    sidebar=sidebar,
+                    material=tableList,
                 )
             flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
         if action:
@@ -586,7 +677,10 @@ def appFactory(regime, test, debug, **kwargs):
                 if recordObj.mayRead is not False:
                     record = recordObj.wrap(showTable=dtable, showEid=deid)
                     return render_template(
-                        INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                        INDEX,
+                        topbar=topbar,
+                        sidebar=sidebar,
+                        material=record,
                     )
                 flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
                 return redirectResult(f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;, False)
@@ -610,7 +704,10 @@ def appFactory(regime, test, debug, **kwargs):
                 if recordObj.mayRead is not False:
                     record = recordObj.wrap()
                     return render_template(
-                        INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                        INDEX,
+                        topbar=topbar,
+                        sidebar=sidebar,
+                        material=record,
                     )
                 flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
                 return redirectResult(f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;, False)
@@ -909,21 +1006,21 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
 
     # API CALLS
 
-    @app.route(&#39;/api/db/&lt;string:table&gt;/&lt;string:eid&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;string:table&gt;/&lt;string:eid&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDbView(table, eid):
         checkBounds(table=table, eid=eid)
         context = getContext()
         auth.authenticate()
         return Api(context).view(table, eid)
 
-    @app.route(&#39;/api/db/&lt;string:table&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;string:table&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDbList(table):
         checkBounds(table=table)
         context = getContext()
         auth.authenticate()
         return Api(context).list(table)
 
-    @app.route(&#39;/api/db/&lt;path:verb&gt;&#39;, methods=[&#39;GET&#39;, &#39;POST&#39;])
+    @app.route(&#34;/api/db/&lt;path:verb&gt;&#34;, methods=[&#34;GET&#34;, &#34;POST&#34;])
     def serveApiDb(verb):
         checkBounds()
         context = getContext()
@@ -1021,7 +1118,10 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
                     flash(f&#34;{action or E} view on {table} not allowed&#34;, &#34;error&#34;)
                     return redirectResult(START, False)
                 return render_template(
-                    INDEX, topbar=topbar, sidebar=sidebar, material=tableList,
+                    INDEX,
+                    topbar=topbar,
+                    sidebar=sidebar,
+                    material=tableList,
                 )
             flash(f&#34;Unknown table {table}&#34;, &#34;error&#34;)
         if action:
@@ -1137,7 +1237,10 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
                 if recordObj.mayRead is not False:
                     record = recordObj.wrap(showTable=dtable, showEid=deid)
                     return render_template(
-                        INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                        INDEX,
+                        topbar=topbar,
+                        sidebar=sidebar,
+                        material=record,
                     )
                 flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
                 return redirectResult(f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;, False)
@@ -1161,7 +1264,10 @@ They will be passed to the object initializer <code>Flask()</code>.</dd>
                 if recordObj.mayRead is not False:
                     record = recordObj.wrap()
                     return render_template(
-                        INDEX, topbar=topbar, sidebar=sidebar, material=record,
+                        INDEX,
+                        topbar=topbar,
+                        sidebar=sidebar,
+                        material=record,
                     )
                 flash(f&#34;Unknown record in table {table}&#34;, &#34;error&#34;)
                 return redirectResult(f&#34;&#34;&#34;/{table}/{N.list}&#34;&#34;&#34;, False)
@@ -1286,23 +1392,88 @@ is delivered</dd>
         is delivered
     &#34;&#34;&#34;
 
-    default = G(LIMITS, N.default, default=100)
-    maxLen = G(LIMITS, N.request, default=default)
-
-    if request.content_length and request.content_length &gt; maxLen:
+    if request.content_length and request.content_length &gt; LIMIT_REQUEST:
         abort(400)
 
     n = len(request.args)
-    boundN = G(LIMITS, N.keys, default=default)
-    if len(kwargs) &gt; boundN:
-        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {boundN} KEYS IN {kwargs}&#34;&#34;&#34;)
+    if len(kwargs) &gt; LIMIT_KEYS:
+        serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: {n} &gt; {LIMIT_KEYS} KEYS IN {kwargs}&#34;&#34;&#34;)
         abort(400)
+
     for (k, v) in chain.from_iterable((kwargs.items(), request.args.items())):
         if k not in LIMITS:
+            serverprint(f&#34;&#34;&#34;ILLEGAL PARAMETER NAME `{k}`: `{saveParam(v)}`&#34;&#34;&#34;)
             abort(400)
-        valN = G(LIMITS, k, default=default)
+        valN = G(LIMITS, k, default=LIMIT_DEFAULT)
         if v is not None and len(v) &gt; valN:
-            serverprint(f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({v})&#34;&#34;&#34;)
+            serverprint(
+                f&#34;&#34;&#34;OUT-OF-BOUNDS: LENGTH ARG &#34;{k}&#34; &gt; {valN} ({saveParam(v)})&#34;&#34;&#34;
+            )
+            abort(400)
+        if not v:
+            # no value for v: no risk
+            return
+
+        # we taste the value of v and verify it conforms to expectations
+        if k == N.action:
+            if v not in LIST_ACTIONS | FIELD_ACTIONS | OTHER_ACTIONS:
+                serverprint(f&#34;&#34;&#34;ILLEGAL ACTION: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in OPTION_SET | {N.reverse}:  # assessed reviewed
+            if v not in {ZERO, ONE, MINONE}:
+                serverprint(f&#34;&#34;&#34;`{k}` with non-3-boolean value: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.bulk:
+            if v not in {ZERO, ONE}:
+                serverprint(f&#34;&#34;&#34;`{k}` with non-boolean value: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.country:
+            if not v.isalpha() or not v == v.upper():
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a country code: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.deid, N.eid, N.masterId}:
+            if not isIdLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a mongo id: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.dtable:
+            if v not in MASTERS:
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a details table: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.email:
+            if not isEmailLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an email address : `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.eppn:
+            if not isEppnLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an eppn: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.field:
+            if not isNameLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an field name: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.filepath, N.anything}:
+            if not isFileLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be an file path: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k in {N.groups, N.sortcol}:
+            if not isNamesLike(v):
+                serverprint(f&#34;&#34;&#34;`{k}` cannot be a list of names: `{v}`&#34;&#34;&#34;)
+                abort(400)
+            pass
+        elif k == N.method:
+            if v not in BODY_METHODS:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a method: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.table:
+            if v not in ALL_TABLES:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a table name: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        elif k == N.task:
+            if v not in TASKS:
+                serverprint(f&#34;&#34;&#34;`{k}` is not a workflow task: `{v}`&#34;&#34;&#34;)
+                abort(400)
+        else:
+            serverprint(f&#34;&#34;&#34;FORGOTTEN TO IMPLEMENT CHECK FOR `{k}`: `{v}`&#34;&#34;&#34;)
             abort(400)</code></pre>
 </details>
 </dd>

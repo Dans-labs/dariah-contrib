@@ -150,7 +150,7 @@ development web server.
     [API docs of the controllers](../{{apidocs}}).
 
     The module
-    [index.py]({{repe}}/server/server/index.py)
+    [index.py]({{repo}}/server/server/index.py)
     defines routes and associates functions to be executed for those routes.
     These functions take a request, and turn it into a response.
 
