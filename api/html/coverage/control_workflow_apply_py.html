@@ -670,7 +670,7 @@
     <p id="t615" class="pln"><span class="n"><a href="#t615">615</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t616" class="run"><span class="n"><a href="#t616">616</a></span><span class="t">        <span class="op">(</span><span class="nam">contribId</span><span class="op">,</span><span class="op">)</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="nam">N</span><span class="op">.</span><span class="nam">contrib</span><span class="op">,</span> <span class="nam">N</span><span class="op">.</span><span class="nam">_id</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t617" class="pln"><span class="n"><a href="#t617">617</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t618" class="run"><span class="n"><a href="#t618">618</a></span><span class="t">        <span class="nam">isOwn</span> <span class="op">=</span> <span class="nam">uid</span> <span class="key">in</span> <span class="nam">creators</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t618" class="run"><span class="n"><a href="#t618">618</a></span><span class="t">        <span class="nam">isOwn</span> <span class="op">=</span> <span class="nam">creators</span> <span class="key">and</span> <span class="nam">uid</span> <span class="key">in</span> <span class="nam">creators</span>&nbsp;</span><span class="r"></span></p>
     <p id="t619" class="run"><span class="n"><a href="#t619">619</a></span><span class="t">        <span class="nam">isCoord</span> <span class="op">=</span> <span class="nam">countryId</span> <span class="key">and</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">coordinator</span><span class="op">(</span><span class="nam">countryId</span><span class="op">=</span><span class="nam">countryId</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t620" class="run"><span class="n"><a href="#t620">620</a></span><span class="t">        <span class="nam">isSuper</span> <span class="op">=</span> <span class="nam">auth</span><span class="op">.</span><span class="nam">superuser</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t621" class="pln"><span class="n"><a href="#t621">621</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -1172,7 +1172,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.5</a>,
-            created at 2021-06-14 11:10 +0200
+            created at 2021-10-26 14:55 +0200
         </p>
     </div>
 </div>

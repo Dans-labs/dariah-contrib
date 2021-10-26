@@ -38,6 +38,7 @@
 &#34;&#34;&#34;
 
 import sys
+import re
 import json
 from json import JSONEncoder
 from bson.objectid import ObjectId
@@ -433,6 +434,76 @@ def thinM(chunks):
     return modified
 
 
+IDLIKE_RE = re.compile(r&#34;^[0-9a-f]+$&#34;, re.S)
+
+
+def isIdLike(val):
+    return IDLIKE_RE.match(val)
+
+
+NAMELIKE_RE = re.compile(r&#34;^[0-9a-zA-Z_]+$&#34;, re.S)
+
+
+def isNameLike(val):
+    return NAMELIKE_RE.match(val)
+
+
+def isEmailLike(val):
+    parts = val.split(&#34;@&#34;)
+    if len(parts) != 2:
+        return False
+    good = True
+    for part in parts:
+        if not part.replace(&#34;_&#34;, &#34;&#34;).replace(&#34;-&#34;, &#34;&#34;).replace(&#34;+&#34;, &#34;&#34;).isalnum():
+            good = False
+            break
+    return good
+
+
+def isEppnLike(val):
+    parts = val.split(&#34;@&#34;)
+    good = True
+    for part in parts:
+        if not part.replace(&#34;_&#34;, &#34;&#34;).replace(&#34;-&#34;, &#34;&#34;).replace(&#34;+&#34;, &#34;&#34;).isalnum():
+            good = False
+            break
+    return good
+
+
+def isFileLike(val):
+    parts = val.split(&#34;/&#34;)
+    good = True
+    for part in parts:
+        if (
+            not part.replace(&#34;_&#34;, &#34;&#34;)
+            .replace(&#34;-&#34;, &#34;&#34;)
+            .replace(&#34;+&#34;, &#34;&#34;)
+            .replace(&#34;.&#34;, &#34;&#34;)
+            .isalnum()
+        ):
+            good = False
+            break
+    return good
+
+
+def isNamesLike(val):
+    parts = val.split(&#34;,&#34;)
+    good = True
+    for part in parts:
+        if not part.isalnum():
+            good = False
+            break
+    return good
+
+
+def saveParam(v):
+    if not v:
+        return &#34;&#34;
+    if len(v) &lt; 30:
+        return v
+    return f&#34;{v[0:10]} ... {v[-10:]}&#34;
+
+
 def getq(name):
     return request.args.get(name, &#34;&#34;)[0:64]</code></pre>
 </details>
@@ -783,6 +854,84 @@ to changes in a record.</p>
     return request.args.get(name, &#34;&#34;)[0:64]</code></pre>
 </details>
 </dd>
+<dt id="control.utils.isEmailLike"><code class="name flex">
+<span>def <span class="ident">isEmailLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isEmailLike(val):
+    parts = val.split(&#34;@&#34;)
+    if len(parts) != 2:
+        return False
+    good = True
+    for part in parts:
+        if not part.replace(&#34;_&#34;, &#34;&#34;).replace(&#34;-&#34;, &#34;&#34;).replace(&#34;+&#34;, &#34;&#34;).isalnum():
+            good = False
+            break
+    return good</code></pre>
+</details>
+</dd>
+<dt id="control.utils.isEppnLike"><code class="name flex">
+<span>def <span class="ident">isEppnLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isEppnLike(val):
+    parts = val.split(&#34;@&#34;)
+    good = True
+    for part in parts:
+        if not part.replace(&#34;_&#34;, &#34;&#34;).replace(&#34;-&#34;, &#34;&#34;).replace(&#34;+&#34;, &#34;&#34;).isalnum():
+            good = False
+            break
+    return good</code></pre>
+</details>
+</dd>
+<dt id="control.utils.isFileLike"><code class="name flex">
+<span>def <span class="ident">isFileLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isFileLike(val):
+    parts = val.split(&#34;/&#34;)
+    good = True
+    for part in parts:
+        if (
+            not part.replace(&#34;_&#34;, &#34;&#34;)
+            .replace(&#34;-&#34;, &#34;&#34;)
+            .replace(&#34;+&#34;, &#34;&#34;)
+            .replace(&#34;.&#34;, &#34;&#34;)
+            .isalnum()
+        ):
+            good = False
+            break
+    return good</code></pre>
+</details>
+</dd>
+<dt id="control.utils.isIdLike"><code class="name flex">
+<span>def <span class="ident">isIdLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isIdLike(val):
+    return IDLIKE_RE.match(val)</code></pre>
+</details>
+</dd>
 <dt id="control.utils.isIterable"><code class="name flex">
 <span>def <span class="ident">isIterable</span></span>(<span>value)</span>
 </code></dt>
@@ -806,6 +955,38 @@ We want to know whether a value is a string or an iterable of strings.</p>
     &#34;&#34;&#34;
 
     return type(value) is not str and hasattr(value, ITER)</code></pre>
+</details>
+</dd>
+<dt id="control.utils.isNameLike"><code class="name flex">
+<span>def <span class="ident">isNameLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isNameLike(val):
+    return NAMELIKE_RE.match(val)</code></pre>
+</details>
+</dd>
+<dt id="control.utils.isNamesLike"><code class="name flex">
+<span>def <span class="ident">isNamesLike</span></span>(<span>val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def isNamesLike(val):
+    parts = val.split(&#34;,&#34;)
+    good = True
+    for part in parts:
+        if not part.isalnum():
+            good = False
+            break
+    return good</code></pre>
 </details>
 </dd>
 <dt id="control.utils.mktsv"><code class="name flex">
@@ -925,6 +1106,23 @@ Otherwise it is the value for <code>field</code> from the record.</p></div>
     &#34;&#34;&#34;
 
     return default if record is None else record.get(field, default)</code></pre>
+</details>
+</dd>
+<dt id="control.utils.saveParam"><code class="name flex">
+<span>def <span class="ident">saveParam</span></span>(<span>v)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def saveParam(v):
+    if not v:
+        return &#34;&#34;
+    if len(v) &lt; 30:
+        return v
+    return f&#34;{v[0:10]} ... {v[-10:]}&#34;</code></pre>
 </details>
 </dd>
 <dt id="control.utils.serverprint"><code class="name flex">
@@ -1273,11 +1471,18 @@ implement default like this::</p>
 <li><code><a title="control.utils.filterModified" href="#control.utils.filterModified">filterModified</a></code></li>
 <li><code><a title="control.utils.getLast" href="#control.utils.getLast">getLast</a></code></li>
 <li><code><a title="control.utils.getq" href="#control.utils.getq">getq</a></code></li>
+<li><code><a title="control.utils.isEmailLike" href="#control.utils.isEmailLike">isEmailLike</a></code></li>
+<li><code><a title="control.utils.isEppnLike" href="#control.utils.isEppnLike">isEppnLike</a></code></li>
+<li><code><a title="control.utils.isFileLike" href="#control.utils.isFileLike">isFileLike</a></code></li>
+<li><code><a title="control.utils.isIdLike" href="#control.utils.isIdLike">isIdLike</a></code></li>
 <li><code><a title="control.utils.isIterable" href="#control.utils.isIterable">isIterable</a></code></li>
+<li><code><a title="control.utils.isNameLike" href="#control.utils.isNameLike">isNameLike</a></code></li>
+<li><code><a title="control.utils.isNamesLike" href="#control.utils.isNamesLike">isNamesLike</a></code></li>
 <li><code><a title="control.utils.mktsv" href="#control.utils.mktsv">mktsv</a></code></li>
 <li><code><a title="control.utils.now" href="#control.utils.now">now</a></code></li>
 <li><code><a title="control.utils.perDay" href="#control.utils.perDay">perDay</a></code></li>
 <li><code><a title="control.utils.pick" href="#control.utils.pick">pick</a></code></li>
+<li><code><a title="control.utils.saveParam" href="#control.utils.saveParam">saveParam</a></code></li>
 <li><code><a title="control.utils.serverprint" href="#control.utils.serverprint">serverprint</a></code></li>
 <li><code><a title="control.utils.shiftRegional" href="#control.utils.shiftRegional">shiftRegional</a></code></li>
 <li><code><a title="control.utils.thinM" href="#control.utils.thinM">thinM</a></code></li>

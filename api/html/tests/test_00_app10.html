@@ -49,13 +49,13 @@ We follow all the url patterns defined in <code>control.app</code>, except
 <dd>
 <p>The public user</p>
 <ul>
-<li>fires a static url for a long file name and gets a 400</li>
+<li>fires a static url for a long file name and fails</li>
 <li>fires a static url for an existing css file but with illegal query
 params and fails.</li>
 <li>fires a static url for an existing css file but with a legal but long query
 param and fails.</li>
 <li>fires a static url for an existing css file with a legal and short but
-non-sensical query param and succeeds.</li>
+non-sensical query param and also fails.</li>
 <li>fires a static url for an existing css file and succeeds.</li>
 <li>fires a static url for an existing favicon file and succeeds.</li>
 <li>fires a static url for a non-existing css file and fails.</li>
@@ -171,13 +171,13 @@ We follow all the url patterns defined in `control.app`, except
 `test_staticFile`
 :   The public user
 
-    *   fires a static url for a long file name and gets a 400
+    *   fires a static url for a long file name and fails
     *   fires a static url for an existing css file but with illegal query
         params and fails.
     *   fires a static url for an existing css file but with a legal but long query
         param and fails.
     *   fires a static url for an existing css file with a legal and short but
-        non-sensical query param and succeeds.
+        non-sensical query param and also fails.
     *   fires a static url for an existing css file and succeeds.
     *   fires a static url for an existing favicon file and succeeds.
     *   fires a static url for a non-existing css file and fails.
@@ -215,8 +215,9 @@ import magic  # noqa
 from conftest import USERS
 from helpers import forall
 from starters import start
-from subtest import illegalize, assertStatus
+from subtest import illegalize, isIllegal, assertStatus
 from example import (
+    ASSESS,
     COMMON_CSS,
     COMMONX_CSS,
     CONTRIB,
@@ -249,16 +250,16 @@ def test_long(clients):
 
 def test_static(clientPublic):
     assertStatus(clientPublic, STATIC, 303)
-    assertStatus(clientPublic, f&#34;{STATIC}/&#34;, 303)
+    assertStatus(clientPublic, f&#34;{STATIC}/&#34;, 400)
     assertStatus(clientPublic, f&#34;{STATIC}{FAV}&#34;, 303)
-    assertStatus(clientPublic, f&#34;{STATIC}{FAV}/&#34;, 303)
+    assertStatus(clientPublic, f&#34;{STATIC}{FAV}/&#34;, 400)
 
 
 def test_staticFile(clientPublic):
     assertStatus(clientPublic, f&#34;{STATIC}/&#34; + (&#34;a&#34; * 200) + &#34;.html&#34;, 400)
     assertStatus(clientPublic, f&#34;{COMMON_CSS}?xxx=yyy&#34;, 400)
     assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 200), 400)
-    assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 10), 200)
+    assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 10), 400)
     assertStatus(clientPublic, COMMON_CSS, 200)
     assertStatus(clientPublic, COMMONX_CSS, 303)
     assertStatus(clientPublic, FAVICON, 200)
@@ -275,6 +276,36 @@ def test_home(clients):
 def test_info(clients):
     illegalize(clients, &#34;/info&#34;)
     illegalize(clients, &#34;/info.tsv&#34;)
+
+
+@pytest.mark.parametrize(
+    (&#34;requestParam&#34;,),
+    (
+        (&#34;action&#34;,),
+        (&#34;anything&#34;,),
+        (&#34;assessed&#34;,),
+        (&#34;bulk&#34;,),
+        (&#34;country&#34;,),
+        (&#34;deid&#34;,),
+        (&#34;dtable&#34;,),
+        (&#34;eid&#34;,),
+        (&#34;email&#34;,),
+        (&#34;eppn&#34;,),
+        (&#34;field&#34;,),
+        (&#34;filepath&#34;,),
+        (&#34;groups&#34;,),
+        (&#34;masterId&#34;,),
+        (&#34;method&#34;,),
+        (&#34;reverse&#34;,),
+        (&#34;reviewed&#34;,),
+        (&#34;sortcol&#34;,),
+        (&#34;table&#34;,),
+        (&#34;task&#34;,),
+    ),
+)
+def test_info_params(clients, requestParam):
+    hack = &#34;udhdu%27%3E%3Cscript%3Ealert(/XSS/)%3C/script%3Ec8dik&#34;
+    isIllegal(clients, f&#34;/info?{requestParam}={hack}&#34;)
 
 
 def test_workflow(clients):
@@ -298,7 +329,7 @@ def test_insertDetail(clients):
         &#34;/api/{table}/{eid}/{dtable}/insert&#34;,
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
     )
 
 
@@ -320,7 +351,7 @@ def test_deleteDetail(clients):
         &#34;/api/{table}/{masterId}/{dtable}/delete/{eid}&#34;,
         table=CONTRIB,
         masterId=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         eid=DUMMY_ID,
     )
 
@@ -339,7 +370,7 @@ def test_itemDetail(clients):
         &#34;/{table}/item/{eid}/open/{dtable}/{deid}&#34;,
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         deid=DUMMY_ID,
     )
 
@@ -393,7 +424,7 @@ def test_field(clients):
         &#34;/api/{table}/{masterId}/{dtable}/delete/{eid}&#34;,
         table=CONTRIB,
         masterId=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         eid=DUMMY_ID,
     )</code></pre>
 </details>
@@ -445,6 +476,45 @@ def test_field(clients):
     illegalize(clients, &#34;/info.tsv&#34;)</code></pre>
 </details>
 </dd>
+<dt id="test_00_app10.test_info_params"><code class="name flex">
+<span>def <span class="ident">test_info_params</span></span>(<span>clients, requestParam)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@pytest.mark.parametrize(
+    (&#34;requestParam&#34;,),
+    (
+        (&#34;action&#34;,),
+        (&#34;anything&#34;,),
+        (&#34;assessed&#34;,),
+        (&#34;bulk&#34;,),
+        (&#34;country&#34;,),
+        (&#34;deid&#34;,),
+        (&#34;dtable&#34;,),
+        (&#34;eid&#34;,),
+        (&#34;email&#34;,),
+        (&#34;eppn&#34;,),
+        (&#34;field&#34;,),
+        (&#34;filepath&#34;,),
+        (&#34;groups&#34;,),
+        (&#34;masterId&#34;,),
+        (&#34;method&#34;,),
+        (&#34;reverse&#34;,),
+        (&#34;reviewed&#34;,),
+        (&#34;sortcol&#34;,),
+        (&#34;table&#34;,),
+        (&#34;task&#34;,),
+    ),
+)
+def test_info_params(clients, requestParam):
+    hack = &#34;udhdu%27%3E%3Cscript%3Ealert(/XSS/)%3C/script%3Ec8dik&#34;
+    isIllegal(clients, f&#34;/info?{requestParam}={hack}&#34;)</code></pre>
+</details>
+</dd>
 <dt id="test_00_app10.test_insert"><code class="name flex">
 <span>def <span class="ident">test_insert</span></span>(<span>clients)</span>
 </code></dt>
@@ -473,7 +543,7 @@ def test_field(clients):
         &#34;/api/{table}/{eid}/{dtable}/insert&#34;,
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
     )</code></pre>
 </details>
 </dd>
@@ -505,7 +575,7 @@ def test_field(clients):
         &#34;/{table}/item/{eid}/open/{dtable}/{deid}&#34;,
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         deid=DUMMY_ID,
     )</code></pre>
 </details>
@@ -602,9 +672,9 @@ def test_start(clientOffice):
 </summary>
 <pre><code class="python">def test_static(clientPublic):
     assertStatus(clientPublic, STATIC, 303)
-    assertStatus(clientPublic, f&#34;{STATIC}/&#34;, 303)
+    assertStatus(clientPublic, f&#34;{STATIC}/&#34;, 400)
     assertStatus(clientPublic, f&#34;{STATIC}{FAV}&#34;, 303)
-    assertStatus(clientPublic, f&#34;{STATIC}{FAV}/&#34;, 303)</code></pre>
+    assertStatus(clientPublic, f&#34;{STATIC}{FAV}/&#34;, 400)</code></pre>
 </details>
 </dd>
 <dt id="test_00_app10.test_staticFile"><code class="name flex">
@@ -620,7 +690,7 @@ def test_start(clientOffice):
     assertStatus(clientPublic, f&#34;{STATIC}/&#34; + (&#34;a&#34; * 200) + &#34;.html&#34;, 400)
     assertStatus(clientPublic, f&#34;{COMMON_CSS}?xxx=yyy&#34;, 400)
     assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 200), 400)
-    assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 10), 200)
+    assertStatus(clientPublic, f&#34;{COMMON_CSS}?action=&#34; + (&#34;a&#34; * 10), 400)
     assertStatus(clientPublic, COMMON_CSS, 200)
     assertStatus(clientPublic, COMMONX_CSS, 303)
     assertStatus(clientPublic, FAVICON, 200)
@@ -679,6 +749,7 @@ def test_start(clientOffice):
 <li><code><a title="test_00_app10.test_field" href="#test_00_app10.test_field">test_field</a></code></li>
 <li><code><a title="test_00_app10.test_home" href="#test_00_app10.test_home">test_home</a></code></li>
 <li><code><a title="test_00_app10.test_info" href="#test_00_app10.test_info">test_info</a></code></li>
+<li><code><a title="test_00_app10.test_info_params" href="#test_00_app10.test_info_params">test_info_params</a></code></li>
 <li><code><a title="test_00_app10.test_insert" href="#test_00_app10.test_insert">test_insert</a></code></li>
 <li><code><a title="test_00_app10.test_insertDetail" href="#test_00_app10.test_insertDetail">test_insertDetail</a></code></li>
 <li><code><a title="test_00_app10.test_item" href="#test_00_app10.test_item">test_item</a></code></li>
