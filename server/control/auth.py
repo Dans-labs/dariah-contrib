@@ -36,8 +36,7 @@ TRANSPORT_ATTRIBUTES = CB.transportAttributes
 SHIB_KEY = CB.shibKey
 ATTRIBUTES = CB.attributes
 
-LIMITS = CW.limits
-LIMIT_JSON = G(LIMITS, N.json, default=1000000)
+LIMIT_JSON = CW.limitJson
 
 Qc = H.icon(CW.unknown[N.country], asChar=True)
 Qu = H.icon(CW.unknown[N.user], asChar=True)

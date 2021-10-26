@@ -359,6 +359,7 @@ def assertStatus(client, url, expect):
     except Exception as e:
         serverprint(f"APPLICATION ERROR: {e}")
         code = 4000
+        raise
 
     if type(expect) is set:
         good = code in expect
@@ -440,12 +441,26 @@ def illegalize(clients, url, **kwargs):
     passable = {200, 301, 302, 303}
     for (i, ux) in enumerate(uxs):
         expectx = {
-            user: 400 if i > 2 or i == 1 and len(kwargsx) else passable
+            user: 400 if i > 1 or i == 1 and len(kwargsx) else passable
             for user in USERS
             if user in clients
         }
         serverprint(f"LEGAL URL ? ({ux})")
         forall(clients, expectx, assertStatus, ux)
+
+
+def isIllegal(clients, url):
+    """Make sure that the ur triggers a 400 response for all clients.
+
+    Parameters
+    ----------
+    clients: dict
+        Mapping from users to client fixtures
+    """
+
+    expectx = {user: 400 for user in USERS if user in clients}
+    serverprint(f"HACKED URL ! ({url})")
+    forall(clients, expectx, assertStatus, url)
 
 
 def inspectTitleAll(clients, table, eid, expect):

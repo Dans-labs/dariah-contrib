@@ -783,6 +783,8 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
+            if colType is int:
+                return 0 if type(value) is str else value
             return E
 
         def makeKeyInd(value):
@@ -794,6 +796,8 @@ class Overview:
                 return value.lower()
             if colType is bool:
                 return 1 if value else -1
+            if colType is int:
+                return 0 if type(value) is str else value
             return E
 
         return makeKeyInd if individual else makeKey

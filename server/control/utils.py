@@ -5,6 +5,7 @@
 """
 
 import sys
+import re
 import json
 from json import JSONEncoder
 from bson.objectid import ObjectId
@@ -398,6 +399,76 @@ def thinM(chunks):
         for m in sorted(thinned, key=lambda x: x[1]):
             modified.append((m, 2 if isLast else 1))
     return modified
+
+
+IDLIKE_RE = re.compile(r"^[0-9a-f]+$", re.S)
+
+
+def isIdLike(val):
+    return IDLIKE_RE.match(val)
+
+
+NAMELIKE_RE = re.compile(r"^[0-9a-zA-Z_]+$", re.S)
+
+
+def isNameLike(val):
+    return NAMELIKE_RE.match(val)
+
+
+def isEmailLike(val):
+    parts = val.split("@")
+    if len(parts) != 2:
+        return False
+    good = True
+    for part in parts:
+        if not part.replace("_", "").replace("-", "").replace("+", "").isalnum():
+            good = False
+            break
+    return good
+
+
+def isEppnLike(val):
+    parts = val.split("@")
+    good = True
+    for part in parts:
+        if not part.replace("_", "").replace("-", "").replace("+", "").isalnum():
+            good = False
+            break
+    return good
+
+
+def isFileLike(val):
+    parts = val.split("/")
+    good = True
+    for part in parts:
+        if (
+            not part.replace("_", "")
+            .replace("-", "")
+            .replace("+", "")
+            .replace(".", "")
+            .isalnum()
+        ):
+            good = False
+            break
+    return good
+
+
+def isNamesLike(val):
+    parts = val.split(",")
+    good = True
+    for part in parts:
+        if not part.isalnum():
+            good = False
+            break
+    return good
+
+
+def saveParam(v):
+    if not v:
+        return ""
+    if len(v) < 30:
+        return v
+    return f"{v[0:10]} ... {v[-10:]}"
 
 
 def getq(name):

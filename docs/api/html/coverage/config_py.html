@@ -23,10 +23,10 @@
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             226 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">198 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">28 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">199 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">27 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
-            <button type="button" class="par run show_par shortkey_p button_toggle_par" title="Toggle lines partially run">11 partial</button>
+            <button type="button" class="par run show_par shortkey_p button_toggle_par" title="Toggle lines partially run">10 partial</button>
         </h2>
     </div>
 </div>
@@ -226,11 +226,11 @@
     <p id="t171" class="run"><span class="n"><a href="#t171">171</a></span><span class="t">        <span class="nam">allNames</span> <span class="op">|=</span> <span class="nam">names</span>&nbsp;</span><span class="r"></span></p>
     <p id="t172" class="pln"><span class="n"><a href="#t172">172</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t173" class="run"><span class="n"><a href="#t173">173</a></span><span class="t">    <span class="nam">spuriousNames</span> <span class="op">=</span> <span class="nam">allPureNames</span> <span class="op">&amp;</span> <span class="nam">allNames</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t174" class="par run show_par"><span class="n"><a href="#t174">174</a></span><span class="t">    <span class="key">if</span> <span class="nam">spuriousNames</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">174&#x202F;&#x219B;&#x202F;175</span><span class="annotate long">line 174 didn't jump to line 175, because the condition on line 174 was never true</span></span></p>
-    <p id="t175" class="mis show_mis"><span class="n"><a href="#t175">175</a></span><span class="t">        <span class="nam">serverprint</span><span class="op">(</span><span class="str">f"NAMES: {len(spuriousNames)} spurious names"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t176" class="mis show_mis"><span class="n"><a href="#t176">176</a></span><span class="t">        <span class="nam">serverprint</span><span class="op">(</span><span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">sorted</span><span class="op">(</span><span class="nam">spuriousNames</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t174" class="par run show_par"><span class="n"><a href="#t174">174</a></span><span class="t">    <span class="key">if</span> <span class="nam">spuriousNames</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">174&#x202F;&#x219B;&#x202F;178</span><span class="annotate long">line 174 didn't jump to line 178, because the condition on line 174 was never false</span></span></p>
+    <p id="t175" class="run"><span class="n"><a href="#t175">175</a></span><span class="t">        <span class="nam">serverprint</span><span class="op">(</span><span class="str">f"NAMES: {len(spuriousNames)} spurious names"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t176" class="run"><span class="n"><a href="#t176">176</a></span><span class="t">        <span class="nam">serverprint</span><span class="op">(</span><span class="str">", "</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">sorted</span><span class="op">(</span><span class="nam">spuriousNames</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t177" class="pln"><span class="n"><a href="#t177">177</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t178" class="par run show_par"><span class="n"><a href="#t178">178</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">TERSE</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">178&#x202F;&#x219B;&#x202F;179</span><span class="annotate long">line 178 didn't jump to line 179, because the condition on line 178 was never true</span></span></p>
+    <p id="t178" class="mis show_mis"><span class="n"><a href="#t178">178</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">TERSE</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t179" class="mis show_mis"><span class="n"><a href="#t179">179</a></span><span class="t">            <span class="nam">serverprint</span><span class="op">(</span><span class="str">"NAMES: No spurious names"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t180" class="pln"><span class="n"><a href="#t180">180</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t181" class="run"><span class="n"><a href="#t181">181</a></span><span class="t">    <span class="nam">NAME_RE</span> <span class="op">=</span> <span class="nam">re</span><span class="op">.</span><span class="nam">compile</span><span class="op">(</span><span class="str">r"""\bN\.[A-Za-z0-9_]+"""</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -363,7 +363,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.5</a>,
-            created at 2021-06-14 11:10 +0200
+            created at 2021-10-26 14:55 +0200
         </p>
     </div>
 </div>

@@ -615,7 +615,7 @@ class WorkflowItem:
 
         (contribId,) = self.info(N.contrib, N._id)
 
-        isOwn = uid in creators
+        isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
 

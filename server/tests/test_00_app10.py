@@ -25,13 +25,13 @@ We follow all the url patterns defined in `control.app`, except
 `test_staticFile`
 :   The public user
 
-    *   fires a static url for a long file name and gets a 400
+    *   fires a static url for a long file name and fails
     *   fires a static url for an existing css file but with illegal query
         params and fails.
     *   fires a static url for an existing css file but with a legal but long query
         param and fails.
     *   fires a static url for an existing css file with a legal and short but
-        non-sensical query param and succeeds.
+        non-sensical query param and also fails.
     *   fires a static url for an existing css file and succeeds.
     *   fires a static url for an existing favicon file and succeeds.
     *   fires a static url for a non-existing css file and fails.
@@ -69,8 +69,9 @@ import magic  # noqa
 from conftest import USERS
 from helpers import forall
 from starters import start
-from subtest import illegalize, assertStatus
+from subtest import illegalize, isIllegal, assertStatus
 from example import (
+    ASSESS,
     COMMON_CSS,
     COMMONX_CSS,
     CONTRIB,
@@ -103,16 +104,16 @@ def test_long(clients):
 
 def test_static(clientPublic):
     assertStatus(clientPublic, STATIC, 303)
-    assertStatus(clientPublic, f"{STATIC}/", 303)
+    assertStatus(clientPublic, f"{STATIC}/", 400)
     assertStatus(clientPublic, f"{STATIC}{FAV}", 303)
-    assertStatus(clientPublic, f"{STATIC}{FAV}/", 303)
+    assertStatus(clientPublic, f"{STATIC}{FAV}/", 400)
 
 
 def test_staticFile(clientPublic):
     assertStatus(clientPublic, f"{STATIC}/" + ("a" * 200) + ".html", 400)
     assertStatus(clientPublic, f"{COMMON_CSS}?xxx=yyy", 400)
     assertStatus(clientPublic, f"{COMMON_CSS}?action=" + ("a" * 200), 400)
-    assertStatus(clientPublic, f"{COMMON_CSS}?action=" + ("a" * 10), 200)
+    assertStatus(clientPublic, f"{COMMON_CSS}?action=" + ("a" * 10), 400)
     assertStatus(clientPublic, COMMON_CSS, 200)
     assertStatus(clientPublic, COMMONX_CSS, 303)
     assertStatus(clientPublic, FAVICON, 200)
@@ -129,6 +130,36 @@ def test_home(clients):
 def test_info(clients):
     illegalize(clients, "/info")
     illegalize(clients, "/info.tsv")
+
+
+@pytest.mark.parametrize(
+    ("requestParam",),
+    (
+        ("action",),
+        ("anything",),
+        ("assessed",),
+        ("bulk",),
+        ("country",),
+        ("deid",),
+        ("dtable",),
+        ("eid",),
+        ("email",),
+        ("eppn",),
+        ("field",),
+        ("filepath",),
+        ("groups",),
+        ("masterId",),
+        ("method",),
+        ("reverse",),
+        ("reviewed",),
+        ("sortcol",),
+        ("table",),
+        ("task",),
+    ),
+)
+def test_info_params(clients, requestParam):
+    hack = "udhdu%27%3E%3Cscript%3Ealert(/XSS/)%3C/script%3Ec8dik"
+    isIllegal(clients, f"/info?{requestParam}={hack}")
 
 
 def test_workflow(clients):
@@ -152,7 +183,7 @@ def test_insertDetail(clients):
         "/api/{table}/{eid}/{dtable}/insert",
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
     )
 
 
@@ -174,7 +205,7 @@ def test_deleteDetail(clients):
         "/api/{table}/{masterId}/{dtable}/delete/{eid}",
         table=CONTRIB,
         masterId=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         eid=DUMMY_ID,
     )
 
@@ -193,7 +224,7 @@ def test_itemDetail(clients):
         "/{table}/item/{eid}/open/{dtable}/{deid}",
         table=CONTRIB,
         eid=DUMMY_ID,
-        dtable=CONTRIB,
+        dtable=ASSESS,
         deid=DUMMY_ID,
     )
 
