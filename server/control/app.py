@@ -186,7 +186,7 @@ def checkBounds(**kwargs):
                 serverprint(f"""`{k}` with non-boolean value: `{v}`""")
                 abort(400)
         elif k == N.country:
-            if not v.isalpha() or not v == v.upper():
+            if v != "x" and (not v.isalpha() or not v == v.upper()):
                 serverprint(f"""`{k}` cannot be a country code: `{v}`""")
                 abort(400)
         elif k in {N.deid, N.eid, N.masterId}:
