@@ -62,14 +62,14 @@ def test_identity(clients):
 
 
 def test_login(clients, clientPublic):
-    for user in sorted(NAMED_USERS) + [E, PUBLIC, f"xxxxxx"]:
+    for user in sorted(NAMED_USERS) + [E, PUBLIC, "xxxxxx"]:
         isNamed = user in NAMED_USERS
         expect = 302 if isNamed else 303
         serverprint(f"LOGIN {user}")
         assertStatus(clientPublic, f"/login?eppn={user}", expect)
         serverprint(f"LOGOUT {user}")
         if user in clients:
-            assertStatus(clients[user], f"/logout", expect)
+            assertStatus(clients[user], "/logout", expect)
 
 
 def test_readEmail(clients):

@@ -262,14 +262,12 @@ otherActions:
 names:
   - _cn
   - addClass
-  - all
   - asc
   - arank
   - astage
   - body
   - desc
   - icon
-  - masterId
   - open
   - option
   - overview

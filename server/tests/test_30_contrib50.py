@@ -54,6 +54,13 @@
     We'll test what happens when the delay time is past.
     We do this by updating the `dateDecided` field under water, directly
     in Mongo.
+
+`test_revokeIntervention`
+:   **mycoord** takes a decision.
+    We let **office** and **system** revoke that decision.
+    **office** has a limited time to do that, **system** can do it anytime.
+    We do this by updating the `dateDecided` field under water, directly
+    in Mongo.
 """
 
 import pytest
@@ -105,7 +112,12 @@ def test_start(clientOffice, clientOwner):
     eid = G(recordId, CONTRIB)
     ids = startInfo["ids"]
     assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (ids["TYPE1"], TYPE1), True,
+        clientOwner,
+        CONTRIB,
+        eid,
+        TYPE,
+        (ids["TYPE1"], TYPE1),
+        True,
     )
 
 
@@ -174,27 +186,63 @@ def test_revoke(clientMycoord, clientSystem):
     recordId = startInfo["recordId"]
     eid = recordId[CONTRIB]
     tests = (
-        (SELECT_ACCEPT, 47, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 49, SELECT_REJECT, False),
-        (SELECT_REJECT, 47, SELECT_ACCEPT, True),
-        (SELECT_REJECT, 49, SELECT_ACCEPT, False),
-        (SELECT_REVOKE, 47, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 49, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 47, SELECT_REJECT, True),
-        (SELECT_REVOKE, 49, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 47, SELECT_REVOKE, True),
-        (SELECT_ACCEPT, 49, SELECT_REVOKE, False),
-        (SELECT_REJECT, 47, SELECT_REVOKE, True),
-        (SELECT_REJECT, 49, SELECT_REVOKE, False),
+        (SELECT_ACCEPT, 95, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 97, SELECT_REJECT, False),
+        (SELECT_REJECT, 95, SELECT_ACCEPT, True),
+        (SELECT_REJECT, 97, SELECT_ACCEPT, False),
+        (SELECT_REVOKE, 95, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 97, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 95, SELECT_REJECT, True),
+        (SELECT_REVOKE, 97, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, True),
+        (SELECT_REJECT, 97, SELECT_REVOKE, False),
     )
     for (decisionBefore, shiftBack, decisionAfter, exp) in tests:
         url = f"/api/task/{decisionBefore}/{eid}"
+        serverprint(f"{decisionBefore}: True")
         assertStatus(clientMycoord, url, True)
+
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
         url = f"/api/task/{decisionAfter}/{eid}"
-        serverprint(
-            f"REVOCATION: {decisionBefore} SHIFTBACK {shiftBack} {decisionAfter}: {exp}"
-        )
-        url = f"/api/task/{decisionAfter}/{eid}"
+        serverprint(f"{decisionAfter}: SHIFTBACK {shiftBack}: {exp}")
         assertStatus(clientMycoord, url, exp)
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)
+
+
+def test_revokeIntervention(clientMycoord, clientOffice, clientSystem):
+    recordId = startInfo["recordId"]
+    eid = recordId[CONTRIB]
+    # note the switch to SELECT_REJECT below after the first failure to revoke:
+    # this is because mycoord cannot accept an accepted contrib
+    tests = (
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, "office", True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, "office", True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, "office", True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, "office", False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, "system", True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, "system", True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, "system", True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, "system", True),
+        (SELECT_ACCEPT, 24000, SELECT_REVOKE, "system", True),
+    )
+    for (decisionBefore, shiftBack, decisionAfter, who, exp) in tests:
+        url = f"/api/task/{decisionBefore}/{eid}"
+        serverprint(f"SELECT DECISION {decisionBefore}: True")
+        assertStatus(clientMycoord, url, True)
+
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
+        url = f"/api/task/{decisionAfter}/{eid}"
+        clientWho = (
+            clientOffice
+            if who == "office"
+            else clientSystem
+            if who == "system"
+            else clientMycoord
+        )
+        serverprint(f"{decisionAfter} by {who}: SHIFTBACK {shiftBack}: {exp}")
+        assertStatus(clientWho, url, exp)
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)

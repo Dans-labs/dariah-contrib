@@ -106,7 +106,7 @@ tasks:
     table: contrib
     field: selected
     date: dateDecided
-    delay: 48
+    delay: 96
     value: "1"
   deselectContrib:
     msg: Discard as national contribution to DARIAH
@@ -116,7 +116,7 @@ tasks:
     table: contrib
     field: selected
     date: dateDecided
-    delay: 48
+    delay: 96
     value: "-1"
   unselectContrib:
     msg: Revoke selection decision for this contribution
@@ -126,7 +126,11 @@ tasks:
     table: contrib
     field: selected
     date: dateDecided
-    delay: 48
+    delay:
+      all: false
+      coord: 96
+      office: 2400
+      sysadmin: true
     value: "0"
   startAssessment:
     msg: Start a self-assessment for this contribution

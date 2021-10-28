@@ -2,23 +2,23 @@
 platform darwin -- Python 3.9.7, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, configfile: pytest.ini, testpaths: tests
 plugins: anyio-2.2.0, ordering-0.6
-collected 205 items
+collected 206 items
 
-tests/test_00_app10.py .......................................        [ 39/205]
-tests/test_10_factory10.py ...                                        [ 42/205]
-tests/test_20_users10.py .....                                        [ 47/205]
-tests/test_30_contrib10.py .............                              [ 60/205]
-tests/test_30_contrib20.py ....................................       [ 96/205]
-tests/test_30_contrib30.py ..............................             [126/205]
-tests/test_30_contrib40.py ....                                       [130/205]
-tests/test_30_contrib50.py ......                                     [136/205]
-tests/test_40_assess10.py .................                           [153/205]
-tests/test_40_assess20.py ...                                         [156/205]
-tests/test_40_assess30.py ............................                [184/205]
-tests/test_50_review10.py ........                                    [192/205]
-tests/test_50_review20.py .............                               [205/205]
+tests/test_00_app10.py .......................................        [ 39/206]
+tests/test_10_factory10.py ...                                        [ 42/206]
+tests/test_20_users10.py .....                                        [ 47/206]
+tests/test_30_contrib10.py .............                              [ 60/206]
+tests/test_30_contrib20.py ....................................       [ 96/206]
+tests/test_30_contrib30.py ..............................             [126/206]
+tests/test_30_contrib40.py ....                                       [130/206]
+tests/test_30_contrib50.py .......                                    [137/206]
+tests/test_40_assess10.py .................                           [154/206]
+tests/test_40_assess20.py ...                                         [157/206]
+tests/test_40_assess30.py ............................                [185/206]
+tests/test_50_review10.py ........                                    [193/206]
+tests/test_50_review20.py .............                               [206/206]
 
-======================= 205 passed in 127.39s (0:02:07) ========================
+======================= 206 passed in 130.28s (0:02:10) ========================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
-      5006        351        6.5       14.3
+      5042        351        6.5       14.4

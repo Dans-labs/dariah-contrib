@@ -544,6 +544,19 @@ class WorkflowItem:
         It may be that the task is only permitted for some limited time from now on.
         Then a timedelta object with the amount of time left is returned.
 
+        More precisely, the workflow configuration table (yaml/workflow.yaml)
+        my specify a set of delays for a set of user roles.
+
+        *   `all` specifies the default for users
+            whose role has not got a corresponding delay
+        *   `coord` is national coordinator of the relevant country
+        *   `office` is any office user
+        *   `super` is any super user, i.e. `system` or `root`
+
+        The value specified for each of these roles is either an integer,
+        which is the amount of hours of the delay.
+        Or it is `false` (no delay) or `true` (infinite delay).
+
         Parameters
         ----------
         table: string
@@ -619,28 +632,50 @@ class WorkflowItem:
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
         isOffice = auth.officeuser()
+        isSysadmin = auth.sysadmin()
 
-        decisionDelay = G(taskInfo, N.delay)
+        decisionDelay = G(taskInfo, N.delay, False)
         if decisionDelay:
-            decisionDelay = timedelta(hours=decisionDelay)
+            if type(decisionDelay) is int:
+                decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is dict:
+                defaultDecisionDelay = G(decisionDelay, N.all, False)
+                decisionDelay = (
+                    G(decisionDelay, N.coord, defaultDecisionDelay)
+                    if isCoord
+                    else G(decisionDelay, N.sysadmin, defaultDecisionDelay)
+                    if isSysadmin
+                    else G(decisionDelay, N.office, defaultDecisionDelay)
+                    if isOffice
+                    else defaultDecisionDelay
+                )
+                if type(decisionDelay) is int:
+                    decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is not bool:
+                decisionDelay = False
 
         justNow = now()
         remaining = False
         if decisionDelay and stageDate:
-            remaining = stageDate + decisionDelay - justNow
-            if remaining <= timedelta(hours=0):
-                remaining = False
+            if type(decisionDelay) is bool:
+                remaining = True
+            else:
+                remaining = stageDate + decisionDelay - justNow
+                if remaining <= timedelta(hours=0):
+                    remaining = False
 
         forbidden = frozen or done
 
-        if forbidden and not remaining:
+        if forbidden:
             if (
                 task == N.unselectContrib
                 and table == N.contrib
-                and (isSuper or isOffice)
             ):
-                return "as intervention"
-            else:
+                if remaining is True:
+                    return "as intervention"
+                if remaining:
+                    return remaining
+            if not remaining:
                 return False
 
         if table == N.contrib:

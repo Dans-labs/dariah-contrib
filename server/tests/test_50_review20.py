@@ -256,13 +256,25 @@ def test_expertDecides(clientsReviewer):
     reviewId = G(recordId, REVIEW)
 
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [REVOKE], False,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [REVOKE],
+        False,
     )
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [ACCEPT], True,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [ACCEPT],
+        True,
     )
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [ACCEPT], False,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [ACCEPT],
+        False,
     )
 
 
@@ -271,10 +283,18 @@ def test_finalAccepts(clientsReviewer):
     reviewId = G(recordId, REVIEW)
 
     assertReviewDecisions(
-        clientsReviewer, reviewId, [FINAL], [ACCEPT], True,
+        clientsReviewer,
+        reviewId,
+        [FINAL],
+        [ACCEPT],
+        True,
     )
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [REJECT, REVISE, ACCEPT, REVOKE],
+        False,
     )
 
 
@@ -319,11 +339,19 @@ def test_revokeDelay(clientFinal, clientSystem):
     rFinal = G(reviewId, FINAL)
     assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -23)
     assertReviewDecisions(
-        cFinal, reviewId, [FINAL], [REVOKE, ACCEPT], True,
+        cFinal,
+        reviewId,
+        [FINAL],
+        [REVOKE, ACCEPT],
+        True,
     )
     assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
     assertReviewDecisions(
-        cFinal, reviewId, [FINAL], [REVOKE], False,
+        cFinal,
+        reviewId,
+        [FINAL],
+        [REVOKE],
+        False,
     )
     assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, 25)
 
@@ -333,10 +361,18 @@ def test_finalRevokes(clientsReviewer):
     reviewId = G(recordId, REVIEW)
 
     assertReviewDecisions(
-        clientsReviewer, reviewId, [FINAL], [REVOKE], True,
+        clientsReviewer,
+        reviewId,
+        [FINAL],
+        [REVOKE],
+        True,
     )
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], True,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [REJECT, REVISE, ACCEPT, REVOKE],
+        True,
     )
 
 
@@ -435,7 +471,11 @@ def test_finalRevise(clientsReviewer, clientSystem):
     assertReviewDecisions(clientsReviewer, reviewId, [FINAL], [REVISE], True)
     assertShiftDate(clientSystem, REVIEW, rFinal, DATE_DECIDED, -25)
     assertReviewDecisions(
-        clientsReviewer, reviewId, [EXPERT], [REJECT, REVISE, ACCEPT, REVOKE], False,
+        clientsReviewer,
+        reviewId,
+        [EXPERT],
+        [REJECT, REVISE, ACCEPT, REVOKE],
+        False,
     )
 
 
@@ -447,10 +487,15 @@ def test_Revise(clientOwner):
 
     assertStage(clientOwner, ASSESS, aId, COMPLETE_REVISED)
     assertModifyField(
-        clientOwner, CRITERIA_ENTRY, cIdFirst, EVIDENCE, ([], E), True,
+        clientOwner,
+        CRITERIA_ENTRY,
+        cIdFirst,
+        EVIDENCE,
+        ([], E),
+        True,
     )
     assertStage(clientOwner, ASSESS, aId, INCOMPLETE_REVISED)
-    theEvidence = [f"revised evidence for 1", "see the internet"]
+    theEvidence = ["revised evidence for 1", "see the internet"]
     theEvidenceRep = ",".join(theEvidence)
     assertModifyField(
         clientOwner,

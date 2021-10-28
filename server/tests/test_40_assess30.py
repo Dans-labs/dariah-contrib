@@ -216,7 +216,7 @@ def test_fillEvidenceAll(clients):
     cId = criteriaEntries[0][0]
 
     def assertIt(cl, exp):
-        theEvidence = [f"evidence for  1", "see the internet"]
+        theEvidence = ["evidence for  1", "see the internet"]
         theEvidenceRep = ",".join(theEvidence)
         assertModifyField(
             cl, CRITERIA_ENTRY, cId, EVIDENCE, (theEvidence, theEvidenceRep), exp
