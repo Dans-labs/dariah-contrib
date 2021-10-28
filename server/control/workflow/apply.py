@@ -556,7 +556,7 @@ class WorkflowItem:
 
         Returns
         -------
-        boolean | timedelta
+        boolean | timedelta | string
         """
 
         db = self.db
@@ -618,6 +618,7 @@ class WorkflowItem:
         isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
+        isOffice = auth.officeuser()
 
         decisionDelay = G(taskInfo, N.delay)
         if decisionDelay:
@@ -633,7 +634,14 @@ class WorkflowItem:
         forbidden = frozen or done
 
         if forbidden and not remaining:
-            return False
+            if (
+                task == N.unselectContrib
+                and table == N.contrib
+                and (isSuper or isOffice)
+            ):
+                return "as intervention"
+            else:
+                return False
 
         if table == N.contrib:
             if not isOwn and not isCoord and not isSuper:
@@ -731,22 +739,30 @@ class WorkflowItem:
                 if not revision:
                     return False
 
-            if task in {
-                N.expertReviewRevise,
-                N.expertReviewAccept,
-                N.expertReviewReject,
-                N.expertReviewRevoke,
-            } - {xExpertStage}:
+            if (
+                task
+                in {
+                    N.expertReviewRevise,
+                    N.expertReviewAccept,
+                    N.expertReviewReject,
+                    N.expertReviewRevoke,
+                }
+                - {xExpertStage}
+            ):
                 return (
                     kind == N.expert and not zFinalStage and mayDecideExpert and answer
                 )
 
-            if task in {
-                N.finalReviewRevise,
-                N.finalReviewAccept,
-                N.finalReviewReject,
-                N.finalReviewRevoke,
-            } - {xFinalStage}:
+            if (
+                task
+                in {
+                    N.finalReviewRevise,
+                    N.finalReviewAccept,
+                    N.finalReviewReject,
+                    N.finalReviewRevoke,
+                }
+                - {xFinalStage}
+            ):
                 return (
                     kind == N.final
                     and not not expertStage
@@ -1033,16 +1049,19 @@ class WorkflowItem:
                 continue
 
             remaining = type(permitted) is timedelta and permitted
-            taskUntil = E
+            remark = type(permitted) is str and permitted
+            taskExtra = E
             if remaining:
                 remainingRep = datetime.toDisplay(justNow + remaining)
-                taskUntil = H.span(f""" before {remainingRep}""", cls="datex")
+                taskExtra = H.span(f""" before {remainingRep}""", cls="datex")
+            elif remark:
+                taskExtra = H.span(f""" {remark}""", cls="datex")
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
             taskPart = (
                 H.a(
-                    [taskMsg, taskUntil],
+                    [taskMsg, taskExtra],
                     f"""/api/task/{task}/{eid}""",
                     cls=f"large task {taskCls}",
                 )
