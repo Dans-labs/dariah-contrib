@@ -15,7 +15,7 @@ class CriteriaEntry(Master):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """The title is a sequence number plus the short criterion text."""
 
         context = self.context
@@ -24,7 +24,7 @@ class CriteriaEntry(Master):
         seqBare = G(record, N.seq)
         eid = G(record, N.criteria)
         titleBare = (
-            E if eid is None else types.criteria.title(eid=eid, markup=markup)
+            E if eid is None else types.criteria.title(eid=eid, markup=markup, **kwargs)
         )
         return (
             f"""{seqBare or E}.{titleBare}"""

@@ -237,7 +237,8 @@ class Overview:
                 r1Stage = (
                     "noReview"
                     if noReview
-                    else preR1Stage if advReview
+                    else preR1Stage
+                    if advReview
                     else "inReview"
                     if inReview
                     else "skipReview"
@@ -358,7 +359,9 @@ class Overview:
                 if chosenCountryId
                 else H.span(ALL, cls="c-focus")
             ]
-            for (cid, countryInfo) in db.country.items():
+            for (cid, countryInfo) in sorted(
+                db.country.items(), key=lambda x: G(x[1], "iso", "zz")
+            ):
                 if not G(countryInfo, N.isMember):
                     continue
                 name = countryType.titleStr(countryInfo)
@@ -418,7 +421,10 @@ class Overview:
             rArgs = f"""{urlArgs}&groups={groups}"""
 
         headerLine = self.ourCountryHeaders(
-            country, groups, asTsv, groupOrder=groupOrder,
+            country,
+            groups,
+            asTsv,
+            groupOrder=groupOrder,
         )
 
         contribs = self.contribs
@@ -473,7 +479,10 @@ class Overview:
             )
 
         (thisMaterial, groupRel) = self.groupList(
-            groupsChosen, chosenCountry, chosenCountry, asTsv,
+            groupsChosen,
+            chosenCountry,
+            chosenCountry,
+            asTsv,
         )
 
         if asTsv:
@@ -506,7 +515,11 @@ class Overview:
         return data
 
     def groupList(
-        self, groups, selectedCountry, chosenCountry, asTsv,
+        self,
+        groups,
+        selectedCountry,
+        chosenCountry,
+        asTsv,
     ):
         cols = self.cols
         groupCols = self.groupCols
@@ -521,7 +534,12 @@ class Overview:
             if asTsv:
                 return (
                     NL.join(
-                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        self.formatContrib(
+                            contrib,
+                            None,
+                            chosenCountry,
+                            asTsv,
+                        )
                         for contrib in groupedList
                     ),
                     E,
@@ -529,7 +547,12 @@ class Overview:
             else:
                 return (
                     [
-                        self.formatContrib(contrib, None, chosenCountry, asTsv,)
+                        self.formatContrib(
+                            contrib,
+                            None,
+                            chosenCountry,
+                            asTsv,
+                        )
                         for contrib in groupedList
                     ],
                     E,
@@ -603,7 +626,10 @@ class Overview:
                     newGroupValues.update(groupValues)
                     newGroupValues[newGroup] = groupValue
                     (nRecordsG, costG) = groupMaterial(
-                        gList[groupValue], depth + 1, newGroupValues, thisGroupId,
+                        gList[groupValue],
+                        depth + 1,
+                        newGroupValues,
+                        thisGroupId,
                     )
                     nRecords += nRecordsG
                     cost += costG

@@ -15,7 +15,7 @@ class Criteria(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """The title is the short criterion text."""
 
         valBare = G(record, N.criterion)

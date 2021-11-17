@@ -20,9 +20,9 @@ class User(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, withRole=False, **kwargs):
         context = self.context
         auth = context.auth
 
-        valBare = auth.identity(record, markup=markup)
+        valBare = auth.identity(record, markup=markup, withRole=withRole)
         return valBare if markup is None else H.he(valBare)

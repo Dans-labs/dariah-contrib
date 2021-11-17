@@ -14,7 +14,7 @@ class Score(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """Put the score and the level in the title."""
 
         score = G(record, N.score)

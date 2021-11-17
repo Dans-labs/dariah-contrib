@@ -162,6 +162,7 @@ class Value(Related):
         active=None,
         hideInActual=False,
         hideBlockedUsers=False,
+        **kwargs,
     ):
         if record is None and eid is None:
             return None if markup is None else (QQ, QQ) if markup else Qq
@@ -172,7 +173,7 @@ class Value(Related):
             context = self.context
             record = context.getItem(table, eid)
 
-        titleStr = self.titleStr(record, markup=markup)
+        titleStr = self.titleStr(record, markup=markup, **kwargs)
         titleHint = self.titleHint(record)
 
         if markup:

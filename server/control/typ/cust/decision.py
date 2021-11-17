@@ -18,7 +18,7 @@ class Decision(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """The title string is a suitable icon plus the participle field."""
         decision = G(record, N.participle)
         if decision is None:

@@ -15,7 +15,7 @@ class TypeContribution(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """Put the main type and the sub type in the title."""
 
         if not record:

@@ -59,7 +59,10 @@ class CriteriaEntryR(Record):
 
             return H.span(
                 [
-                    H.span([f"""{seq}{DOT}{NBSP}""", critRecord.title()], cls="col1"),
+                    H.span(
+                        [f"""{seq}{DOT}{NBSP}""", critRecord.title(**kwargs)],
+                        cls="col1",
+                    ),
                     H.span(scoreRep, cls="col2"),
                     status,
                 ],
@@ -69,7 +72,7 @@ class CriteriaEntryR(Record):
             hasEvidence = "without" if self.field(N.evidence).isBlank() else "with"
             evidence = f"""{hasEvidence} evidence"""
             scoreRep = self.field(N.score).wrapBare(markup=markup)
-            critRep = critRecord.title(markup=markup)
+            critRep = critRecord.title(markup=markup, **kwargs)
             return f"""{seq}{DOT} {critRep} {scoreRep}, {evidence}"""
 
     def bodyCompact(self, **kwargs):

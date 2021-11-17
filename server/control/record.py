@@ -740,14 +740,14 @@ class Record:
             ]
         )
 
-    def title(self, markup=True):
+    def title(self, markup=True, **kwargs):
         """Generate a title for the record."""
         record = self.record
         valid = self.valid
 
         warningCls = E if valid else " warning "
 
-        return Record.titleRaw(self, record, cls=warningCls, markup=markup)
+        return Record.titleRaw(self, record, cls=warningCls, markup=markup, **kwargs)
 
     def inActualCls(self, record):
         """Get a CSS class name for a record based on whether it is *actual*.
@@ -778,7 +778,7 @@ class Record:
         return E if isActual else "inactual"
 
     @staticmethod
-    def titleRaw(obj, record, cls=E, markup=True):
+    def titleRaw(obj, record, cls=E, markup=True, **kwargs):
         """Generate a title for a different record.
 
         This is fast title generation.
@@ -807,7 +807,7 @@ class Record:
         context = obj.context
         types = context.types
         typesObj = getattr(types, table, None)
-        valueBare = typesObj.title(record=record)
+        valueBare = typesObj.title(record=record, **kwargs)
 
         if markup is None:
             return valueBare
@@ -815,4 +815,4 @@ class Record:
         inActualCls = Record.inActualCls(obj, record)
         atts = dict(cls=f"{cls} {inActualCls}")
 
-        return H.span(typesObj.title(record=record), **atts)
+        return H.span(valueBare, **atts, **kwargs)

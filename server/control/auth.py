@@ -29,6 +29,7 @@ from control.perm import (
 
 CB = C.base
 CW = C.web
+CP = C.perm
 
 DEBUG = CB.debug
 DEBUG_AUTH = G(DEBUG, N.auth)
@@ -419,7 +420,7 @@ class Auth:
         db = self.db
         return G(G(db.permissionGroup, group), N.rep) or UNAUTH
 
-    def identity(self, user=None, markup=True):
+    def identity(self, user=None, markup=True, withRole=False):
         """Provide a string representation of the identity of a user.
 
         !!! note
@@ -440,7 +441,9 @@ class Auth:
         if user is None:
             user = self.user
 
-        if self.isDevel:
+        db = self.db
+        # if self.isDevel:
+        if db.test:
             return G(
                 user,
                 N.eppn,
@@ -463,8 +466,16 @@ class Auth:
 
         countryShort = self.countryRep(user=user)
 
+        permGroupRep = E
+        if isAuth and withRole:
+            userGroup = self.groupRep(user=user)
+            permGroupRep = G(CP.roles, userGroup, E)
+            if permGroupRep:
+                permGroupRep = f"{permGroupRep} "
+
         identityRep = (
-            (
+            permGroupRep
+            + (
                 f"""{name}{orgRep}"""
                 if name
                 else f"""{email}{orgRep}"""

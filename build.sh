@@ -36,6 +36,7 @@ function givehelp {
     echo "serveprod     :     idem, but use prod database"
     echo "serveprod p   :     idem, but Flask development mode is off"
     echo "ship msg      : run tests, build docs, commit/push all code to github, msg=commit message"
+    echo "shipx msg     : commit/push all code to github, msg=commit message; use when tests already have succeeded"
     echo "stamp         : add a slug to updated css and js file names to invalidate caches"
     echo "stamp un      : use unslugged css and js file names"
     echo "stats         : collect codebase statistics"
@@ -774,6 +775,11 @@ function ship {
     gitsave "ship: $*"
 }
 
+function shipx {
+    docsmk "deploy"
+    gitsave "ship: $*"
+}
+
 function test {
     echo "RUNNING TESTS ..."
     dbtestinit "noclean"
@@ -799,7 +805,7 @@ function update {
 mayrun="1"
 
 case "$1" in
-    databulk|datadown|dataup|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|stamp|stats)
+    databulk|datadown|dataup|dbinitdev|docs|docsapi|docsship|gits|serve|serveprod|servetest|ship|shipx|stamp|stats)
         if [[ "$ON_DANS" == "1" ]]; then
             mayrun="0"
         fi;;
@@ -824,7 +830,7 @@ else
     shift
     if [[ "$ON_DANS" == "0" ]]; then
         case "$command" in
-            gits|guni|gunitest|serve|serveprod|servetest|ship|test|testc)
+            gits|guni|gunitest|serve|serveprod|servetest|ship|shipx|test|testc)
                 stamp;;
         esac
     fi

@@ -2,7 +2,7 @@ default:
   read: public
   edit: edit
 
-roles:
+rolesOld:
   - nobody
   - public
   - auth
@@ -12,6 +12,17 @@ roles:
   - office
   - system
   - root
+
+roles:
+  nobody: (a) not in the system
+  public: (z)never logged in
+  auth: (y) known user
+  edit: (y) known user
+  own: (y) known user
+  coord: (e) national coordinator
+  office: (d) back-office
+  system: (c) system admin
+  root: (b) system owner
 
 names:
   - Guest

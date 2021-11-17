@@ -63,7 +63,7 @@ class Related(TypeBase):
         result = self.title(eid=val, markup=markup)
         return result[1] if markup else result
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         valBare = (
             G(record, N.title) or G(record, N.rep) or (E if markup is None else Qq)
         )
@@ -72,8 +72,8 @@ class Related(TypeBase):
     def titleHint(self, record):
         return None
 
-    def title(self, record=None, eid=None, markup=False, active=None):
-        """Generate a title for a rlated record.
+    def title(self, record=None, eid=None, markup=False, active=None, **kwargs):
+        """Generate a title for a related record.
 
         Parameters
         ----------
@@ -101,7 +101,7 @@ class Related(TypeBase):
             context = self.context
             record = context.getItem(table, eid)
 
-        titleStr = self.titleStr(record, markup=markup)
+        titleStr = self.titleStr(record, markup=markup, **kwargs)
         titleHint = self.titleHint(record)
 
         if markup:

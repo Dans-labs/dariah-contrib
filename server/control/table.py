@@ -145,7 +145,7 @@ class Table:
         """
 
         def titleSortkey(r):
-            return self.title(r).lower()
+            return self.title(r, withRole=True).lower()
 
         self.titleSortkey = titleSortkey
         """*function* Given a record delivers a key for sorting the records.
@@ -437,7 +437,7 @@ class Table:
                 else:
                     recordsHtml.append(
                         H.details(
-                            self.title(record),
+                            self.title(record, withRole=True),
                             H.div(ELLIPS),
                             f"""{table}/{G(record, N._id)}""",
                             fetchurl=f"""/api/{table}/{N.item}/{G(record, N._id)}""",
@@ -570,7 +570,7 @@ class Table:
         auth = context.auth
         return checkTable(auth, table) and (action is None or auth.authenticated())
 
-    def title(self, record, markup=True):
+    def title(self, record, markup=True, **kwargs):
         """Fast way to get a title on the basis of the record only.
 
         When record titles have to be generated for many records in a list,
@@ -596,7 +596,7 @@ class Table:
         """
 
         # return obj.record(record=record).title(**atts)
-        return self.RecordClass.titleRaw(self, record, markup=markup)
+        return self.RecordClass.titleRaw(self, record, markup=markup, **kwargs)
 
     @staticmethod
     def forceOpen(theEid, openEid):

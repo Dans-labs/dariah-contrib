@@ -16,7 +16,7 @@ class Country(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True):
+    def titleStr(self, record, markup=True, **kwargs):
         """Puts the 2-letter iso code plus the flag characters in the title."""
 
         valBare = G(record, N.iso)
