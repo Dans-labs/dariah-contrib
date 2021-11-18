@@ -471,7 +471,7 @@ class Auth:
             userGroup = self.groupRep(user=user)
             permGroupRep = G(CP.roles, userGroup, E)
             if permGroupRep:
-                permGroupRep = f"{permGroupRep} "
+                permGroupRep = f"{permGroupRep}: "
 
         identityRep = (
             permGroupRep

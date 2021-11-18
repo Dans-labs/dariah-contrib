@@ -13,10 +13,12 @@ from control.utils import pick as G, E, ELLIPS, NBSP, ONE
 from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
+CP = C.perm
 CT = C.tables
 CW = C.workflow
 
 
+GROUP_RANK = CP.groupRank
 MAIN_TABLE = CT.userTables[0]
 INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
@@ -54,6 +56,7 @@ class Table:
         """*object* A `control.context.Context` singleton.
         """
 
+        db = context.db
         auth = context.auth
         user = auth.user
 
@@ -149,6 +152,21 @@ class Table:
 
         self.titleSortkey = titleSortkey
         """*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the title.
+        """
+
+        def groupSortkey(r):
+            title = self.title(r, withRole=True).lower()
+            group = G(r, N.group, "")
+            groupRep = G(G(db.permissionGroup, group, {}), N.rep, E) or E
+            rank = G(GROUP_RANK, groupRep, 0)
+            return (-rank, title)
+
+        self.groupSortkey = groupSortkey
+        """*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the permission group and then on the title.
         """
 
         self.RecordClass = recordFactory(table)
@@ -383,7 +401,7 @@ class Table:
         table = self.table
         uid = self.uid
         countryId = self.countryId
-        titleSortkey = self.titleSortkey
+        titleSortkey = self.groupSortkey if table == N.user else self.titleSortkey
         (itemSingular, itemPlural) = self.itemLabels
 
         params = (

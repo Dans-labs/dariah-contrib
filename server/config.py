@@ -153,6 +153,13 @@ def main():
 
     N = Names
     C = Config
+    CP = C.perm
+
+    groupRank = {}
+    for (r, group) in enumerate(CP.rolesOrder):
+        groupRank[group] = r
+    setattr(CP, "groupRank", groupRank)
+
     CT = C.tables
 
     masters = {}

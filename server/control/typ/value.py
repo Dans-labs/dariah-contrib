@@ -111,7 +111,15 @@ class Value(Related):
         db = context.db
         table = self.name
 
-        valueRecords = db.getValueRecords(table, constrain=constrain)
+        if table == N.permissionGroup:
+            auth = context.auth
+            user = auth.user
+            group = G(user, N.group)
+            groupRep = G(G(db.permissionGroup, group), N.rep)
+        else:
+            groupRep = None
+
+        valueRecords = db.getValueRecords(table, constrain=constrain, upper=groupRep)
 
         filterControl = (
             [
@@ -137,15 +145,20 @@ class Value(Related):
             hideInActual=True,
             hideBlockedUsers=True,
         )
+        results = (self.title(record=record, **atts) for record in valueRecords)
         return H.div(
             filterControl
             + [
                 formatted
                 for (text, formatted) in (
                     ([] if multiple else [self.title(record={}, **atts)])
-                    + sorted(
-                        (self.title(record=record, **atts) for record in valueRecords),
-                        key=lambda x: x[0].lower(),
+                    + (
+                        sorted(
+                            results,
+                            key=lambda x: x[0].lower(),
+                        )
+                        if type(valueRecords) is tuple
+                        else list(results)
                     )
                 )
             ],
@@ -212,7 +225,9 @@ class Value(Related):
             )
 
             titleFormatted = H.span(
-                [titleStr, titleIcon], lab=titleStr.lower(), **atts,
+                [titleStr, titleIcon],
+                lab=titleStr.lower(),
+                **atts,
             )
             return (titleStr, titleFormatted)
         else:

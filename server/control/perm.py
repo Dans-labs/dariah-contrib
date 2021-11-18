@@ -11,6 +11,7 @@ CT = C.tables
 CP = C.perm
 
 DEFAULT_PERM = CP.default
+GROUP_RANK = CP.groupRank
 TABLE_PERM = CT.perm
 
 NOBODY = N.nobody
@@ -87,9 +88,7 @@ def checkTable(
         return group == COORD or isSuper
 
 
-def checkPerm(
-    require, perm,
-):
+def checkPerm(require, perm):
     """Verify whether user's credentials match the requirements.
 
     Parameters
@@ -98,7 +97,7 @@ def checkPerm(
         The required permission level (see the perm.yaml configuration file under
         the key `roles`).
     perm: dict
-        User attributes, in paticular `group` which is the role a user can play on the
+        User attributes, in particular `group` which is the role a user can play on the
         basis of his/her identity.
         But it also contains attributes that links a user to ceertain records, e.g. the
         records of which (s)he is creator/editor, or National Coordinator.
@@ -140,7 +139,7 @@ def checkPerm(
         return group == COORD and G(perm, N.sameCountry) or isSuper
 
 
-def getPermField(table, permRecord, require):
+def getPermField(table, permRecord, require, actual=None, minimum=None):
     """Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -157,6 +156,14 @@ def getPermField(table, permRecord, require):
     require:
         Permissions required for reading/editing a particular field,
         coming from the table specific .yaml files with field specifications.
+    actual, minimum: string, optional None
+        If the permission is dependent on the actual value of this field,
+        pass the actual value and the minimum value.
+        This applies to the edit permission.
+        The typical use case is when the field type is permissionGroup,
+        and an edit is only allowed if the permissionGroup of the user
+        has a greater or equal rank than/as the current value of the field.
+        We assume the ranks will be passed, not the values themselves.
 
     Returns
     -------
@@ -181,6 +188,9 @@ def getPermField(table, permRecord, require):
         else G(require, N.edit)
     )
     mayEdit = checkPerm(editRequire, permRecord)
+    if mayEdit and actual is not None and minimum is not None:
+        if G(GROUP_RANK, actual, 0) > G(GROUP_RANK, minimum, 100):
+            mayEdit = False
     return (mayRead, mayEdit)
 
 

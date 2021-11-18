@@ -232,6 +232,13 @@ def thisYear():
     return dt.utcnow().year
 
 
+def debug(*msg):
+    """Print a message to the std error immediately."""
+
+    sys.stderr.write(f"""{" ".join(msg)}{NL}""")
+    sys.stderr.flush()
+
+
 def serverprint(*msg):
     """Print a message to the console immediately."""
 

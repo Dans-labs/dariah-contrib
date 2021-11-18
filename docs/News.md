@@ -1,5 +1,14 @@
 # News
 
+## 2021-11-18
+
+*   Selected/rejected contributions can be unselected/unrejected within a longer time frame:
+    4 days by the national coordinator, 100 days by office users.
+*   The user table is organized by roles. You can easily see what role each user has.
+    Also, whereever users are mentioned, their current role is also indicated.
+*   😎 Users can no longer modify the roles of more powerful users.
+*   😎 Users can no longer give themselves a more powerful role.
+
 ## 2021-07-16
 
 The API supports calls for tab-separated data as well.

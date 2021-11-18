@@ -20,7 +20,7 @@ class User(Value):
     def __init__(self, context):
         super().__init__(context)
 
-    def titleStr(self, record, markup=True, withRole=False, **kwargs):
+    def titleStr(self, record, markup=True, withRole=True, **kwargs):
         context = self.context
         auth = context.auth
 

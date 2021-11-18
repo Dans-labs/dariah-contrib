@@ -198,7 +198,9 @@ class Field:
 
         readonly = self.readonly if readonly is None else readonly
 
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
         if mayRead is not None:
             self.mayRead = mayRead
         if mayEdit is not None:
@@ -213,6 +215,20 @@ class Field:
         !!! hint
             To be used to pass to buttons in widgets for this field.
         """
+
+    def getActualMinimum(self):
+        tp = self.tp
+        if tp == N.permissionGroup:
+            context = self.context
+            db = context.db
+            auth = context.auth
+            user = auth.user
+            userGroup = G(user, N.group)
+            minimum = G(G(db.permissionGroup, userGroup), N.rep)
+            value = self.value
+            actual = G(G(db.permissionGroup, value), N.rep)
+            return dict(actual=actual, minimum=minimum)
+        return {}
 
     def save(self, data):
         """Save a new value for this field to MongoDb.
@@ -306,7 +322,9 @@ class Field:
         self.value = G(record, field)
         self.perm = recordObj.perm
         perm = self.perm
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
 
         good = True
         if field == N.editors and table in CASCADE_SPECS:

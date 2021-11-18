@@ -26,6 +26,7 @@ from control.typ.related import castObjectId
 
 CB = C.base
 CM = C.mongo
+CP = C.perm
 CT = C.tables
 CF = C.workflow
 CW = C.web
@@ -51,6 +52,8 @@ M_ELEM = CM.elem
 SHOW_ARGS = set(CM.showArgs)
 OTHER_COMMANDS = set(CM.otherCommands)
 M_COMMANDS = SHOW_ARGS | OTHER_COMMANDS
+
+GROUP_RANK = CP.groupRank
 
 ACTUAL_TABLES = set(CT.actualTables)
 VALUE_TABLES = set(CT.valueTables)
@@ -253,7 +256,9 @@ class Db:
         )
 
         setattr(
-            self, valueTable, {G(record, N._id): record for record in valueList},
+            self,
+            valueTable,
+            {G(record, N._id): record for record in valueList},
         )
         setattr(
             self,
@@ -286,7 +291,7 @@ class Db:
 
         !!! caution
             If you change the MongoDb from without, an you forget to
-            put an appropriate time stamp, the app will not see it untill it
+            put an appropriate time stamp, the app will not see it until it
             is restarted.
             See for example how `root.makeUserRoot` handles this.
 
@@ -300,7 +305,16 @@ class Db:
 
         for valueTable in VALUE_TABLES:
             self.cacheValueTable(valueTable)
-            collected[valueTable] = now()
+            justNow = now()
+            collected[valueTable] = justNow
+            self.mongoCmd(
+                N.recollect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: valueTable},
+                {M_SET: {RECOLLECT_DATE: justNow}},
+                upsert=True,
+            )
 
         self.collectActualItems()
         if DEBUG_SYNCH:
@@ -322,7 +336,7 @@ class Db:
 
         ### Global recollection
 
-        Whenever we recollect a value table, we insert the time of recollection
+        Whenever we (re)collect a value table, we insert the time of recollection
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
@@ -385,7 +399,7 @@ class Db:
             justNow = now()
             for aTable in affected:
                 self.mongoCmd(
-                    N.collect,
+                    N.recollect,
                     N.collect,
                     N.update_one,
                     {RECOLLECT_NAME: aTable},
@@ -774,7 +788,7 @@ class Db:
 
         return sorted(details, key=sortKey) if sortKey else details
 
-    def getValueRecords(self, valueTable, constrain=None):
+    def getValueRecords(self, valueTable, constrain=None, upper=None):
         """Fetch records from a value table.
 
         It will apply some standard and custom constraints.
@@ -802,6 +816,12 @@ class Db:
         constrain: 2-tuple, optional `None`
             A custom constraint. If present, it should be a tuple `(fieldName, value)`.
             Only records with that value in that field will be delivered.
+        upper: string
+            The name of a permission group.
+            If the valueTable is permissionGroup, not all values will be shown,
+            only the values that are not more powerful than this group.
+            This is needed to prevent users to make somebody more powerful
+            then themselves.
 
         Returns
         -------
@@ -809,7 +829,7 @@ class Db:
         """
 
         records = getattr(self, valueTable, {}).values()
-        return list(
+        result = (
             (r for r in records if G(r, N.isMember) or False)
             if valueTable == N.country
             else (r for r in records if G(r, N.authority) != N.legacy)
@@ -818,6 +838,19 @@ class Db:
             if constrain
             else records
         )
+        if valueTable == N.permissionGroup:
+            result = (
+                r for r in result if G(r, N.rep, "") not in {N.edit, N.own, N.nobody}
+            )
+            if upper is not None:
+                upperRank = G(GROUP_RANK, upper, 0)
+                result = (
+                    r
+                    for r in result
+                    if G(GROUP_RANK, G(r, N.rep, ""), 100) <= upperRank
+                )
+            return sorted(result, key=lambda r: G(GROUP_RANK, G(r, N.rep, ""), 100))
+        return tuple(result)
 
     def getValueInv(self, valueTable, constrain):
         """Fetch a mapping from values to ids from a value table.
@@ -1038,7 +1071,14 @@ class Db:
         self.mongoCmd(N.deleteMany, table, N.delete_many, crit)
 
     def updateField(
-        self, table, eid, field, data, actor, modified, nowFields=[],
+        self,
+        table,
+        eid,
+        field,
+        data,
+        actor,
+        modified,
+        nowFields=[],
     ):
         """Update a single field in a single record.
 
