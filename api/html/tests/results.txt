@@ -12,4 +12,13 @@ tests/test_30_contrib20.py ....................................       [ 96/206]
 tests/test_30_contrib30.py ..............................             [126/206]
 tests/test_30_contrib40.py ....                                       [130/206]
 tests/test_30_contrib50.py .......                                    [137/206]
-tests/test_40_assess10.py ..........
+tests/test_40_assess10.py .................                           [154/206]
+tests/test_40_assess20.py ...                                         [157/206]
+tests/test_40_assess30.py ............................                [185/206]
+tests/test_50_review10.py ........                                    [193/206]
+tests/test_50_review20.py .............                               [206/206]
+
+======================= 206 passed in 165.87s (0:02:45) ========================
+
+  REQUESTS       URLS  USERS/URL    REQ/URL
+      5042        351        6.5       14.4
