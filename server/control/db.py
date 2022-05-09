@@ -166,7 +166,7 @@ class Db:
         mongo = self.mongo
         database = self.database
 
-        if not mongo:
+        if mongo is None:
             client = MongoClient()
             mongo = client[database]
             self.client = client

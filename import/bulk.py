@@ -131,6 +131,8 @@ CREATOR_ID = None
 CREATOR_NAME = "HaSProject"
 
 FIELD_SEP = re.compile(r"""[ \t]*[,\n]+[ \t]*""")
+YEAR_RE = re.compile(r"""\.0*$""")
+NUMBER_RE = re.compile(r"""^\s*[1-9][0-9]*(?:\.[0-9]*)?\s*$""")
 
 
 def info(x):
@@ -233,11 +235,17 @@ def intLike(val):
         return (None, True, None)
     if type(val) is int:
         return (val, True, None)
+    if type(val) is float:
+        return (int(round(val)), True, f"converted from float `{val}`")
     if type(val) is str:
-        if not val.startswith("0") and val.isdigit():
-            return (int(val), True, f"converted from string `{val}`")
+        if NUMBER_RE.match(val):
+            return (int(round(float(val))), True, f"converted from string `{val}`")
         return (None, False, f"string `{val}` cannot be converted to an integer")
-    return (None, False, f"{type(val).__name__} `{val}` cannot be converted to an integer")
+    return (
+        None,
+        False,
+        f"{type(val).__name__} `{val}` cannot be converted to an integer",
+    )
 
 
 def doSheet(fileName):
@@ -283,12 +291,15 @@ def doSheet(fileName):
         _id = None
         if not email or len(email) < 8:
             error(f"{posRep} not a valid email: `{email}` is too short")
+            return None
         else:
             parts = email.split("@")
-            if len(parts) == 0:
+            if len(parts) <= 1:
                 error(f"{posRep} not a valid email: `{email}` has no @")
+                return None
             elif len(parts) > 2:
                 error(f"{posRep} not a valid email: `{email}` has multiple @")
+                return None
             site = parts[1]
             if "." in site:
                 _id = itemsEmail.get(email, None)
@@ -375,6 +386,7 @@ def doSheet(fileName):
                     error(f"{posRep} not a member country of DARIAH: `{value}`")
                     good = False
             elif field == "year":
+                value = YEAR_RE.sub("", str(value).strip())
                 yearId = VALUES["year"].get(str(value).strip(), None)
                 if yearId:
                     value = yearId
