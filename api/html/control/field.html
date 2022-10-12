@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.field API documentation</title>
 <meta name="description" content="Fields of records of tables …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -232,7 +232,9 @@ class Field:
 
         readonly = self.readonly if readonly is None else readonly
 
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
         if mayRead is not None:
             self.mayRead = mayRead
         if mayEdit is not None:
@@ -247,6 +249,20 @@ class Field:
         !!! hint
             To be used to pass to buttons in widgets for this field.
         &#34;&#34;&#34;
+
+    def getActualMinimum(self):
+        tp = self.tp
+        if tp == N.permissionGroup:
+            context = self.context
+            db = context.db
+            auth = context.auth
+            user = auth.user
+            userGroup = G(user, N.group)
+            minimum = G(G(db.permissionGroup, userGroup), N.rep)
+            value = self.value
+            actual = G(G(db.permissionGroup, value), N.rep)
+            return dict(actual=actual, minimum=minimum)
+        return {}
 
     def save(self, data):
         &#34;&#34;&#34;Save a new value for this field to MongoDb.
@@ -340,7 +356,9 @@ class Field:
         self.value = G(record, field)
         self.perm = recordObj.perm
         perm = self.perm
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
 
         good = True
         if field == N.editors and table in CASCADE_SPECS:
@@ -909,7 +927,9 @@ passing values for them here.</p>
 
         readonly = self.readonly if readonly is None else readonly
 
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
         if mayRead is not None:
             self.mayRead = mayRead
         if mayEdit is not None:
@@ -924,6 +944,20 @@ passing values for them here.</p>
         !!! hint
             To be used to pass to buttons in widgets for this field.
         &#34;&#34;&#34;
+
+    def getActualMinimum(self):
+        tp = self.tp
+        if tp == N.permissionGroup:
+            context = self.context
+            db = context.db
+            auth = context.auth
+            user = auth.user
+            userGroup = G(user, N.group)
+            minimum = G(G(db.permissionGroup, userGroup), N.rep)
+            value = self.value
+            actual = G(G(db.permissionGroup, value), N.rep)
+            return dict(actual=actual, minimum=minimum)
+        return {}
 
     def save(self, data):
         &#34;&#34;&#34;Save a new value for this field to MongoDb.
@@ -1017,7 +1051,9 @@ passing values for them here.</p>
         self.value = G(record, field)
         self.perm = recordObj.perm
         perm = self.perm
-        (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+        (self.mayRead, self.mayEdit) = getPermField(
+            table, perm, require, **self.getActualMinimum()
+        )
 
         good = True
         if field == N.editors and table in CASCADE_SPECS:
@@ -1447,6 +1483,30 @@ receives the timestamp.</p>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="control.field.Field.getActualMinimum"><code class="name flex">
+<span>def <span class="ident">getActualMinimum</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getActualMinimum(self):
+    tp = self.tp
+    if tp == N.permissionGroup:
+        context = self.context
+        db = context.db
+        auth = context.auth
+        user = auth.user
+        userGroup = G(user, N.group)
+        minimum = G(G(db.permissionGroup, userGroup), N.rep)
+        value = self.value
+        actual = G(G(db.permissionGroup, value), N.rep)
+        return dict(actual=actual, minimum=minimum)
+    return {}</code></pre>
+</details>
+</dd>
 <dt id="control.field.Field.isBlank"><code class="name flex">
 <span>def <span class="ident">isBlank</span></span>(<span>self)</span>
 </code></dt>
@@ -1636,7 +1696,9 @@ Python/MongoDb values</dd>
     self.value = G(record, field)
     self.perm = recordObj.perm
     perm = self.perm
-    (self.mayRead, self.mayEdit) = getPermField(table, perm, require)
+    (self.mayRead, self.mayEdit) = getPermField(
+        table, perm, require, **self.getActualMinimum()
+    )
 
     good = True
     if field == N.editors and table in CASCADE_SPECS:
@@ -2153,6 +2215,7 @@ These fields will get a refresh button automatically.</p>
 <li><code><a title="control.field.Field.extensible" href="#control.field.Field.extensible">extensible</a></code></li>
 <li><code><a title="control.field.Field.field" href="#control.field.Field.field">field</a></code></li>
 <li><code><a title="control.field.Field.fieldTypeObj" href="#control.field.Field.fieldTypeObj">fieldTypeObj</a></code></li>
+<li><code><a title="control.field.Field.getActualMinimum" href="#control.field.Field.getActualMinimum">getActualMinimum</a></code></li>
 <li><code><a title="control.field.Field.inheritProps" href="#control.field.Field.inheritProps">inheritProps</a></code></li>
 <li><code><a title="control.field.Field.isBlank" href="#control.field.Field.isBlank">isBlank</a></code></li>
 <li><code><a title="control.field.Field.isEmpty" href="#control.field.Field.isEmpty">isEmpty</a></code></li>
@@ -2178,7 +2241,7 @@ These fields will get a refresh button automatically.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.perm API documentation</title>
 <meta name="description" content="Permission library …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -44,6 +44,7 @@ CT = C.tables
 CP = C.perm
 
 DEFAULT_PERM = CP.default
+GROUP_RANK = CP.groupRank
 TABLE_PERM = CT.perm
 
 NOBODY = N.nobody
@@ -120,9 +121,7 @@ def checkTable(
         return group == COORD or isSuper
 
 
-def checkPerm(
-    require, perm,
-):
+def checkPerm(require, perm):
     &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements.
 
     Parameters
@@ -131,7 +130,7 @@ def checkPerm(
         The required permission level (see the perm.yaml configuration file under
         the key `roles`).
     perm: dict
-        User attributes, in paticular `group` which is the role a user can play on the
+        User attributes, in particular `group` which is the role a user can play on the
         basis of his/her identity.
         But it also contains attributes that links a user to ceertain records, e.g. the
         records of which (s)he is creator/editor, or National Coordinator.
@@ -173,7 +172,7 @@ def checkPerm(
         return group == COORD and G(perm, N.sameCountry) or isSuper
 
 
-def getPermField(table, permRecord, require):
+def getPermField(table, permRecord, require, actual=None, minimum=None):
     &#34;&#34;&#34;Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -190,6 +189,14 @@ def getPermField(table, permRecord, require):
     require:
         Permissions required for reading/editing a particular field,
         coming from the table specific .yaml files with field specifications.
+    actual, minimum: string, optional None
+        If the permission is dependent on the actual value of this field,
+        pass the actual value and the minimum value.
+        This applies to the edit permission.
+        The typical use case is when the field type is permissionGroup,
+        and an edit is only allowed if the permissionGroup of the user
+        has a greater or equal rank than/as the current value of the field.
+        We assume the ranks will be passed, not the values themselves.
 
     Returns
     -------
@@ -214,6 +221,9 @@ def getPermField(table, permRecord, require):
         else G(require, N.edit)
     )
     mayEdit = checkPerm(editRequire, permRecord)
+    if mayEdit and actual is not None and minimum is not None:
+        if G(GROUP_RANK, actual, 0) &gt; G(GROUP_RANK, minimum, 100):
+            mayEdit = False
     return (mayRead, mayEdit)
 
 
@@ -325,7 +335,7 @@ def permRecord(context, table, record):
 <dd>The required permission level (see the perm.yaml configuration file under
 the key <code>roles</code>).</dd>
 <dt><strong><code>perm</code></strong> :&ensp;<code>dict</code></dt>
-<dd>User attributes, in paticular <code>group</code> which is the role a user can play on the
+<dd>User attributes, in particular <code>group</code> which is the role a user can play on the
 basis of his/her identity.
 But it also contains attributes that links a user to ceertain records, e.g. the
 records of which (s)he is creator/editor, or National Coordinator.</dd>
@@ -339,9 +349,7 @@ records of which (s)he is creator/editor, or National Coordinator.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def checkPerm(
-    require, perm,
-):
+<pre><code class="python">def checkPerm(require, perm):
     &#34;&#34;&#34;Verify whether user&#39;s credentials match the requirements.
 
     Parameters
@@ -350,7 +358,7 @@ records of which (s)he is creator/editor, or National Coordinator.</dd>
         The required permission level (see the perm.yaml configuration file under
         the key `roles`).
     perm: dict
-        User attributes, in paticular `group` which is the role a user can play on the
+        User attributes, in particular `group` which is the role a user can play on the
         basis of his/her identity.
         But it also contains attributes that links a user to ceertain records, e.g. the
         records of which (s)he is creator/editor, or National Coordinator.
@@ -486,7 +494,7 @@ user can be obtained.</dd>
 </details>
 </dd>
 <dt id="control.perm.getPermField"><code class="name flex">
-<span>def <span class="ident">getPermField</span></span>(<span>table, permRecord, require)</span>
+<span>def <span class="ident">getPermField</span></span>(<span>table, permRecord, require, actual=None, minimum=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Determine read/edit permissions for a field in a record in a table.</p>
@@ -500,12 +508,20 @@ Then apply this function to get the result.</p>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
 <dd>Where the record resides</dd>
+<dt>permRecord:</dt>
+<dt>Permissions based on the record as a whole.</dt>
+<dt>require:</dt>
+<dt>Permissions required for reading/editing a particular field,</dt>
+<dt>coming from the table specific .yaml files with field specifications.</dt>
+<dt><strong><code>actual</code></strong>, <strong><code>minimum</code></strong> :&ensp;<code>string</code>, optional <code>None</code></dt>
+<dd>If the permission is dependent on the actual value of this field,
+pass the actual value and the minimum value.
+This applies to the edit permission.
+The typical use case is when the field type is permissionGroup,
+and an edit is only allowed if the permissionGroup of the user
+has a greater or equal rank than/as the current value of the field.
+We assume the ranks will be passed, not the values themselves.</dd>
 </dl>
-<p>permRecord:
-Permissions based on the record as a whole.
-require:
-Permissions required for reading/editing a particular field,
-coming from the table specific .yaml files with field specifications.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><strong><code>mayRead</code></strong> :&ensp;<code>boolean</code></dt>
@@ -517,7 +533,7 @@ coming from the table specific .yaml files with field specifications.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getPermField(table, permRecord, require):
+<pre><code class="python">def getPermField(table, permRecord, require, actual=None, minimum=None):
     &#34;&#34;&#34;Determine read/edit permissions for a field in a record in a table.
 
     !!! hint
@@ -534,6 +550,14 @@ coming from the table specific .yaml files with field specifications.</p>
     require:
         Permissions required for reading/editing a particular field,
         coming from the table specific .yaml files with field specifications.
+    actual, minimum: string, optional None
+        If the permission is dependent on the actual value of this field,
+        pass the actual value and the minimum value.
+        This applies to the edit permission.
+        The typical use case is when the field type is permissionGroup,
+        and an edit is only allowed if the permissionGroup of the user
+        has a greater or equal rank than/as the current value of the field.
+        We assume the ranks will be passed, not the values themselves.
 
     Returns
     -------
@@ -558,6 +582,9 @@ coming from the table specific .yaml files with field specifications.</p>
         else G(require, N.edit)
     )
     mayEdit = checkPerm(editRequire, permRecord)
+    if mayEdit and actual is not None and minimum is not None:
+        if G(GROUP_RANK, actual, 0) &gt; G(GROUP_RANK, minimum, 100):
+            mayEdit = False
     return (mayRead, mayEdit)</code></pre>
 </details>
 </dd>
@@ -714,7 +741,7 @@ As creator/editor/reviewer/coordinator?</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

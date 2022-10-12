@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.record API documentation</title>
 <meta name="description" content="Records in tables …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -774,14 +774,14 @@ class Record:
             ]
         )
 
-    def title(self, markup=True):
+    def title(self, markup=True, **kwargs):
         &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
         record = self.record
         valid = self.valid
 
         warningCls = E if valid else &#34; warning &#34;
 
-        return Record.titleRaw(self, record, cls=warningCls, markup=markup)
+        return Record.titleRaw(self, record, cls=warningCls, markup=markup, **kwargs)
 
     def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
@@ -812,7 +812,7 @@ class Record:
         return E if isActual else &#34;inactual&#34;
 
     @staticmethod
-    def titleRaw(obj, record, cls=E, markup=True):
+    def titleRaw(obj, record, cls=E, markup=True, **kwargs):
         &#34;&#34;&#34;Generate a title for a different record.
 
         This is fast title generation.
@@ -841,7 +841,7 @@ class Record:
         context = obj.context
         types = context.types
         typesObj = getattr(types, table, None)
-        valueBare = typesObj.title(record=record)
+        valueBare = typesObj.title(record=record, **kwargs)
 
         if markup is None:
             return valueBare
@@ -849,7 +849,7 @@ class Record:
         inActualCls = Record.inActualCls(obj, record)
         atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
-        return H.span(typesObj.title(record=record), **atts)</code></pre>
+        return H.span(valueBare, **atts, **kwargs)</code></pre>
 </details>
 </section>
 <section>
@@ -1586,14 +1586,14 @@ that spawns a record object.</p>
             ]
         )
 
-    def title(self, markup=True):
+    def title(self, markup=True, **kwargs):
         &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
         record = self.record
         valid = self.valid
 
         warningCls = E if valid else &#34; warning &#34;
 
-        return Record.titleRaw(self, record, cls=warningCls, markup=markup)
+        return Record.titleRaw(self, record, cls=warningCls, markup=markup, **kwargs)
 
     def inActualCls(self, record):
         &#34;&#34;&#34;Get a CSS class name for a record based on whether it is *actual*.
@@ -1624,7 +1624,7 @@ that spawns a record object.</p>
         return E if isActual else &#34;inactual&#34;
 
     @staticmethod
-    def titleRaw(obj, record, cls=E, markup=True):
+    def titleRaw(obj, record, cls=E, markup=True, **kwargs):
         &#34;&#34;&#34;Generate a title for a different record.
 
         This is fast title generation.
@@ -1653,7 +1653,7 @@ that spawns a record object.</p>
         context = obj.context
         types = context.types
         typesObj = getattr(types, table, None)
-        valueBare = typesObj.title(record=record)
+        valueBare = typesObj.title(record=record, **kwargs)
 
         if markup is None:
             return valueBare
@@ -1661,7 +1661,7 @@ that spawns a record object.</p>
         inActualCls = Record.inActualCls(obj, record)
         atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
-        return H.span(typesObj.title(record=record), **atts)</code></pre>
+        return H.span(valueBare, **atts, **kwargs)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1682,7 +1682,7 @@ that spawns a record object.</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="control.record.Record.titleRaw"><code class="name flex">
-<span>def <span class="ident">titleRaw</span></span>(<span>obj, record, cls='', markup=True)</span>
+<span>def <span class="ident">titleRaw</span></span>(<span>obj, record, cls='', markup=True, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate a title for a different record.</p>
@@ -1713,7 +1713,7 @@ or a record object</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def titleRaw(obj, record, cls=E, markup=True):
+def titleRaw(obj, record, cls=E, markup=True, **kwargs):
     &#34;&#34;&#34;Generate a title for a different record.
 
     This is fast title generation.
@@ -1742,7 +1742,7 @@ def titleRaw(obj, record, cls=E, markup=True):
     context = obj.context
     types = context.types
     typesObj = getattr(types, table, None)
-    valueBare = typesObj.title(record=record)
+    valueBare = typesObj.title(record=record, **kwargs)
 
     if markup is None:
         return valueBare
@@ -1750,7 +1750,7 @@ def titleRaw(obj, record, cls=E, markup=True):
     inActualCls = Record.inActualCls(obj, record)
     atts = dict(cls=f&#34;{cls} {inActualCls}&#34;)
 
-    return H.span(typesObj.title(record=record), **atts)</code></pre>
+    return H.span(valueBare, **atts, **kwargs)</code></pre>
 </details>
 </dd>
 </dl>
@@ -2505,7 +2505,7 @@ or if there is no workflow item found,
 </details>
 </dd>
 <dt id="control.record.Record.title"><code class="name flex">
-<span>def <span class="ident">title</span></span>(<span>self, markup=True)</span>
+<span>def <span class="ident">title</span></span>(<span>self, markup=True, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generate a title for the record.</p></div>
@@ -2513,14 +2513,14 @@ or if there is no workflow item found,
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def title(self, markup=True):
+<pre><code class="python">def title(self, markup=True, **kwargs):
     &#34;&#34;&#34;Generate a title for the record.&#34;&#34;&#34;
     record = self.record
     valid = self.valid
 
     warningCls = E if valid else &#34; warning &#34;
 
-    return Record.titleRaw(self, record, cls=warningCls, markup=markup)</code></pre>
+    return Record.titleRaw(self, record, cls=warningCls, markup=markup, **kwargs)</code></pre>
 </details>
 </dd>
 <dt id="control.record.Record.wrap"><code class="name flex">
@@ -2901,7 +2901,7 @@ master record.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
