@@ -17,7 +17,7 @@ We are ready to implement the next steps if there is enough demand for it.
 Here is the outline of the proces:
 
 1.  A national coordinator downloads the
-    [template file (Excel)]({{repBase}}/import/CCYYYYcreator@dariah.eu.xlsx)
+    [template file (Excel)]({{repBase}}/import/bulkTemplate.xlsx)
     for entering the contributions.
 1.  They change `CC` into the ISO language code of their country, `YYYY` to the relevant
     year, and `creator@dariah.eu.xslx` to the email address of the DARIAH user that

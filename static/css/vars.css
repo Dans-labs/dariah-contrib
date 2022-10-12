@@ -91,6 +91,8 @@
     --special-fore-o:                  hsla(120,  00%,  30%, 1  );
     --special-fore:                    hsla(120,  00%,  50%, 1  );
     --special-back:                    hsla(120, 100%,  95%, 0.5);
+    --special-fore-i:                  hsla(180, 100%,  60%, 1  );
+    --special-back-i:                  hsla(120, 100%,  40%, 1  );
 
     --tag-fore:                        hsla(  0,   0%,   0%, 1  );
     --tag-back:                        hsla(  0,   0%,  90%, 0.8);
@@ -108,6 +110,8 @@
     --warning-fore-o:                  hsla( 30, 100%,  30%, 1  );
     --warning-fore:                    hsla( 30, 100%,  50%, 1  );
     --warning-back:                    hsla( 30, 100%,  80%, 0.5);
+    --warning-fore-i:                  hsla( 90, 100%,  60%, 1  );
+    --warning-back-i:                  hsla( 30, 100%,  40%, 1  );
 
     --msg-fore:                        hsla( 60, 100%,  90%, 1  );
     --msg-back:                        hsla(  0,   0%,  70%, 0.3);
