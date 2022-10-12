@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>test_30_contrib50 API documentation</title>
 <meta name="description" content="Test scenario for assessments …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -83,6 +83,12 @@ There is a delay time during which this decision can be revoked.
 We'll test what happens when the delay time is past.
 We do this by updating the <code>dateDecided</code> field under water, directly
 in Mongo.</dd>
+<dt><code><a title="test_30_contrib50.test_revokeIntervention" href="#test_30_contrib50.test_revokeIntervention">test_revokeIntervention()</a></code></dt>
+<dd><strong>mycoord</strong> takes a decision.
+We let <strong>office</strong> and <strong>system</strong> revoke that decision.
+<strong>office</strong> has a limited time to do that, <strong>system</strong> can do it anytime.
+We do this by updating the <code>dateDecided</code> field under water, directly
+in Mongo.</dd>
 </dl>
 <details class="source">
 <summary>
@@ -144,6 +150,13 @@ in Mongo.</dd>
     We&#39;ll test what happens when the delay time is past.
     We do this by updating the `dateDecided` field under water, directly
     in Mongo.
+
+`test_revokeIntervention`
+:   **mycoord** takes a decision.
+    We let **office** and **system** revoke that decision.
+    **office** has a limited time to do that, **system** can do it anytime.
+    We do this by updating the `dateDecided` field under water, directly
+    in Mongo.
 &#34;&#34;&#34;
 
 import pytest
@@ -195,7 +208,12 @@ def test_start(clientOffice, clientOwner):
     eid = G(recordId, CONTRIB)
     ids = startInfo[&#34;ids&#34;]
     assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True,
+        clientOwner,
+        CONTRIB,
+        eid,
+        TYPE,
+        (ids[&#34;TYPE1&#34;], TYPE1),
+        True,
     )
 
 
@@ -264,29 +282,65 @@ def test_revoke(clientMycoord, clientSystem):
     recordId = startInfo[&#34;recordId&#34;]
     eid = recordId[CONTRIB]
     tests = (
-        (SELECT_ACCEPT, 47, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 49, SELECT_REJECT, False),
-        (SELECT_REJECT, 47, SELECT_ACCEPT, True),
-        (SELECT_REJECT, 49, SELECT_ACCEPT, False),
-        (SELECT_REVOKE, 47, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 49, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 47, SELECT_REJECT, True),
-        (SELECT_REVOKE, 49, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 47, SELECT_REVOKE, True),
-        (SELECT_ACCEPT, 49, SELECT_REVOKE, False),
-        (SELECT_REJECT, 47, SELECT_REVOKE, True),
-        (SELECT_REJECT, 49, SELECT_REVOKE, False),
+        (SELECT_ACCEPT, 95, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 97, SELECT_REJECT, False),
+        (SELECT_REJECT, 95, SELECT_ACCEPT, True),
+        (SELECT_REJECT, 97, SELECT_ACCEPT, False),
+        (SELECT_REVOKE, 95, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 97, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 95, SELECT_REJECT, True),
+        (SELECT_REVOKE, 97, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, True),
+        (SELECT_REJECT, 97, SELECT_REVOKE, False),
     )
     for (decisionBefore, shiftBack, decisionAfter, exp) in tests:
         url = f&#34;/api/task/{decisionBefore}/{eid}&#34;
+        serverprint(f&#34;{decisionBefore}: True&#34;)
         assertStatus(clientMycoord, url, True)
+
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
         url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
-        serverprint(
-            f&#34;REVOCATION: {decisionBefore} SHIFTBACK {shiftBack} {decisionAfter}: {exp}&#34;
-        )
-        url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
+        serverprint(f&#34;{decisionAfter}: SHIFTBACK {shiftBack}: {exp}&#34;)
         assertStatus(clientMycoord, url, exp)
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)
+
+
+def test_revokeIntervention(clientMycoord, clientOffice, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    eid = recordId[CONTRIB]
+    # note the switch to SELECT_REJECT below after the first failure to revoke:
+    # this is because mycoord cannot accept an accepted contrib
+    tests = (
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, &#34;office&#34;, False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 24000, SELECT_REVOKE, &#34;system&#34;, True),
+    )
+    for (decisionBefore, shiftBack, decisionAfter, who, exp) in tests:
+        url = f&#34;/api/task/{decisionBefore}/{eid}&#34;
+        serverprint(f&#34;SELECT DECISION {decisionBefore}: True&#34;)
+        assertStatus(clientMycoord, url, True)
+
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
+        url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
+        clientWho = (
+            clientOffice
+            if who == &#34;office&#34;
+            else clientSystem
+            if who == &#34;system&#34;
+            else clientMycoord
+        )
+        serverprint(f&#34;{decisionAfter} by {who}: SHIFTBACK {shiftBack}: {exp}&#34;)
+        assertStatus(clientWho, url, exp)
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)</code></pre>
 </details>
 </section>
@@ -374,29 +428,74 @@ def test_revoke(clientMycoord, clientSystem):
     recordId = startInfo[&#34;recordId&#34;]
     eid = recordId[CONTRIB]
     tests = (
-        (SELECT_ACCEPT, 47, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 49, SELECT_REJECT, False),
-        (SELECT_REJECT, 47, SELECT_ACCEPT, True),
-        (SELECT_REJECT, 49, SELECT_ACCEPT, False),
-        (SELECT_REVOKE, 47, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 49, SELECT_ACCEPT, True),
-        (SELECT_REVOKE, 47, SELECT_REJECT, True),
-        (SELECT_REVOKE, 49, SELECT_REJECT, True),
-        (SELECT_ACCEPT, 47, SELECT_REVOKE, True),
-        (SELECT_ACCEPT, 49, SELECT_REVOKE, False),
-        (SELECT_REJECT, 47, SELECT_REVOKE, True),
-        (SELECT_REJECT, 49, SELECT_REVOKE, False),
+        (SELECT_ACCEPT, 95, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 97, SELECT_REJECT, False),
+        (SELECT_REJECT, 95, SELECT_ACCEPT, True),
+        (SELECT_REJECT, 97, SELECT_ACCEPT, False),
+        (SELECT_REVOKE, 95, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 97, SELECT_ACCEPT, True),
+        (SELECT_REVOKE, 95, SELECT_REJECT, True),
+        (SELECT_REVOKE, 97, SELECT_REJECT, True),
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, True),
+        (SELECT_REJECT, 97, SELECT_REVOKE, False),
     )
     for (decisionBefore, shiftBack, decisionAfter, exp) in tests:
         url = f&#34;/api/task/{decisionBefore}/{eid}&#34;
+        serverprint(f&#34;{decisionBefore}: True&#34;)
         assertStatus(clientMycoord, url, True)
+
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
         url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
-        serverprint(
-            f&#34;REVOCATION: {decisionBefore} SHIFTBACK {shiftBack} {decisionAfter}: {exp}&#34;
-        )
-        url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
+        serverprint(f&#34;{decisionAfter}: SHIFTBACK {shiftBack}: {exp}&#34;)
         assertStatus(clientMycoord, url, exp)
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)</code></pre>
+</details>
+</dd>
+<dt id="test_30_contrib50.test_revokeIntervention"><code class="name flex">
+<span>def <span class="ident">test_revokeIntervention</span></span>(<span>clientMycoord, clientOffice, clientSystem)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_revokeIntervention(clientMycoord, clientOffice, clientSystem):
+    recordId = startInfo[&#34;recordId&#34;]
+    eid = recordId[CONTRIB]
+    # note the switch to SELECT_REJECT below after the first failure to revoke:
+    # this is because mycoord cannot accept an accepted contrib
+    tests = (
+        (SELECT_ACCEPT, 95, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, &#34;office&#34;, True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, &#34;office&#34;, False),
+        (SELECT_REJECT, 95, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 97, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 2399, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 2401, SELECT_REVOKE, &#34;system&#34;, True),
+        (SELECT_ACCEPT, 24000, SELECT_REVOKE, &#34;system&#34;, True),
+    )
+    for (decisionBefore, shiftBack, decisionAfter, who, exp) in tests:
+        url = f&#34;/api/task/{decisionBefore}/{eid}&#34;
+        serverprint(f&#34;SELECT DECISION {decisionBefore}: True&#34;)
+        assertStatus(clientMycoord, url, True)
+
+        assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, -shiftBack)
+
+        url = f&#34;/api/task/{decisionAfter}/{eid}&#34;
+        clientWho = (
+            clientOffice
+            if who == &#34;office&#34;
+            else clientSystem
+            if who == &#34;system&#34;
+            else clientMycoord
+        )
+        serverprint(f&#34;{decisionAfter} by {who}: SHIFTBACK {shiftBack}: {exp}&#34;)
+        assertStatus(clientWho, url, exp)
         assertShiftDate(clientSystem, CONTRIB, eid, DATE_DECIDED, shiftBack)</code></pre>
 </details>
 </dd>
@@ -458,7 +557,12 @@ def test_start(clientOffice, clientOwner):
     eid = G(recordId, CONTRIB)
     ids = startInfo[&#34;ids&#34;]
     assertModifyField(
-        clientOwner, CONTRIB, eid, TYPE, (ids[&#34;TYPE1&#34;], TYPE1), True,
+        clientOwner,
+        CONTRIB,
+        eid,
+        TYPE,
+        (ids[&#34;TYPE1&#34;], TYPE1),
+        True,
     )</code></pre>
 </details>
 </dd>
@@ -477,11 +581,12 @@ def test_start(clientOffice, clientOwner):
 </div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="test_30_contrib50.test_modify1" href="#test_30_contrib50.test_modify1">test_modify1</a></code></li>
 <li><code><a title="test_30_contrib50.test_modify2" href="#test_30_contrib50.test_modify2">test_modify2</a></code></li>
 <li><code><a title="test_30_contrib50.test_modify3" href="#test_30_contrib50.test_modify3">test_modify3</a></code></li>
 <li><code><a title="test_30_contrib50.test_revoke" href="#test_30_contrib50.test_revoke">test_revoke</a></code></li>
+<li><code><a title="test_30_contrib50.test_revokeIntervention" href="#test_30_contrib50.test_revokeIntervention">test_revokeIntervention</a></code></li>
 <li><code><a title="test_30_contrib50.test_select" href="#test_30_contrib50.test_select">test_select</a></code></li>
 <li><code><a title="test_30_contrib50.test_start" href="#test_30_contrib50.test_start">test_start</a></code></li>
 </ul>
@@ -490,7 +595,7 @@ def test_start(clientOffice, clientOwner):
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

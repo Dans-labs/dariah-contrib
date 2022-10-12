@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.workflow.apply API documentation</title>
 <meta name="description" content="Applying workflow …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -634,6 +634,19 @@ class WorkflowItem:
         It may be that the task is only permitted for some limited time from now on.
         Then a timedelta object with the amount of time left is returned.
 
+        More precisely, the workflow configuration table (yaml/workflow.yaml)
+        my specify a set of delays for a set of user roles.
+
+        *   `all` specifies the default for users
+            whose role has not got a corresponding delay
+        *   `coord` is national coordinator of the relevant country
+        *   `office` is any office user
+        *   `super` is any super user, i.e. `system` or `root`
+
+        The value specified for each of these roles is either an integer,
+        which is the amount of hours of the delay.
+        Or it is `false` (no delay) or `true` (infinite delay).
+
         Parameters
         ----------
         table: string
@@ -646,7 +659,7 @@ class WorkflowItem:
 
         Returns
         -------
-        boolean | timedelta
+        boolean | timedelta | string
         &#34;&#34;&#34;
 
         db = self.db
@@ -708,22 +721,52 @@ class WorkflowItem:
         isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
+        isOffice = auth.officeuser()
+        isSysadmin = auth.sysadmin()
 
-        decisionDelay = G(taskInfo, N.delay)
+        decisionDelay = G(taskInfo, N.delay, False)
         if decisionDelay:
-            decisionDelay = timedelta(hours=decisionDelay)
+            if type(decisionDelay) is int:
+                decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is dict:
+                defaultDecisionDelay = G(decisionDelay, N.all, False)
+                decisionDelay = (
+                    G(decisionDelay, N.coord, defaultDecisionDelay)
+                    if isCoord
+                    else G(decisionDelay, N.sysadmin, defaultDecisionDelay)
+                    if isSysadmin
+                    else G(decisionDelay, N.office, defaultDecisionDelay)
+                    if isOffice
+                    else defaultDecisionDelay
+                )
+                if type(decisionDelay) is int:
+                    decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is not bool:
+                decisionDelay = False
 
         justNow = now()
         remaining = False
         if decisionDelay and stageDate:
-            remaining = stageDate + decisionDelay - justNow
-            if remaining &lt;= timedelta(hours=0):
-                remaining = False
+            if type(decisionDelay) is bool:
+                remaining = True
+            else:
+                remaining = stageDate + decisionDelay - justNow
+                if remaining &lt;= timedelta(hours=0):
+                    remaining = False
 
         forbidden = frozen or done
 
-        if forbidden and not remaining:
-            return False
+        if forbidden:
+            if (
+                task == N.unselectContrib
+                and table == N.contrib
+            ):
+                if remaining is True:
+                    return &#34;as intervention&#34;
+                if remaining:
+                    return remaining
+            if not remaining:
+                return False
 
         if table == N.contrib:
             if not isOwn and not isCoord and not isSuper:
@@ -821,22 +864,30 @@ class WorkflowItem:
                 if not revision:
                     return False
 
-            if task in {
-                N.expertReviewRevise,
-                N.expertReviewAccept,
-                N.expertReviewReject,
-                N.expertReviewRevoke,
-            } - {xExpertStage}:
+            if (
+                task
+                in {
+                    N.expertReviewRevise,
+                    N.expertReviewAccept,
+                    N.expertReviewReject,
+                    N.expertReviewRevoke,
+                }
+                - {xExpertStage}
+            ):
                 return (
                     kind == N.expert and not zFinalStage and mayDecideExpert and answer
                 )
 
-            if task in {
-                N.finalReviewRevise,
-                N.finalReviewAccept,
-                N.finalReviewReject,
-                N.finalReviewRevoke,
-            } - {xFinalStage}:
+            if (
+                task
+                in {
+                    N.finalReviewRevise,
+                    N.finalReviewAccept,
+                    N.finalReviewReject,
+                    N.finalReviewRevoke,
+                }
+                - {xFinalStage}
+            ):
                 return (
                     kind == N.final
                     and not not expertStage
@@ -1123,16 +1174,19 @@ class WorkflowItem:
                 continue
 
             remaining = type(permitted) is timedelta and permitted
-            taskUntil = E
+            remark = type(permitted) is str and permitted
+            taskExtra = E
             if remaining:
                 remainingRep = datetime.toDisplay(justNow + remaining)
-                taskUntil = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+                taskExtra = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+            elif remark:
+                taskExtra = H.span(f&#34;&#34;&#34; {remark}&#34;&#34;&#34;, cls=&#34;datex&#34;)
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
             taskPart = (
                 H.a(
-                    [taskMsg, taskUntil],
+                    [taskMsg, taskExtra],
                     f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
                     cls=f&#34;large task {taskCls}&#34;,
                 )
@@ -1719,6 +1773,19 @@ details of the current user can be read off.</dd>
         It may be that the task is only permitted for some limited time from now on.
         Then a timedelta object with the amount of time left is returned.
 
+        More precisely, the workflow configuration table (yaml/workflow.yaml)
+        my specify a set of delays for a set of user roles.
+
+        *   `all` specifies the default for users
+            whose role has not got a corresponding delay
+        *   `coord` is national coordinator of the relevant country
+        *   `office` is any office user
+        *   `super` is any super user, i.e. `system` or `root`
+
+        The value specified for each of these roles is either an integer,
+        which is the amount of hours of the delay.
+        Or it is `false` (no delay) or `true` (infinite delay).
+
         Parameters
         ----------
         table: string
@@ -1731,7 +1798,7 @@ details of the current user can be read off.</dd>
 
         Returns
         -------
-        boolean | timedelta
+        boolean | timedelta | string
         &#34;&#34;&#34;
 
         db = self.db
@@ -1793,22 +1860,52 @@ details of the current user can be read off.</dd>
         isOwn = creators and uid in creators
         isCoord = countryId and auth.coordinator(countryId=countryId)
         isSuper = auth.superuser()
+        isOffice = auth.officeuser()
+        isSysadmin = auth.sysadmin()
 
-        decisionDelay = G(taskInfo, N.delay)
+        decisionDelay = G(taskInfo, N.delay, False)
         if decisionDelay:
-            decisionDelay = timedelta(hours=decisionDelay)
+            if type(decisionDelay) is int:
+                decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is dict:
+                defaultDecisionDelay = G(decisionDelay, N.all, False)
+                decisionDelay = (
+                    G(decisionDelay, N.coord, defaultDecisionDelay)
+                    if isCoord
+                    else G(decisionDelay, N.sysadmin, defaultDecisionDelay)
+                    if isSysadmin
+                    else G(decisionDelay, N.office, defaultDecisionDelay)
+                    if isOffice
+                    else defaultDecisionDelay
+                )
+                if type(decisionDelay) is int:
+                    decisionDelay = timedelta(hours=decisionDelay)
+            elif type(decisionDelay) is not bool:
+                decisionDelay = False
 
         justNow = now()
         remaining = False
         if decisionDelay and stageDate:
-            remaining = stageDate + decisionDelay - justNow
-            if remaining &lt;= timedelta(hours=0):
-                remaining = False
+            if type(decisionDelay) is bool:
+                remaining = True
+            else:
+                remaining = stageDate + decisionDelay - justNow
+                if remaining &lt;= timedelta(hours=0):
+                    remaining = False
 
         forbidden = frozen or done
 
-        if forbidden and not remaining:
-            return False
+        if forbidden:
+            if (
+                task == N.unselectContrib
+                and table == N.contrib
+            ):
+                if remaining is True:
+                    return &#34;as intervention&#34;
+                if remaining:
+                    return remaining
+            if not remaining:
+                return False
 
         if table == N.contrib:
             if not isOwn and not isCoord and not isSuper:
@@ -1906,22 +2003,30 @@ details of the current user can be read off.</dd>
                 if not revision:
                     return False
 
-            if task in {
-                N.expertReviewRevise,
-                N.expertReviewAccept,
-                N.expertReviewReject,
-                N.expertReviewRevoke,
-            } - {xExpertStage}:
+            if (
+                task
+                in {
+                    N.expertReviewRevise,
+                    N.expertReviewAccept,
+                    N.expertReviewReject,
+                    N.expertReviewRevoke,
+                }
+                - {xExpertStage}
+            ):
                 return (
                     kind == N.expert and not zFinalStage and mayDecideExpert and answer
                 )
 
-            if task in {
-                N.finalReviewRevise,
-                N.finalReviewAccept,
-                N.finalReviewReject,
-                N.finalReviewRevoke,
-            } - {xFinalStage}:
+            if (
+                task
+                in {
+                    N.finalReviewRevise,
+                    N.finalReviewAccept,
+                    N.finalReviewReject,
+                    N.finalReviewRevoke,
+                }
+                - {xFinalStage}
+            ):
                 return (
                     kind == N.final
                     and not not expertStage
@@ -2208,16 +2313,19 @@ details of the current user can be read off.</dd>
                 continue
 
             remaining = type(permitted) is timedelta and permitted
-            taskUntil = E
+            remark = type(permitted) is str and permitted
+            taskExtra = E
             if remaining:
                 remainingRep = datetime.toDisplay(justNow + remaining)
-                taskUntil = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+                taskExtra = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+            elif remark:
+                taskExtra = H.span(f&#34;&#34;&#34; {remark}&#34;&#34;&#34;, cls=&#34;datex&#34;)
             taskMsg = G(taskInfo, N.msg)
             taskCls = G(taskInfo, N.cls)
 
             taskPart = (
                 H.a(
-                    [taskMsg, taskUntil],
+                    [taskMsg, taskExtra],
                     f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
                     cls=f&#34;large task {taskCls}&#34;,
                 )
@@ -3142,6 +3250,18 @@ prohibiting non-sensical tasks.</p>
 </div>
 <p>It may be that the task is only permitted for some limited time from now on.
 Then a timedelta object with the amount of time left is returned.</p>
+<p>More precisely, the workflow configuration table (yaml/workflow.yaml)
+my specify a set of delays for a set of user roles.</p>
+<ul>
+<li><code>all</code> specifies the default for users
+whose role has not got a corresponding delay</li>
+<li><code>coord</code> is national coordinator of the relevant country</li>
+<li><code>office</code> is any office user</li>
+<li><code>super</code> is any super user, i.e. <code>system</code> or <code>root</code></li>
+</ul>
+<p>The value specified for each of these roles is either an integer,
+which is the amount of hours of the delay.
+Or it is <code>false</code> (no delay) or <code>true</code> (infinite delay).</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>table</code></strong> :&ensp;<code>string</code></dt>
@@ -3154,7 +3274,7 @@ the task acts on: contrib, assessment, or review.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>boolean | timedelta</code></dt>
+<dt><code>boolean | timedelta | string</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
@@ -3188,6 +3308,19 @@ the task acts on: contrib, assessment, or review.</dd>
     It may be that the task is only permitted for some limited time from now on.
     Then a timedelta object with the amount of time left is returned.
 
+    More precisely, the workflow configuration table (yaml/workflow.yaml)
+    my specify a set of delays for a set of user roles.
+
+    *   `all` specifies the default for users
+        whose role has not got a corresponding delay
+    *   `coord` is national coordinator of the relevant country
+    *   `office` is any office user
+    *   `super` is any super user, i.e. `system` or `root`
+
+    The value specified for each of these roles is either an integer,
+    which is the amount of hours of the delay.
+    Or it is `false` (no delay) or `true` (infinite delay).
+
     Parameters
     ----------
     table: string
@@ -3200,7 +3333,7 @@ the task acts on: contrib, assessment, or review.</dd>
 
     Returns
     -------
-    boolean | timedelta
+    boolean | timedelta | string
     &#34;&#34;&#34;
 
     db = self.db
@@ -3262,22 +3395,52 @@ the task acts on: contrib, assessment, or review.</dd>
     isOwn = creators and uid in creators
     isCoord = countryId and auth.coordinator(countryId=countryId)
     isSuper = auth.superuser()
+    isOffice = auth.officeuser()
+    isSysadmin = auth.sysadmin()
 
-    decisionDelay = G(taskInfo, N.delay)
+    decisionDelay = G(taskInfo, N.delay, False)
     if decisionDelay:
-        decisionDelay = timedelta(hours=decisionDelay)
+        if type(decisionDelay) is int:
+            decisionDelay = timedelta(hours=decisionDelay)
+        elif type(decisionDelay) is dict:
+            defaultDecisionDelay = G(decisionDelay, N.all, False)
+            decisionDelay = (
+                G(decisionDelay, N.coord, defaultDecisionDelay)
+                if isCoord
+                else G(decisionDelay, N.sysadmin, defaultDecisionDelay)
+                if isSysadmin
+                else G(decisionDelay, N.office, defaultDecisionDelay)
+                if isOffice
+                else defaultDecisionDelay
+            )
+            if type(decisionDelay) is int:
+                decisionDelay = timedelta(hours=decisionDelay)
+        elif type(decisionDelay) is not bool:
+            decisionDelay = False
 
     justNow = now()
     remaining = False
     if decisionDelay and stageDate:
-        remaining = stageDate + decisionDelay - justNow
-        if remaining &lt;= timedelta(hours=0):
-            remaining = False
+        if type(decisionDelay) is bool:
+            remaining = True
+        else:
+            remaining = stageDate + decisionDelay - justNow
+            if remaining &lt;= timedelta(hours=0):
+                remaining = False
 
     forbidden = frozen or done
 
-    if forbidden and not remaining:
-        return False
+    if forbidden:
+        if (
+            task == N.unselectContrib
+            and table == N.contrib
+        ):
+            if remaining is True:
+                return &#34;as intervention&#34;
+            if remaining:
+                return remaining
+        if not remaining:
+            return False
 
     if table == N.contrib:
         if not isOwn and not isCoord and not isSuper:
@@ -3375,22 +3538,30 @@ the task acts on: contrib, assessment, or review.</dd>
             if not revision:
                 return False
 
-        if task in {
-            N.expertReviewRevise,
-            N.expertReviewAccept,
-            N.expertReviewReject,
-            N.expertReviewRevoke,
-        } - {xExpertStage}:
+        if (
+            task
+            in {
+                N.expertReviewRevise,
+                N.expertReviewAccept,
+                N.expertReviewReject,
+                N.expertReviewRevoke,
+            }
+            - {xExpertStage}
+        ):
             return (
                 kind == N.expert and not zFinalStage and mayDecideExpert and answer
             )
 
-        if task in {
-            N.finalReviewRevise,
-            N.finalReviewAccept,
-            N.finalReviewReject,
-            N.finalReviewRevoke,
-        } - {xFinalStage}:
+        if (
+            task
+            in {
+                N.finalReviewRevise,
+                N.finalReviewAccept,
+                N.finalReviewReject,
+                N.finalReviewRevoke,
+            }
+            - {xFinalStage}
+        ):
             return (
                 kind == N.final
                 and not not expertStage
@@ -3669,16 +3840,19 @@ tasks: contrib, assessment, or review.</dd>
             continue
 
         remaining = type(permitted) is timedelta and permitted
-        taskUntil = E
+        remark = type(permitted) is str and permitted
+        taskExtra = E
         if remaining:
             remainingRep = datetime.toDisplay(justNow + remaining)
-            taskUntil = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+            taskExtra = H.span(f&#34;&#34;&#34; before {remainingRep}&#34;&#34;&#34;, cls=&#34;datex&#34;)
+        elif remark:
+            taskExtra = H.span(f&#34;&#34;&#34; {remark}&#34;&#34;&#34;, cls=&#34;datex&#34;)
         taskMsg = G(taskInfo, N.msg)
         taskCls = G(taskInfo, N.cls)
 
         taskPart = (
             H.a(
-                [taskMsg, taskUntil],
+                [taskMsg, taskExtra],
                 f&#34;&#34;&#34;/api/task/{task}/{eid}&#34;&#34;&#34;,
                 cls=f&#34;large task {taskCls}&#34;,
             )
@@ -3751,7 +3925,7 @@ tasks: contrib, assessment, or review.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

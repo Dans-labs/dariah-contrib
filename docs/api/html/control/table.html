@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.table API documentation</title>
 <meta name="description" content="Tables …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -47,10 +47,12 @@ from control.utils import pick as G, E, ELLIPS, NBSP, ONE
 from control.perm import checkTable
 from control.cust.factory_record import factory as recordFactory
 
+CP = C.perm
 CT = C.tables
 CW = C.workflow
 
 
+GROUP_RANK = CP.groupRank
 MAIN_TABLE = CT.userTables[0]
 INTER_TABLE = CT.userTables[1]
 USER_TABLES = set(CT.userTables)
@@ -88,6 +90,7 @@ class Table:
         &#34;&#34;&#34;*object* A `control.context.Context` singleton.
         &#34;&#34;&#34;
 
+        db = context.db
         auth = context.auth
         user = auth.user
 
@@ -179,10 +182,25 @@ class Table:
         &#34;&#34;&#34;
 
         def titleSortkey(r):
-            return self.title(r).lower()
+            return self.title(r, withRole=True).lower()
 
         self.titleSortkey = titleSortkey
         &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the title.
+        &#34;&#34;&#34;
+
+        def groupSortkey(r):
+            title = self.title(r, withRole=True).lower()
+            group = G(r, N.group, &#34;&#34;)
+            groupRep = G(G(db.permissionGroup, group, {}), N.rep, E) or E
+            rank = G(GROUP_RANK, groupRep, 0)
+            return (-rank, title)
+
+        self.groupSortkey = groupSortkey
+        &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the permission group and then on the title.
         &#34;&#34;&#34;
 
         self.RecordClass = recordFactory(table)
@@ -417,7 +435,7 @@ class Table:
         table = self.table
         uid = self.uid
         countryId = self.countryId
-        titleSortkey = self.titleSortkey
+        titleSortkey = self.groupSortkey if table == N.user else self.titleSortkey
         (itemSingular, itemPlural) = self.itemLabels
 
         params = (
@@ -471,7 +489,7 @@ class Table:
                 else:
                     recordsHtml.append(
                         H.details(
-                            self.title(record),
+                            self.title(record, withRole=True),
                             H.div(ELLIPS),
                             f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
                             fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
@@ -604,7 +622,7 @@ class Table:
         auth = context.auth
         return checkTable(auth, table) and (action is None or auth.authenticated())
 
-    def title(self, record, markup=True):
+    def title(self, record, markup=True, **kwargs):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
 
         When record titles have to be generated for many records in a list,
@@ -630,7 +648,7 @@ class Table:
         &#34;&#34;&#34;
 
         # return obj.record(record=record).title(**atts)
-        return self.RecordClass.titleRaw(self, record, markup=markup)
+        return self.RecordClass.titleRaw(self, record, markup=markup, **kwargs)
 
     @staticmethod
     def forceOpen(theEid, openEid):
@@ -712,6 +730,7 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         &#34;&#34;&#34;*object* A `control.context.Context` singleton.
         &#34;&#34;&#34;
 
+        db = context.db
         auth = context.auth
         user = auth.user
 
@@ -803,10 +822,25 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         &#34;&#34;&#34;
 
         def titleSortkey(r):
-            return self.title(r).lower()
+            return self.title(r, withRole=True).lower()
 
         self.titleSortkey = titleSortkey
         &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the title.
+        &#34;&#34;&#34;
+
+        def groupSortkey(r):
+            title = self.title(r, withRole=True).lower()
+            group = G(r, N.group, &#34;&#34;)
+            groupRep = G(G(db.permissionGroup, group, {}), N.rep, E) or E
+            rank = G(GROUP_RANK, groupRep, 0)
+            return (-rank, title)
+
+        self.groupSortkey = groupSortkey
+        &#34;&#34;&#34;*function* Given a record delivers a key for sorting the records.
+
+        The key is based on the permission group and then on the title.
         &#34;&#34;&#34;
 
         self.RecordClass = recordFactory(table)
@@ -1041,7 +1075,7 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         table = self.table
         uid = self.uid
         countryId = self.countryId
-        titleSortkey = self.titleSortkey
+        titleSortkey = self.groupSortkey if table == N.user else self.titleSortkey
         (itemSingular, itemPlural) = self.itemLabels
 
         params = (
@@ -1095,7 +1129,7 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
                 else:
                     recordsHtml.append(
                         H.details(
-                            self.title(record),
+                            self.title(record, withRole=True),
                             H.div(ELLIPS),
                             f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
                             fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
@@ -1228,7 +1262,7 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         auth = context.auth
         return checkTable(auth, table) and (action is None or auth.authenticated())
 
-    def title(self, record, markup=True):
+    def title(self, record, markup=True, **kwargs):
         &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
 
         When record titles have to be generated for many records in a list,
@@ -1254,7 +1288,7 @@ otherwise to the base class <code><a title="control.record.Record" href="record.
         &#34;&#34;&#34;
 
         # return obj.record(record=record).title(**atts)
-        return self.RecordClass.titleRaw(self, record, markup=markup)
+        return self.RecordClass.titleRaw(self, record, markup=markup, **kwargs)
 
     @staticmethod
     def forceOpen(theEid, openEid):
@@ -1426,6 +1460,11 @@ the table.</p></div>
 <dd>
 <div class="desc"><p><em>ObjectId</em> The permission group of the current user.</p></div>
 </dd>
+<dt id="control.table.Table.groupSortkey"><code class="name">var <span class="ident">groupSortkey</span></code></dt>
+<dd>
+<div class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p>
+<p>The key is based on the permission group and then on the title.</p></div>
+</dd>
 <dt id="control.table.Table.isInterTable"><code class="name">var <span class="ident">isInterTable</span></code></dt>
 <dd>
 <div class="desc"><p><em>boolean</em> Whether the table is the inter table, i.e. <code>assessment</code>.</p></div>
@@ -1482,7 +1521,8 @@ new record into this table.</p></div>
 </dd>
 <dt id="control.table.Table.titleSortkey"><code class="name">var <span class="ident">titleSortkey</span></code></dt>
 <dd>
-<div class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p></div>
+<div class="desc"><p><em>function</em> Given a record delivers a key for sorting the records.</p>
+<p>The key is based on the title.</p></div>
 </dd>
 <dt id="control.table.Table.uid"><code class="name">var <span class="ident">uid</span></code></dt>
 <dd>
@@ -1974,7 +2014,7 @@ and they may supply alternative body methods as well.</dd>
 </details>
 </dd>
 <dt id="control.table.Table.title"><code class="name flex">
-<span>def <span class="ident">title</span></span>(<span>self, record, markup=True)</span>
+<span>def <span class="ident">title</span></span>(<span>self, record, markup=True, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fast way to get a title on the basis of the record only.</p>
@@ -1999,7 +2039,7 @@ fields from the record itself.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def title(self, record, markup=True):
+<pre><code class="python">def title(self, record, markup=True, **kwargs):
     &#34;&#34;&#34;Fast way to get a title on the basis of the record only.
 
     When record titles have to be generated for many records in a list,
@@ -2025,7 +2065,7 @@ fields from the record itself.</p>
     &#34;&#34;&#34;
 
     # return obj.record(record=record).title(**atts)
-    return self.RecordClass.titleRaw(self, record, markup=markup)</code></pre>
+    return self.RecordClass.titleRaw(self, record, markup=markup, **kwargs)</code></pre>
 </details>
 </dd>
 <dt id="control.table.Table.withInsert"><code class="name flex">
@@ -2183,7 +2223,7 @@ otherwise all records go to the interface.</dd>
     table = self.table
     uid = self.uid
     countryId = self.countryId
-    titleSortkey = self.titleSortkey
+    titleSortkey = self.groupSortkey if table == N.user else self.titleSortkey
     (itemSingular, itemPlural) = self.itemLabels
 
     params = (
@@ -2237,7 +2277,7 @@ otherwise all records go to the interface.</dd>
             else:
                 recordsHtml.append(
                     H.details(
-                        self.title(record),
+                        self.title(record, withRole=True),
                         H.div(ELLIPS),
                         f&#34;&#34;&#34;{table}/{G(record, N._id)}&#34;&#34;&#34;,
                         fetchurl=f&#34;&#34;&#34;/api/{table}/{N.item}/{G(record, N._id)}&#34;&#34;&#34;,
@@ -2289,6 +2329,7 @@ otherwise all records go to the interface.</dd>
 <li><code><a title="control.table.Table.fields" href="#control.table.Table.fields">fields</a></code></li>
 <li><code><a title="control.table.Table.forceOpen" href="#control.table.Table.forceOpen">forceOpen</a></code></li>
 <li><code><a title="control.table.Table.group" href="#control.table.Table.group">group</a></code></li>
+<li><code><a title="control.table.Table.groupSortkey" href="#control.table.Table.groupSortkey">groupSortkey</a></code></li>
 <li><code><a title="control.table.Table.insert" href="#control.table.Table.insert">insert</a></code></li>
 <li><code><a title="control.table.Table.insertButton" href="#control.table.Table.insertButton">insertButton</a></code></li>
 <li><code><a title="control.table.Table.isInterTable" href="#control.table.Table.isInterTable">isInterTable</a></code></li>
@@ -2320,7 +2361,7 @@ otherwise all records go to the interface.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>control.db API documentation</title>
 <meta name="description" content="All access to the database …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -60,6 +60,7 @@ from control.typ.related import castObjectId
 
 CB = C.base
 CM = C.mongo
+CP = C.perm
 CT = C.tables
 CF = C.workflow
 CW = C.web
@@ -85,6 +86,8 @@ M_ELEM = CM.elem
 SHOW_ARGS = set(CM.showArgs)
 OTHER_COMMANDS = set(CM.otherCommands)
 M_COMMANDS = SHOW_ARGS | OTHER_COMMANDS
+
+GROUP_RANK = CP.groupRank
 
 ACTUAL_TABLES = set(CT.actualTables)
 VALUE_TABLES = set(CT.valueTables)
@@ -197,7 +200,7 @@ class Db:
         mongo = self.mongo
         database = self.database
 
-        if not mongo:
+        if mongo is None:
             client = MongoClient()
             mongo = client[database]
             self.client = client
@@ -287,7 +290,9 @@ class Db:
         )
 
         setattr(
-            self, valueTable, {G(record, N._id): record for record in valueList},
+            self,
+            valueTable,
+            {G(record, N._id): record for record in valueList},
         )
         setattr(
             self,
@@ -320,7 +325,7 @@ class Db:
 
         !!! caution
             If you change the MongoDb from without, an you forget to
-            put an appropriate time stamp, the app will not see it untill it
+            put an appropriate time stamp, the app will not see it until it
             is restarted.
             See for example how `root.makeUserRoot` handles this.
 
@@ -334,7 +339,16 @@ class Db:
 
         for valueTable in VALUE_TABLES:
             self.cacheValueTable(valueTable)
-            collected[valueTable] = now()
+            justNow = now()
+            collected[valueTable] = justNow
+            self.mongoCmd(
+                N.recollect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: valueTable},
+                {M_SET: {RECOLLECT_DATE: justNow}},
+                upsert=True,
+            )
 
         self.collectActualItems()
         if DEBUG_SYNCH:
@@ -356,7 +370,7 @@ class Db:
 
         ### Global recollection
 
-        Whenever we recollect a value table, we insert the time of recollection
+        Whenever we (re)collect a value table, we insert the time of recollection
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
@@ -419,7 +433,7 @@ class Db:
             justNow = now()
             for aTable in affected:
                 self.mongoCmd(
-                    N.collect,
+                    N.recollect,
                     N.collect,
                     N.update_one,
                     {RECOLLECT_NAME: aTable},
@@ -808,7 +822,7 @@ class Db:
 
         return sorted(details, key=sortKey) if sortKey else details
 
-    def getValueRecords(self, valueTable, constrain=None):
+    def getValueRecords(self, valueTable, constrain=None, upper=None):
         &#34;&#34;&#34;Fetch records from a value table.
 
         It will apply some standard and custom constraints.
@@ -836,6 +850,12 @@ class Db:
         constrain: 2-tuple, optional `None`
             A custom constraint. If present, it should be a tuple `(fieldName, value)`.
             Only records with that value in that field will be delivered.
+        upper: string
+            The name of a permission group.
+            If the valueTable is permissionGroup, not all values will be shown,
+            only the values that are not more powerful than this group.
+            This is needed to prevent users to make somebody more powerful
+            then themselves.
 
         Returns
         -------
@@ -843,7 +863,7 @@ class Db:
         &#34;&#34;&#34;
 
         records = getattr(self, valueTable, {}).values()
-        return list(
+        result = (
             (r for r in records if G(r, N.isMember) or False)
             if valueTable == N.country
             else (r for r in records if G(r, N.authority) != N.legacy)
@@ -852,6 +872,19 @@ class Db:
             if constrain
             else records
         )
+        if valueTable == N.permissionGroup:
+            result = (
+                r for r in result if G(r, N.rep, &#34;&#34;) not in {N.edit, N.own, N.nobody}
+            )
+            if upper is not None:
+                upperRank = G(GROUP_RANK, upper, 0)
+                result = (
+                    r
+                    for r in result
+                    if G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100) &lt;= upperRank
+                )
+            return sorted(result, key=lambda r: G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100))
+        return tuple(result)
 
     def getValueInv(self, valueTable, constrain):
         &#34;&#34;&#34;Fetch a mapping from values to ids from a value table.
@@ -1072,7 +1105,14 @@ class Db:
         self.mongoCmd(N.deleteMany, table, N.delete_many, crit)
 
     def updateField(
-        self, table, eid, field, data, actor, modified, nowFields=[],
+        self,
+        table,
+        eid,
+        field,
+        data,
+        actor,
+        modified,
+        nowFields=[],
     ):
         &#34;&#34;&#34;Update a single field in a single record.
 
@@ -1503,7 +1543,7 @@ as recommended in
         mongo = self.mongo
         database = self.database
 
-        if not mongo:
+        if mongo is None:
             client = MongoClient()
             mongo = client[database]
             self.client = client
@@ -1593,7 +1633,9 @@ as recommended in
         )
 
         setattr(
-            self, valueTable, {G(record, N._id): record for record in valueList},
+            self,
+            valueTable,
+            {G(record, N._id): record for record in valueList},
         )
         setattr(
             self,
@@ -1626,7 +1668,7 @@ as recommended in
 
         !!! caution
             If you change the MongoDb from without, an you forget to
-            put an appropriate time stamp, the app will not see it untill it
+            put an appropriate time stamp, the app will not see it until it
             is restarted.
             See for example how `root.makeUserRoot` handles this.
 
@@ -1640,7 +1682,16 @@ as recommended in
 
         for valueTable in VALUE_TABLES:
             self.cacheValueTable(valueTable)
-            collected[valueTable] = now()
+            justNow = now()
+            collected[valueTable] = justNow
+            self.mongoCmd(
+                N.recollect,
+                N.collect,
+                N.update_one,
+                {RECOLLECT_NAME: valueTable},
+                {M_SET: {RECOLLECT_DATE: justNow}},
+                upsert=True,
+            )
 
         self.collectActualItems()
         if DEBUG_SYNCH:
@@ -1662,7 +1713,7 @@ as recommended in
 
         ### Global recollection
 
-        Whenever we recollect a value table, we insert the time of recollection
+        Whenever we (re)collect a value table, we insert the time of recollection
         in a record in the MongoDb.
 
         Somewhere at the start of each request, these records will be checked,
@@ -1725,7 +1776,7 @@ as recommended in
             justNow = now()
             for aTable in affected:
                 self.mongoCmd(
-                    N.collect,
+                    N.recollect,
                     N.collect,
                     N.update_one,
                     {RECOLLECT_NAME: aTable},
@@ -2114,7 +2165,7 @@ as recommended in
 
         return sorted(details, key=sortKey) if sortKey else details
 
-    def getValueRecords(self, valueTable, constrain=None):
+    def getValueRecords(self, valueTable, constrain=None, upper=None):
         &#34;&#34;&#34;Fetch records from a value table.
 
         It will apply some standard and custom constraints.
@@ -2142,6 +2193,12 @@ as recommended in
         constrain: 2-tuple, optional `None`
             A custom constraint. If present, it should be a tuple `(fieldName, value)`.
             Only records with that value in that field will be delivered.
+        upper: string
+            The name of a permission group.
+            If the valueTable is permissionGroup, not all values will be shown,
+            only the values that are not more powerful than this group.
+            This is needed to prevent users to make somebody more powerful
+            then themselves.
 
         Returns
         -------
@@ -2149,7 +2206,7 @@ as recommended in
         &#34;&#34;&#34;
 
         records = getattr(self, valueTable, {}).values()
-        return list(
+        result = (
             (r for r in records if G(r, N.isMember) or False)
             if valueTable == N.country
             else (r for r in records if G(r, N.authority) != N.legacy)
@@ -2158,6 +2215,19 @@ as recommended in
             if constrain
             else records
         )
+        if valueTable == N.permissionGroup:
+            result = (
+                r for r in result if G(r, N.rep, &#34;&#34;) not in {N.edit, N.own, N.nobody}
+            )
+            if upper is not None:
+                upperRank = G(GROUP_RANK, upper, 0)
+                result = (
+                    r
+                    for r in result
+                    if G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100) &lt;= upperRank
+                )
+            return sorted(result, key=lambda r: G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100))
+        return tuple(result)
 
     def getValueInv(self, valueTable, constrain):
         &#34;&#34;&#34;Fetch a mapping from values to ids from a value table.
@@ -2378,7 +2448,14 @@ as recommended in
         self.mongoCmd(N.deleteMany, table, N.delete_many, crit)
 
     def updateField(
-        self, table, eid, field, data, actor, modified, nowFields=[],
+        self,
+        table,
+        eid,
+        field,
+        data,
+        actor,
+        modified,
+        nowFields=[],
     ):
         &#34;&#34;&#34;Update a single field in a single record.
 
@@ -2940,7 +3017,9 @@ Those records are marked by the presence of the field <code>import</code>.</dd>
     )
 
     setattr(
-        self, valueTable, {G(record, N._id): record for record in valueList},
+        self,
+        valueTable,
+        {G(record, N._id): record for record in valueList},
     )
     setattr(
         self,
@@ -3003,7 +3082,7 @@ in attribute <code>collected</code>.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>If you change the MongoDb from without, an you forget to
-put an appropriate time stamp, the app will not see it untill it
+put an appropriate time stamp, the app will not see it until it
 is restarted.
 See for example how <code>root.makeUserRoot</code> handles this.</p>
 </div>
@@ -3036,7 +3115,7 @@ After collecting a value table, the "actual" items will be recomputed.</p>
 
     !!! caution
         If you change the MongoDb from without, an you forget to
-        put an appropriate time stamp, the app will not see it untill it
+        put an appropriate time stamp, the app will not see it until it
         is restarted.
         See for example how `root.makeUserRoot` handles this.
 
@@ -3050,7 +3129,16 @@ After collecting a value table, the "actual" items will be recomputed.</p>
 
     for valueTable in VALUE_TABLES:
         self.cacheValueTable(valueTable)
-        collected[valueTable] = now()
+        justNow = now()
+        collected[valueTable] = justNow
+        self.mongoCmd(
+            N.recollect,
+            N.collect,
+            N.update_one,
+            {RECOLLECT_NAME: valueTable},
+            {M_SET: {RECOLLECT_DATE: justNow}},
+            upsert=True,
+        )
 
     self.collectActualItems()
     if DEBUG_SYNCH:
@@ -3835,7 +3923,7 @@ Only records with that value in that field will be delivered.</dd>
 </details>
 </dd>
 <dt id="control.db.Db.getValueRecords"><code class="name flex">
-<span>def <span class="ident">getValueRecords</span></span>(<span>self, valueTable, constrain=None)</span>
+<span>def <span class="ident">getValueRecords</span></span>(<span>self, valueTable, constrain=None, upper=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Fetch records from a value table.</p>
@@ -3865,6 +3953,12 @@ that are linked to that criterion record are eligible.</p>
 <dt><strong><code>constrain</code></strong> :&ensp;<code>2-tuple</code>, optional <code>None</code></dt>
 <dd>A custom constraint. If present, it should be a tuple <code>(fieldName, value)</code>.
 Only records with that value in that field will be delivered.</dd>
+<dt><strong><code>upper</code></strong> :&ensp;<code>string</code></dt>
+<dd>The name of a permission group.
+If the valueTable is permissionGroup, not all values will be shown,
+only the values that are not more powerful than this group.
+This is needed to prevent users to make somebody more powerful
+then themselves.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -3875,7 +3969,7 @@ Only records with that value in that field will be delivered.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getValueRecords(self, valueTable, constrain=None):
+<pre><code class="python">def getValueRecords(self, valueTable, constrain=None, upper=None):
     &#34;&#34;&#34;Fetch records from a value table.
 
     It will apply some standard and custom constraints.
@@ -3903,6 +3997,12 @@ Only records with that value in that field will be delivered.</dd>
     constrain: 2-tuple, optional `None`
         A custom constraint. If present, it should be a tuple `(fieldName, value)`.
         Only records with that value in that field will be delivered.
+    upper: string
+        The name of a permission group.
+        If the valueTable is permissionGroup, not all values will be shown,
+        only the values that are not more powerful than this group.
+        This is needed to prevent users to make somebody more powerful
+        then themselves.
 
     Returns
     -------
@@ -3910,7 +4010,7 @@ Only records with that value in that field will be delivered.</dd>
     &#34;&#34;&#34;
 
     records = getattr(self, valueTable, {}).values()
-    return list(
+    result = (
         (r for r in records if G(r, N.isMember) or False)
         if valueTable == N.country
         else (r for r in records if G(r, N.authority) != N.legacy)
@@ -3918,7 +4018,20 @@ Only records with that value in that field will be delivered.</dd>
         else (r for r in records if G(r, constrain[0]) == constrain[1])
         if constrain
         else records
-    )</code></pre>
+    )
+    if valueTable == N.permissionGroup:
+        result = (
+            r for r in result if G(r, N.rep, &#34;&#34;) not in {N.edit, N.own, N.nobody}
+        )
+        if upper is not None:
+            upperRank = G(GROUP_RANK, upper, 0)
+            result = (
+                r
+                for r in result
+                if G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100) &lt;= upperRank
+            )
+        return sorted(result, key=lambda r: G(GROUP_RANK, G(r, N.rep, &#34;&#34;), 100))
+    return tuple(result)</code></pre>
 </details>
 </dd>
 <dt id="control.db.Db.getWorkflowItem"><code class="name flex">
@@ -4428,7 +4541,7 @@ The command must be listed in the mongo.yaml config file.</dd>
     mongo = self.mongo
     database = self.database
 
-    if not mongo:
+    if mongo is None:
         client = MongoClient()
         mongo = client[database]
         self.client = client
@@ -4453,7 +4566,7 @@ So when we need to recollect values for our cache, we must notify
 in some way that other workers also have to recollect this table.</p>
 </div>
 <h3 id="global-recollection">Global recollection</h3>
-<p>Whenever we recollect a value table, we insert the time of recollection
+<p>Whenever we (re)collect a value table, we insert the time of recollection
 in a record in the MongoDb.</p>
 <p>Somewhere at the start of each request, these records will be checked,
 and if needed, recollections will be done before the request processing.</p>
@@ -4504,7 +4617,7 @@ to now, so that each worker will refresh its value cache.</p>
 
     ### Global recollection
 
-    Whenever we recollect a value table, we insert the time of recollection
+    Whenever we (re)collect a value table, we insert the time of recollection
     in a record in the MongoDb.
 
     Somewhere at the start of each request, these records will be checked,
@@ -4567,7 +4680,7 @@ to now, so that each worker will refresh its value cache.</p>
         justNow = now()
         for aTable in affected:
             self.mongoCmd(
-                N.collect,
+                N.recollect,
                 N.collect,
                 N.update_one,
                 {RECOLLECT_NAME: aTable},
@@ -4626,7 +4739,14 @@ For exampe, if <code>submitted</code> is modified, the current datetime will be 
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def updateField(
-    self, table, eid, field, data, actor, modified, nowFields=[],
+    self,
+    table,
+    eid,
+    field,
+    data,
+    actor,
+    modified,
+    nowFields=[],
 ):
     &#34;&#34;&#34;Update a single field in a single record.
 
@@ -4850,7 +4970,7 @@ they are about.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
