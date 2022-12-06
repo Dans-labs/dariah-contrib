@@ -424,7 +424,8 @@ def doSheet(fileName):
                         if fGood:
                             newValue.append(fVal)
                             if fError:
-                                info(f"{posRep} {fError}")
+                                pass
+                                # info(f"{posRep} {fError}")
                         else:
                             error(f"{posRep} {fError}")
                             good = False
@@ -434,7 +435,8 @@ def doSheet(fileName):
                     if fGood:
                         newValue = fValue
                         if fError:
-                            info(f"{posRep} {fError}")
+                            pass
+                            # info(f"{posRep} {fError}")
                     else:
                         error(f"{posRep} {fError}")
                         good = False
