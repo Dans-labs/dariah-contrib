@@ -433,7 +433,7 @@ def doSheet(fileName):
                 else:
                     (fValue, fGood, fError) = intLike(value)
                     if fGood:
-                        newValue = fValue
+                        value = fValue
                         if fError:
                             pass
                             # info(f"{posRep} {fError}")
