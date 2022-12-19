@@ -174,7 +174,10 @@ def readValueTables():
             users = list(DB.user.find(criterion))
             eppns = {r["_id"]: r.get("eppn", r.get("email", None)) for r in users}
             CREATOR_ID = [
-                r["_id"] for r in users if r.get("eppn", None) == CREATOR_NAME
+                r["_id"]
+                for r in users
+                if r.get("eppn", None) == CREATOR_NAME
+                or r.get("email", None) == CREATOR_NAME
             ][0]
             VALUES["eppn"] = eppns
         VALUES[table] = items
@@ -335,6 +338,7 @@ def doSheet(fileName):
 
     for (r, row) in enumerate(rows):
         contrib = {field: row[i].value for (i, field) in header.items()}
+        contrib["title"] = str(contrib.get("title", ""))
         posRep = f"\trow {r + 2} column creator:"
         value = contrib["creator"]
         creatorId = checkEmail(value, posRep)
@@ -399,6 +403,8 @@ def doSheet(fileName):
             elif field == "editors":
                 if any(v is None for v in value):
                     good = False
+            elif field == "title":
+                value = str(value or "")
             elif field in VALUE_TABLES:
                 if field in MULTIPLE:
                     valueId = []

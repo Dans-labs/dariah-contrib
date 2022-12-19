@@ -196,7 +196,7 @@ class Overview:
 
         contribs = {}
         for record in db.bulkContribWorkflow(chosenCountryId, bulk):
-            title = G(record, N.title)
+            title = str(G(record, N.title))
             contribId = G(record, N._id)
 
             selected = G(record, N.selected)
