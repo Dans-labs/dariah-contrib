@@ -173,11 +173,12 @@ def readValueTables():
         if table == "user":
             users = list(DB.user.find(criterion))
             eppns = {r["_id"]: r.get("eppn", r.get("email", None)) for r in users}
+            for r in users:
+                print(f"{r['_id']} {r.get('eppn', None)}")
             CREATOR_ID = [
                 r["_id"]
                 for r in users
                 if r.get("eppn", None) == CREATOR_NAME
-                or r.get("email", None) == CREATOR_NAME
             ][0]
             VALUES["eppn"] = eppns
         VALUES[table] = items
