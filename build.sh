@@ -112,7 +112,7 @@ DB_PROD="dariah"
 
 BACKUP_PROD="/home/dirkr/backups"
 BULK_PROD="/home/dirkr/bulk"
-BASE_DEV=~/werk/KNAW/dariah/Files
+BASE_DEV=~/KNAW/dariah/Files
 BACKUP_DEV=$BASE_DEV/backups
 BULK_DEV=$BASE_DEV/bulk
 

@@ -1,6 +1,7 @@
 import sys
 import os
 import collections
+from datetime import datetime as dt
 
 # import sys
 import yaml
@@ -11,8 +12,18 @@ from pymongo import MongoClient
 # from bson.objectid import ObjectId
 
 
+def now():
+    """The current moment in time as a isolike string value.
+
+    Strips everything after the decimal point,
+    (milliseconds and timezone).
+    """
+
+    return dt.utcnow().isoformat().split(".")[0].replace(":", "-")
+
+
 LIMIT = None
-EXPORT_DIR = "~/Documents/DANS/projects/has/backupsYaml/2019-12-05"
+EXPORT_DIR = f"~/export/{now()}"
 DATABASE = "dariah"
 DB = MongoClient()[DATABASE]
 
