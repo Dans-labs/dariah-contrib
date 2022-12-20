@@ -345,6 +345,7 @@ def exportData(outDir):
                     [DATA[table][_id] for _id in valIds],
                     allow_unicode=True,
                     sort_keys=False,
+                    encoding="utf-8",
                 )
             )
     info("done")
