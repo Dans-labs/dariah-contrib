@@ -112,7 +112,7 @@ DB_PROD="dariah"
 
 BACKUP_PROD="/home/dirkr/backups"
 BULK_PROD="/home/dirkr/bulk"
-BASE_DEV=~/KNAW/dariah/Files
+BASE_DEV=~/werk/KNAW/dariah/Files
 BACKUP_DEV=$BASE_DEV/backups
 BULK_DEV=$BASE_DEV/bulk
 
@@ -320,14 +320,16 @@ function datamanage {
             restored="_restored"
             if [[ "$1" == "p" ]]; then
                 fromdb="$DB_PROD"
+                todb="$DB_PROD"
             elif [[ "$1" == "x" ]]; then
                 fromdb="$DB_PROD"
+                todb="$DB_PROD"
                 restored=""
             fi
             if [ -d "$datastore" ]; then
                 mongostart
                 mongorestore --drop --nsFrom "$fromdb.*" --nsTo "$todb$restored"".*" "$datastore"
-                if [[ "$1" == "x" ]]; then
+                if [[ "$1" != "x" ]]; then
                     if [[ "$ON_DANS" == "0" ]]; then
                         cd $root/server
                         python3 testusers.py

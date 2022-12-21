@@ -169,11 +169,10 @@ class Auth:
             if (
                 G(record, N.authority) == authority
                 and (
-                    (eppn is not None and G(record, N.eppn) == eppn)
+                    (G(record, N.eppn) is not None and G(record, N.eppn) == eppn)
                     or (
-                        eppn is None
+                        G(record, N.eppn) is None
                         and email is not None
-                        and G(record, N.eppn) is None
                         and G(record, N.email) == email
                     )
                 )
@@ -215,6 +214,7 @@ class Auth:
         group = user[N.group] if N.group in user else authId
         if N.group not in user:
             user[N.group] = group
+            db.updateUser(user)
 
         groupRep = G(G(db.permissionGroup, group), N.rep)
         result = groupRep != UNAUTH
