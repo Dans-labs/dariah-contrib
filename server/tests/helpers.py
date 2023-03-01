@@ -585,4 +585,5 @@ def viewField(client, table, eid, field):
     response = client.get(url)
     text = response.get_data(as_text=True)
     fields = findFields(text)
+    # print(f"{url=} ==> {text=} ==> {fields=}")
     return (text, fields)

@@ -708,7 +708,8 @@ def appFactory(regime, test, debug, **kwargs):
                 if recordObj.mayRead is not False:
                     fieldObj = mkTable(context, table).record(eid=eid).field(field)
                     if fieldObj:
-                        return fieldObj.wrap(action=action)
+                        result = fieldObj.wrap(action=action)
+                        return result
                     return noField(table, field)
                 return noRecord(table)
             return noTable(table)

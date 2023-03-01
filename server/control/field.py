@@ -477,16 +477,17 @@ class Field:
 
         if action is not None and not asMaster:
             contentLength = request.content_length
-            if contentLength is not None and contentLength > LIMIT_JSON:
-                abort(400)
-            data = request.get_json()
-            if data is not None and N.save in data:
-                if mayEdit:
-                    good = self.save(data[N.save])
-                else:
-                    good = False
-                if not good:
+            if contentLength is not None:
+                if contentLength > LIMIT_JSON:
                     abort(400)
+                data = request.get_json()
+                if data is not None and N.save in data:
+                    if mayEdit:
+                        good = self.save(data[N.save])
+                    else:
+                        good = False
+                    if not good:
+                        abort(400)
 
         if action == N.save:
             return E

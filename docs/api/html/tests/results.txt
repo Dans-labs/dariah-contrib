@@ -1,7 +1,7 @@
 ============================= test session starts ==============================
-platform darwin -- Python 3.9.7, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
-rootdir: /Users/dirk/github/Dans-labs/dariah-contrib/server, configfile: pytest.ini, testpaths: tests
-plugins: anyio-2.2.0, ordering-0.6
+platform darwin -- Python 3.11.1, pytest-7.2.1, pluggy-1.0.0
+rootdir: /Users/me/github/Dans-labs/dariah-contrib/server, configfile: pytest.ini, testpaths: tests
+plugins: anyio-3.6.2
 collected 206 items
 
 tests/test_00_app10.py .......................................        [ 39/206]
@@ -18,7 +18,7 @@ tests/test_40_assess30.py ............................                [185/206]
 tests/test_50_review10.py ........                                    [193/206]
 tests/test_50_review20.py .............                               [206/206]
 
-======================= 206 passed in 165.87s (0:02:45) ========================
+============================= 206 passed in 40.13s =============================
 
   REQUESTS       URLS  USERS/URL    REQ/URL
       5042        351        6.5       14.4
